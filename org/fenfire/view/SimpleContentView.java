@@ -126,7 +126,7 @@ public class SimpleContentView implements ContentViewSettings.ContentView {
 	}
     }
 
-    private Lob makeLob(Object node, boolean uniqueColor) {
+    private Lob makeLob(Object node, boolean isPropertyLob) {
 	Model str;
 
 	if(node instanceof Literal)
@@ -134,17 +134,23 @@ public class SimpleContentView implements ContentViewSettings.ContentView {
 	else
 	    str = Models.cache(new ContentModel(new ObjectModel(node)));
 
-	TextModel text = new TextModel.StringTextModel(str, Theme.getFont());
-	Model cursor = new IntModel(-1);
+	Lob l;
 
-	Sequence seq = new Box(Lob.X, text);
-	seq = new TextCursorLob(seq, cursor);
+	if(!isPropertyLob) {
+	    TextModel text = 
+		new TextModel.StringTextModel(str, Theme.getFont());
+	    Model cursor = new IntModel(-1);
 
-	Model positionModel = seq.positionModel(Lob.X, cursor); 
-	Lob l = new TextEditController(seq, text, cursor, new IntModel(1));
-	l = new ViewportLob(Lob.X, l, positionModel, new FloatModel(.5f));
+	    Sequence seq = new Box(Lob.X, text);
+	    seq = new TextCursorLob(seq, cursor);
+	    
+	    Model positionModel = seq.positionModel(Lob.X, cursor); 
+	    l = new TextEditController(seq, text, cursor, new IntModel(1));
+	    l = new ViewportLob(Lob.X, l, positionModel, new FloatModel(.5f));
+	} else {
+	    l = new Label(str);
+	}
 
-	cache.put(node, l);
 	return l;
     }
 
