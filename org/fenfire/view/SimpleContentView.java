@@ -39,7 +39,12 @@ import java.util.*;
 public class SimpleContentView implements ContentViewSettings.ContentView {
     private static void p(String s) { System.out.println("SimpleContentView:: "+s); }
 
-    private Map cache = new org.nongnu.navidoc.util.WeakValueMap();
+    /* caching interacts badly with the same lob being used
+     * at different layouts in SimpleSpatialView... don't cache
+     * for now, the spatial views cache for us anyway...
+     */
+    //private Map cache = new org.nongnu.navidoc.util.WeakValueMap();
+
     private Map propCache = new org.nongnu.navidoc.util.WeakValueMap();
 
     private Graph graph;
@@ -68,9 +73,9 @@ public class SimpleContentView implements ContentViewSettings.ContentView {
     }
 
     public Lob getLob(Object node) {
-	if(cache.get(node) != null) return (Lob)cache.get(node);
+	//if(cache.get(node) != null) return (Lob)cache.get(node);
 	Lob l = makeLob(node, false);
-	cache.put(node, l);
+	//cache.put(node, l);
 	return l;
     }
 

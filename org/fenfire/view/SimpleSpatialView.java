@@ -43,7 +43,8 @@ public class SimpleSpatialView implements SpatialViewSettings.SpatialView {
     private Color nodeBorderColor;
     private Color literalBorderColor;
 
-    private Map cache = new org.nongnu.navidoc.util.WeakValueMap();
+    private Map mainviewCache = new org.nongnu.navidoc.util.WeakValueMap();
+    private Map buoyCache = new org.nongnu.navidoc.util.WeakValueMap();
 
     public SimpleSpatialView(ContentViewSettings contentViewSettings) {
 	this(contentViewSettings, new Color(.85f, .85f, .8f),
@@ -68,10 +69,14 @@ public class SimpleSpatialView implements SpatialViewSettings.SpatialView {
     }
 
     public Lob getMainviewLob(Cursor cursor) {
-	return getBuoyLob(cursor.getNode());
+	return getLob(cursor.getNode(), mainviewCache, 150);
     }
 
     public Lob getBuoyLob(Object node) {
+	return getLob(node, buoyCache, 75);
+    }
+
+    private Lob getLob(Object node, Map cache, float maxY) {
 	if(cache.get(node) != null) return (Lob)cache.get(node);
 
 	Model cs = new IntModel();
@@ -82,7 +87,8 @@ public class SimpleSpatialView implements SpatialViewSettings.SpatialView {
 	Lob l = contentViewSettings.getLob(node);
 	l = new BuoyConnectorLob(l, node, cs);
 	l = new Frame(l, bgColor, borderColor, 2, 3, false, false, true);
-	l = new RequestChangeLob(Lob.X, l, Float.NaN, 100, 100);
+	l = new RequestChangeLob(l, Float.NaN, 125, 125,
+				 Float.NaN, Float.NaN, maxY);
 	l = new SpatialContextLob(l, cs);
 	l = new Stamp(l);
 	cache.put(node, l);
