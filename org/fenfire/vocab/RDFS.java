@@ -32,4 +32,5 @@ public class RDFS {
     static String namespace = "http://www.w3.org/2000/01/rdf-schema#";
 
     static public Object label = Nodes.get(namespace+"label");
+    static public Object seeAlso = Nodes.get(namespace+"seeAlso");
 }
