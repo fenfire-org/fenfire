@@ -1,4 +1,4 @@
-/*
+/* -*-java-*-
 CanvasSpatialView.java
  *    
  *    Copyright (c) 2005, Benja Fallenstein and Matti Katila
@@ -35,6 +35,7 @@ import org.nongnu.libvob.lob.*;
 import org.nongnu.libvob.*;
 import org.nongnu.libvob.util.*;
 import org.nongnu.navidoc.util.Obs;
+import javolution.realtime.*;
 import java.awt.Color;
 import java.util.*;
 
@@ -161,32 +162,17 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
     }
 
     public Lob getBuoyLob(Object node) {
-	Lob l = Lobs.nullLob();
-	l = BuoyConnectorLob.newInstance(l, node);
+	CanvasCursor cc = makeCanvasCursor(node);
+
+	Lob l = getContentLob(node);
+	l = Lobs.translate(l, -cc.getPanX(), -cc.getPanY());
+	l = Lobs.align(l, .5f, .5f);
+	l = Lobs.request(l, 100, 100, 100, 100, 100, 100);
+	l = addBackground(l, cc.getCanvas(), false);
+
 	l = SpatialContextLob.newInstance(l);
-	return l;
-	/*
-	if(buoyCache.get(node) != null) return (Lob)buoyCache.get(node);
 
-	Object canvas = graph.find1_X11(CANVAS2D.contains, node);
-	Lob canvasContent = (Lob)canvasCache.get(canvas);
-	if(canvasContent == null) {
-	    canvasContent = getCanvasContent(canvas, null);
-	    canvasCache.put(canvas, canvasContent);
-	}
-
-	Lob ct = getContentLob(node);
-	Model x = getModel(node, CANVAS2D.x), y = getModel(node, CANVAS2D.y);
-	x = x.plus(ct.getNatSize(Lob.X) / 2);
-	y = y.plus(ct.getNatSize(Lob.Y) / 2);
-	
-	Lob l = new PanZoomLob(canvasContent, x, y, new FloatModel(1));
-	l = addBackground(l, canvas, false);
-	l = new SpatialContextLob(l, (Model)l.getTemplateParameter("cs"));
-	
-	buoyCache.put(node, l);
 	return l;
-	*/
     }
 
     protected Lob getContentLob(Object node) {
@@ -197,7 +183,7 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
     /**
      *  'cursor' may be null.
      */
-    protected Lob getCanvasContent(final Object canvas, final Cursor cursor) {
+    protected Lob getCanvasContent(Object canvas, Cursor cursor) {
 	
 	Lob tray = Lobs.tray(false);
 	
@@ -211,22 +197,21 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 	    float x = RDFUtil.getFloat(graph, n, CANVAS2D.x);
 	    float y = RDFUtil.getFloat(graph, n, CANVAS2D.y);
 
-	    /*
-	    if(cursor != null)
-		l = new ClickController(l, 1, new AbstractAction() {
+	    CanvasCursor cc = makeCanvasCursor(n);
+	    float zoom = getCanvasCursor(cursor).getZoom();
+
+	    if(cursor != null) {
+		l = Lobs.clickController(l, 1, new @realtime-i Action(Object n, float zoom, Object canvas, Cursor cursor, CanvasCursor cc) {
 			public void run() {
-			    CanvasCursor cc = getCanvasCursor(cursor);
+			    float nx = cc.getPanX();
+			    float ny = cc.getPanY();
 
-			    float nx = x.getFloat()+label.getNatSize(Lob.X)/2;
-			    float ny = y.getFloat()+label.getNatSize(Lob.Y)/2;
-			    float nz = cc.getZoom();
-
-			    CanvasCursor c = new CanvasCursor(cc.getCanvas(),
-							      nx, ny, nz);
+			    CanvasCursor c = new CanvasCursor(canvas,
+							      nx, ny, zoom);
 
 			    cursor.set(n, c);
 
-			    VobScene sc = winAnim.getCurrentVS();
+			    VobScene sc = Lobs.getWindowAnimation().getCurrentVS();
 			    ConnectionVobMatcher m = 
 				(ConnectionVobMatcher)sc.matcher;
 			    
@@ -235,7 +220,7 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 			    m.setNextFocus(m.getLink(context, 1, n, "structure point"));
 			}
 		    });
-	    */
+            }
 
 	    l = Lobs.translate(l, x, y);
 	    tray.add(l);
