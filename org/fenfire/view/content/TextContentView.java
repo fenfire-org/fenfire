@@ -153,7 +153,20 @@ public class TextContentView implements ContentViewSettings.ContentView {
 	    */
 	}
 
-	return Components.label(texter.getText(node));
+	Model textModel = texter.model(node);
+	Model cursorModel = SimpleModel.newInstance(cursor.textCursor);
+
+	List text = Lobs.text(texter.getText(node));
+	text = Lobs.keyList(text, node);
+	Lob lob = Lobs.linebreaker(text);
+	
+        Lob cursor_lob = Lobs.line(java.awt.Color.black, 0, 0, 0, 1);
+        cursor_lob = Lobs.key(cursor_lob, "textcursor");
+        lob = Lobs.decorate(lob, cursor_lob, node, cursor.textCursor);
+
+        lob = org.nongnu.libvob.lob.lobs.TextKeyController.newInstance(lob, textModel, cursorModel);
+
+	return lob;
 
 	/*
 	Lob l;

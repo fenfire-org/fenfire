@@ -169,4 +169,28 @@ public class NodeTexter extends RealtimeObject {
 	    p = defaultProperty;
 	graph.add(n, p, Nodes.editLiteral(l, s));
     }
+
+    public Model model(final Object node) {
+	return new Model() {
+		public Object get() { 
+		    return getText(node); 
+		}
+		public void set(Object value) { 
+		    setText(node, (String)value); 
+		}
+		public int getInt() {
+		    throw new UnsupportedOperationException();
+		}
+		public void set(int i) {
+		    throw new UnsupportedOperationException();
+		}
+
+		public javolution.lang.Text toText() {
+		    throw new UnsupportedOperationException();
+		}
+		public boolean move(Realtime.ObjectSpace o) {
+		    throw new UnsupportedOperationException();
+		}
+	    };
+    }
 }
