@@ -49,7 +49,7 @@ public final class HTTPUpdater implements Runnable {
     private class Feed implements Runnable {
 	private HTTPResource resource;
 	private int loadInterval;  // in millis
-	private long lastRead;     // in millis
+	private long lastRead;     // in millis, or -1 if not known
 
 	private boolean updateInProgress = false;
 
@@ -58,7 +58,13 @@ public final class HTTPUpdater implements Runnable {
 
 	    this.resource = new HTTPResource(uri, context);
 	    this.loadInterval = loadInterval;
-	    this.lastRead = resource.lastRead().getTime();
+	    try {
+		this.lastRead = resource.lastRead().getTime();
+	    } catch (IOException e) {
+		this.lastRead = -1;
+		e.printStackTrace();
+		System.out.println("Pretending "+uri+" was loaded a long time ago.");
+	    }
 	}
 
 	/** Reload if necessary */

@@ -228,6 +228,7 @@ public final class HTTPResource {
      *  is unchanged, the lastRead date is updated; if the
      *  resource is loaded from the local cache, and the server
      *  is <em>not</em> contacted, the date remains the same.
+     *  @throws IOException if the date is not known
      */
     public Date lastRead() throws IOException {
 	try {
