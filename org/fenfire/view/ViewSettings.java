@@ -41,8 +41,10 @@ public class ViewSettings {
 
     public interface SpatialView {
 	Set getTypes();
-	Lob getLob(Cursor cursor);
 	boolean showBig(); // whether the mainview should be shown big
+	Lob getLob(Cursor cursor);
+	Lob getCoordinateLob(Lob content, Cursor cursor);
+	Cursor createViewSpecificCursor(Cursor old);
     }
 
     public static Type ALL = new Type() {

@@ -63,4 +63,12 @@ public class SimpleSpatialView implements ViewSettings.SpatialView {
 	cache.put(node, l);
 	return l;
     }
+
+    public Lob getCoordinateLob(Lob content, Cursor c) {
+	return content;
+    }
+    public Cursor createViewSpecificCursor(Cursor c) {
+	return new Cursor.SimpleCursor(c.getNode());
+    }
+
 }
