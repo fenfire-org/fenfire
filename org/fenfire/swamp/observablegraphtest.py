@@ -56,37 +56,46 @@ def test_ObservableGraph_ObsOnce():
 
     o1 = _Obs()
     o2 = _Obs()
+    o3 = _Obs()
     assert graph.find1_11X(node[0], node[1], o1) == None
     assert graph.find1_11X(node[0], node[1], o2) == None
+    assert not graph.contains(node[0], node[1], node[2], o3)
 
     graph.set1_11X(node[0], node[1], node[2])
 
     assert o1.t == 1
     assert o2.t == 1
+    assert o3.t == 1
     assert graph.find1_11X(node[0], node[1]) == node[2]
+    assert graph.contains(node[0], node[1], node[2])
 
     graph.rm_11A(node[0], node[1])
 
     assert o1.t == 1
     assert o2.t == 1
+    assert o3.t == 1
 
     graph.set1_11X(node[0], node[1], node[2])
     assert o1.t == 1
     assert o2.t == 1
+    assert o3.t == 1
 
     assert graph.find1_11X(node[0], node[1], o1) == node[2]
     assert graph.find1_11X(node[0], node[1], o2) == node[2]
+    assert graph.contains(node[0], node[1], node[2], o3)
 
     graph.rm_11A(node[0], node[1])
 
     assert o1.t == 2
     assert o2.t == 2
+    assert o3.t == 2
     assert graph.find1_11X(node[0], node[1]) == None
 
     graph.set1_11X(node[0], node[1], node[2])
 
     assert o1.t == 2
     assert o2.t == 2
+    assert o3.t == 2
 
 def test_ObservableGraph_TripleObs():
     node = _node
