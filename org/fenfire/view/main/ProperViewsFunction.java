@@ -40,7 +40,6 @@ public class ProperViewsFunction implements PureNodeFunction {
     List views = new ArrayList();
     public ProperViewsFunction(FServer f) {
 	this.f = f;
-	this.views = views;
     } 
 
 

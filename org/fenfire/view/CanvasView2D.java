@@ -25,7 +25,6 @@ CanvasView2D.java
  */
 
 package org.fenfire.view;
-import org.fenfire.modules.pp.*;
 import org.fenfire.*;
 import org.fenfire.view.*;
 import org.fenfire.view.buoy.*;
