@@ -135,14 +135,14 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 	final Model panY = new Adapter(cursor, 1);
 	final Model zoom = new Adapter(cursor, 2);
 
-	final MonoLob result = new SpatialContextLob(NullLob.instance, (Model)canvasContent.getTemplateParameter("cs"));
-
+	final Model theLob = new ObjectModel();
+	
 	final PanZoomLob pzl = new PanZoomLob(canvasContent, panX.getFloat(), panY.getFloat(), zoom.getFloat());
 
 	Lob l = new DragController(pzl, 3, new org.nongnu.libvob.mouse.RelativeAdapter() {
 		public void startDrag(int x, int y) {
 		    super.startDrag(x, y);
-		    mainviewCache = result;
+		    mainviewCache = (Lob)theLob.get();
 		}
 
 		public void changedRelative(float dx, float dy) {
@@ -153,14 +153,14 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 		    zoom.setFloat(nz);
 
 		    pzl.setParams(nx, ny, nz);
-		    mainviewCache = result;
+		    mainviewCache = (Lob)theLob.get();
 		    winAnim.rerender();
 		}
 	    });
 	l = new DragController(l, 1, new org.nongnu.libvob.mouse.RelativeAdapter() {
 		public void startDrag(int x, int y) {
 		    super.startDrag(x, y);
-		    mainviewCache = result;
+		    mainviewCache = (Lob)theLob.get();
 		}
 
 		public void changedRelative(float dx, float dy) {
@@ -172,18 +172,20 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 		    panY.setFloat(ny);
 
 		    pzl.setParams(nx, ny, nz);
-		    mainviewCache = result;
+		    mainviewCache = (Lob)theLob.get();
 		    winAnim.rerender();
 		}
 	    }); 
 
-	l = addBackground(l, canvas);
-	l = new DepthChangeLob(l, 5); // XXX how to get the background rendered
-                                      // at the right time before fading it?!?
-                                      // should we change the fader? hmmm...
+	l = new DepthChangeLob(l, -10);
+	l = addBackground(l, canvas, true);
+	l = new DepthChangeLob(l, 10);
 
-	result.setContent(l);
-	return result;
+	l = new SpatialContextLob(l, (Model)canvasContent.getTemplateParameter("cs"));
+	l = new Margin(l, 40);
+
+	theLob.set(l);
+	return l;
     }
 
     public Lob getBuoyLob(Object node) {
@@ -202,7 +204,7 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 	y = y.plus(ct.getNatSize(Lob.Y) / 2);
 	
 	Lob l = new PanZoomLob(canvasContent, x, y, new FloatModel(1));
-	l = addBackground(l, canvas);
+	l = addBackground(l, canvas, false);
 	l = new SpatialContextLob(l, (Model)l.getTemplateParameter("cs"));
 	
 	buoyCache.put(node, l);
@@ -263,10 +265,22 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 	return new RequestChangeLob(tray, 100, 100, 100, 100, 100, 100);
     }
 
-    protected Lob addBackground(Lob content, Object canvas) {
-	Model bgcolor = new UniqueColorModel(new ObjectModel(canvas),.75f,1f);
-	return new Frame(content, bgcolor, new ObjectModel(Color.black),
-			 2, 0, false, false, true);
+    protected Lob addBackground(Lob content, Object canvas, boolean fade) {
+	final Model bgcolor = new UniqueColorModel(new ObjectModel(canvas),.75f,1f);
+	Lob l = new Frame(content, bgcolor, new ObjectModel(Color.black),
+			  2, 0, false, false, true);
+	if(fade) l = new AbstractMonoLob(l) { 
+		public void render(VobScene scene, int into, int matchingParent,
+				   float w, float h, float d,
+				   boolean visible) {
+		    scene.fader = new ColorFader((Color)bgcolor.get(), 0, 10);
+		    super.render(scene, into, matchingParent, w, h, d, visible);
+		}
+		protected Object clone(Object[] params) {
+		    throw new Error("not impl");
+		}
+	    };
+	return l;
     }
 
 
