@@ -2,9 +2,10 @@
 # Copyright (C) 2001 Matthew W. Lefkowitz
 #               2003-2004 Tuukka Hastrup and others?
 #               2004-2005 Matti J. Katila
+#               2005 Benja Fallenstein
 #
 # This library is free software; you can redistribute it and/or
-# modify it under the terms of version 2.1 of the GNU Lesser General Public
+# modify it under the terms of version 2.1 of the GNU General Public
 # License as published by the Free Software Foundation.
 #
 # This library is distributed in the hope that it will be useful,
@@ -41,7 +42,7 @@ NICK = "ffdarcsbot"
 IRC_SERVER = "irc.freenode.net"
 
 # Project options
-projects = [ 'libvob', 'callgl', 'fenfire', 'storm', 'alph', 'depends', 'ff', 'navidoc' ]
+projects = [ 'libvob', 'callgl', 'fenfire', 'storm', 'alph', 'depends', 'navidoc', 'project' ]
 SENT_DIR = 'darcsbot_sent_commits'
 
 if not os.path.exists(SENT_DIR):
