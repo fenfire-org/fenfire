@@ -26,37 +26,44 @@ BuoyConnectorLob.java
  * Written by Benja Fallenstein and Matti Katila
  */
 package org.fenfire.view;
-import org.nongnu.libvob.layout.*;
+import org.nongnu.libvob.fn.*;
+import org.nongnu.libvob.lob.*;
 import org.nongnu.libvob.*;
 import java.util.*;
 
-public class BuoyConnectorLob extends AbstractMonoLob {
+public class BuoyConnectorLob extends AbstractDelegateLob {
 
-    protected Model cs;
     protected Object key;
 
-    public BuoyConnectorLob(Lob content, Object key, Model cs) {
-	super(content);
-	this.cs = cs;
-	this.key = key;
+    private BuoyConnectorLob() {}
+
+    public static Lob newInstance(Lob content, Object key) {
+	BuoyConnectorLob l = (BuoyConnectorLob)FACTORY.object();
+	l.delegate = content;
+	l.key = key;
+	return l;
     }
 
-    protected Replaceable[] getParams() {
-	return new Replaceable[] { content, cs };
-    }
-
-    protected Object clone(Object[] params) {
-	return new BuoyConnectorLob((Lob)params[0], key, (Model)params[1]);
+    protected Lob wrap(Lob l) {
+	return newInstance(l, key);
     }
 
     public void render(VobScene scene, int into, int matchingParent,
-		       float w, float h, float d,
-		       boolean visible) {
-	int cs = scene.coords.box(into, w, h);
+		       float d, boolean visible) {
+	int context = SpatialContextLob.getSpatialContextCS();
+
+	SizeRequest r = delegate.getSizeRequest();
+	int cs = scene.coords.box(into, r.width(), r.height());
 	ConnectionVobMatcher m = (ConnectionVobMatcher)scene.matcher;
 	m.add(matchingParent, cs, key);
-	m.link(this.cs.getInt(), 1, cs, "structure point");
-	m.getLink(this.cs.getInt(), 1, key, "structure point");
-	super.render(scene, cs, cs, w, h, d, visible);
+	m.link(context, 1, cs, "structure point");
+	m.getLink(context, 1, key, "structure point");
+	super.render(scene, cs, cs, d, visible);
     }
+
+    private static final Factory FACTORY = new Factory() {
+	    public Object create() {
+		return new BuoyConnectorLob();
+	    }
+	};
 }

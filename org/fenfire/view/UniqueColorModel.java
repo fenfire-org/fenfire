@@ -30,16 +30,14 @@ import org.fenfire.Cursor;
 import org.fenfire.swamp.*;
 import org.fenfire.vocab.*;
 import org.fenfire.lob.*;
-import org.nongnu.libvob.layout.*;
-import org.nongnu.libvob.layout.unit.*;
-import org.nongnu.libvob.layout.component.*;
+import org.nongnu.libvob.lob.*;
 import org.nongnu.libvob.*;
 import org.nongnu.libvob.util.*;
 import org.nongnu.navidoc.util.Obs;
 import java.awt.Color;
 import java.util.*;
 
-public class UniqueColorModel extends AbstractModel.AbstractObjectModel {
+public class UniqueColorModel {}/*extends AbstractModel.AbstractObjectModel {
     private Model node;
     private float minBrightness, maxBrightness;
 
@@ -77,11 +75,10 @@ public class UniqueColorModel extends AbstractModel.AbstractObjectModel {
 		B = min + r.nextFloat() * range;
 	    color = new Color(R,G,B);
 
-	    /*
-	    color = Color.getHSBColor(r.nextFloat(), r.nextFloat(),
-				      min + r.nextFloat() * range);
-	    */
+	    //color = Color.getHSBColor(r.nextFloat(), r.nextFloat(),
+	    //			      min + r.nextFloat() * range);
 	}
 	return color;
     }
 }
+*/

@@ -27,7 +27,7 @@ ViewSettings.java
  */
 package org.fenfire.view;
 import org.fenfire.Cursor;
-import org.nongnu.libvob.layout.*;
+import org.nongnu.libvob.lob.*;
 import org.nongnu.libvob.*;
 import org.nongnu.libvob.util.*;
 import org.nongnu.navidoc.util.Obs;

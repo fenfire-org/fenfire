@@ -28,7 +28,6 @@ Potions.java
 package org.fenfire.potion;
 import org.fenfire.Cursor;
 import org.fenfire.swamp.*;
-import org.nongnu.libvob.layout.Model;
 import java.util.*;
 
 public class Potions {

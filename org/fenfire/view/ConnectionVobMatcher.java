@@ -27,7 +27,7 @@ ConnectionVobMatcher.java
  */
 package org.fenfire.view;
 import org.nongnu.libvob.*;
-import org.nongnu.libvob.layout.IndexedVobMatcher;
+import org.nongnu.libvob.impl.IndexedVobMatcher;
 import java.awt.*;
 import java.util.*;
 

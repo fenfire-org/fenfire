@@ -25,7 +25,6 @@ Cursor.java
  * Written by Benja Fallenstein
  */
 package org.fenfire;
-import org.nongnu.libvob.layout.*;
 import org.fenfire.swamp.smush.SmushListener;
 import java.util.*;
 
@@ -33,14 +32,14 @@ import java.util.*;
  */
 public final class Cursor implements SmushListener {
 
-    public final Model node = new ObjectModel();
-    public final Model spatialCursor = new ObjectModel();
-    public final Model textCursor = new IntModel(-1);
-    public final Map rotations = new HashMap(); // should perhaps be LRU...
+    public Object node;
+    public Object spatialCursor;
+    public int textCursor = -1;
+    public Map rotations = new HashMap(); // should perhaps be LRU...
 
 
     public void smushed(Object old, Object into) {
-	if(old.equals(node.get())) node.set(into);
+	if(old.equals(node)) node = into;
 
 	System.out.println("*** smushed => "+old+" => "+into+" ***");
 
@@ -66,11 +65,11 @@ public final class Cursor implements SmushListener {
 
 
     public Object getNode() {
-	return node.get();
+	return node;
     }
 
     public Object getSpatialCursor() {
-	return spatialCursor.get();
+	return spatialCursor;
     }
 
     public Rotation getRotation(Object node) {
@@ -98,9 +97,9 @@ public final class Cursor implements SmushListener {
     }
 
     public void set(Object node, Object spatialCursor) {
-	this.node.set(node);
-	this.spatialCursor.set(spatialCursor);
-	this.textCursor.setInt(-1);
+	this.node = node;
+	this.spatialCursor = spatialCursor;
+	this.textCursor = -1;
     }
 
     public void set(Object node, Object rotationProperty, 
@@ -113,21 +112,21 @@ public final class Cursor implements SmushListener {
      *  To set the node without changing the spatial cursor, use 'setNode().'
      */
     public void set(Object node) {
-	this.node.set(node);
-	this.spatialCursor.set(null);
-	this.textCursor.setInt(-1);
+	this.node = node;
+	this.spatialCursor = null;
+	this.textCursor = -1;
     }
 
     /** Set the node, don't change the spatial cursor.
      *  To set the node and set the spatial cursor to null, use 'set().'
      */
     public void setNode(Object node) {
-	this.node.set(node);
-	this.textCursor.setInt(-1);
+	this.node = node;
+	this.textCursor = -1;
     }
 
     public void setSpatialCursor(Object spatialCursor) {
-	this.spatialCursor.set(spatialCursor);
+	this.spatialCursor = spatialCursor;
     }
 
 

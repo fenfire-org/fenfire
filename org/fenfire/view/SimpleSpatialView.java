@@ -28,8 +28,8 @@ SimpleSpatialView.java
 package org.fenfire.view;
 import org.fenfire.Cursor;
 import org.fenfire.swamp.*;
-import org.nongnu.libvob.layout.*;
-import org.nongnu.libvob.layout.component.*;
+import org.nongnu.libvob.fn.*;
+import org.nongnu.libvob.lob.*;
 import org.nongnu.libvob.*;
 import org.nongnu.libvob.util.*;
 import org.nongnu.navidoc.util.Obs;
@@ -42,9 +42,6 @@ public class SimpleSpatialView implements SpatialViewSettings.SpatialView {
     private Color bgColor;
     private Color nodeBorderColor;
     private Color literalBorderColor;
-
-    private Map mainviewCache = new org.nongnu.navidoc.util.WeakValueMap();
-    private Map buoyCache = new org.nongnu.navidoc.util.WeakValueMap();
 
     public SimpleSpatialView(ContentViewSettings contentViewSettings) {
 	this(contentViewSettings, new Color(.85f, .85f, .8f),
@@ -69,34 +66,28 @@ public class SimpleSpatialView implements SpatialViewSettings.SpatialView {
     }
 
     public Lob getMainviewLob(Cursor cursor) {
-	return getLob(cursor.getNode(), mainviewCache, 150, true);
+	return getLob(cursor.getNode(), 150, true);
     }
 
     public Lob getBuoyLob(Object node) {
-	return getLob(node, buoyCache, 75, false);
+	return getLob(node, 75, false);
     }
 
-    private Lob getLob(Object node, Map cache, float maxY, boolean align) {
-	if(cache.get(node) != null) return (Lob)cache.get(node);
-
-	Model cs = new IntModel();
-
+    private Lob getLob(Object node, float maxY, boolean align) {
 	Color borderColor = 
 	    (node instanceof Literal) ? literalBorderColor : nodeBorderColor;
 
 	Lob l = contentViewSettings.getLob(node);
-	l = new BuoyConnectorLob(l, node, cs);
-	l = new Frame(l, bgColor, borderColor, 2, 3, false, false, true);
-	l = new RequestChangeLob(l, Float.NaN, 125, 125,
-				 Float.NaN, Float.NaN, maxY);
+	l = Lobs.clip(l);
+	l = BuoyConnectorLob.newInstance(l, node);
+	l = Lobs.frame(l, bgColor, borderColor, 2, 3, false);
+	l = Lobs.request(l, -1, 125, 125, -1, -1, maxY);
 
-	l = new SpatialContextLob(l, cs);
-	l = new Stamp(l);
+	l = SpatialContextLob.newInstance(l);
 
 	if(align)
-	    l = new AlignLob(l, .5f, .5f, .5f, .5f);
+	    l = Lobs.align(l, .5f, .5f, .5f, .5f);
 
-	cache.put(node, l);
 	return l;
     }
 }

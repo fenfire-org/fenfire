@@ -34,9 +34,7 @@ import org.fenfire.lob.*;
 import org.fenfire.swamp.*;
 import org.fenfire.util.*;
 import org.nongnu.libvob.*;
-import org.nongnu.libvob.layout.*;
-import org.nongnu.libvob.layout.component.*;
-import org.nongnu.libvob.layout.unit.*;
+import org.nongnu.libvob.lob.*;
 import java.awt.Color;
 import java.util.*;
 
@@ -79,6 +77,8 @@ public class ImageContentView implements ContentViewSettings.ContentView {
     /** 
      */
     private Lob makeLob(Object node) {
+	throw new Error();
+	/*
 	Lob l;
 
 	// XXX why this doesn't work if print is removed?
@@ -92,6 +92,7 @@ public class ImageContentView implements ContentViewSettings.ContentView {
 	    throw new Error("");
 	}
 	return l;
+	*/
     }
 
 }

@@ -28,10 +28,12 @@ PotionAction.java
 package org.fenfire.potion;
 import org.fenfire.Cursor;
 import org.fenfire.swamp.*;
-import org.nongnu.libvob.layout.*;
+import org.nongnu.libvob.fn.*;
+import org.nongnu.libvob.lob.*;
+import javolution.realtime.*;
 import java.util.*;
 
-public class PotionAction extends AbstractAction {
+public class PotionAction extends RealtimeObject implements Action {
 
     protected Graph graph;
     protected Cursor cursor;

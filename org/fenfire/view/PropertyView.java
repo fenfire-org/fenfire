@@ -32,8 +32,8 @@ import org.fenfire.lob.*;
 import org.fenfire.swamp.*;
 import org.fenfire.util.*;
 import org.nongnu.libvob.*;
-import org.nongnu.libvob.layout.*;
-import org.nongnu.libvob.layout.component.*;
+import org.nongnu.libvob.fn.*;
+import org.nongnu.libvob.lob.*;
 import java.awt.Color;
 import java.util.*;
 
@@ -54,6 +54,8 @@ public class PropertyView {
 
     private float minPropBrightness, maxPropBrightness;
 
+    private NodeTexter texter;
+
     public PropertyView(Graph graph, Cursor cursor, NamespaceMap nmap, 
 			     Set textProperties, Object defaultProperty,
 			     float minPropBrightness,
@@ -65,6 +67,9 @@ public class PropertyView {
 	this.defaultProperty = defaultProperty;
 	this.minPropBrightness = minPropBrightness;
 	this.maxPropBrightness = maxPropBrightness;
+
+	this.texter = new NodeTexter(graph, nmap, textProperties,
+				     defaultProperty);
     }
 
     public Lob getPropertyLob(Object node) {
@@ -75,11 +80,9 @@ public class PropertyView {
     }
 
     private Lob makeLob(Object node) {
-
+	return Components.label(texter.getText(node));
+	/*
 	Model nodeModel = new ObjectModel(node);
-	Model str = Models.cache(new NodeTextModel(graph, nodeModel, nmap,
-						   textProperties,
-						   defaultProperty));
 
 	Lob l;
 
@@ -95,6 +98,7 @@ public class PropertyView {
 	
 	l = new Label(text);
 	return l;
+	*/
     }
 
 }

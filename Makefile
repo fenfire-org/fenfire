@@ -20,6 +20,7 @@ JAVA ?= java -Xincgc -Xnoclassgc
 JAVAC ?= javac
 
 java:
+	#python ../libvob/metacode/rj2java.py org/fenfire/view/BuoyConnectorLob.rj org/fenfire/view/BuoyConnectorLob.java
 	mkdir -p build
 	$(JAVAC) -d build -classpath $(FFCLASSPATH):$(CLASSPATH) `find org -name '*.java'`
 

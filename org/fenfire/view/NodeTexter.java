@@ -1,5 +1,5 @@
 /*
-NodeTextModel.java
+NodeTexter.java
  *    
  *    Copyright (c) 2003-2005, Benja Fallenstein
  *
@@ -25,14 +25,18 @@ NodeTextModel.java
 /*
  * Written by Benja Fallenstein
  */
-package org.fenfire.lob;
+package org.fenfire.view;
 import org.fenfire.swamp.*;
 import org.fenfire.util.*;
-import org.nongnu.libvob.layout.*;
-import org.nongnu.libvob.layout.component.*;
+import org.nongnu.libvob.fn.*;
+import org.nongnu.libvob.lob.*;
+import org.nongnu.navidoc.util.Obs;
+import javolution.realtime.*;
 import java.util.*;
 
-/** NodeTextModel takes a Model containing a node and returns the string
+/** XXX update javadoc.
+ *
+ *  NodeTextModel takes a Model containing a node and returns the string
  *  we use to represent the node on the screen. For example, if a node
  *  has an rdf:label, NodeTextModel will return that; if it has no rdf:label
  *  or other text property, but it's in a namespace, e.g. Dublin Core,
@@ -44,58 +48,36 @@ import java.util.*;
  *  new one along 'defaultProperty' if the node isn't currently
  *  connected to any literal on any of the text properties.
  */
-public class NodeTextModel extends AbstractModel.AbstractObjectModel {
-    private Model node;
+public class NodeTexter extends RealtimeObject {
     private Graph graph;
     private NamespaceMap nmap;
     private SortedSet textProperties; // the properties we look for, in order
     private Object defaultProperty; // used if text is added to textless node
 
-    private Object cache;
-
     // XXX these are buggy on Kaffe 1.0.6
-    private String preferredLang = Locale.getDefault().getLanguage();
-    private String preferredCountry = Locale.getDefault().getCountry()
-	                                                 .toLowerCase();
+    private static String preferredLang = Locale.getDefault().getLanguage();
+    private static String preferredCountry = Locale.getDefault().getCountry()
+	                                                        .toLowerCase();
 
-    public NodeTextModel(Graph graph, Model node, NamespaceMap nmap, 
-			 Set textProperties, Object defaultProperty) {
+    public NodeTexter(Graph graph, NamespaceMap nmap, 
+		      Set textProperties, Object defaultProperty) {
 	this.graph = graph;
-	this.node = node;
 	this.nmap = nmap;
 	this.textProperties = new TreeSet(textProperties);
 	this.defaultProperty = defaultProperty;
 
 	// defaultProperty is expected to be in textProperties
 	this.textProperties.add(defaultProperty);
-
-	node.addObs(this);
-	nmap.addObs(this);
-    }
-
-    public Replaceable[] getParams() {
-	return new Replaceable[] { node };
-    }
-    public Object clone(Object[] params) {
-	return new NodeTextModel(graph, (Model)params[0], nmap,
-				 textProperties, defaultProperty);
-    }
-
-    public void chg() {
-	cache = null;
-	super.chg();
     }
 
     /** Finds the first text property that has a literal object present.
      *  @return the property to be used for node text,
      *          or null if there isn't a suitable one
      */
-    protected Object getProperty() {
-	Object n = node.get();
-	
+    protected Object getProperty(Object n) {
 	for(Iterator i=textProperties.iterator(); i.hasNext();) {
 	    Object prop = i.next();
-	    Iterator j = graph.findN_11X_Iter(n, prop, this);
+	    Iterator j = graph.findN_11X_Iter(n, prop);
 	    while(j.hasNext()) {
 		Object value = j.next();
 		if(value instanceof Literal)
@@ -118,7 +100,7 @@ public class NodeTextModel extends AbstractModel.AbstractObjectModel {
 	// -1 null
 	Object best = null;
 	int bestval = -1, val;
-	Iterator i = graph.findN_11X_Iter(n, p, this);
+	Iterator i = graph.findN_11X_Iter(n, p);
 	while (i.hasNext()) {
 	    Object o = i.next();
 	    if (! (o instanceof Literal))
@@ -151,8 +133,8 @@ public class NodeTextModel extends AbstractModel.AbstractObjectModel {
      *          email address or telephone number for mailto: and tel: URIs,
      *          otherwise a URI, abbreviated if it starts with a namespace.
      */
-    protected String fallback() {
-	String s = Nodes.toString(node.get());
+    protected String fallback(Object node) {
+	String s = Nodes.toString(node);
 		
 	if(s.startsWith("anon:") || s.startsWith("bnode:") || s.startsWith("urn:urn-5:"))
 	    s = "";
@@ -166,20 +148,17 @@ public class NodeTextModel extends AbstractModel.AbstractObjectModel {
 	return s;
     }
 
-    public Object get() {
-	if(cache == null) {
-	    Object n = node.get(), p = getProperty();
-	    if(p == null) 
-		cache = fallback();
-	    else {
-		cache = getLiteral(n, p).getString();
-	    }
+    public String getText(Object n) {
+	Object p = getProperty(n);
+	if(p == null) 
+	    return fallback(n);
+	else {
+	    return getLiteral(n, p).getString();
 	}
-	return cache;
     }
 
-    public void set(Object value) {
-	Object n = node.get(), p = getProperty();
+    public void setText(Object n, String value) {
+	Object p = getProperty(n);
 	String s = (String)value;
 	Literal l = null;
 

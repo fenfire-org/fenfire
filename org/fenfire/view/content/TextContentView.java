@@ -33,8 +33,9 @@ import org.fenfire.lob.*;
 import org.fenfire.swamp.*;
 import org.fenfire.util.*;
 import org.nongnu.libvob.*;
-import org.nongnu.libvob.layout.*;
-import org.nongnu.libvob.layout.component.*;
+import org.nongnu.libvob.fn.*;
+import org.nongnu.libvob.lob.*;
+import javolution.realtime.*;
 import java.awt.Color;
 import java.util.*;
 
@@ -50,6 +51,8 @@ public class TextContentView implements ContentViewSettings.ContentView {
     private Set textProperties;
     private Object defaultProperty;
 
+    private NodeTexter texter;
+
     public TextContentView(Graph graph, Cursor cursor, NamespaceMap nmap, 
 			     Set textProperties, Object defaultProperty) {
 	this.graph = graph;
@@ -57,6 +60,9 @@ public class TextContentView implements ContentViewSettings.ContentView {
 	this.nmap = nmap;
 	this.textProperties = textProperties;
 	this.defaultProperty = defaultProperty;
+	
+	this.texter = new NodeTexter(graph, nmap, textProperties,
+				     defaultProperty);
     }
 
     public Set getTypes() {
@@ -70,7 +76,7 @@ public class TextContentView implements ContentViewSettings.ContentView {
 	return l;
     }
 
-    private class LiteralTextModel extends AbstractModel.AbstractObjectModel {
+    private class LiteralTextModel extends RealtimeObject implements Model {
 	public Object get() {
 	    Object n = cursor.getNode();
 	    if(n instanceof Literal) {
@@ -97,14 +103,23 @@ public class TextContentView implements ContentViewSettings.ContentView {
 	    //p("removed "+node+" "+prop+" "+literal);
 	    //p("added "+nlit);
 
-	    int textCursor = cursor.textCursor.getInt();
+	    int textCursor = cursor.textCursor;
 	    cursor.set(nlit, prop, node, -1);
-	    cursor.textCursor.setInt(textCursor);
+	    cursor.textCursor = textCursor;
+	}
+
+	public int getInt() {
+	    throw new UnsupportedOperationException();
+	}
+	public void set(int value) {
+	    throw new UnsupportedOperationException();
 	}
     }
 
     private Lob makeLob(Object node, boolean isPropertyLob) {
 	if(node instanceof Literal) {
+	    throw new Error();
+	    /*
 	    Model nodeModel = new ObjectModel(node);
 
 	    Model str = new LiteralTextModel();
@@ -135,13 +150,12 @@ public class TextContentView implements ContentViewSettings.ContentView {
 		 new ObjectModel(l), new ObjectModel(l2));
 
 	    return new ModelLob(lobModel);
+	    */
 	}
 
-	Model nodeModel = new ObjectModel(node);
-	Model str = Models.cache(new NodeTextModel(graph, nodeModel, nmap,
-						   textProperties,
-						   defaultProperty));
+	return Components.label(texter.getText(node));
 
+	/*
 	Lob l;
 
 	TextModel text = 
@@ -161,6 +175,7 @@ public class TextContentView implements ContentViewSettings.ContentView {
 	l = new TextEditController(seq, text, tc, lineModel);
 	l = new ViewportLob(Lob.Y, l, positionModel, new FloatModel(.5f));
 	return l;
+	*/
     }
 
 }

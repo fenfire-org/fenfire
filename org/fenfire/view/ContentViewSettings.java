@@ -27,7 +27,7 @@ ContentViewSettings.java
  */
 package org.fenfire.view;
 import org.fenfire.Cursor;
-import org.nongnu.libvob.layout.*;
+import org.nongnu.libvob.lob.*;
 import org.nongnu.libvob.*;
 import org.nongnu.libvob.util.*;
 import org.nongnu.navidoc.util.Obs;
@@ -44,14 +44,7 @@ public class ContentViewSettings extends ViewSettings {
 	super(views);
     }
 
-    protected Replaceable[] getParams() {
-	return new Replaceable[] { };
-    }
-    protected Object clone(Object[] params) {
-	return new ContentViewSettings(views);
-    }
-
-    private Lob errorLob = new org.nongnu.libvob.layout.component.Label("No matching content view found!");
+    private Lob errorLob = Components.label("No matching content view found!");
 
     public Lob getLob(Object node) {
 	ContentView v = (ContentView)getViewByNode(node);

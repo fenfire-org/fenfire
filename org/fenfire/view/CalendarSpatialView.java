@@ -30,9 +30,7 @@ import org.fenfire.Cursor;
 import org.fenfire.swamp.*;
 import org.fenfire.vocab.*;
 import org.fenfire.lob.*;
-import org.nongnu.libvob.layout.*;
-import org.nongnu.libvob.layout.unit.*;
-import org.nongnu.libvob.layout.component.*;
+import org.nongnu.libvob.lob.*;
 import org.nongnu.libvob.*;
 import org.nongnu.libvob.util.*;
 import org.nongnu.navidoc.util.Obs;
@@ -84,15 +82,12 @@ public class CalendarSpatialView
 	return Collections.singleton(TYPE);
     }
 
-    public boolean showBig() {
-	return true;
-    }
-
 
     public void chg() {
 	isCurrent = false;
     }
 
+    /*
     protected void updateNodes() {
 	if(isCurrent) return;
 
@@ -168,8 +163,11 @@ public class CalendarSpatialView
 
     private Map mainviewCache = new org.nongnu.navidoc.util.WeakValueMap();
     private Map buoyCache = new org.nongnu.navidoc.util.WeakValueMap();
+    */
 
     public Lob getBuoyLob(Object node) {
+	throw new Error();
+	/*
 	if(buoyCache.get(node) != null) 
 	    return (Lob)buoyCache.get(node);
 
@@ -183,9 +181,12 @@ public class CalendarSpatialView
 
 	buoyCache.put(node, l);
 	return l;
+	*/
     }
 
     public Lob getMainviewLob(Cursor cursor) {
+	throw new Error();
+	/*
 	if(mainviewCache.get(cursor.getSpatialCursor()) != null) 
 	    return (Lob)mainviewCache.get(cursor.getSpatialCursor());
 
@@ -204,6 +205,7 @@ public class CalendarSpatialView
 
 	mainviewCache.put(cursor.getSpatialCursor(), l);
 	return l;
+	*/
     }
 
     /*
@@ -220,6 +222,7 @@ public class CalendarSpatialView
     }
     */	
 
+    /*
     protected Lob getCalendarContent(final CalendarCursor cc, 
 				     final Cursor cursor) {
 	updateNodes();
@@ -273,6 +276,7 @@ public class CalendarSpatialView
 
 	return dateList;
     }
+    */
 
 
     /*

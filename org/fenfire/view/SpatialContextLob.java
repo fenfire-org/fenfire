@@ -26,34 +26,51 @@ SpatialContextLob.java
  * Written by Benja Fallenstein and Matti Katila
  */
 package org.fenfire.view;
-import org.nongnu.libvob.layout.*;
+import org.nongnu.libvob.fn.*;
+import org.nongnu.libvob.lob.*;
 import org.nongnu.libvob.*;
+import javolution.realtime.*;
 import java.util.*;
 
-public class SpatialContextLob extends AbstractMonoLob {
+public class SpatialContextLob extends AbstractDelegateLob {
+    
+    private static LocalContext.Variable lcs = new LocalContext.Variable(null);
 
-    protected Model cs;
-
-    public SpatialContextLob(Lob content, Model cs) {
-	super(content);
-	this.cs = cs;
+    public static int getSpatialContextCS() {
+	FastInt fi = (FastInt)lcs.getValue();
+	if(fi == null)
+	    throw new IllegalStateException("no spatial context");
+	return fi.intValue();
     }
 
-    protected Replaceable[] getParams() {
-	return new Replaceable[] { content, cs };
+    private SpatialContextLob() {}
+
+    public static SpatialContextLob newInstance(Lob content) {
+	SpatialContextLob l = (SpatialContextLob)FACTORY.object();
+	l.delegate = content;
+	return l;
     }
 
-    protected Object clone(Object[] params) {
-	return new SpatialContextLob((Lob)params[0], (Model)params[1]);
+    public Lob wrap(Lob lob) {
+	return newInstance(lob);
     }
 
     public void render(VobScene scene, int into, int matchingParent,
-		       float w, float h, float d,
-		       boolean visible) {
-	if(cs != null)
-	    cs.setInt(into);
-
+		       float d, boolean visible) {
 	scene.matcher.add(matchingParent, into, "spatial context");
-	super.render(scene, into, matchingParent, w, h, d, visible);
+
+	LocalContext.enter();
+	try {
+	    lcs.setValue(FastInt.newInstance(into));
+	    super.render(scene, into, matchingParent, d, visible);
+	} finally {
+	    LocalContext.exit();
+	}
     }
+
+    private static final Factory FACTORY = new Factory() {
+	    public Object create() {
+		return new SpatialContextLob();
+	    }
+	};
 }

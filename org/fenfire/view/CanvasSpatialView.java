@@ -30,9 +30,7 @@ import org.fenfire.Cursor;
 import org.fenfire.swamp.*;
 import org.fenfire.vocab.*;
 import org.fenfire.lob.*;
-import org.nongnu.libvob.layout.*;
-import org.nongnu.libvob.layout.unit.*;
-import org.nongnu.libvob.layout.component.*;
+import org.nongnu.libvob.lob.*;
 import org.nongnu.libvob.*;
 import org.nongnu.libvob.util.*;
 import org.nongnu.navidoc.util.Obs;
@@ -70,6 +68,7 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 	return Collections.singleton(TYPE);
     }
 
+    /*
     public boolean showBig() {
 	return true;
     }
@@ -106,6 +105,7 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 	m = Models.parseFloat(m);
 	return m;
     }
+    */
 
     /**
      *  Cache of the mainview lob during dragging.
@@ -120,6 +120,8 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
     Lob mainviewCache;
     
     public Lob getMainviewLob(Cursor cursor) {
+	return null;
+	/*
 	if(mainviewCache != null) {
 	    Lob result = mainviewCache;
 	    mainviewCache = null;
@@ -186,9 +188,12 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 
 	theLob.set(l);
 	return l;
+	*/
     }
 
     public Lob getBuoyLob(Object node) {
+	return null;
+	/*
 	if(buoyCache.get(node) != null) return (Lob)buoyCache.get(node);
 
 	Object canvas = graph.find1_X11(CANVAS2D.contains, node);
@@ -209,15 +214,19 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 	
 	buoyCache.put(node, l);
 	return l;
+	*/
     }
 
+    /*
     protected Lob getContentLob(Object node) {
 	return contentViewSettings.getLob(node);
     }
+    */
 
     /**
      *  'cursor' may be null.
      */
+    /*
     protected Lob getCanvasContent(final Object canvas, final Cursor cursor) {
 	
 	Tray tray = new Tray(false);
@@ -341,4 +350,5 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 	    cursor.setSpatialCursor(new CanvasCursor(canvas, panX, panY, zoom));
 	}
     }
+    */
 }
