@@ -107,9 +107,13 @@ public final class HTTPUpdater implements Runnable {
 	new Thread(this).start();
     }
 
-    public void add(String uri, int loadIntervalMinutes) throws IOException {
+    public HTTPResource add(String uri, int loadIntervalMinutes) 
+	throws IOException {
+
 	int loadInterval = loadIntervalMinutes * 60 * 1000;
-	feeds.put(uri, new Feed(uri, loadInterval));
+	Feed feed = new Feed(uri, loadInterval);
+	feeds.put(uri, feed);
+	return feed.resource;
     }
 
     public void remove(String uri) {
