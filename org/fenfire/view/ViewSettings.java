@@ -36,19 +36,25 @@ import java.util.*;
 public class ViewSettings {
 
     public interface Type {
-	boolean contains(Cursor cursor);
+	boolean containsCursor(Cursor cursor);
+	boolean containsNode(Object node);
+    }
+
+    public static abstract class AbstractType implements Type {
+	public boolean containsCursor(Cursor cursor) {
+	    return containsNode(cursor.getNode());
+	}
     }
 
     public interface SpatialView {
 	Set getTypes();
 	boolean showBig(); // whether the mainview should be shown big
-	Lob getMainviewLob(Model cursor);
+	Lob getMainviewLob(Cursor cursor);
 	Lob getBuoyLob(Object node);
-	Cursor createViewSpecificCursor(Cursor old);
     }
 
-    public static Type ALL = new Type() {
-	    public boolean contains(Cursor cursor) {
+    public static Type ALL = new AbstractType() {
+	    public boolean containsNode(Object node) {
 		return true;
 	    }
 	};
@@ -97,12 +103,24 @@ public class ViewSettings {
 	return new ViewSettings(views);
     }
 
-    protected SpatialView getView(Cursor cursor) {
+    protected SpatialView getViewByCursor(Cursor cursor) {
 	// use numeric iteration instead of Iterator
 	// because this is called in an inner loop
 	for(int i=0; i<types.size(); i++) {
 	    Type type = (Type)types.get(i);
-	    if(type.contains(cursor))
+	    if(type.containsCursor(cursor))
+		return (SpatialView)viewByType.get(type);
+	}
+
+	return null;
+    }
+
+    protected SpatialView getViewByNode(Object node) {
+	// use numeric iteration instead of Iterator
+	// because this is called in an inner loop
+	for(int i=0; i<types.size(); i++) {
+	    Type type = (Type)types.get(i);
+	    if(type.containsNode(node))
 		return (SpatialView)viewByType.get(type);
 	}
 
@@ -111,17 +129,16 @@ public class ViewSettings {
 
     private Lob errorLob = new org.nongnu.libvob.layout.component.Label("No matching nodeview found!");
 
-    public Lob getMainviewLob(Model cursorModel) {
-	Cursor cursor = (Cursor)cursorModel.get();
-	SpatialView v = getView(cursor);
+    public Lob getMainviewLob(Cursor cursor) {
+	SpatialView v = getViewByCursor(cursor);
 	if(v != null)
-	    return v.getMainviewLob(cursorModel);
+	    return v.getMainviewLob(cursor);
 	else
 	    return errorLob;
     }
 
     public Lob getBuoyLob(Object node) {
-	SpatialView v = getView(new Cursor.SimpleCursor(node)); // XXX
+	SpatialView v = getViewByNode(node);
 	if(v != null)
 	    return v.getBuoyLob(node);
 	else
@@ -129,7 +146,7 @@ public class ViewSettings {
     }
 
     public boolean showBig(Cursor cursor) {
-	SpatialView v = getView(cursor);
+	SpatialView v = getViewByCursor(cursor);
 	if(v != null)
 	    return v.showBig();
 	else
@@ -145,14 +162,14 @@ public class ViewSettings {
 
 	    for(Iterator j=v.getTypes().iterator(); j.hasNext();) {
 		Type t = (Type)j.next();
-		if(t.contains(position)) {
+		if(t.containsCursor(position)) {
 		    list.add(v);
 		    break;
 		}
 	    }
 	}
 
-	int index = list.indexOf(getView(position));
+	int index = list.indexOf(getViewByCursor(position));
 	index = (index + steps) % list.size();
 	if(index < 0) index += list.size();
 	System.out.println("move to index "+index);
@@ -165,7 +182,7 @@ public class ViewSettings {
 	Type t = null;
 	for(Iterator i=types.iterator(); i.hasNext();) {
 	    t = (Type)i.next();
-	    if(v.getTypes().contains(t) && t.contains(position))
+	    if(v.getTypes().contains(t) && t.containsCursor(position))
 		break;
 	}
 

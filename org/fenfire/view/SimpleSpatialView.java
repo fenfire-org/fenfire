@@ -47,10 +47,8 @@ public class SimpleSpatialView implements ViewSettings.SpatialView {
 	return false;
     }
 
-    public Lob getMainviewLob(Model cmodel) {
-	Cursor c = (Cursor)cmodel.get();
-	Object node = c.getNode();
-	return getBuoyLob(node);
+    public Lob getMainviewLob(Cursor cursor) {
+	return getBuoyLob(cursor.getNode());
     }
 
     public Lob getBuoyLob(Object node) {
@@ -68,9 +66,4 @@ public class SimpleSpatialView implements ViewSettings.SpatialView {
 	cache.put(node, l);
 	return l;
     }
-
-    public Cursor createViewSpecificCursor(Cursor c) {
-	return new Cursor.SimpleCursor(c.getNode());
-    }
-
 }

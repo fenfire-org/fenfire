@@ -136,7 +136,7 @@ public class FenFiction extends LobLob {
 	    this.state = state; this.node = node;
 	}
 	public void run() {
-	    state.set(new Cursor.SimpleCursor(node.get()));
+	    throw new Error(); //state.set(new Cursor.SimpleCursor(node.get()));
 	}
 
 	protected Replaceable[] getParams() {
@@ -185,7 +185,7 @@ public class FenFiction extends LobLob {
 			graph.add(n, RDF.type, type);
 			if(property != null)
 			    graph.add(c.getNode(), property, n);
-			state.set(new Cursor.SimpleCursor(n));
+			throw new Error(); //state.set(new Cursor.SimpleCursor(n));
 		    }
 		})));
 	    list.add(new Glue(Lob.Y, 10, 10, 10));
@@ -263,7 +263,7 @@ public class FenFiction extends LobLob {
 	public Lob getViewLob(final Model state) {
 	    Lob backButton = new Button("All stories", new AbstractAction() {
 		    public void run() {
-			state.set(new Cursor.SimpleCursor(ALL_STORIES));
+			throw new Error(); //state.set(new Cursor.SimpleCursor(ALL_STORIES));
 		    }
 		}, new ObjectModel(ALL_STORIES));
 
@@ -372,7 +372,7 @@ public class FenFiction extends LobLob {
 
 	Graph g = gf.getGraph();
 
-	Lob l = new BrowserLob(new ObjectModel(new Cursor.SimpleCursor(ALL_STORIES)), 
+	Lob l = new BrowserLob(null /* XXX!!! new ObjectModel(new Cursor.SimpleCursor(ALL_STORIES))*/, 
 			       getViews(g));
 
 	KeyController k = new KeyController(l);

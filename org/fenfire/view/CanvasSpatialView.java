@@ -53,10 +53,11 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 	this.winAnim = winAnim;
     }
 
+
+
     public Set getTypes() {
-	return Collections.singleton(new ViewSettings.Type() {
-		public boolean contains(Cursor cursor) {
-		    Object node = cursor.getNode();
+	return Collections.singleton(new ViewSettings.AbstractType() {
+		public boolean containsNode(Object node) {
 		    return graph.find1_X11(CANVAS2D.contains, node) != null;
 		}
 	    });
@@ -66,31 +67,42 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 	return true;
     }
 
-    public Cursor createViewSpecificCursor(Cursor c) {
-	return makeCanvasCursor(c);
-    }
-
-    protected CanvasCursor makeCanvasCursor(Cursor c) {
-	if (c instanceof CanvasCursor) {
-	    return (CanvasCursor)c;
-	} else {
+    protected Cursor.SpatialCursor getSpatialCursor(Cursor c) {
+	Cursor.SpatialCursor sc = c.getSpatialCursor();
+	if(sc.getSpatialPosition() instanceof CanvasCursor) 
+	    return sc;
+	else {
 	    Object n = c.getNode();
 	    Iterator canvases = graph.findN_X11_Iter(CANVAS2D.contains, n);
 	    
 	    if(!canvases.hasNext()) return null;
 
 	    Object canvas = canvases.next();
-
-	    String s = Nodes.toString(n);
-	    Lob l = new Label(s.substring(s.length()-5));
-
-	    Model xm = getModel(n, CANVAS2D.x), ym = getModel(n, CANVAS2D.y);
-
-	    float x = xm.getFloat() + l.getNatSize(Lob.X)/2;
-	    float y = ym.getFloat() + l.getNatSize(Lob.Y)/2;
-	    
-	    return new CanvasCursor(canvas, c.getNode(), x, y, 1);
+	    return new Cursor.SpatialCursor(canvas, getCanvasCursor(c));
 	}
+    }
+
+    protected CanvasCursor getCanvasCursor(Cursor c) {
+	Object pos = c.getSpatialCursor().spatialPosition.get();
+
+	if (pos instanceof CanvasCursor) {
+	    return (CanvasCursor)pos;
+	} else {
+	    Object n = c.getNode();
+	    return makeCanvasCursor(n);
+	}
+    }
+
+    protected CanvasCursor makeCanvasCursor(Object n) {
+	String s = Nodes.toString(n);
+	Lob l = new Label(s.substring(s.length()-5));
+	
+	Model xm = getModel(n, CANVAS2D.x), ym = getModel(n, CANVAS2D.y);
+	
+	float x = xm.getFloat() + l.getNatSize(Lob.X)/2;
+	float y = ym.getFloat() + l.getNatSize(Lob.Y)/2;
+	
+	return new CanvasCursor(x, y, 1);
     }
 
 
@@ -102,25 +114,15 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 	return m;
     }
 
-    Lob lastMainview;
-    Object lastMainviewNode;
-
-    private boolean equals(Object o1, Object o2) {
-	if(o1 == o2) return true;
-	if(o1 == null || o2 == null) return false;
-	return o1.equals(o2);
-    }
+    Lob mainviewCache;
+    Cursor cachedMainviewCursor;
     
-    public Lob getMainviewLob(Model cursor) {
-	CanvasCursor c = makeCanvasCursor((Cursor)cursor.get());
-	Object node = c.getNode();
+    public Lob getMainviewLob(Cursor cursor) {
+	if(cursor == null) throw new NullPointerException("null cursor");
+	if(cursor == cachedMainviewCursor) return mainviewCache;
 
-	// argl, need this so that no new DragControllers are created
-	// during dragging -- they don't have isDragging set, so drag events
-	// aren't handled... :-(
-	if(equals(node, lastMainviewNode)) return lastMainview; 
-
-	Object canvas = graph.find1_X11(CANVAS2D.contains, node);
+	Object node = cursor.getNode();
+	Object canvas = getSpatialCursor(cursor).spatialContext;
 
 	Lob canvasContent = getCanvasContent(canvas, cursor);
 
@@ -147,14 +149,14 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 	l = addBackground(l, canvas);
 	l = new SpatialContextLob(l, (Model)l.getTemplateParameter("cs"));
 
-	lastMainview = l;
-	lastMainviewNode = node;
+	mainviewCache = l;
+	cachedMainviewCursor = cursor;
 
 	return l;
     }
 
     public Lob getBuoyLob(Object node) {
-	if(buoyCache.containsKey(node)) return (Lob)buoyCache.get(node);
+	if(buoyCache.get(node) != null) return (Lob)buoyCache.get(node);
 
 	Object canvas = graph.find1_X11(CANVAS2D.contains, node);
 	Lob canvasContent = (Lob)canvasCache.get(canvas);
@@ -175,7 +177,7 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
     /**
      *  'cursor' may be null.
      */
-    protected Lob getCanvasContent(final Object canvas, final Model cursor) {
+    protected Lob getCanvasContent(final Object canvas, final Cursor cursor) {
 	
 	Tray tray = new Tray(false);
 	
@@ -188,22 +190,23 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 	    String s = Nodes.toString(n);
 	    final Lob label = new Label(s.substring(s.length()-5));
 	    Lob l = new BuoyConnectorLob(label, n, cs);
-	    
+
 	    final Model x = getModel(n, CANVAS2D.x);
 	    final Model y = getModel(n, CANVAS2D.y);
 
 	    if(cursor != null)
 		l = new ClickController(l, 1, new AbstractAction() {
 			public void run() {
-			    Cursor c0 = (Cursor)cursor.get();
-			    CanvasCursor cc = makeCanvasCursor(c0);
+			    CanvasCursor cc = getCanvasCursor(cursor);
 
 			    float nx = x.getFloat()+label.getNatSize(Lob.X)/2;
 			    float ny = y.getFloat()+label.getNatSize(Lob.Y)/2;
 			    float nz = cc.getZoom();
 
-			    Cursor c = new CanvasCursor(canvas, n, nx, ny, nz);
-			    cursor.set(c);
+			    CanvasCursor c = new CanvasCursor(nx, ny, nz);
+
+			    cursor.nodeCursor.set(new Cursor.NodeCursor(n));
+			    cursor.getSpatialCursor().spatialPosition.set(c);
 
 			    VobScene sc = winAnim.getCurrentVS();
 			    ConnectionVobMatcher m = 
@@ -230,31 +233,40 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 
 
     protected class Adapter extends AbstractModel.AbstractFloatModel {
-	protected Model cursor;
-	protected int type;
+	protected Model spatialPosition;
+	protected Model nodeCursor;
 
-	protected Object myNode;
+	protected int type;
 
 	protected float cache;
 	protected boolean current;
 	
-	public Adapter(Model cursor, int type) {
-	    this.cursor = cursor; this.type = type;
-	    myNode = ((Cursor)cursor.get()).getNode();
-	    cursor.addObs(this);
+	public Adapter(Cursor cursor, int type) {
+	    this.spatialPosition = cursor.getSpatialCursor().spatialPosition;
+	    nodeCursor = cursor.nodeCursor;
+
+	    this.type = type;
+	    spatialPosition.addObs(this);
 	}
 
 	public void chg() {
-	    Cursor c = (Cursor)cursor.get();
-	    if(myNode.equals(c.getNode())) {
-		current = false;
-		super.chg();
-	    }
+	    current = false;
+	    super.chg();
+	}
+
+	private CanvasCursor getCanvasCursor() {
+	    Object pos = spatialPosition.get();
+	    if(pos instanceof CanvasCursor)
+		return (CanvasCursor)pos;
+
+	    Cursor.NodeCursor nc = (Cursor.NodeCursor)nodeCursor.get();
+	    return makeCanvasCursor(nc.node);
 	}
 	
 	public float getFloat() {
 	    if(!current) {
-		CanvasCursor c = makeCanvasCursor((Cursor)cursor.get());
+		CanvasCursor c = getCanvasCursor();
+
 		if(c == null) cache = (type==2) ? 1 : 0;
 		else if(type == 0) cache = c.getPanX();
 		else if(type == 1) cache = c.getPanY();
@@ -269,11 +281,7 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 	public void setFloat(float value) {
 	    if(current && value == cache) return;
 	    
-	    Cursor c0 = (Cursor)cursor.get();
-	    if(!myNode.equals(c0.getNode())) return;
-	    CanvasCursor c = makeCanvasCursor(c0);
-
-	    if(c == null) return;
+	    CanvasCursor c = getCanvasCursor();
 	    
 	    float panX = c.getPanX(), panY = c.getPanY(), zoom = c.getZoom();
 	    if(type == 0) panX = value;
@@ -281,8 +289,7 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 	    else if(type == 2) zoom = value;
 	    else throw new IllegalArgumentException("adapter type "+type);
 
-	    cursor.set(new CanvasCursor(c.getCanvas(), c.getNode(),
-					panX, panY, zoom));
+	    spatialPosition.set(new CanvasCursor(panX, panY, zoom));
 	}
     }
 

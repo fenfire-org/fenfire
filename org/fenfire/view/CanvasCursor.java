@@ -27,31 +27,18 @@ CanvasCursor.java
 package org.fenfire.view;
 import org.fenfire.Cursor;
 
-/** Cursor for Canvas spatial view.
+/** Spatial position for canvas spatial view.
+ *  Used as a value for org.fenfire.Cursor.SpatialCursor.spatialPosition.
  */
-public class CanvasCursor implements Cursor {
-    private final Object canvas, node;
+public class CanvasCursor implements Cursor.SpatialPosition {
     private final float panX;
     private final float panY;
     private final float zoom;
 
-    public CanvasCursor(Object canvas, Object node,
-			float panX, float panY, float zoom) { 
-	if (canvas == null) 
-	    throw new NullPointerException("Canvas MUST be set.");
-	this.canvas = canvas;
-	this.node = node; 
-
+    public CanvasCursor(float panX, float panY, float zoom) { 
 	this.panX = panX;
 	this.panY = panY;
 	this.zoom = zoom;
-    }
-
-    public Object getNode() { 
-	return node; 
-    }
-    public Object getCanvas() {
-	return canvas;
     }
 
     public float getPanX() { return panX; }
@@ -59,20 +46,12 @@ public class CanvasCursor implements Cursor {
     public float getZoom() { return zoom; }
 
     public int hashCode() {
-	return (int)(canvas.hashCode() + 32489*node.hashCode() +
-		     23480*panX + 21348*panY + 8942*zoom);
+	return (int)(23480*panX + 21348*panY + 8942*zoom);
     }
 	
     public boolean equals(Object o) {
 	if (!(o instanceof CanvasCursor)) return false;
 	CanvasCursor c = (CanvasCursor)o;
-	return equals(canvas, c.canvas) && equals(node, c.node) &&
-	    panX == c.panX && panY == c.panY && zoom == c.zoom;
-    }
-
-    private boolean equals(Object o1, Object o2) {
-	if(o1 == o2) return true;
-	if(o1 == null || o2 == null) return false;
-	return o1.equals(o2);
+	return panX == c.panX && panY == c.panY && zoom == c.zoom;
     }
 }
