@@ -198,6 +198,17 @@ public class Graphs {
 				   Writer w) throws IOException {
 	// XXX use namespaces!!!
 
+	// create our own unchanging copy
+	Map nmap = new HashMap(namespaces);
+	// get the namespaces in stable order
+	SortedSet nset = new TreeSet(nmap.keySet());
+	Iterator n = nset.iterator();
+	while(n.hasNext()) {
+	    String prefix = (String) n.next();
+	    w.write("@prefix "+prefix+": <"+nmap.get(prefix)+">.\n");
+	}
+	w.write("\n");
+
 	for (Iterator i=g.findN_XAA_Iter(); i.hasNext();) {
 	    Object subj = i.next();
 
