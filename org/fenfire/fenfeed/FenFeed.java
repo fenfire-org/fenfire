@@ -32,6 +32,7 @@ import org.nongnu.libvob.layout.*;
 import org.nongnu.libvob.layout.component.*;
 import org.nongnu.libvob.impl.LobMain;
 import org.nongnu.navidoc.util.Obs;
+import org.fenfire.gnowsis.Gnowsis;
 import org.fenfire.swamp.*;
 import org.fenfire.swamp.impl.*;
 import org.fenfire.swamp.smush.*;
@@ -153,6 +154,9 @@ public class FenFeed extends LobLob {
 	KeyController kc = new KeyController(l);
 	kc.add("Ctrl-Q", new AbstractAction() { public void run() {
 	    System.exit(0);
+	}});
+	kc.add("Ctrl-O", new AbstractAction() { public void run() {
+	    Gnowsis.open(selectedItem.get());
 	}});
 
 	setDelegate(kc);
