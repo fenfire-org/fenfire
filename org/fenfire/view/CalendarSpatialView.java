@@ -162,7 +162,7 @@ public class CalendarSpatialView
     }
 
     protected CalendarCursor makeCalendarCursor(Object node) {
-	return new CalendarCursor(getDay(node), ndays, 1);
+	return new CalendarCursor(getDay(node), 1);
     }
 
 
@@ -206,16 +206,19 @@ public class CalendarSpatialView
 	Model cs = Parameter.model("cs", new IntModel());
 
 	Box dateList = new Box(Lob.Y);
-	for (int i=0; i<cc.getShownDays().length; i++) {
-	    Calendar day = cc.getShownDays()[i];
-	    Date time = day.getTime();
+
+	for (int i=-ndays/2; i<=ndays/2; i++) {
+	    final GregorianCalendar day = new GregorianCalendar();
+	    day.setTimeInMillis(cc.getDay().getTimeInMillis());
+	    day.add(day.DAY_OF_MONTH, i);
+
+	    final Date time = day.getTime();
 
 	    Box v = new Box(Lob.Y);
 	    Lob l = new Label(dateFormat.format(time));
 	    l = new ThemeFrame(l, new ObjectModel(time));
 	    l = new AlignLob(l, .5f,.5f,.5f,.5f);
 	    v.add(l);
-	    //p(cc.getShownDays()[i].getString());
 
 	    Set nodes = (Set)nodesByDay.get(day);
 	    if(nodes != null) {

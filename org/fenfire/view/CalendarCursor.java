@@ -34,50 +34,37 @@ import java.util.*;
  *  Used as a value for org.fenfire.Cursor.SpatialCursor.spatialPosition.
  */
 public class CalendarCursor {
-    private final Calendar[] shownDays;
+    private final Calendar day;
 
     // may be accursed if any..
     private final float zoom;
 
-    public CalendarCursor(Calendar curr, int nDays, float zoom) { 
+    public CalendarCursor(Calendar day, float zoom) { 
 	this.zoom = zoom;
-
-	System.out.println("ZOOM: "+zoom);
-
-	int half = nDays / 2;
-	shownDays = new Calendar[nDays];
-	for (int i=0; i<nDays; i++) {
-	    GregorianCalendar d = new GregorianCalendar();
-	    shownDays[i] = d;
-
-	    d.setTimeInMillis(curr.getTimeInMillis());
-	    d.add(d.DAY_OF_MONTH, i-half);
-	}
+	this.day = day;
     }
 
-    public Calendar[] getShownDays() {
-	return shownDays;
+    public Calendar getDay() {
+	return day;
+    }
+
+
+    /** get cursor with different day but same zoom
+     */
+    public CalendarCursor getCursor(Calendar day) {
+	return new CalendarCursor(day, zoom);
     }
 
 
     public float getZoom() { return zoom; }
 
     public int hashCode() {
-	int hash = (int)(942*zoom);
-	for(int i=0; i<shownDays.length; i++) {
-	    hash += shownDays[i].hashCode();
-	    hash *= 234809;
-	}
-	return hash;
+	return (int)(942*zoom) + day.hashCode();
     }
 	
     public boolean equals(Object o) {
 	if (!(o instanceof CalendarCursor)) return false;
 	CalendarCursor c = (CalendarCursor)o;
-	if(shownDays.length != c.shownDays.length) return false;
-	for (int i=0; i<shownDays.length; i++)
-	    if (!shownDays[i].equals(c.shownDays[i]))
-		return false;
-	return zoom == c.zoom;
+	return zoom == c.zoom && day.equals(c.day);
     }
 }
