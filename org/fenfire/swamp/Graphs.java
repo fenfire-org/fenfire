@@ -221,7 +221,8 @@ public class Graphs {
 	// XXX should get a NamespaceMap instead of a Map
 	// order of namespaces is not the same as originally, but random
 	NamespaceMap nmap = new NamespaceMap();
-	nmap.putAll(namespaces);
+	if (namespaces != null)
+	    nmap.putAll(namespaces);
 
 	Iterator n = nmap.uriIterator();
 	while(n.hasNext()) {
