@@ -299,7 +299,7 @@ public final class SmushedQuadsGraph extends SmushedQuadsGraph_Gen {
 		groupsByPair.put(x, g2);
 	    } else {
 		if(g2.canonicalNode == null || 
-		   cmp.compare(x, g1.canonicalNode) < 0) {
+		   cmp.compare(x, g2.canonicalNode) < 0) {
 		    g2.canonicalNode = x;
 		}
 		g2.subjects.add(x);
@@ -311,16 +311,11 @@ public final class SmushedQuadsGraph extends SmushedQuadsGraph_Gen {
 	if(g1.canonicalNode==null || g2.canonicalNode==null)
 	    throw new AssertionError(g1.canonicalNode+" "+g2.canonicalNode);
 
-	if(dbg) p("now replacing");
+	if(dbg) p("now replacing -- "+g1.canonicalNode+" "+g2.canonicalNode);
 
 	remove(g.canonicalNode);
 	putAll(g1.subjects);
 	putAll(g2.subjects);
-    }
-
-
-    private Object get(Object node, Object oldCanonical, Object newCanonical) {
-	return node.equals(oldCanonical) ? newCanonical : get(node);
     }
     
     
