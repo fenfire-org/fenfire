@@ -53,14 +53,13 @@ public class CalendarSpatialView implements ViewSettings.SpatialView {
 	this.graph = graph;
 	this.winAnim = winAnim;
 	
-	if (days <0) throw new Error("Please give more days! '"+days+"'");
+	if (days < 0) throw new IllegalArgumentException("0 > days = "+days);
 	ndays = days;
     }
 
     public Set getTypes() {
-	return Collections.singleton(new ViewSettings.Type() {
-		public boolean contains(Cursor cursor) {
-		    Object node = cursor.getNode();
+	return Collections.singleton(new ViewSettings.AbstractType() {
+		public boolean containsNode(Object node) {
 		    Iterator i = graph.findN_11X_Iter(node, DC.date);
 		    //p("i: "+i.hasNext());
 		    return i.hasNext();
@@ -72,10 +71,6 @@ public class CalendarSpatialView implements ViewSettings.SpatialView {
 	return true;
     }
 
-    public Cursor createViewSpecificCursor(Cursor c) {
-	return makeCalendarCursor(c);
-    }
-
 
     protected Date getDate(Object node) {
 	Iterator i = graph.findN_11X_Iter(node, DC.date);
@@ -85,143 +80,85 @@ public class CalendarSpatialView implements ViewSettings.SpatialView {
 	return org.nongnu.storm.util.DateParser.parse(date.getString());
     }	
 
-    protected CalendarCursor makeCalendarCursor(Cursor c) {
-	if (c instanceof CalendarCursor) {
-	    return (CalendarCursor)c;
+    protected CalendarCursor getCalendarCursor(Cursor c) {
+	Object pos = c.getSpatialCursor().getSpatialPosition();
+	if (pos instanceof CalendarCursor) {
+	    return (CalendarCursor)pos;
 	} else {
-	    Object node = c.getNode();
-	    return new CalendarCursor(node, getDate(node), ndays, 1);
+	    return makeCalendarCursor(c.getNode());
 	}
     }
 
-
-    private Model getModel(Object node, Object prop) {
-	Model m = new ObjectModel(node);
-	m = new PropValueModel(new ObjectModel(graph), m, prop, 1);
-	m = new LiteralStringModel(m);
-	m = Models.parseFloat(m);
-	return m;
+    protected CalendarCursor makeCalendarCursor(Object node) {
+	return new CalendarCursor(getDate(node), ndays, 1);
     }
 
-    public Lob getLob(Model cmodel) {
+
+    public Lob getBuoyLob(Object node) {
+	Lob l = getCalendarContent(makeCalendarCursor(node));
+	l = new AlignLob(l, .5f, .5f, .5f, .5f);
+	l = new ThemeFrame(l);
+	l = new SpatialContextLob(l, (Model)l.getTemplateParameter("cs"));
+
+	float s = 100;
+	l = new RequestChangeLob(l, s,s, s,s, s,s);
+
+	return l;
+    }
+
+    public Lob getMainviewLob(Cursor cursor) {
+	Lob l = getCalendarContent(getCalendarCursor(cursor));
+	l = new AlignLob(l, .5f, .5f, .5f, .5f);
+	l = new ThemeFrame(l);
+	l = new SpatialContextLob(l, (Model)l.getTemplateParameter("cs"));
+	return l;
+    }
+
+    /*
 	CalendarCursor c = makeCalendarCursor((Cursor)cmodel.get());
 	Object node = c.getNode();
 	Object canvas = graph.find1_X11(CANVAS2D.contains, node);
 
 	Lob canvasContent = (Lob)cache.get(canvas);
-	
-	if(canvasContent == null) {
-	    Tray tray = new Tray(false);
-
-	    Model cs = Parameter.model("cs", new IntModel());
-
-	    
-	    Lob nl = null;
-
-	    Box hbox = new Box(Lob.X);
-	    for (int i=0; i<c.getShownDates().length; i++) {
-		Box v = new Box(Lob.Y);
-		Lob l = new Label(c.getShownDates()[i].getString(
-				      ).substring(0, 10));
-		l = new ThemeFrame(l);
-		l = new AlignLob(l, .5f,.5f,.5f,.5f);
-		v.add(l);
-		//p(c.getShownDates()[i].getString());
-		for (Iterator j=graph.findN_X11_Iter(DC.date, 
-						     c.getShownDates()[i]); 
-		     j.hasNext();) {
-		    Object n = j.next();
-		    // add click controller to select new focus...
-		    Lob l3 = new Label((String)n);
-		    l3 = new AlignLob(l3, .5f,.5f,.5f,.5f);
-		    l3 = new BuoyConnectorLob(l3, n, cs);
-		    v.add(l3);
-		}
-		hbox.add(v);
-	    }
-	    Lob l2 = new ThemeFrame(hbox);
-	    l2 = new AlignLob(l2, .5f,.5f,.5f,.5f);
-	    tray.add(l2);
-
-	    /*
-	    for(Iterator i=graph.findN_11X_Iter(canvas, CANVAS2D.contains); 
-		i.hasNext();) {
-
-		Object n = i.next();
-		String s = Nodes.toString(n);
-		Lob l = new Label(s.substring(s.length()-5));
-		if(n.equals(node)) nl = l;
-		l = new BuoyConnectorLob(l, n, cs);
-
-		Model x = getModel(n, CANVAS2D.x), y = getModel(n, CANVAS2D.y);
-		l = new TranslationLob(l, x, y);
-		tray.add(l);
-	    }
-	    */
-	    float s = 100;
-	    canvasContent = 
-		new RequestChangeLob(tray, s,s, s,s, s,s);
-
-	    cache.put(node, canvasContent);
-	}
 
 	Lob l = canvasContent;
 	l = getCoordinateLob(l, cmodel);
 	l = new SpatialContextLob(l, (Model)l.getTemplateParameter("cs"));
 	return l;
     }
+    */	
 
-
-    protected class Adapter extends AbstractModel.AbstractFloatModel {
-	protected Model cursor;
-	protected int type;
-
-	protected Object myNode;
-
-	protected float cache;
-	protected boolean current;
+    protected Lob getCalendarContent(CalendarCursor cc) {
+	Model cs = Parameter.model("cs", new IntModel());
 	
-	public Adapter(Model cursor, int type) {
-	    this.cursor = cursor; this.type = type;
-	    myNode = ((Cursor)cursor.get()).getNode();
-	    cursor.addObs(this);
-	}
+	Box dateList = new Box(Lob.Y);
+	for (int i=0; i<cc.getShownDates().length; i++) {
+	    TypedLiteral date = cc.getShownDates()[i];
 
-	public void chg() {
-	    Cursor c = (Cursor)cursor.get();
-	    if(myNode.equals(c.getNode())) {
-		current = false;
-		super.chg();
+	    Box v = new Box(Lob.Y);
+	    Lob l = new Label(date.getString().substring(0, 10));
+	    l = new ThemeFrame(l, new ObjectModel(date));
+	    l = new AlignLob(l, .5f,.5f,.5f,.5f);
+	    v.add(l);
+	    //p(cc.getShownDates()[i].getString());
+	    for (Iterator j=graph.findN_X11_Iter(DC.date,date); j.hasNext();) {
+		Object n = j.next();
+		String s = Nodes.toString(n);
+		Lob l3 = new Label(s.substring(s.length()-5));
+		// add click controller to select new focus...
+		l3 = new BuoyConnectorLob(l3, n, cs);
+		l3 = new AlignLob(l3, .5f,.5f,.5f,.5f);
+		v.add(l3);
 	    }
-	}
-	
-	public float getFloat() {
-	    if(!current) {
-		CalendarCursor c = makeCalendarCursor((Cursor)cursor.get());
-		if(c == null) cache = c.getZoom();
-		current = true;
-	    }
-	    return cache;
+	    dateList.add(v);
+	    dateList.glue(5, 5, 5);
 	}
 
-	public void setFloat(float value) {
-	    if(current && value == cache) return;
-	    
-	    Cursor c0 = (Cursor)cursor.get();
-	    if(!myNode.equals(c0.getNode())) return;
-	    CalendarCursor c = makeCalendarCursor(c0);
-
-	    if(c == null) return;
-	    
-
-	    Object node = c.getNode();
-	    float zoom = value;
-	    cursor.set(new CalendarCursor(node, getDate(node),
-					  ndays, zoom));
-	}
+	return dateList;
     }
 
 
+    /*
     protected Map coordlobs = new org.nongnu.navidoc.util.WeakValueMap();
     public Lob getCoordinateLob(Lob content, Model cmodel) {
 	Cursor c = (Cursor)cmodel.get();
@@ -249,40 +186,5 @@ public class CalendarSpatialView implements ViewSettings.SpatialView {
 	}
 	return l;
     }
-
-
-    private class UniqueColorModel extends AbstractModel.AbstractObjectModel {
-	Model key;
-
-	UniqueColorModel(Model key) {
-	    this.key = key;
-	    key.addObs(this);
-	}
-	
-	protected Replaceable[] getParams() {
-	    return new Replaceable[] { key };
-	}
-	protected Object clone(Object[] params) {
-	    return new UniqueColorModel((Model)params[0]);
-	}
-
-	Color color;
-
-	public void chg() {
-	    color = null;
-	    super.chg();
-	}
-
-	public Object get() {
-	    if(color == null) {
-		java.util.Random r = new Random(key.get().hashCode());
-		float 
-		    R = 1 - r.nextFloat() * 0.2f,
-		    G = 1 - r.nextFloat() * 0.2f,
-		    B = 1 - r.nextFloat() * 0.2f;
-		color = new Color(R,G,B); 
-	    }
-	    return color;
-	}
-    }
+    */
 }

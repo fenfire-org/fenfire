@@ -31,17 +31,15 @@ import org.fenfire.swamp.*;
 import java.util.Date;
 
 /** Cursor for Calendar spatial view.
+ *  Used as a value for org.fenfire.Cursor.SpatialCursor.spatialPosition.
  */
-public class CalendarCursor implements Cursor {
+public class CalendarCursor implements Cursor.SpatialPosition {
     private final TypedLiteral [] shownDays;
 
     // may be accursed if any..
-    private final Object node; 
     private final float zoom;
     private final long DAY = 24 * 60 * 60 * 1000;
-    public CalendarCursor(Object node, Date curr, 
-			  int nDays, float zoom) { 
-	this.node = node; 
+    public CalendarCursor(Date curr, int nDays, float zoom) { 
 	this.zoom = zoom;
 
 	System.out.println("ZOOM: "+zoom);
@@ -58,9 +56,6 @@ public class CalendarCursor implements Cursor {
 	}
     }
 
-    public Object getNode() { 
-	return node; 
-    }
     public TypedLiteral[] getShownDates() {
 	return shownDays;
     }
@@ -69,23 +64,21 @@ public class CalendarCursor implements Cursor {
     public float getZoom() { return zoom; }
 
     public int hashCode() {
-	return (int)(132489*node.hashCode() +
-		     942*zoom);
+	int hash = (int)(942*zoom);
+	for(int i=0; i<shownDays.length; i++) {
+	    hash += shownDays[i].hashCode();
+	    hash *= 234809;
+	}
+	return hash;
     }
 	
     public boolean equals(Object o) {
 	if (!(o instanceof CalendarCursor)) return false;
 	CalendarCursor c = (CalendarCursor)o;
-	for (int i=0; i<shownDays.length || i<c.shownDays.length; i++)
+	if(shownDays.length != c.shownDays.length) return false;
+	for (int i=0; i<shownDays.length; i++)
 	    if (!shownDays[i].equals(c.shownDays[i]))
 		return false;
-	return equals(node, c.node) &&
-	    zoom == c.zoom;
-    }
-
-    private boolean equals(Object o1, Object o2) {
-	if(o1 == o2) return true;
-	if(o1 == null || o2 == null) return false;
-	return o1.equals(o2);
+	return zoom == c.zoom;
     }
 }
