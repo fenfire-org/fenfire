@@ -64,18 +64,18 @@ public class FenFiction extends LobLob {
 	}
     }
 
-    private static final String 
-	fic = "http://fenfire.org/vocab/2004/11/fenfiction#",
-	allStories = "AllStories";
+    public static final String
+	FIC = "http://fenfire.org/vocab/2004/11/fenfiction#";
 
     public static final Object
+	ALL_STORIES = Nodes.get(FIC+"allStories"),
 	TITLE = Nodes.get("http://purl.org/dc/elements/1.1/title"), 
-	NAME = Nodes.get(fic+"name"),
-	STORY = Nodes.get(fic+"Story"),
-	CHARACTER = Nodes.get(fic+"Character"),
-	ELEMENT = Nodes.get(fic+"element"),
-	NOTE = Nodes.get(fic+"Note"),
-	TEXT = Nodes.get(fic+"text"),
+	NAME = Nodes.get(FIC+"name"),
+	STORY = Nodes.get(FIC+"Story"),
+	CHARACTER = Nodes.get(FIC+"Character"),
+	ELEMENT = Nodes.get(FIC+"element"),
+	NOTE = Nodes.get(FIC+"Note"),
+	TEXT = Nodes.get(FIC+"text"),
 	RELATION = Nodes.get("http://purl.org/dc/elements/1.1/relation");
 
 
@@ -189,7 +189,7 @@ public class FenFiction extends LobLob {
 
     protected BrowserLob.Type allStoriesType = new BrowserLob.Type() {
 	    public boolean contains(Object state) {
-		return allStories.equals(state);
+		return ALL_STORIES.equals(state);
 	    }
 	};
 
@@ -207,7 +207,7 @@ public class FenFiction extends LobLob {
 	public Set getTypes() {
 	    return Collections.singleton(allStoriesType);
 	}
-	public Lob getViewLob(final Model state) {
+	public Lob getViewLob(final Model state, final Model viewState) {
 	    Lob heading = 
 		new KeyLob(new Label("All stories", headingFont),
 			   "AllStories");
@@ -246,10 +246,10 @@ public class FenFiction extends LobLob {
 	    super(graph, STORY);
 	}
 	
-	public Lob getViewLob(final Model state) {
+	public Lob getViewLob(final Model state, final Model viewState) {
 	    Lob backButton = new Button("All stories", new AbstractAction() {
 		    public void run() {
-			state.set(allStories);
+			state.set(ALL_STORIES);
 		    }
 		}, new ObjectModel("AllStories"));
 
@@ -275,7 +275,7 @@ public class FenFiction extends LobLob {
 	    super(graph, CHARACTER);
 	}
 	
-	public Lob getViewLob(final Model state) {
+	public Lob getViewLob(final Model state, final Model viewState) {
 	    final Model story = rlob.value(state, ELEMENT, -1);
 	    Lob label = rlob.label(story, TITLE);
 
@@ -304,7 +304,7 @@ public class FenFiction extends LobLob {
 	    super(graph, NOTE);
 	}
 	
-	public Lob getViewLob(final Model state) {
+	public Lob getViewLob(final Model state, final Model viewState) {
 	    ListModel listHeading = new ListModel.Simple();
 	    listHeading.add(new Label("Related items:"));
 	    listHeading.add(new Glue(Lob.Y, 10, 10, 10));
@@ -330,6 +330,15 @@ public class FenFiction extends LobLob {
 	}
     }
 
+    protected Set getViews(Graph g) {
+	Set views = new HashSet();
+	views.add(new AllStoriesView(g));
+	views.add(new StoryView(g));
+	views.add(new CharacterView(g));
+	views.add(new NoteView(g));
+	return views;
+    }
+
     public FenFiction() {
 	final GraphFile gf;
 
@@ -343,13 +352,9 @@ public class FenFiction extends LobLob {
 
 	Graph g = gf.getGraph();
 
-	Set views = new HashSet();
-	views.add(new AllStoriesView(g));
-	views.add(new StoryView(g));
-	views.add(new CharacterView(g));
-	views.add(new NoteView(g));
-
-	Lob l = new BrowserLob(new ObjectModel(allStories), views);
+	Lob l = new BrowserLob(new ObjectModel(ALL_STORIES), 
+			       new ObjectModel(null),
+			       getViews(g));
 
 	KeyController k = new KeyController(l);
 	k.add("Ctrl-S", new AbstractAction() { public void run() {
