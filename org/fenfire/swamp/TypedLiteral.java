@@ -63,4 +63,8 @@ public final class TypedLiteral extends Literal {
     public int hashCode() {
 	return string.hashCode() + 324891*type.hashCode();
     }
+
+    public String toString() {
+	return '"' + string + '"' + "^^<" + type + ">";
+    }
 }

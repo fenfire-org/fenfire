@@ -123,8 +123,9 @@ public class FenFeed extends LobLob {
 	Lob chTemplate = new Label(rlob.string(channel, TITLE), channelFont);
 
 	ListBox channel_list = 
-	    new ListBox(rlob.listModel(channels, cmp), chTemplate, 
-			new ObjectModel("channels"));
+	    new ListBox(rlob.listModel(channels, cmp), 
+			"template", chTemplate, 
+			"key", "channels");
 	channel_list.setSelectionModel(selectedChannel);
 	hbox.addRequest(channel_list, 250, 250, 250);
 
@@ -141,8 +142,9 @@ public class FenFeed extends LobLob {
 	Model itemFont = wasRead.select(font, boldFont);
 	Lob template = new Label(rlob.string(item, TITLE), itemFont);
 
-	ListBox item_list = new ListBox(items, template, 
-					new ObjectModel("items"));
+	ListBox item_list = new ListBox(items, 
+					"template", template, 
+					"key", "items");
 	item_list.setSelectionModel(selectedItem);
 	vbox.addRequest(item_list, 200, 200, 200);
 
@@ -150,13 +152,13 @@ public class FenFeed extends LobLob {
 
 	ListModel texts = new ListModel.Simple();
 	texts.add(rlob.textModel("Title: ", false));
-	texts.add(rlob.textModel(selectedItem, TITLE, null));
+	texts.add(rlob.textsModel(selectedItem, TITLE, null));
 	texts.add(rlob.textModel("\nDate: ", false));
-	texts.add(rlob.textModel(selectedItem, DC_DATE, null));
+	texts.add(rlob.textsModel(selectedItem, DC_DATE, null));
 	texts.add(rlob.textModel("\nCreator: ", false));
-	texts.add(rlob.textModel(selectedItem, DC_CREATOR, null));
+	texts.add(rlob.textsModel(selectedItem, DC_CREATOR, null));
 	texts.add(rlob.textModel("\nSubject: ", false));
-	texts.add(rlob.textModel(selectedItem, DC_SUBJECT, null));
+	texts.add(rlob.textsModel(selectedItem, DC_SUBJECT, null));
 	texts.add(rlob.textModel("\n\n", false));
 	texts.add(rlob.textModel(selectedItem, ITEM_TEXT));
 	vbox.add(new TextArea(new TextModel.Concat(texts), 

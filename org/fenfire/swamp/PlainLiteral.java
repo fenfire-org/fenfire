@@ -57,4 +57,11 @@ public final class PlainLiteral extends Literal {
 	if(lang == null) return string.hashCode();
 	return string.hashCode() + 324891*lang.hashCode();
     }
+
+    public String toString() {
+	if(lang == null)
+	    return '"' + string + '"';
+	else
+	    return '"' + string + '"' + '@' + lang;
+    }
 }

@@ -103,9 +103,10 @@ public class PropValueSetModel extends SetModel.AbstractSetModel {
 	    dir =  PropValueSetModel.this.dir.getInt();
 
 	    if(node == null || prop == null)
-		throw new NullPointerException("Node "+node+", prop "+prop);
+		//throw new NullPointerException("Node "+node+", prop "+prop);
+		iter = Collections.EMPTY_SET.iterator();
 	    
-	    if(dir > 0)
+	    else if(dir > 0)
 		iter = g.findN_11X_Iter(node, prop, PropValueSetModel.this);
 	    else
 		iter = g.findN_X11_Iter(prop, node, PropValueSetModel.this);

@@ -44,7 +44,8 @@ public class RDFLobFactory {
     }
 
     private Model model(Object o) {
-	if(o == null) return new ObjectModel(null);
+	if(o == null) return new ObjectModel(null); // not always appropriate?
+	if(o.equals("*")) return Parameter.model(ListModel.PARAM);
 	return Nodes.isNode(o) ? new ObjectModel(o) : (Model)o;
     }
 
@@ -114,11 +115,33 @@ public class RDFLobFactory {
 	return textModel(node, property, node);
     }
 
-    public TextModel textModel(Object _node, Object property, Object _key) {
+    public TextModel textsModel(Object _node, Object property) {
 	Model node = model(_node);
+	return textsModel(node, property, node);
+    }
+
+    public TextModel textModel(Object node, Object property, Object _key) {
 	Model key = model(_key);
 	Model string = string(node, property);
 	return new TextModel.StringTextModel(string, font, key);
+    }
+
+    public TextModel textsModel(Object node, Object property, Object _key) {
+	Model key = model(_key);
+	SetModel set = setModel(node, property, 1);
+	ListModel list = new ListModel.ListCache(set);
+
+	Model param = Parameter.model(ListModel.PARAM);
+	Model strTempl = Models.adaptMethod(param, Object.class, "toString");
+	TextModel.StringTextModel templ = 
+	    new TextModel.StringTextModel(strTempl, font, key);
+	templ.setIncludeLineEnd(false);
+	list = new ListModel.Transform(list, templ);
+
+	TextModel comma = textModel(", ", false);
+	list = new ListModel.Join(list, new ObjectModel(comma));
+
+	return new TextModel.Concat(list);
     }
 
     public Label label(Object node, Object property) {
@@ -145,31 +168,22 @@ public class RDFLobFactory {
     public ListBox listBox(CollectionModel collection, Lob template,
 			   Comparator cmp, Object key) {
 	collection = new SortedSetModel.SortedSetCache(collection, cmp);
-	return new ListBox(new ListModel.ListCache(collection), template,
-			   new ObjectModel(key));
+	return new ListBox(new ListModel.ListCache(collection), 
+			   "template", template,
+			   "key", new ObjectModel(key));
     }
 
     public ListBox listBox(CollectionModel collection, Object property,
 			   Comparator cmp, Object key) {
-	Model m0 = new ObjectModel();
-
-	// prevent NullPointerException... argl
-	Iterator i = collection.iterator();
-	if(i.hasNext()) m0.set(i.next());
-
 	Lob template = 
 	    label(Parameter.model(ListModel.PARAM), property, false);
 	return listBox(collection, template, cmp, key);
     }
 
     public ListBox listBox(ListModel list, Object property, Object key) {
-	Model m0 = new ObjectModel();
-
-	// prevent NullPointerException... argl
-	if(!list.isEmpty()) m0.set(list.get(0));
-
 	Lob template = 
 	    label(Parameter.model(ListModel.PARAM), property, false);
-	return new ListBox(list, template, new ObjectModel(key));
+	return new ListBox(list, "template", template, 
+			   "key", new ObjectModel(key));
     }
 }
