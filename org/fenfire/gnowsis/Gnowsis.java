@@ -36,7 +36,10 @@ public class Gnowsis {
 	    if(client == null) client = new Client();
 
 	    String uri = Nodes.toString(node);
-	    return Graphs.readXML(new StringReader(client.runBDesc(uri)));
+	    Graph g = new org.fenfire.swamp.impl.HashGraph();
+	    Graphs.readXML(new StringReader(client.runBDesc(uri)), uri, g,
+			   new java.util.HashMap());
+	    return g;
 	} catch(Exception e) {
 	    throw new Error(e);
 	}

@@ -55,7 +55,7 @@ public interface GraphFile {
 	    this.namespaces = new HashMap();
 
 	    if(file.exists()) {
-		graph.addAll(Graphs.readTurtle(file, namespaces));
+		Graphs.readTurtle(file, graph, namespaces);
 	    } else if(defaultGraph == null) {
 		throw new FileNotFoundException(""+file);
 	    } else {

@@ -28,7 +28,11 @@ Graphs.java
 package org.fenfire.swamp;
 import org.fenfire.swamp.impl.*;
 import com.hp.hpl.mesa.rdf.jena.model.*;
+import com.hp.hpl.mesa.rdf.jena.model.Statement;
+import com.hp.hpl.mesa.rdf.jena.model.Resource;
 import com.hp.hpl.mesa.rdf.jena.mem.*;
+import org.openrdf.rio.*;
+import org.openrdf.model.*;
 import java.io.*;
 import java.util.*;
 
@@ -36,15 +40,140 @@ public class Graphs {
     public static boolean dbg = false;
     public static void p(String s) { System.out.println("swamp.Graphs:: "+s); }
 
-    public static Graph readTurtle(File file, Map namespaces) 
+
+
+    protected static Object node(Value node) { 
+	if(node instanceof URI)
+	    return Nodes.get(((URI)node).getURI());
+	else if(node instanceof BNode)
+	    return Nodes.get("bnode:"+((BNode)node).getID());
+	else if(node instanceof org.openrdf.model.Literal) {
+	    org.openrdf.model.Literal l = (org.openrdf.model.Literal)node;
+	    if(l.getDatatype() != null)
+		return new TypedLiteral(l.getLabel(), l.getDatatype());
+	    else
+		return new PlainLiteral(l.getLabel(), l.getLanguage());
+	} else {
+	    throw new ClassCastException(""+node);
+	}
+    }
+
+    private static void setHandlers(Parser parser, final Graph graph, 
+				    final Map namespaces) {
+
+	parser.setPreserveBNodeIds(true);
+
+	parser.setNamespaceListener(new NamespaceListener() {
+		public void handleNamespace(String prefix, String uri) {
+		    namespaces.put(prefix, uri);
+		}
+	    });
+
+	parser.setStatementHandler(new StatementHandler() {
+		public void handleStatement(org.openrdf.model.Resource subject,
+					    URI predicate, Value object) {
+		    graph.add(node(subject), node(predicate), node(object));
+		}
+	    });
+    }
+
+    private static void parse(Parser parser, InputStream in, String baseURI)
 	throws IOException {
 
-	Graph g = new HashGraph();
-	TurtleReader.read(new InputStreamReader(new FileInputStream(file),
-						"UTF-8"), 
-			  g, namespaces, file.getName());
-	return g;
+	try {
+	    parser.parse(in, baseURI);
+	} catch(ParseException e) {
+	    throw new IOException(""+e);
+	} catch(StatementHandlerException e) {
+	    throw new IOException(""+e);
+	}
     }
+
+    private static void parse(Parser parser, Reader r, String baseURI)
+	throws IOException {
+
+	try {
+	    parser.parse(r, baseURI);
+	} catch(ParseException e) {
+	    throw new IOException(""+e);
+	} catch(StatementHandlerException e) {
+	    throw new IOException(""+e);
+	}
+    }
+
+
+
+    public static void read(InputStream in, String contentType,
+			    String baseURI, Graph graph, Map namespaces)
+	throws IOException {
+	
+	int i = contentType.indexOf(';');
+	if(i >= 0) contentType = contentType.substring(0, i);
+	contentType = contentType.trim().toLowerCase();
+
+	if(contentType.equals("application/turtle")) {
+	    readTurtle(in, baseURI, graph, namespaces);
+	} else if(contentType.equals("application/rdf+xml")) {
+	    readXML(in, baseURI, graph, namespaces);
+	} else {
+	    throw new UnsupportedOperationException("Reading content type "+
+						    contentType);
+	}
+    }
+
+
+
+    public static void readTurtle(File file, Graph graph, Map namespaces) 
+	throws IOException {
+
+	String baseURI = file.toURI().toString();
+	readTurtle(new FileInputStream(file), baseURI, graph, namespaces);
+    }
+
+    public static void readTurtle(InputStream in, String baseURI,
+				  Graph graph, Map namespaces) 
+	throws IOException {
+
+	Parser parser = new org.openrdf.rio.turtle.TurtleParser();
+	setHandlers(parser, graph, namespaces);
+	parse(parser, in, baseURI);
+    }
+
+    public static void readTurtle(Reader r, String baseURI,
+				  Graph graph, Map namespaces) 
+	throws IOException {
+
+	Parser parser = new org.openrdf.rio.turtle.TurtleParser();
+	setHandlers(parser, graph, namespaces);
+	parse(parser, r, baseURI);
+    }
+
+    public static void readXML(File file, Graph graph, Map namespaces) 
+	throws IOException {
+
+	String baseURI = file.toURI().toString();
+	readXML(new FileInputStream(file), baseURI, graph, namespaces);
+    }
+
+    public static void readXML(InputStream in, String baseURI,
+			       Graph graph, Map namespaces) 
+	throws IOException {
+
+	Parser parser = new org.openrdf.rio.rdfxml.RdfXmlParser();
+	setHandlers(parser, graph, namespaces);
+	parse(parser, in, baseURI);
+    }
+
+    public static void readXML(Reader r, String baseURI,
+			       Graph graph, Map namespaces) 
+	throws IOException {
+
+	Parser parser = new org.openrdf.rio.rdfxml.RdfXmlParser();
+	setHandlers(parser, graph, namespaces);
+	parse(parser, r, baseURI);
+    }
+
+
 
     public static void writeTurtle(ConstGraph g, Map namespaces,
 				   File f) throws IOException {
@@ -58,17 +187,25 @@ public class Graphs {
 
 	for (Iterator i=g.findN_XAA_Iter(); i.hasNext();) {
 	    Object subj = i.next();
+
+	    Iterator j = g.findN_1XA_Iter(subj);
+	    if(!j.hasNext()) throw new Error();
+
 	    w.write("<");
 	    w.write(Nodes.toString(subj));
 	    w.write(">\n");
 
-	    for (Iterator j=g.findN_1XA_Iter(subj); j.hasNext();) {
+	    while(j.hasNext()) {
 		Object pred = j.next();
+
+		Iterator k = g.findN_11X_Iter(subj,pred);
+		if(!k.hasNext()) throw new Error();
+
 		w.write("  <");
 		w.write(Nodes.toString(pred));
 		w.write(">\n");
 
-		for (Iterator k=g.findN_11X_Iter(subj,pred); k.hasNext();) {
+		while(k.hasNext()) {
 		    Object obj = k.next();
 
 		    if(obj instanceof Literal) {
@@ -118,22 +255,6 @@ public class Graphs {
 	}
 
 	w.close();
-    }
-
-    public static Graph readXML(File file) throws IOException {
-	return readXML(new InputStreamReader(new FileInputStream(file),
-					     "UTF-8"));
-    }
-
-    public static Graph readXML(Reader r) throws IOException {
-	Model jenaModel = new ModelMem();
-	try {
-	    jenaModel.read(r, null);
-	} catch(com.hp.hpl.mesa.rdf.jena.model.RDFException e) {
-	    throw new IOException(""+e);
-	}
-	    
-	return toGraph(jenaModel);
     }
 
     public static void writeXML(ConstGraph g, File file) throws IOException {
