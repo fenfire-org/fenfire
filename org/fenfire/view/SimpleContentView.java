@@ -37,6 +37,7 @@ import java.awt.Color;
 import java.util.*;
 
 public class SimpleContentView implements ContentViewSettings.ContentView {
+    private static void p(String s) { System.out.println("SimpleContentView:: "+s); }
 
     private Map cache = new org.nongnu.navidoc.util.WeakValueMap();
     private Map propCache = new org.nongnu.navidoc.util.WeakValueMap();
@@ -81,13 +82,21 @@ public class SimpleContentView implements ContentViewSettings.ContentView {
     }
 
     private class LiteralTextModel extends AbstractModel.AbstractObjectModel {
-	Literal literal;
-	LiteralTextModel(Literal literal) { this.literal = literal; }
-
 	public Object get() {
-	    return literal.getString();
+	    Object n = cursor.getNode();
+	    if(n instanceof Literal) {
+		//p("ret "+n); 
+		return ((Literal)n).getString(); 
+	    } else { 
+		//p("ret ''"); 
+		return ""; 
+	    }
 	}
 	public void set(Object o) {
+	    Object n = cursor.getNode();
+	    if(!(n instanceof Literal)) return;
+
+	    Literal literal = (Literal)n;
 	    Literal nlit = new PlainLiteral((String)o);
 
 	    Object node = cursor.getRotation().getRotationNode();
@@ -96,6 +105,9 @@ public class SimpleContentView implements ContentViewSettings.ContentView {
 	    graph.rm_111(node, prop, literal);
 	    graph.add(node, prop, nlit);
 
+	    //p("removed "+node+" "+prop+" "+literal);
+	    //p("added "+nlit);
+
 	    int textCursor = cursor.textCursor.getInt();
 	    cursor.set(nlit, prop, node, -1);
 	    cursor.textCursor.setInt(textCursor);
@@ -103,16 +115,42 @@ public class SimpleContentView implements ContentViewSettings.ContentView {
     }
 
     private Lob makeLob(Object node, boolean isPropertyLob) {
-	Model str;
+	if(node instanceof Literal) {
+	    Model nodeModel = new ObjectModel(node);
+
+	    Model str = new LiteralTextModel();
+	    TextModel text = 
+		new TextModel.StringTextModel(str, Theme.getFont());
+
+	    Breaker br = new Breaker(Lob.X, text);
+
+	    Model tc = cursor.textCursor;
+	    Model lineModel = br.lineModel(tc);
+
+	    Sequence seq = br;
+	    seq = new TextCursorLob(br, tc, 
+				    cursor.node.equalsModel(nodeModel));
+	    
+	    Model positionModel = seq.positionModel(Lob.Y, tc); 
+	    Lob l = new TextEditController(seq, text, tc, lineModel);
+	    l = new ViewportLob(Lob.Y, l, positionModel, new FloatModel(.5f));
+
+	    str = new LiteralStringModel(nodeModel);
+	    TextModel ntext = 
+		new TextModel.StringTextModel(str, Theme.getFont());
+	    br = new Breaker(Lob.X, text);
+		
+	    Lob l2 = new TextEditController(br, text, tc, lineModel);
+
+	    Model lobModel = cursor.node.equalsModel(nodeModel).select(new ObjectModel(l), new ObjectModel(l2));
+
+	    return new ModelLob(lobModel);
+	}
 
 	Model nodeModel = new ObjectModel(node);
-
-	if(node instanceof Literal)
-	    str = new LiteralTextModel((Literal)node);
-	else
-	    str = Models.cache(new NodeTextModel(graph, nodeModel, nmap,
-						 textProperties,
-						 defaultProperty));
+	Model str = Models.cache(new NodeTextModel(graph, nodeModel, nmap,
+						   textProperties,
+						   defaultProperty));
 
 	Lob l;
 
@@ -123,13 +161,16 @@ public class SimpleContentView implements ContentViewSettings.ContentView {
 	    Model tc = cursor.textCursor;
 	    tc = cursor.node.equalsModel(nodeModel).select(tc, new IntModel(-1));
 
-	    Sequence seq = new Box(Lob.X, text);
-	    seq = new TextCursorLob(seq, tc, 
+	    Breaker br = new Breaker(Lob.X, text);
+	    Model lineModel = br.lineModel(tc);
+
+	    Sequence seq = br;
+	    seq = new TextCursorLob(br, tc, 
 				    cursor.node.equalsModel(nodeModel));
 	    
-	    Model positionModel = seq.positionModel(Lob.X, tc); 
-	    l = new TextEditController(seq, text, tc, new IntModel(1));
-	    l = new ViewportLob(Lob.X, l, positionModel, new FloatModel(.5f));
+	    Model positionModel = seq.positionModel(Lob.Y, tc); 
+	    l = new TextEditController(seq, text, tc, lineModel);
+	    l = new ViewportLob(Lob.Y, l, positionModel, new FloatModel(.5f));
 	} else {
 	    Model color = 
 		new UniqueColorModel(new ObjectModel(node),
