@@ -64,7 +64,7 @@ public class SimpleSpatialView implements SpatialViewSettings.SpatialView {
 
 	Lob l = contentViewSettings.getLob(node);
 	l = new BuoyConnectorLob(l, node, cs);
-	l = new AlignLob(l, .5f, .5f, .5f, .5f);
+	//l = new AlignLob(l, .5f, .5f, .5f, .5f);
 	l = new ThemeFrame(l);
 	l = new RequestChangeLob(Lob.X, l, Float.NaN, 100, 100);
 	l = new SpatialContextLob(l, cs);
