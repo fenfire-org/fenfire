@@ -84,6 +84,7 @@ public class SimpleSpatialView implements SpatialViewSettings.SpatialView {
 	l = new Frame(l, bgColor, borderColor, 2, 3, false, false, true);
 	l = new RequestChangeLob(Lob.X, l, Float.NaN, 100, 100);
 	l = new SpatialContextLob(l, cs);
+	l = new Stamp(l);
 	cache.put(node, l);
 	return l;
     }

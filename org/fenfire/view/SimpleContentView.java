@@ -138,7 +138,7 @@ public class SimpleContentView implements ContentViewSettings.ContentView {
 	    str = new LiteralStringModel(nodeModel);
 	    TextModel ntext = 
 		new TextModel.StringTextModel(str, Theme.getFont());
-	    br = new Breaker(Lob.X, text);
+	    br = new Breaker(Lob.X, ntext);
 		
 	    Lob l2 = new TextEditController(br, text, tc, lineModel);
 
