@@ -97,43 +97,40 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 
     public Lob getLob(Cursor c) {
 	Object node = c.getNode();
-	if(cache.get(node) != null) return (Lob)cache.get(node);
-
 	Object canvas = graph.find1_X11(CANVAS2D.contains, node);
 
-	Tray tray = new Tray(false);
+	Lob canvasContent = (Lob)cache.get(canvas);
+	
+	if(canvasContent == null) {
+	    Tray tray = new Tray(false);
 
-	Model cs = new IntModel();
+	    Model cs = Parameter.model("cs", new IntModel());
 
-	Lob nl = null;
+	    Lob nl = null;
 
-	for(Iterator i=graph.findN_11X_Iter(canvas, CANVAS2D.contains); 
-	    i.hasNext();) {
+	    for(Iterator i=graph.findN_11X_Iter(canvas, CANVAS2D.contains); 
+		i.hasNext();) {
 
-	    Object n = i.next();
-	    String s = Nodes.toString(n);
-	    Lob l = new Label(s.substring(s.length()-5));
-	    if(n.equals(node)) nl = l;
-	    l = new BuoyConnectorLob(l, n, cs);
+		Object n = i.next();
+		String s = Nodes.toString(n);
+		Lob l = new Label(s.substring(s.length()-5));
+		if(n.equals(node)) nl = l;
+		l = new BuoyConnectorLob(l, n, cs);
 
-	    Model x = getModel(n, CANVAS2D.x), y = getModel(n, CANVAS2D.y);
-	    l = new TranslationLob(l, x, y);
-	    tray.add(l);
+		Model x = getModel(n, CANVAS2D.x), y = getModel(n, CANVAS2D.y);
+		l = new TranslationLob(l, x, y);
+		tray.add(l);
+	    }
+
+	    canvasContent = 
+		new RequestChangeLob(tray, 100, 100, 100, 100, 100, 100);
+
+	    cache.put(node, canvasContent);
 	}
 
-	Model x = getModel(node, CANVAS2D.x), y = getModel(node, CANVAS2D.y);
-	Model middle = new FloatModel(.5f);
-
-	Lob l = tray;
-	/*
-	l = new ViewportLob(Lob.X, l, x.plus(nl.getNatSize(Lob.X)/2f), middle);
-	l = new ViewportLob(Lob.Y, l, y.plus(nl.getNatSize(Lob.Y)/2f), middle);
-	l = new ThemeFrame(l);
-	*/
-	l = new RequestChangeLob(l, 100, 100, 100, 100, 100, 100);
+	Lob l = canvasContent;
 	l = getCoordinateLob(l, c);
-	l = new SpatialContextLob(l, cs);
-	cache.put(node, l);
+	l = new SpatialContextLob(l, (Model)l.getTemplateParameter("cs"));
 	return l;
     }
 
