@@ -64,6 +64,10 @@ public final class SmushedQuadsGraph extends SmushedQuadsGraph_Gen {
 
 	Set subjects = new HashSet();
 	Set pairs    = new HashSet();
+
+	public String toString() {
+	    return "Group@"+System.identityHashCode(this)+"("+canonicalNode+", "+subjects+", "+pairs+")";
+	}
     }
 
     
@@ -121,10 +125,12 @@ public final class SmushedQuadsGraph extends SmushedQuadsGraph_Gen {
 	    add(subj, SHA1SUM, o2, c2);
 	}
 
+	if(dbg) checkAllSmushed();
+
 	unsmushed.add(subj, pred, obj, context);
 	smushed.add(get(subj), get(pred), get(obj), context);
 
-	if(!ifps.contains(pred)) return;
+	if(!ifps.contains(pred)) { if(dbg) checkAllSmushed(); return; }
 
 	if(dbg) p("Smushing:\n    "+subj+" \n    "+pred+" \n    "+obj+
 			   "\n  CURR\n    "+get(subj)+"\n    "+get(pred)+
@@ -155,7 +161,7 @@ public final class SmushedQuadsGraph extends SmushedQuadsGraph_Gen {
 		groupsBySubject.put(subj, g1);
 		g1.subjects.add(subj);
 	    }
-	    if(g1 == pairGroup) return;
+	    if(g1 == pairGroup) { if(dbg) checkAllSmushed(); return; }
 
 	    Group g2 = pairGroup;
 
@@ -182,6 +188,18 @@ public final class SmushedQuadsGraph extends SmushedQuadsGraph_Gen {
 	    remove(g2.canonicalNode);
 	    putAll(g2.subjects);
 
+	    if(dbg) {
+		try {
+		    checkAllSmushed();
+		} catch(Error e) {
+		    p("was trying to add: "+subj+" "+pred+" "+obj);
+		    p("in: "+context);
+		    p("was merging "+g2.canonicalNode+" into "+g1.canonicalNode);
+		    e.printStackTrace();
+		    System.exit(1);
+		}
+	    }
+
 	    for(Iterator i = smushListeners.iterator(); i.hasNext();) {
 		((SmushListener)i.next()).smushed(g2.canonicalNode, 
 						  g1.canonicalNode);
@@ -201,7 +219,7 @@ public final class SmushedQuadsGraph extends SmushedQuadsGraph_Gen {
 
 	if(dbg) p("rm ? "+pred);
 
-	if(!ifps.contains(pred)) return;
+	if(!ifps.contains(pred)) { if(dbg) checkAllSmushed(); return; }
 
 	if(dbg) p("rm...");
 
@@ -209,6 +227,7 @@ public final class SmushedQuadsGraph extends SmushedQuadsGraph_Gen {
 	    // the same triple still exists in a different context,
 	    // so the smushing isn't affected
 	    if(dbg) p("still exists");
+	    if(dbg) checkAllSmushed();
 	    return;
 	}
 
@@ -219,6 +238,15 @@ public final class SmushedQuadsGraph extends SmushedQuadsGraph_Gen {
 	    // the PO was only connected to this one subject
 	    if(dbg) p("just remove po from group");
 	    g.pairs.remove(po);
+	    groupsByPair.remove(po);
+
+	    if(g.pairs.isEmpty()) {
+		// there was only one subject
+		check(g.subjects.size() == 1);
+		groupsBySubject.remove(g.canonicalNode);
+	    }
+
+	    if(dbg) checkAllSmushed();
 	    return;
 	}
 
@@ -243,6 +271,7 @@ public final class SmushedQuadsGraph extends SmushedQuadsGraph_Gen {
 			// both subject and PO, so we need not do anything
 			
 			if(dbg) p("another link exists");
+			if(dbg) checkAllSmushed();
 			return;
 		    }
 
@@ -311,11 +340,20 @@ public final class SmushedQuadsGraph extends SmushedQuadsGraph_Gen {
 	if(g1.canonicalNode==null || g2.canonicalNode==null)
 	    throw new AssertionError(g1.canonicalNode+" "+g2.canonicalNode);
 
+	if(g1.pairs.isEmpty()) {
+	    groupsBySubject.keySet().removeAll(g1.subjects);
+	}
+	if(g2.pairs.isEmpty()) {
+	    groupsBySubject.keySet().removeAll(g2.subjects);
+	}
+
 	if(dbg) p("now replacing -- "+g1.canonicalNode+" "+g2.canonicalNode);
 
 	remove(g.canonicalNode);
 	putAll(g1.subjects);
 	putAll(g2.subjects);
+
+	if(dbg) checkAllSmushed();
     }
     
     
@@ -341,7 +379,7 @@ public final class SmushedQuadsGraph extends SmushedQuadsGraph_Gen {
      *  from the unsmushed to the smushed graph.
      */
     private void put(Object node) {
-	if(dbg) p("PUT");
+	if(dbg) p("PUT "+node);
 
 	for(Iterator i0=unsmushed.findN_AAAX_Iter(); i0.hasNext();) {
 	    Object c = i0.next();
@@ -419,6 +457,85 @@ public final class SmushedQuadsGraph extends SmushedQuadsGraph_Gen {
 	    throw new Error(node+" "+findN_1AXA_Iter(node).next());
 	if(findN_XA1A_Iter(node).hasNext())
 	    throw new Error(node+" "+findN_XA1A_Iter(node).next());
+    }
+
+    /** check that all that can be smushed, is smushed
+     */
+    public void checkAllSmushed() {
+	for(Iterator i=ifps.iterator(); i.hasNext();) {
+	    Object prop = i.next();
+
+	    for(Iterator j=findN_A1XA_Iter(prop); j.hasNext();) {
+		Object obj = j.next();
+		
+		Iterator k = findN_X11A_Iter(prop, obj);
+		k.next(); // there needs to be at least one
+		if(k.hasNext()) throw new Error(k.next()+" "+prop+" "+obj);
+	    }
+	}
+
+	// check that the groups are correct
+	// first, check that the two maps contain the same groups
+
+	Set s1 = new HashSet(groupsBySubject.values());
+	Set s2 = new HashSet(groupsByPair.values());
+
+	check(s1.equals(s2), "by subj: "+groupsBySubject+"; by pair: "+s2);
+
+	// now, check that the maps are internally consistent
+	// and that all the claimed triples are in the graphs
+
+	for(Iterator i=groupsBySubject.keySet().iterator(); i.hasNext();) {
+	    Object subj = i.next();
+	    Group g = (Group)groupsBySubject.get(subj);
+	    check(g.subjects.contains(subj));
+	}
+	for(Iterator i=groupsByPair.keySet().iterator(); i.hasNext();) {
+	    Pair pair = (Pair)i.next();
+	    Group g = (Group)groupsByPair.get(pair);
+	    check(g.pairs.contains(pair), 
+		  g.canonicalNode+" "+pair.p()+" "+pair.o()+" --- "+g.pairs);
+	}
+
+	for(Iterator i=s1.iterator(); i.hasNext();) {
+	    Group g = (Group)i.next();
+	    check(g.subjects.contains(g.canonicalNode));
+	    check(groupsBySubject.get(g.canonicalNode) == g);
+
+	    for(Iterator j=g.subjects.iterator(); j.hasNext();) {
+		check(groupsBySubject.get(j.next()) == g);
+	    }
+	    for(Iterator j=g.pairs.iterator(); j.hasNext();) {
+		Pair p = (Pair)j.next();
+		check(groupsByPair.get(p) == g);
+
+		boolean x = 
+		    smushed.findN_111X_Iter(g.canonicalNode, 
+					    get(p.p()), get(p.o())).hasNext();
+
+		check(x);
+
+		// XXX check unsmushed graph
+	    }
+	}
+    }
+
+    private void check(boolean condition) {
+	if(!condition) throw new Error("assertion failed");
+    }
+
+    private void check(boolean condition, String err) {
+	if(!condition) throw new Error("assertion failed: "+err);
+    }
+	
+
+    public void allSmushedOrDie() {
+	try {
+	    checkAllSmushed();
+	} catch(Error e) {
+	    e.printStackTrace();
+	    System.exit(1);
+	}
     }
 
 

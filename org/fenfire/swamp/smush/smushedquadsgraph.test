@@ -24,6 +24,18 @@ from __future__ import nested_scopes
 
 from org.fenfire.swamp import Nodes, PlainLiteral
 from org.fenfire.swamp.smush import SmushedQuadsGraph
+from org.fenfire.swamp.impl import OneQuadGraph
+
+
+from org.fenfire.swamp.graphtest import *
+from org.fenfire.swamp.observablegraphtest import *
+
+def setUp():
+    qg = SmushedQuadsGraph()
+    g = OneQuadGraph(qg, "foo")
+    setUpGraphtest(g)
+    setUpObservableGraphTest(g)
+
 
 
 class Finder:
@@ -131,3 +143,23 @@ def testMbox():
 
     assert find._11X(n[1], mbox) == find._11X(n[1], sha1) == \
            find._11X(n[1], prop) == []
+
+
+def testStupidUglyBug():
+    g = SmushedQuadsGraph()
+
+    n = [Nodes.get('node:%s' % i) for i in range(10)]
+    c, d = Nodes.N(), Nodes.N()
+
+    # "load context C"
+    g.add(n[1], prop,  n[5], c); g.checkAllSmushed()
+
+    # "remove context C"
+    g.rm_AAA1(c);                g.checkAllSmushed()
+
+    # "load context C" -- replacing n[1] by a lexically smaller node
+    g.add(n[0], prop,  n[5], c); g.checkAllSmushed()
+
+    # "load context D"
+    g.add(n[2], prop,  n[5], d); g.checkAllSmushed()
+

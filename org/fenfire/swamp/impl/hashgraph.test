@@ -31,7 +31,7 @@ def setUp():
     setUpGraphtest(g)
     setUpObservableGraphTest(g)
 
-def testWierd():
+def testWeird():
     g = swamp.impl.HashGraph()
     node = 'test.est'
     g.rm_1AA(node)
