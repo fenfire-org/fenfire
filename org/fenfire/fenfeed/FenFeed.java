@@ -87,7 +87,10 @@ public class FenFeed extends LobLob {
 	Comparator cmp = new PropertyComparator(gm, DATE);
 
 
+	Comparator titleCmp = new PropertyComparator(gm, TITLE);
 	SetModel channels = rlob.setModel(CHANNEL, RDF.type, -1);
+	channels = new SortedSetModel.SortedSetCache(channels, titleCmp);
+	
 
 	final Model selectedChannel = new ObjectModel();
 	final Model selectedItem = new ObjectModel();
