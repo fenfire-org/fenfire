@@ -59,6 +59,15 @@ public class Potions {
 	    }
 	};
 
+    public static Command goTo = new SimpleCommand(new Object[] {
+	"Go to ", node }) {
+
+	    public void execute(Object[] params, Map context) {
+		Cursor cursor = (Cursor)context.get("cursor");
+		cursor.setNode(params[0]);
+	    }
+	};
+
     public static FunctionExpression newNode = 
 	new SimpleFunction(new Object[] { "a new node" }) {
 	    public Object evaluate(Object[] params, Map context) {
