@@ -95,8 +95,10 @@ public class ViewSettings {
     }
 
     protected SpatialView getView(Cursor cursor) {
-	for(Iterator i=types.iterator(); i.hasNext();) {
-	    Type type = (Type)i.next();
+	// use numeric iteration instead of Iterator
+	// because this is called in an inner loop
+	for(int i=0; i<types.size(); i++) {
+	    Type type = (Type)types.get(i);
 	    if(type.contains(cursor))
 		return (SpatialView)viewByType.get(type);
 	}
@@ -104,12 +106,14 @@ public class ViewSettings {
 	return null;
     }
 
+    private Lob errorLob = new org.nongnu.libvob.layout.component.Label("No matching nodeview found!");
+
     public Lob getLob(Cursor cursor) {
 	SpatialView v = getView(cursor);
 	if(v != null)
 	    return v.getLob(cursor);
 	else
-	    return new org.nongnu.libvob.layout.component.Label("No matching nodeview found!");
+	    return errorLob;
     }
 
     public void changeView(Cursor position, int steps) {
