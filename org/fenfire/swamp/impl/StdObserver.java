@@ -80,6 +80,11 @@ public class StdObserver extends AbstractHashtable {
     }
 
 
+    public void addObs(Object s, Object p, Object o, Object context, Obs _) {
+	// ignore the context for now...
+	addObs(s, p, o, _);
+    }
+
     public void addObs(Object s, Object p, Object o, Obs _) {
 	if(_ == null) return;
 	if(s == null || p == null || o == null)

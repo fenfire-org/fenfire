@@ -35,6 +35,34 @@ abstract public class AbstractGraph extends AbstractConstGraph implements Graph 
 	return new StdObservedGraph(this, o);
     }
 
+    public void set1_11X(Object subject, Object predicate, Object object) {
+	rm_11A(subject, predicate);
+	add(subject, predicate, object);
+    }
+
+    public void addAll(Graph g) {
+	for (Iterator i=g.findN_XAA_Iter(); i.hasNext();) {
+	    Object subj = i.next();
+	    for (Iterator j=g.findN_1XA_Iter(subj); j.hasNext();) {
+		Object pred = j.next();
+		for (Iterator k=g.findN_11X_Iter(subj,pred); k.hasNext();){
+		    Object obj = k.next();
+		    add(subj, pred, obj);
+		}
+	    }
+	}
+    }
+
+    protected void checkNode(Object node) {
+	if(!Nodes.isNode(node))
+	    throw new IllegalArgumentException("Not a node: "+node);
+    }
+    
+    protected void checkNodeOrLiteral(Object node) {
+	if(!Nodes.isNode(node) && !(node instanceof Literal))
+	    throw new IllegalArgumentException("Not a node or literal: "+node);
+    }
+
     public void rm_11A(Object e0,Object e1) {
 	Iterator i = findN_11X_Iter(e0, e1);
 	ArrayList l = new ArrayList();

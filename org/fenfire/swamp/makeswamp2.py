@@ -65,60 +65,85 @@ quad_spec.rm_patterns = [
 #                        [p+'1' for p in spec.rm_patterns]
 
 
-def arguments(p):
-    n = len([x for x in p if x=='1'])
-    return ', '.join(['Object e%s' % i for i in range(n)])
+ARG = ['subj', 'pred', 'obj', 'context']
 
-def argumentsObs(p):
-    n = len([x for x in p if x=='1'])
-    return ', '.join(['Object e%s' % i for i in range(n)]+["Obs obs"])
 
-def callArguments(p):
-    n = len([x for x in p if x=='1'])
-    return ', '.join(['e%s' % i for i in range(n)])
+def arguments(p, additionalArgs=[]):
+    """
+    Return the arguments in the argument list of a function
+    with a particular pattern.
 
-def callArguments2(p):
-    return ', '.join(['e%s' % i for i in range(len(p)) if p[i]=='1'])
+    Examples:
+        arguments('11X') == 'Object subj, Object pred'
+        arguments('1X11') == 'Object subj, Object obj, Object context'
 
-def callArgumentsObs(p):
-    n = len([x for x in p if x=='1'])
-    return ', '.join(['e%s' % i for i in range(n)]+["obs"])
+    additionalArgs -- List of additional arguments the function should have.
 
-def callArgumentsQuadObs(p):
-    n = len([x for x in p if x=='1'])
-    return ', '.join(['e%s' % i for i in range(n)]+["context", "obs"])
+    Example:
+        arguments('1X1A', ['Obs obs']) == 'Object subj, Object obj, Obs obs'
+    """
+    
+    n = [i for i in range(len(p)) if p[i]=='1']
+    return ', '.join(['Object %s' % ARG[i] for i in n]+additionalArgs)
 
-def callArgumentsNulls(p):
-    n = len([x for x in p if x=='1'])
-    args = ['e%s' % i for i in range(n)] + ['null']*(len(p)-n)
-    return ', '.join(args)
+def callArgs(p, additionalArgs=[], null=None, fill=None):
+    """
+    Return the arguments list for calling a function
+    with a particular pattern.
 
-def callArgumentsNulls2(p):
-    n = len([x for x in p if x=='1'])
-    l = ['e%s' % i for i in range(len(p)) if p[i]=='1'] + ['null']*(len(p)-n-1)
-    return ', '.join(l)
+    Examples:
+        callArgs('11X') == 'subj, pred'
+        callArgs('1X11') == 'subj, obj, context'
 
-def callArgumentsAnys(p):
-    n = len([x for x in p if x=='1'])
-    args = ['e%s' % i for i in range(n)] + ['"ANY"']*(len(p)-n-1)
-    return ', '.join(args)
+    additionalArgs -- List of additional arguments the function should have.
 
-def callArgumentsAnyNulls(p):
-    n = len([x for x in p if x=='1'])
-    args = ['e%s' % i for i in range(n)] + ['null']*(len(p)-n-1)
-    return ', '.join(args)
+        Example:
+            callArgs('1X1A', ['obs']) == 'subj, obj, obs'
 
-def obsArguments(p):
+    In addition to the basic way, specifying the pattern and optionally
+    the additional arguments, there are two additional ways to use
+    this function.
+
+    First, if you set 'null' to a string, it will be used in the place
+    of omitted parameters. Examples:
+
+        callArgs('111', null='null') == 'subj, pred, obj'
+        callArgs('1X1A', null='null') == 'subj, null, obj, null'
+        callArgs('11X', null='WILDCARD') == 'subj, pred, WILDCARD'
+
+    This is used to call methods that take a whole triple/quad.
+
+    Second, if you set 'fill' to a string, the argument list
+    will be padded with copies of 'fill' to have length (len(p)-1). Examples:
+
+        callArgs('11X', fill='null') == 'subj, pred'
+        callArgs('1XA', fill='null') == 'subj, null'
+        callArgs('AX1', fill='null') == 'obj, null'
+        callArgs('AX1A', fill='null') == 'obj, null, null'
+
+    This is used to call methods in the indices that take a fixed-length
+    'key' of length (len(p)-1).
+
+    The 'null' and 'fill' parameters cannot be specified both.
+    """
+
+    if null!=None and fill!=None:
+        raise Error('Either null or fill can be specified, but not both')
+    
     args = []
-    i = 0
-    for c in p[:3]:
-        if c == '1':
-            args.append('e%s' % i)
-            i = i+1
-        elif c == 'X' or c == 'A':
-            args.append('observer.WILDCARD')
+    for i in range(len(p)):
+        if p[i] == '1':
+            args.append(ARG[i])
+        elif null != None:
+            args.append(null)
+        else:
+            pass
 
-    return ', '.join(args)
+    if fill != None:
+        args += [fill] * (len(p)-len(args)-1)
+
+    return ', '.join(args+additionalArgs)
+
 
 
 # def constGraph(spec):
@@ -148,11 +173,11 @@ def obsArguments(p):
 
 #     for p in spec.find_patterns:
 #         s += 'public Object find1_%s(%s) {\n' % (p, arguments(p))
-#         s += '    return find1_%s(%s, null);\n' % (p, callArguments(p))
+#         s += '    return find1_%s(%s, null);\n' % (p, callArgs(p))
 #         s += '}\n'
         
 #         s += 'public Iterator findN_%s_Iter(%s) {\n' % (p, arguments(p))
-#         s += '    return findN_%s_Iter(%s, null);\n' % (p, callArguments(p))
+#         s += '    return findN_%s_Iter(%s, null);\n' % (p, callArgs(p))
 #         s += '}\n'
 
 #     return spec.abstractConstGraphTemplate % s
@@ -164,53 +189,57 @@ def simpleHashGraph(spec):
     for p in spec.find_patterns:
         s += 'Map map_%s = new HashMap();\n' % p
 
-        s += 'public Object find1_%s(%s) {\n' % (p, argumentsObs(p))
-        s += '    Iterator i = findN_%s_Iter(%s);\n' % (p, callArgumentsObs(p))
+        s += 'public Object find1_%s(%s) {\n' % (p, arguments(p, ['Obs obs']))
+        s += '    Iterator i = findN_%s_Iter(%s);\n' % \
+                                                (p, callArgs(p, ['obs']))
         s += '    if(!i.hasNext()) return null;\n'
         s += '    Object result = i.next();\n'
         s += '    if(i.hasNext())\n'
-        s += '        throw new NotUniqueError(%s);\n' % callArgumentsNulls(p)
+        s += '        throw new NotUniqueError(%s);\n' % \
+                                                callArgs(p, null='null')
         s += '    return result;\n'
         s += '}\n'
         
-        s += 'public Iterator findN_%s_Iter(%s){\n' % (p, argumentsObs(p))
+        s += 'public Iterator findN_%s_Iter(%s){\n' % \
+                                               (p, arguments(p, ['Obs obs']))
         s += '    if(obs != null)\n'
-        s += '        observer.addObs(%s, obs);\n' % obsArguments(p)
+        s += '        observer.addObs(%s);\n' % \
+                               callArgs(p, ['obs'], null='observer.WILDCARD')
         s += '\n'
-        s += '    Set s = getSet_%s(%s);\n' % (p, callArguments(p))
+        s += '    Set s = getSet_%s(%s);\n' % (p, callArgs(p))
         s += '    return s.iterator();\n'
         s += '}\n'
 
         s += 'public Set getSet_%s(%s) {\n' % (p, arguments(p))
         s += '    Map m = map_%s;\n' % p
-        s += '    Key key = new Key(%s);\n' % callArgumentsAnys(p)
+        s += '    Key key = new Key(%s);\n' % callArgs(p, fill='"ANY"')
         s += '    if(!m.containsKey(key)) m.put(key, new HashSet());\n'
         s += '    return (Set)m.get(key);\n'
         s += '}\n'
 
 
     s += 'public void rm_%s(%s) {\n' % (spec.one, arguments(spec.one))
-    s += '    checkNode(e0); checkNode(e1); checkNodeOrLiteral(e2);\n'
+    s += '    checkNode(subj); checkNode(pred); checkNodeOrLiteral(obj);\n'
 
     for p in spec.find_patterns:
         toremove = p.index('X')
-        s += '    getSet_%s(%s).remove(e%s);\n' % (p, callArguments2(p),
-                                                   toremove)
+        s += '    getSet_%s(%s).remove(%s);\n' % (p, callArgs(p),
+                                                  ARG[toremove])
 
     s += '    \n'
-    s += '    observer.triggerObs(-1, e0, e1, e2);\n'
+    s += '    observer.triggerObs(-1, subj, pred, obj);\n'
     s += '}\n'
 
 
     s += 'public void add(%s) {\n' % arguments(spec.one)
-    s += '    checkNode(e0); checkNode(e1); checkNodeOrLiteral(e2);\n'
+    s += '    checkNode(subj); checkNode(pred); checkNodeOrLiteral(obj);\n'
 
     for p in spec.find_patterns:
         toremove = p.index('X')
-        s += '    getSet_%s(%s).add(e%s);\n' % (p, callArguments2(p), toremove)
+        s += '    getSet_%s(%s).add(%s);\n' % (p, callArgs(p), ARG[toremove])
 
     s += '    \n'
-    s += '    observer.triggerObs(1, e0, e1, e2);\n'
+    s += '    observer.triggerObs(1, subj, pred, obj);\n'
     s += '}\n'
 
 
@@ -223,48 +252,52 @@ def hashGraph(spec):
     for p in spec.find_patterns:
         s += 'PairMap map_%s = new PairMap();\n' % p
 
-        s += 'public Object find1_%s(%s) {\n' % (p, argumentsObs(p))
+        s += 'public Object find1_%s(%s) {\n' % (p, arguments(p, ['Obs obs']))
         s += '    if(obs != null)\n'
-        s += '        observer.addObs(%s, obs);\n' % obsArguments(p)
+        s += '        observer.addObs(%s);\n' % \
+                                callArgs(p, ['obs'], null='observer.WILDCARD')
         s += '\n'
         s += '    try {\n'
-        s += '        return map_%s.get(%s);\n' % (p, callArgumentsAnyNulls(p))
+        s += '        return map_%s.get(%s);\n' % (p, callArgs(p, fill='null'))
         s += '    } catch(PairMap.NotUniqueException _) {\n'
-        s += '        throw new NotUniqueError(%s);\n' % callArgumentsNulls(p)
+        s += '        throw new NotUniqueError(%s);\n' % \
+                                                  callArgs(p, null='null')
         s += '    }\n'
         s += '}\n'
         
-        s += 'public Iterator findN_%s_Iter(%s){\n' % (p, argumentsObs(p))
+        s += 'public Iterator findN_%s_Iter(%s){\n' % \
+                                                (p, arguments(p, ['Obs obs']))
         s += '    if(obs != null)\n'
-        s += '        observer.addObs(%s, obs);\n' % obsArguments(p)
+        s += '        observer.addObs(%s);\n' % \
+                                callArgs(p, ['obs'], null='observer.WILDCARD')
         s += '\n'
-        s += '    return map_%s.getIter(%s);\n' % (p, callArgumentsAnyNulls(p))
+        s += '    return map_%s.getIter(%s);\n' % (p, callArgs(p, fill='null'))
         s += '}\n'
 
 
     s += 'public void rm_%s(%s) {\n' % (spec.one, arguments(spec.one))
-    s += '    checkNode(e0); checkNode(e1); checkNodeOrLiteral(e2);\n'
+    s += '    checkNode(subj); checkNode(pred); checkNodeOrLiteral(obj);\n'
 
     for p in spec.find_patterns:
         toremove = p.index('X')
-        s += '    map_%s.rm(%s, e%s);\n' % (p, callArgumentsNulls2(p),
-                                            toremove)
+        s += '    map_%s.rm(%s, %s);\n' % (p, callArgs(p, fill='null'),
+                                           ARG[toremove])
 
     s += '    \n'
-    s += '    observer.triggerObs(-1, e0, e1, e2);\n'
+    s += '    observer.triggerObs(-1, subj, pred, obj);\n'
     s += '}\n'
 
 
     s += 'public void add(%s) {\n' % arguments(spec.one)
-    s += '    checkNode(e0); checkNode(e1); checkNodeOrLiteral(e2);\n'
+    s += '    checkNode(subj); checkNode(pred); checkNodeOrLiteral(obj);\n'
 
     for p in spec.find_patterns:
         toremove = p.index('X')
-        s += '    map_%s.add(%s, e%s);\n' % (p, callArgumentsNulls2(p),
-                                             toremove)
+        s += '    map_%s.add(%s, %s);\n' % (p, callArgs(p, fill='null'),
+                                            ARG[toremove])
 
     s += '    \n'
-    s += '    observer.triggerObs(1, e0, e1, e2);\n'
+    s += '    observer.triggerObs(1, subj, pred, obj);\n'
     s += '}\n'
 
 
@@ -277,19 +310,20 @@ def quadAdapterGraph(name, findAll):
 
     if findAll:
         c = 'A'
-        callArg = callArgumentsObs
+        callArg = lambda p: callArgs(p, ['obs'])
     else:
         c = '1'
-        callArg = callArgumentsQuadObs
+        callArg = lambda p: callArgs(p, ['context', 'obs'])
 
     s = ""
 
     for p in spec.find_patterns:
-        s += 'public Object find1_%s(%s) {\n' % (p, argumentsObs(p))
+        s += 'public Object find1_%s(%s) {\n' % (p, arguments(p, ['Obs obs']))
         s += '    return graph.find1_%s%s(%s);\n' % (p, c, callArg(p))
         s += '}\n'
         
-        s += 'public Iterator findN_%s_Iter(%s){\n' % (p, argumentsObs(p))
+        s += 'public Iterator findN_%s_Iter(%s){\n' % \
+                                                (p, arguments(p, ['Obs obs']))
         s += '    return graph.findN_%s%s_Iter(%s);\n' % (p, c, callArg(p))
         s += '}\n'
 
@@ -318,54 +352,26 @@ spec.simpleHashGraphTemplate = """
 	private StdObserver observer = new StdObserver();
 
         protected class Key {
-            Object e1, e2;
-            public Key(Object e1, Object e2) {
-                this.e1 = e1; this.e2 = e2;
+            Object k1, k2;
+            public Key(Object k1, Object k2) {
+                this.k1 = k1; this.k2 = k2;
             }
             public boolean equals(Object o) {
                 if(!(o instanceof Key)) return false;
                 Key t=(Key)o;
-                return e1.equals(t.e1) && e2.equals(t.e2);
+                return k1.equals(t.k1) && k2.equals(t.k2);
             }
             public int hashCode() {
-                return e1.hashCode() + 127*e2.hashCode();
+                return k1.hashCode() + 127*k2.hashCode();
             }
         }
 
         %s
 
-	public void set1_11X(Object subject, Object predicate, Object object) {
-	    rm_11A(subject, predicate);
-	    add(subject, predicate, object);
+	public boolean contains(Object subj, Object pred, Object obj, Obs o) {
+	    if(o != null) observer.addObs(subj, pred, obj, o);
+            return getSet_11X(subj, pred).contains(obj);
 	}
-
-	public boolean contains(Object e0, Object e1, Object e2, Obs o) {
-	    if(o != null) observer.addObs(e0, e1, e2, o);
-            return getSet_11X(e0, e1).contains(e2);
-	}
-
-        public void addAll(Graph g) {
-	    for (Iterator i=g.findN_XAA_Iter(); i.hasNext();) {
-                Object subj = i.next();
-                for (Iterator j=g.findN_1XA_Iter(subj); j.hasNext();) {
-                    Object pred = j.next();
-		    for (Iterator k=g.findN_11X_Iter(subj,pred); k.hasNext();){
-		        Object obj = k.next();
-                        add(subj, pred, obj);
-                    }
-                }
-            }
-        }
-
-        protected void checkNode(Object node) {
-            if(!Nodes.isNode(node))
-                throw new IllegalArgumentException("Not a node: "+node);
-        }
-
-        protected void checkNodeOrLiteral(Object node) {
-            if(!Nodes.isNode(node) && !(node instanceof Literal))
-                throw new IllegalArgumentException("Not a node or literal: "+node);
-        }
     }
 """
 
@@ -380,38 +386,10 @@ spec.hashGraphTemplate = """
 
         %s
 
-	public void set1_11X(Object subject, Object predicate, Object object) {
-	    rm_11A(subject, predicate);
-	    add(subject, predicate, object);
+	public boolean contains(Object subj, Object pred, Object obj, Obs o) {
+	    if(o != null) observer.addObs(subj, pred, obj, o);
+            return map_11X.contains(subj, pred, obj);
 	}
-
-	public boolean contains(Object e0, Object e1, Object e2, Obs o) {
-	    if(o != null) observer.addObs(e0, e1, e2, o);
-            return map_11X.contains(e0, e1, e2);
-	}
-
-        public void addAll(Graph g) {
-	    for (Iterator i=g.findN_XAA_Iter(); i.hasNext();) {
-                Object subj = i.next();
-                for (Iterator j=g.findN_1XA_Iter(subj); j.hasNext();) {
-                    Object pred = j.next();
-		    for (Iterator k=g.findN_11X_Iter(subj,pred); k.hasNext();){
-		        Object obj = k.next();
-                        add(subj, pred, obj);
-                    }
-                }
-            }
-        }
-
-        protected void checkNode(Object node) {
-            if(!Nodes.isNode(node))
-                throw new IllegalArgumentException("Not a node: "+node);
-        }
-
-        protected void checkNodeOrLiteral(Object node) {
-            if(!Nodes.isNode(node) && !(node instanceof Literal))
-                throw new IllegalArgumentException("Not a node or literal: "+node);
-        }
     }
 """
 
@@ -425,25 +403,25 @@ quad_spec.simpleHashGraphTemplate = """
 	private StdObserver observer = new StdObserver();
 
         protected class Key {
-            Object e1, e2, e3;
-            public Key(Object e1, Object e2, Object e3) {
-                this.e1 = e1; this.e2 = e2; this.e3 = e3;
+            Object k1, k2, k3;
+            public Key(Object k1, Object k2, Object k3) {
+                this.k1 = k1; this.k2 = k2; this.k3 = k3;
             }
             public boolean equals(Object o) {
                 if(!(o instanceof Key)) return false;
                 Key t=(Key)o;
-                return e1.equals(t.e1) && e2.equals(t.e2) && e3.equals(t.e3);
+                return k1.equals(t.k1) && k2.equals(t.k2) && k3.equals(t.k3);
             }
             public int hashCode() {
-                return e1.hashCode() + 127*e2.hashCode() + 2047*e3.hashCode();
+                return k1.hashCode() + 127*k2.hashCode() + 2047*k3.hashCode();
             }
         }
 
         %s
 
-	public boolean contains(Object e0, Object e1, Object e2, Object e3, Obs o) {
-	    if(o != null) observer.addObs(e0, e1, e2, o);
-            return getSet_11X1(e0, e1, e3).contains(e2);
+	public boolean contains(Object subj, Object pred, Object obj, Object context, Obs o) {
+	    if(o != null) observer.addObs(subj, pred, obj, o);
+            return getSet_11X1(subj, pred, context).contains(obj);
 	}
 
         protected void checkNode(Object node) {
@@ -469,9 +447,9 @@ quad_spec.hashGraphTemplate = """
 
         %s
 
-	public boolean contains(Object e0, Object e1, Object e2, Object e3, Obs o) {
-	    if(o != null) observer.addObs(e0, e1, e2, o);
-            return map_11X1.contains(e0, e1, e3, e2);
+	public boolean contains(Object subj, Object pred, Object obj, Object context, Obs o) {
+	    if(o != null) observer.addObs(subj, pred, obj, o);
+            return map_11X1.contains(subj, pred, context, obj);
 	}
 
         protected void checkNode(Object node) {
@@ -502,29 +480,12 @@ public class %s extends AbstractGraph {
     }
 
     public Obs getObserver() { return graph.getObserver(); }
-    public boolean contains(Object e0, Object e1, Object e2) {
-        return graph.contains(e0,e1,e2, context); }
-    public boolean contains(Object e0, Object e1, Object e2, Obs o) {
-        return graph.contains(e0,e1,e2, context, o); }
-    public void set1_11X(Object subject, Object predicate, Object object) {
-        graph.set1_11XA(subject, predicate, object);
-        graph.add(subject, predicate, object, context);
-    }
+    public boolean contains(Object subj, Object pred, Object obj) {
+        return graph.contains(subj,pred,obj, context); }
+    public boolean contains(Object subj, Object pred, Object obj, Obs o) {
+        return graph.contains(subj,pred,obj, context, o); }
     public void add(Object subject, Object predicate, Object object) {
         graph.add(subject, predicate, object, context);     }
-
-    public void addAll(Graph g) {
-       for (Iterator i=g.findN_XAA_Iter(); i.hasNext();) {
-           Object subj = i.next();
-           for (Iterator j=g.findN_1XA_Iter(subj); j.hasNext();) {
-               Object pred = j.next();
-               for (Iterator k=g.findN_11X_Iter(subj,pred); k.hasNext();){
-                   Object obj = k.next();
-                   graph.add(subj, pred, obj, context);
-               }
-           }
-       }
-    }
 
     %s
 }
