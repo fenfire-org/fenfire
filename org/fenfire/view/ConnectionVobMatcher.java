@@ -181,6 +181,41 @@ private static final String rcsid = "$Id: ConnectionVobMatcher.java,v 1.1 2003/0
 	throw new NoSuchElementException();
     }
 
+    /** Iterate through the links in a given direction with a given link key.
+     *  For example:
+     *  <pre>
+     *  int cs = -1;
+     *  while((cs = matcher.getNextLinkedCS(from, dir, linkKey, cs)) >= 0) {
+     *      Object key = matcher.getKey(cs);
+     *      ...
+     *  }
+     *  </pre>
+     */
+    public int getNextLinkedCS(int from, int dir, Object linkKey, 
+			       int lastLinkedCS) {
+	int i=0;
+
+	if(dir > 0) {
+	    if(lastLinkedCS >= 0)
+		for(; i<size; i++)
+		    if(cs2[i] == lastLinkedCS) { i++; break; }
+
+	    for(; i<size; i++)
+		if(cs1[i] == from && linkkey[i].equals(linkKey)) 
+		    return cs2[i];
+	} else {
+	    if(lastLinkedCS >= 0)
+		for(; i<size; i++)
+		    if(cs1[i] == lastLinkedCS) { i++; break; }
+
+	    for(; i<size; i++)
+		if(cs2[i] == from && linkkey[i].equals(linkKey)) 
+		    return cs1[i];
+	}
+
+	return -1;
+    }
+
     // the link traversing -- XXX not fast
 
     protected void traverse(int parent, int cs, 
