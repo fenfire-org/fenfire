@@ -72,13 +72,35 @@ public class SimpleContentView implements ContentViewSettings.ContentView {
 	return l;
     }
 
+    private class LiteralTextModel extends AbstractModel.AbstractObjectModel {
+	Literal literal;
+	LiteralTextModel(Literal literal) { this.literal = literal; }
+
+	public Object get() {
+	    return literal.getString();
+	}
+	public void set(Object o) {
+	    Literal nlit = new PlainLiteral((String)o);
+
+	    Object node = cursor.getRotation().getRotationNode();
+	    Object prop = cursor.getRotation().getRotationProperty();
+
+	    graph.rm_111(node, prop, literal);
+	    graph.add(node, prop, nlit);
+
+	    int textCursor = cursor.textCursor.getInt();
+	    cursor.set(nlit, prop, node, -1);
+	    cursor.textCursor.setInt(textCursor);
+	}
+    }
+
     private Lob makeLob(Object node, boolean isPropertyLob) {
 	Model str;
 
 	Model nodeModel = new ObjectModel(node);
 
 	if(node instanceof Literal)
-	    str = new ObjectModel(((Literal)node).getString());
+	    str = new LiteralTextModel((Literal)node);
 	else
 	    str = Models.cache(new NodeTextModel(graph, nodeModel, nmap,
 						 textProperties,
