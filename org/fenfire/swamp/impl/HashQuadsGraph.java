@@ -459,63 +459,123 @@ public void rm_1111(Object subj, Object pred, Object obj, Object context) {
 
     iter = findN_111X_Iter(subj, pred, obj);
     if(!iter.hasNext() ||
-       (iter.next().equals(context) && !iter.hasNext()))
+       (iter.next().equals(context) && !iter.hasNext())) {
         map_X11A.rm(pred, obj, null, subj);
+    }
 
     iter = findN_111X_Iter(subj, pred, obj);
     if(!iter.hasNext() ||
-       (iter.next().equals(context) && !iter.hasNext()))
+       (iter.next().equals(context) && !iter.hasNext())) {
         map_1X1A.rm(subj, obj, null, pred);
+    }
 
     iter = findN_111X_Iter(subj, pred, obj);
     if(!iter.hasNext() ||
-       (iter.next().equals(context) && !iter.hasNext()))
+       (iter.next().equals(context) && !iter.hasNext())) {
         map_11XA.rm(subj, pred, null, obj);
+    }
 
     iter = findN_11XA_Iter(subj, pred);
     if(!iter.hasNext() ||
-       (iter.next().equals(obj) && !iter.hasNext()))
+       (iter.next().equals(obj) && !iter.hasNext())) {
+    iter = findN_111X_Iter(subj, pred, obj);
+    if(!iter.hasNext() ||
+       (iter.next().equals(context) && !iter.hasNext())) {
         map_X1AA.rm(pred, null, null, subj);
+    }
+    }
 
     iter = findN_11XA_Iter(subj, pred);
     if(!iter.hasNext() ||
-       (iter.next().equals(obj) && !iter.hasNext()))
+       (iter.next().equals(obj) && !iter.hasNext())) {
+    iter = findN_111X_Iter(subj, pred, obj);
+    if(!iter.hasNext() ||
+       (iter.next().equals(context) && !iter.hasNext())) {
         map_1XAA.rm(subj, null, null, pred);
+    }
+    }
 
     iter = findN_1X1A_Iter(subj, obj);
     if(!iter.hasNext() ||
-       (iter.next().equals(pred) && !iter.hasNext()))
+       (iter.next().equals(pred) && !iter.hasNext())) {
+    iter = findN_111X_Iter(subj, pred, obj);
+    if(!iter.hasNext() ||
+       (iter.next().equals(context) && !iter.hasNext())) {
         map_1AXA.rm(subj, null, null, obj);
+    }
+    }
 
     iter = findN_1X1A_Iter(subj, obj);
     if(!iter.hasNext() ||
-       (iter.next().equals(pred) && !iter.hasNext()))
+       (iter.next().equals(pred) && !iter.hasNext())) {
+    iter = findN_111X_Iter(subj, pred, obj);
+    if(!iter.hasNext() ||
+       (iter.next().equals(context) && !iter.hasNext())) {
         map_XA1A.rm(obj, null, null, subj);
+    }
+    }
 
     iter = findN_X11A_Iter(pred, obj);
     if(!iter.hasNext() ||
-       (iter.next().equals(subj) && !iter.hasNext()))
+       (iter.next().equals(subj) && !iter.hasNext())) {
+    iter = findN_111X_Iter(subj, pred, obj);
+    if(!iter.hasNext() ||
+       (iter.next().equals(context) && !iter.hasNext())) {
         map_AX1A.rm(obj, null, null, pred);
+    }
+    }
 
     iter = findN_X11A_Iter(pred, obj);
     if(!iter.hasNext() ||
-       (iter.next().equals(subj) && !iter.hasNext()))
+       (iter.next().equals(subj) && !iter.hasNext())) {
+    iter = findN_111X_Iter(subj, pred, obj);
+    if(!iter.hasNext() ||
+       (iter.next().equals(context) && !iter.hasNext())) {
         map_A1XA.rm(pred, null, null, obj);
+    }
+    }
 
     iter = findN_1XAA_Iter(subj);
     if(!iter.hasNext() ||
-       (iter.next().equals(pred) && !iter.hasNext()))
+       (iter.next().equals(pred) && !iter.hasNext())) {
+    iter = findN_11XA_Iter(subj, pred);
+    if(!iter.hasNext() ||
+       (iter.next().equals(obj) && !iter.hasNext())) {
+    iter = findN_111X_Iter(subj, pred, obj);
+    if(!iter.hasNext() ||
+       (iter.next().equals(context) && !iter.hasNext())) {
         map_XAAA.rm(null, null, null, subj);
+    }
+    }
+    }
 
     iter = findN_X1AA_Iter(pred);
     if(!iter.hasNext() ||
-       (iter.next().equals(subj) && !iter.hasNext()))
+       (iter.next().equals(subj) && !iter.hasNext())) {
+    iter = findN_11XA_Iter(subj, pred);
+    if(!iter.hasNext() ||
+       (iter.next().equals(obj) && !iter.hasNext())) {
+    iter = findN_111X_Iter(subj, pred, obj);
+    if(!iter.hasNext() ||
+       (iter.next().equals(context) && !iter.hasNext())) {
         map_AXAA.rm(null, null, null, pred);
+    }
+    }
+    }
 
     iter = findN_XA1A_Iter(obj);
     if(!iter.hasNext() ||
-       (iter.next().equals(subj) && !iter.hasNext()))
+       (iter.next().equals(subj) && !iter.hasNext())) {
+    iter = findN_1X1A_Iter(subj, obj);
+    if(!iter.hasNext() ||
+       (iter.next().equals(pred) && !iter.hasNext())) {
+    iter = findN_111X_Iter(subj, pred, obj);
+    if(!iter.hasNext() ||
+       (iter.next().equals(context) && !iter.hasNext())) {
         map_AAXA.rm(null, null, null, obj);
+    }
+    }
+    }
 
     map_X111.rm(pred, obj, context, subj);
 
@@ -525,55 +585,85 @@ public void rm_1111(Object subj, Object pred, Object obj, Object context) {
 
     iter = findN_11X1_Iter(subj, pred, context);
     if(!iter.hasNext() ||
-       (iter.next().equals(obj) && !iter.hasNext()))
+       (iter.next().equals(obj) && !iter.hasNext())) {
         map_X1A1.rm(pred, context, null, subj);
+    }
 
     iter = findN_11X1_Iter(subj, pred, context);
     if(!iter.hasNext() ||
-       (iter.next().equals(obj) && !iter.hasNext()))
+       (iter.next().equals(obj) && !iter.hasNext())) {
         map_1XA1.rm(subj, context, null, pred);
+    }
 
     iter = findN_1X11_Iter(subj, obj, context);
     if(!iter.hasNext() ||
-       (iter.next().equals(pred) && !iter.hasNext()))
+       (iter.next().equals(pred) && !iter.hasNext())) {
         map_1AX1.rm(subj, context, null, obj);
+    }
 
     iter = findN_1X11_Iter(subj, obj, context);
     if(!iter.hasNext() ||
-       (iter.next().equals(pred) && !iter.hasNext()))
+       (iter.next().equals(pred) && !iter.hasNext())) {
         map_XA11.rm(obj, context, null, subj);
+    }
 
     iter = findN_X111_Iter(pred, obj, context);
     if(!iter.hasNext() ||
-       (iter.next().equals(subj) && !iter.hasNext()))
+       (iter.next().equals(subj) && !iter.hasNext())) {
         map_AX11.rm(obj, context, null, pred);
+    }
 
     iter = findN_X111_Iter(pred, obj, context);
     if(!iter.hasNext() ||
-       (iter.next().equals(subj) && !iter.hasNext()))
+       (iter.next().equals(subj) && !iter.hasNext())) {
         map_A1X1.rm(pred, context, null, obj);
+    }
 
     iter = findN_1XA1_Iter(subj, context);
     if(!iter.hasNext() ||
-       (iter.next().equals(pred) && !iter.hasNext()))
+       (iter.next().equals(pred) && !iter.hasNext())) {
+    iter = findN_11X1_Iter(subj, pred, context);
+    if(!iter.hasNext() ||
+       (iter.next().equals(obj) && !iter.hasNext())) {
         map_XAA1.rm(context, null, null, subj);
+    }
+    }
 
     iter = findN_X1A1_Iter(pred, context);
     if(!iter.hasNext() ||
-       (iter.next().equals(subj) && !iter.hasNext()))
+       (iter.next().equals(subj) && !iter.hasNext())) {
+    iter = findN_11X1_Iter(subj, pred, context);
+    if(!iter.hasNext() ||
+       (iter.next().equals(obj) && !iter.hasNext())) {
         map_AXA1.rm(context, null, null, pred);
+    }
+    }
 
     iter = findN_XA11_Iter(obj, context);
     if(!iter.hasNext() ||
-       (iter.next().equals(subj) && !iter.hasNext()))
+       (iter.next().equals(subj) && !iter.hasNext())) {
+    iter = findN_1X11_Iter(subj, obj, context);
+    if(!iter.hasNext() ||
+       (iter.next().equals(pred) && !iter.hasNext())) {
         map_AAX1.rm(context, null, null, obj);
+    }
+    }
 
     map_111X.rm(subj, pred, obj, context);
 
     iter = findN_XAA1_Iter(context);
     if(!iter.hasNext() ||
-       (iter.next().equals(subj) && !iter.hasNext()))
+       (iter.next().equals(subj) && !iter.hasNext())) {
+    iter = findN_1XA1_Iter(subj, context);
+    if(!iter.hasNext() ||
+       (iter.next().equals(pred) && !iter.hasNext())) {
+    iter = findN_11X1_Iter(subj, pred, context);
+    if(!iter.hasNext() ||
+       (iter.next().equals(obj) && !iter.hasNext())) {
         map_AAAX.rm(null, null, null, context);
+    }
+    }
+    }
     
     observer.triggerObs(-1, subj, pred, obj);
 }

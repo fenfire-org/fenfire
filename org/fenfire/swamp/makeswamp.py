@@ -351,18 +351,27 @@ def hashGraph(spec):
             s += '    map_%s.rm(%s, %s);\n' % (p, callIndexArgs(p),
                                                ARGS[toremove])
         else:
-            a = p.index('A')
-            q = [x for x in p]
-            q[toremove] = '1'
-            q[a] = 'X'
-            q = ''.join(q)
+            for a in range(len(p)):
+                if p[a] == 'A':
+                    def f(x):
+                        if x == 'A': return 'A'
+                        else: return '1'
+                        
+                    q = ['1' for i in range(a)] + ['X'] + [f(x) for x in p[a+1:]]
+                    #q[toremove] = '1'
+                    #q[a] = 'X'
+                    q = ''.join(q)
 
-            s += '    iter = findN_%s_Iter(%s);\n' % (q, callArgs(q))
-            s += '    if(!iter.hasNext() ||\n'
-            s += '       (iter.next().equals(%s) && !iter.hasNext()))\n' % \
-                                                                    (ARGS[a])
+                    s += '    iter = findN_%s_Iter(%s);\n' % (q, callArgs(q))
+                    s += '    if(!iter.hasNext() ||\n'
+                    s += '       (iter.next().equals(%s) && !iter.hasNext())) {\n' % (ARGS[a])
+
             s += '        map_%s.rm(%s, %s);\n' % (p, callIndexArgs(p),
                                                   ARGS[toremove])
+
+            for a in range(len(p)):
+                if p[a] == 'A':
+                    s += '    }\n'
 
     s += '    \n'
     s += '    observer.triggerObs(-1, subj, pred, obj);\n'

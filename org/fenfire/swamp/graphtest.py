@@ -134,3 +134,16 @@ def test_Graph_ManyTriples():
         except:
             print (s,p,o)
             assert 0
+
+
+def test_Graph_removeUpdate():
+    n = _node
+
+    graph.add(n[0], n[1], n[2])
+    graph.add(n[0], n[1], n[3])
+
+    assert graph.find1_XAA() == n[0]
+    graph.rm_111(n[0], n[1], n[2])
+    assert graph.find1_XAA() == n[0]
+    graph.rm_111(n[0], n[1], n[3])
+    assert graph.find1_XAA() == None
