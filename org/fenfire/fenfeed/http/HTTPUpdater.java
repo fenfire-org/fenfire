@@ -86,6 +86,8 @@ public final class HTTPUpdater implements Runnable {
 	    } catch(IOException e) {
 		updateFailed(resource, e);
 		return;
+	    } finally {
+		lastRead = System.currentTimeMillis();
 	    }
 
 	    updateInProgress = false;
