@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2002, Benja Fallenstein and Tuomas J. Lukka
+# Copyright (c) 2002-2005, Benja Fallenstein and Tuomas J. Lukka
 # 
 # This file is part of Fenfire.
 # 
@@ -47,6 +47,7 @@ import org.fenfire.util.dbg
 import vob
 
 def getName(module, fn):
+    test = fn.__name__
     rawname = '%s.%s' % (module.__name__, test)
 
     if not fn.__doc__:
