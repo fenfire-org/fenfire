@@ -26,7 +26,9 @@ Resource.java
  * Written by Benja Fallenstein
  */
 package org.fenfire.fenfeed.http;
-import java.io.*;
+import java.io.InputStream;
+import java.io.IOException;
+import java.util.Date;
 
 /** A resource identified by an HTTP URI.
  *  Allows getting the header and body of the resource currently
@@ -47,6 +49,15 @@ public interface Resource {
     String getURI();
     InputStream getInputStream() throws IOException;
     String getContentType() throws IOException;
+
+    /** Return the date that the server was last asked for the newest version
+     *  of this resource.
+     *  If the server is contacted and replies that the resource
+     *  is unchanged, the lastRead date is updated; if the
+     *  resource is loaded from the local cache, and the server
+     *  is <em>not</em> contacted, the date remains the same.
+     */
+    Date lastRead() throws IOException;
 
     /** If the server replied with 301 Moved Permanently, the new URI
      *  of this resource; otherwise, null.

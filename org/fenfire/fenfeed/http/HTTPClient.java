@@ -44,7 +44,8 @@ import java.util.*;
  *  _httpcache/java.sun.com/j2se/1.4.2/docs/api/java/util/_Date.html-content
  *  <p>
  *  (The file .../_Date.html-header contains the HTTP headers
- *  of the message.)
+ *  of the message, the file .../_Date.html-lastRead the date
+ *  the server was last asked for the newest version.)
  *  <p>
  *  Cached representations so far aren't deleted automatically.
  *  (For now this is intended to be used in a feed reader, where
@@ -137,6 +138,8 @@ public class HTTPClient {
 
 		    if(expires.before(now)) {
 			System.out.println("- use cached version");
+			// does not update lastRead because we didn't
+			// contact the server
 			return;
 		    }
 		}
@@ -186,6 +189,11 @@ public class HTTPClient {
 	    } else {
 		throw new HTTPException(code, conn.getResponseMessage());
 	    }
+
+	    // The server was asked for the newest version of the resource
+	    // and has replied -- store current time as the "last read" date
+	    Date now = new Date();
+	    CopyUtil.writeString(""+now, out("lastRead"));
 	}
 
 	public String getURI() {
@@ -200,6 +208,10 @@ public class HTTPClient {
 	public String getContentType() throws IOException {
 	    if(redirect != null) return redirect.getContentType();
 	    return (String)header().get("content-type");
+	}
+
+	public Date lastRead() throws IOException {
+	    return new Date(CopyUtil.readString(in("lastRead")));
 	}
 
 	public String getNewURI() {
