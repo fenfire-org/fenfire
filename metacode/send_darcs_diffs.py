@@ -9,10 +9,12 @@ Program that sends a source diff to the mailing-list.
 
 import os, sys
 
+dry_run = (len(sys.argv) > 1 and sys.argv[1] == '--dry-run')
+
 TO       = 'Fenfire commit messages <fencommits@lists.jyu.fi>'
 REPLY_TO = 'Fenfire developers list <fenfire-dev@nongnu.org>'
 
-projects = [ 'libvob', 'callgl', 'fenfire', 'storm', 'alph', 'depends', 'ff', 'navidoc' ]
+projects = [ 'libvob', 'callgl', 'fenfire', 'storm', 'alph', 'depends', 'ff', 'navidoc', '!private' ] # '!' signals to look in ~befallen/darcs/
 LOCK = 'send_darcs_diffs/lock'
 
 if not os.path.exists('send_darcs_diffs'):
@@ -39,18 +41,37 @@ def mail(projectName, fileName, author, title):
     for s in f.xreadlines():
         msg += s
     f.close()
-	   
-    server = smtplib.SMTP('smtp.cc.jyu.fi')
-    server.set_debuglevel(1)
-    server.sendmail(author, TO, msg)
-    server.quit()
+
+    if not dry_run:
+        server = smtplib.SMTP('smtp.cc.jyu.fi')
+        server.set_debuglevel(1)
+        server.sendmail(author, TO, msg)
+        server.quit()
+    else:
+        print 'would have sent this message:'
+        print msg
+        print
 
 
-def send(proj, p):
-    x=os.system("darcs changes --match 'hash %s' --repo=%s " % (p, proj) +
-                "> send_darcs_diffs/desc")
-    y=os.system("darcs diff -u --match 'hash %s' --repo=%s " % (p, proj) +
-                "> send_darcs_diffs/diff")
+def send(_proj, p):
+    if _proj[0] != '!':
+        proj = _proj
+        x=os.system("darcs changes --match 'hash %s' --repo=%s " % (p, proj) +
+                    "> send_darcs_diffs/desc")
+        y=os.system("darcs diff -u --match 'hash %s' --repo=%s " % (p, proj) +
+                    "> send_darcs_diffs/diff")
+    else:
+        proj = _proj[1:]
+        x=os.system("cd /home/b/befallen/darcs/" +
+                    "darcs changes --match 'hash %s' --repo=%s " % (p, proj) +
+                    "> send_darcs_diffs/desc")
+        y=0
+        f = open('send_darcs_diffs/diff', 'w')
+        f.write("This is a patch to the 'private' archive, \n"
+                "which contains code we can currently not publish\n"
+                "due to legal issues. For this reason, this mail\n"
+                "does not include a source code diff. (Sorry.)\n")
+        f.close()
 
     if x>0 or y>0:
         print '-- skip %s: darcs exited with status code %s/%s --' % (p,x,y)
@@ -99,10 +120,16 @@ def send(proj, p):
 
 
 
-def project(proj):
-    if not os.path.isdir(proj):
-        # we don't have that project -- skip
-        return
+def project(_proj):
+    if _proj[0] != '!':
+        proj = _proj
+        if not os.path.isdir(proj):
+            # we don't have that project -- skip
+            return
+    else:
+        proj = _proj[1:]
+        if not os.path.isdir('/home/b/befallen/darcs/%s' % proj):
+            return
     
     FILE = 'send_darcs_diffs/%s-patches-sent' % proj
 
@@ -118,10 +145,12 @@ def project(proj):
     has_sent = []
 
     for p in to_be_sent:
-        if send(proj, p): has_sent.append(p)
+        if send(_proj, p): has_sent.append(p)
 
-    f = open(FILE, 'a')
-    for p in has_sent: f.write(p+'\n')
+    if not dry_run:
+        f = open(FILE, 'a')
+        for p in has_sent: f.write(p+'\n')
+        f.close()
     
 
 
