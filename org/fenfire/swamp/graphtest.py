@@ -80,6 +80,7 @@ def test_Graph_Triples():
                 if (s,p,o) in triples:
                     assert graph.contains(node[s],node[p],node[o])
 
+                    assert iterContains(graph.findN_XAA_Iter(), node[s])
                     assert iterContains(graph.findN_1XA_Iter(node[s]), node[p])
                     assert iterContains(graph.findN_11X_Iter(node[s], node[p]),
                                         node[o])
@@ -91,3 +92,30 @@ def test_Graph_Triples():
                                             node[o])
 
 
+def test_Graph_ManyTriples():
+    triples = []
+
+    RANGE = 8
+    
+    for i in range(RANGE):
+        s = Nodes.N()
+
+        for j in range(RANGE):
+            p = Nodes.N()
+
+            for k in range(RANGE):
+                o = Nodes.N()
+
+                triples.append((s,p,o))
+
+                graph.add(s,p,o)
+                assert iterContains(graph.findN_1XA_Iter(s), p)
+                assert iterContains(graph.findN_11X_Iter(s,p), o)
+
+    for (s,p,o) in triples:
+        try:
+            assert iterContains(graph.findN_1XA_Iter(s), p)
+            assert iterContains(graph.findN_11X_Iter(s,p), o)
+        except:
+            print (s,p,o)
+            assert 0

@@ -76,7 +76,7 @@ public class PairMap extends AbstractHashtable {
 
 	System.arraycopy(key1, 0, n1, 0, key1.length);
 	System.arraycopy(key2, 0, n2, 0, key1.length);
-	System.arraycopy(key3, 0, n2, 0, key1.length);
+	System.arraycopy(key3, 0, n3, 0, key1.length);
 	System.arraycopy(value, 0, nv, 0, key1.length);
 
 	key1=n1; key2=n2; key3=n3; value=nv;
