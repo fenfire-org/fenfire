@@ -84,10 +84,8 @@ public class FenFiction extends LobLob {
 	Box vbox = new Box(Y);
 	hbox.addRequest(vbox, 100, 200, 200);
 
-	if(msg != null) {
-	    Lob label = new Label(msg, true);
-	    vbox.add(new KeyLob(label, "HELP"));
-	}
+	if(msg != null)
+	    vbox.add(new Label(msg, true));
 
 	vbox.glue(0, 0, inf);
 
@@ -117,10 +115,9 @@ public class FenFiction extends LobLob {
 				 Object property) {
 	    Model param = Parameter.model(ListModel.PARAM);
 	    Lob template = rlob.label(param, property);
-	    template = new ThemeFrame(template);
+	    template = new ThemeFrame(template, param);
 	    template = new ClickController(template, 1, 
 					   new Model.Change(state, param));
-	    template = new KeyLob(template, param);
 	    
 	    list = new ListModel.Transform(list, template);
 	    
@@ -132,7 +129,7 @@ public class FenFiction extends LobLob {
 				   final Object type,
 				   final Object property) {
 	    ListModel list = new ListModel.Simple();
-	    list.add(new NoGrowLob(Y, new KeyLob(new Button(caption, 
+	    list.add(new NoGrowLob(Y, new Button(caption, 
 						 new AbstractAction() {
 		    public void run() {
 			Object n = Nodes.N();
@@ -141,7 +138,7 @@ public class FenFiction extends LobLob {
 			    graph.add(state.get(), property, n);
 			state.set(n);
 		    }
-		}), "New "+type)));
+		})));
 	    list.add(new Glue(Lob.Y, 10, 10, 10));
 
 	    return list;
