@@ -27,11 +27,23 @@ CommandExpression.java
  */
 
 package org.fenfire.potion;
+
 import java.util.*;
 
+public class CommandExpression extends Expression {
 
-public interface CommandExpression extends Expression {
-	
-    void execute(Map context);
-    String getString(Map context);
+    Command command;
+
+    public CommandExpression(Command command, FunctionExpression[] params) {
+	super(command, params);
+	this.command = command;
+    }
+
+    public void execute(Map context) {
+	command.execute(evaluateParams(context), context);
+    }
+
+    protected Expression newExpression(FunctionExpression[] params) {
+	return new CommandExpression(command, params);
+    }
 }

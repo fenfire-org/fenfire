@@ -1,9 +1,9 @@
 /*
 FunctionExpression.java
- *
+ *    
  *    Copyright (c) 2002, Anton Feldmann
  *    Copyright (c) 2005, Benja Fallenstein
- *
+ *    
  *    This file is part of Fenfire.
  *    
  *    Fenfire is free software; you can redistribute it and/or modify it under
@@ -21,7 +21,7 @@ FunctionExpression.java
  *    Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
  *    MA  02111-1307  USA
  *    
- *
+ *    
  */
 /*
  * Written by Anton Feldmann
@@ -29,6 +29,20 @@ FunctionExpression.java
 package org.fenfire.potion;
 import java.util.*;
 
-public interface FunctionExpression extends Expression {
-    List evaluate(Map contetxt);
+public class FunctionExpression extends Expression {
+
+    Function function;
+
+    public FunctionExpression(Function function, FunctionExpression[] params) {
+	super(function, params);
+	this.function = function;
+    }
+
+    public List evaluate(Map context) {
+	return function.evaluate(evaluateParams(context), context);
+    }
+
+    public Expression newExpression(FunctionExpression[] params) {
+	return new FunctionExpression(function, params);
+    }
 }

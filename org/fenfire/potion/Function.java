@@ -29,6 +29,6 @@ Function.java
 package org.fenfire.potion;
 import java.util.*;
 
-public interface Function extends Head{
+public interface Function extends Head {
     List evaluate(List[] params, Map contetxt);
 }
