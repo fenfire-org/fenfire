@@ -52,8 +52,9 @@ public class FenFeed extends LobLob {
     public static final Object
 	CONFIGURATION = Nodes.get(fenfeed+"Configuration"),
 	SUBSCRIBED_TO = Nodes.get(fenfeed+"subscribedTo"), // config -> feed
-	READ = Nodes.get(fenfeed+"read"), // config -> item (marked as read)
+	READ = Nodes.get(fenfeed+"read"); // config -> item (marked as read)
 
+    private static final Object
 	CHANNEL = Nodes.get(rss+"channel"),
 	ITEM = Nodes.get(rss+"item"),
 	ITEMS = Nodes.get(rss+"items"),
@@ -61,6 +62,9 @@ public class FenFeed extends LobLob {
 	DATE = Nodes.get(rss+"date"),
 	DESC = Nodes.get(rss+"description"),
 	ENCODED = Nodes.get(content+"encoded");
+
+    private static final Object[]
+	ITEM_TEXT = { ENCODED, DESC };
 
 
     private static final float inf = Float.POSITIVE_INFINITY;
@@ -139,14 +143,7 @@ public class FenFeed extends LobLob {
 
 	vbox.glue(5, 5, 5);
 
-	Model enc = new PropValueModel(gm, selectedItem, ENCODED, 1);
-	Model desc = new PropValueModel(gm, selectedItem, DESC, 1);
-	Model NULL = new ObjectModel(null);
-	Model content = enc.equalsModel(NULL).select(desc, enc);
-	Model str = new LiteralStringModel(content);
-	TextModel txt = new TextModel.StringTextModel(str, font, selectedItem);
-
-	vbox.add(new TextArea(txt));
+	vbox.add(rlob.textArea(selectedItem, ITEM_TEXT));
 
 	Lob l = new Margin(hbox, 5);
 	l = new FocusLob(l);

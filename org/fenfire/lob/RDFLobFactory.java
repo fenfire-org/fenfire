@@ -43,30 +43,47 @@ public class RDFLobFactory {
 	this.font = font;
     }
 
-    public Model value(Model node, Object property) {
+    private Model model(Object o) {
+	return Nodes.isNode(o) ? new ObjectModel(o) : (Model)o;
+    }
+
+    public Model value(Object node, Object property) {
 	return value(node, property, 1);
     }
 
-    public Model value(Model node, Object property, int dir) {
-	return new PropValueModel(graph, node, property, dir);
+    public Model value(Object _node, Object property, int dir) {
+	Model node = model(_node);
+
+	if(!(property instanceof Object[])) {
+	    return new PropValueModel(graph, node, model(property), 
+				      new IntModel(dir));
+	} else {
+	    Object[] props = (Object[])property;
+	    Model NULL = new ObjectModel(null);
+
+	    Model result = value(node, props[0], dir);
+
+	    for(int i=1; i<props.length; i++) {
+		Model m = value(node, props[i], dir);
+		result = result.equalsModel(NULL).select(m, result);
+	    }
+
+	    return result;
+	}
     }
 
-    public Model string(Model node, Object property) {
+    public Model string(Object node, Object property) {
 	return new LiteralStringModel(value(node, property));
     }
 
     public SetModel setModel(Object node, Object prop, int dir) {
-	Model nm = Nodes.isNode(node) ? new ObjectModel(node) : (Model)node;
-	Model pm = Nodes.isNode(prop) ? new ObjectModel(prop) : (Model)prop;
-
-	return new PropValueSetModel(graph, nm, pm, new IntModel(dir));
+	return new PropValueSetModel(graph, model(node), model(prop),
+				     new IntModel(dir));
     }
 
     public ListModel containerModel(Object node, Object prop, int dir) {
-	Model nm = Nodes.isNode(node) ? new ObjectModel(node) : (Model)node;
-	Model pm = Nodes.isNode(prop) ? new ObjectModel(prop) : (Model)prop;
-
-	Model container = new PropValueModel(graph, nm, pm, new IntModel(dir));
+	Model container = new PropValueModel(graph, model(node), model(prop), 
+					     new IntModel(dir));
 	return new ContainerModel(graph, container);
     }
 
@@ -84,29 +101,30 @@ public class RDFLobFactory {
 	return listModel(setModel(type), cmp);
     }
 
-    public TextModel textModel(Model node, Object property) {
+    public TextModel textModel(Object _node, Object property) {
+	Model node = model(_node);
 	Model string = string(node, property);
 	return new TextModel.StringTextModel(string, font, node);
     }
 
-    public Label label(Model node, Object property) {
+    public Label label(Object node, Object property) {
 	return new Label(textModel(node, property));
     }
-    public Label label(Model node, Object property, boolean linebreaking) {
+    public Label label(Object node, Object property, boolean linebreaking) {
 	return new Label(textModel(node, property), linebreaking);
     }
 
-    public TextField textField(Model node, Object property) {
-	return textField(node, property, new ObjectModel(property));
+    public TextField textField(Object node, Object property) {
+	return textField(node, property, model(property));
     }
-    public TextField textField(Model node, Object property, Model key) {
+    public TextField textField(Object node, Object property, Model key) {
 	return new TextField(textModel(node, property), key);
     }
 
-    public TextArea textArea(Model node, Object property) {
+    public TextArea textArea(Object node, Object property) {
 	return textArea(node, property, new ObjectModel(property));
     }
-    public TextArea textArea(Model node, Object property, Model key) {
+    public TextArea textArea(Object node, Object property, Model key) {
 	return new TextArea(textModel(node, property), key);
     }
 
