@@ -37,15 +37,22 @@ import org.nongnu.libvob.*;
 import org.nongnu.libvob.util.*;
 import org.nongnu.navidoc.util.Obs;
 import java.awt.Color;
+import java.text.DateFormat;
 import java.util.*;
 
-public class CalendarSpatialView implements SpatialViewSettings.SpatialView {
+public class CalendarSpatialView 
+    implements SpatialViewSettings.SpatialView, Obs {
     static private void p(String s) { System.out.println("CalendarSpatialView:: "+s); }
 
     private Graph graph;
     private ContentViewSettings contentViewSettings;
     private WindowAnimation winAnim;
     private int ndays;
+
+    private DateFormat dateFormat;
+
+    private Map nodesByDay = new HashMap();
+    private boolean isCurrent;
 
     private Map cache = new org.nongnu.navidoc.util.WeakValueMap();
 
@@ -55,6 +62,10 @@ public class CalendarSpatialView implements SpatialViewSettings.SpatialView {
 	this.graph = graph;
 	this.contentViewSettings = contentViewSettings;
 	this.winAnim = winAnim;
+
+	dateFormat = DateFormat.getDateInstance();
+
+	isCurrent = false;
 	
 	if (days < 0) throw new IllegalArgumentException("0 > days = "+days);
 	ndays = days;
@@ -78,13 +89,68 @@ public class CalendarSpatialView implements SpatialViewSettings.SpatialView {
     }
 
 
-    protected Date getDate(Object node) {
+    public void chg() {
+	isCurrent = false;
+    }
+
+    protected void updateNodes() {
+	if(isCurrent) return;
+
+	nodesByDay.clear();
+
+	for(Iterator i=graph.findN_X1A_Iter(DC.date, this); i.hasNext();) {
+	    Object n = i.next();
+	    
+	    for(Iterator j=graph.findN_11X_Iter(n, DC.date, this); 
+		j.hasNext();) {
+
+		Object o = j.next();
+		if(!(o instanceof Literal)) continue;
+		Literal l = (Literal)o;
+		String s = l.getString();
+
+		Calendar day;
+
+		try {
+		    day = parseDay(s);
+		} catch(NumberFormatException e) {
+		    p("Malformed date: "+s);
+		    continue;
+		}
+
+		Set set = (Set)nodesByDay.get(day);
+		if(set == null)
+		    nodesByDay.put(day, set = new HashSet());
+
+		set.add(n);
+	    }
+	}
+
+	isCurrent = true;
+    }
+
+    protected Calendar parseDay(String s) throws NumberFormatException {
+	Date d = org.nongnu.storm.util.DateParser.parse(s);
+
+	Calendar cal = new GregorianCalendar();
+	cal.setTime(d);
+	
+	int year = cal.get(cal.YEAR);
+	int month = cal.get(cal.MONTH);
+	int day = cal.get(cal.DAY_OF_MONTH);
+
+	return new GregorianCalendar(year, month, day);
+    }
+
+
+    protected Calendar getDay(Object node) {
 	Iterator i = graph.findN_11X_Iter(node, DC.date);
 	if (!i.hasNext()) return null;
 	
 	Literal date = (Literal) i.next();
-	return org.nongnu.storm.util.DateParser.parse(date.getString());
+	return parseDay(date.getString());
     }	
+
 
     protected CalendarCursor getCalendarCursor(Cursor c) {
 	Object pos = c.getSpatialCursor();
@@ -96,7 +162,7 @@ public class CalendarSpatialView implements SpatialViewSettings.SpatialView {
     }
 
     protected CalendarCursor makeCalendarCursor(Object node) {
-	return new CalendarCursor(getDate(node), ndays, 1);
+	return new CalendarCursor(getDay(node), ndays, 1);
     }
 
 
@@ -135,25 +201,32 @@ public class CalendarSpatialView implements SpatialViewSettings.SpatialView {
     */	
 
     protected Lob getCalendarContent(CalendarCursor cc) {
-	Model cs = Parameter.model("cs", new IntModel());
+	updateNodes();
 	
+	Model cs = Parameter.model("cs", new IntModel());
+
 	Box dateList = new Box(Lob.Y);
-	for (int i=0; i<cc.getShownDates().length; i++) {
-	    TypedLiteral date = cc.getShownDates()[i];
+	for (int i=0; i<cc.getShownDays().length; i++) {
+	    Calendar day = cc.getShownDays()[i];
+	    Date time = day.getTime();
 
 	    Box v = new Box(Lob.Y);
-	    Lob l = new Label(date.getString().substring(0, 10));
-	    l = new ThemeFrame(l, new ObjectModel(date));
+	    Lob l = new Label(dateFormat.format(time));
+	    l = new ThemeFrame(l, new ObjectModel(time));
 	    l = new AlignLob(l, .5f,.5f,.5f,.5f);
 	    v.add(l);
-	    //p(cc.getShownDates()[i].getString());
-	    for (Iterator j=graph.findN_X11_Iter(DC.date,date); j.hasNext();) {
-		Object n = j.next();
-		Lob l3 = contentViewSettings.getLob(n);
-		// add click controller to select new focus...
-		l3 = new BuoyConnectorLob(l3, n, cs);
-		l3 = new AlignLob(l3, .5f,.5f,.5f,.5f);
-		v.add(l3);
+	    //p(cc.getShownDays()[i].getString());
+
+	    Set nodes = (Set)nodesByDay.get(day);
+	    if(nodes != null) {
+		for (Iterator j=nodes.iterator(); j.hasNext();) {
+		    Object n = j.next();
+		    Lob l3 = contentViewSettings.getLob(n);
+		    // add click controller to select new focus...
+		    l3 = new BuoyConnectorLob(l3, n, cs);
+		    l3 = new AlignLob(l3, .5f,.5f,.5f,.5f);
+		    v.add(l3);
+		}
 	    }
 	    dateList.add(v);
 	    dateList.glue(5, 5, 5);

@@ -28,35 +28,34 @@ package org.fenfire.view;
 import org.fenfire.Cursor;
 import org.fenfire.vocab.XSD;
 import org.fenfire.swamp.*;
-import java.util.Date;
+import java.util.*;
 
 /** Cursor for Calendar spatial view.
  *  Used as a value for org.fenfire.Cursor.SpatialCursor.spatialPosition.
  */
 public class CalendarCursor {
-    private final TypedLiteral [] shownDays;
+    private final Calendar[] shownDays;
 
     // may be accursed if any..
     private final float zoom;
-    private final long DAY = 24 * 60 * 60 * 1000;
-    public CalendarCursor(Date curr, int nDays, float zoom) { 
+
+    public CalendarCursor(Calendar curr, int nDays, float zoom) { 
 	this.zoom = zoom;
 
 	System.out.println("ZOOM: "+zoom);
 
 	int half = nDays / 2;
-	shownDays = new TypedLiteral[nDays];
+	shownDays = new Calendar[nDays];
 	for (int i=0; i<nDays; i++) {
-	    Date d = new Date(curr.getTime());
-	    d = new Date(curr.getTime() - half*DAY + i*DAY);
-	    shownDays[i] = new TypedLiteral(
-		org.nongnu.storm.util.DateParser.getIsoDate(d),
-		XSD.date);
-	    //System.out.println("date: "+shownDays[i]);
+	    GregorianCalendar d = new GregorianCalendar();
+	    shownDays[i] = d;
+
+	    d.setTimeInMillis(curr.getTimeInMillis());
+	    d.add(d.DAY_OF_MONTH, i-half);
 	}
     }
 
-    public TypedLiteral[] getShownDates() {
+    public Calendar[] getShownDays() {
 	return shownDays;
     }
 
