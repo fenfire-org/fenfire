@@ -47,6 +47,11 @@ public class FeedReader {
 	String baseURI = res.getURI();
 
 	String contentType = res.getContentType();
+
+	// not all publishers send content types... the code below
+	// requires contentType to be non-null
+	if(contentType == null) contentType = "";
+
 	int i = contentType.indexOf(';');
 	if(i >= 0) contentType = contentType.substring(0, i);
 	contentType = contentType.trim().toLowerCase();
@@ -73,7 +78,8 @@ public class FeedReader {
 		    Graphs.readTurtle(in, baseURI, graph, namespaces);
 		    return;
 		} else {
-		    throw new IOException(""+e);
+		    e.printStackTrace();
+		    throw new IOException("Not well-formed XML. "+e);
 		}
 	    }
 
@@ -134,6 +140,7 @@ public class FeedReader {
 	    } catch(ParsingException e) {
 		throw new IOException(""+e);
 	    } catch(XSLException e) {
+		e.printStackTrace();
 		throw new IOException(""+e);
 	    }
 	}

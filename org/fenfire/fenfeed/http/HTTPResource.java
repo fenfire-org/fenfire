@@ -188,9 +188,17 @@ public final class HTTPResource {
     private void writeHeaders(URLConnection conn) throws IOException {
 	Writer w = new OutputStreamWriter(out("header"), "UTF-8");
 	    
-	for(int i=1; conn.getHeaderField(i) != null; i++) {
-	    w.write(conn.getHeaderFieldKey(i)+": "+
-		    conn.getHeaderField(i)+"\n");
+	for(int i=1; true; i++) {
+	    String value;
+	    try {
+		value = conn.getHeaderField(i);
+		if(value == null) break;
+	    } catch(NoSuchElementException e) {
+		// shouldn't be thrown, but is thrown by Classpath currently
+		break;
+	    }
+		
+	    w.write(conn.getHeaderFieldKey(i)+": "+value+"\n");
 	}
 	
 	w.close();
@@ -220,7 +228,12 @@ public final class HTTPResource {
      *  is <em>not</em> contacted, the date remains the same.
      */
     public Date lastRead() throws IOException {
+	try {
 	if(!hasLoaded) reload(false);
+	} catch (RuntimeException e) {
+	    System.out.println(uri);
+	    throw e;
+	}
 	return DateParser.parse(CopyUtil.readString(in("lastRead")));
     }
 
