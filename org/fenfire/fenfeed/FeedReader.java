@@ -44,7 +44,6 @@ public class FeedReader {
     public static void read(HTTPResource res, Graph graph, Map namespaces) 
 	throws IOException {
 
-	InputStream in = res.getInputStream();
 	String baseURI = res.getURI();
 
 	String contentType = res.getContentType();
@@ -53,44 +52,59 @@ public class FeedReader {
 	contentType = contentType.trim().toLowerCase();
 
 	if(contentType.equals("application/turtle")) {
+	    InputStream in = res.getInputStream();
 	    Graphs.readTurtle(in, baseURI, graph, namespaces);
-	} else if(contentType.equals("application/rdf+xml")) {
-	    if(dbg) p("---- read rdf/xml");
-	    Graphs.readXML(in, baseURI, graph, namespaces);
-	    if(dbg) p("---- fi");
-	} else if(contentType.equals("application/rss+xml") ||
-		  contentType.equals("application/xml") ||
-		  contentType.equals("text/xml")) {
-	    if(dbg) p("---- read rss");
+	    return;
+	} 
+
+	if(contentType.endsWith("/xml") || contentType.endsWith("+xml") ||
+	   contentType.equals("text/plain")) {
+	    if(dbg) p("---- read arbitrary xml: "+baseURI);
 
 	    Builder b = new Builder();
 	    Document xml, transform_xml;
 
 	    try { 
-		InputStream tr_in = 
-		    new FileInputStream("org/fenfire/fenfeed/feed-rss1.0.xsl");
-
+		InputStream in = res.getInputStream();
 		xml = b.build(in);	
-		transform_xml = b.build(tr_in);
 	    } catch(ParsingException e) {
-		throw new IOException(""+e);
+		if(contentType.equals("text/plain")) {
+		    InputStream in = res.getInputStream();
+		    Graphs.readTurtle(in, baseURI, graph, namespaces);
+		    return;
+		} else {
+		    throw new IOException(""+e);
+		}
 	    }
 
 	    Element root = xml.getRootElement();
-	    if(root.getNamespaceURI().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#") && root.getLocalName().equals("RDF")) {
-		// this is RDF/XML -- skip the chase and read it directly
+	    boolean isRDFXML = false;
 
-		if(dbg) p("---- no, read xml");
-		Graphs.readXML(res.getInputStream(), baseURI, 
-			       graph, namespaces);
-		if(dbg) p("---- fi");
-		return;
+	    if(contentType.equals("application/rdf+xml")) isRDFXML = true;
+	    if(root.getNamespaceURI().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#") && root.getLocalName().equals("RDF")) isRDFXML = true;
+
+	    if(root.getNamespaceURI().equals("")) 
+		// probably non-RDF RSS, even if sent as application/rdf+xml
+		// (Groklaw does that)
+		isRDFXML = false;
+
+	    if(isRDFXML) {
+		// seems to be RDF/XML -- cut the chase and read it directly
+
+		if(dbg) p("---- no, read rdf/xml: "+baseURI);
+		try {
+		    InputStream in = res.getInputStream();
+		    Graphs.readXML(in, baseURI, graph, namespaces);
+		    if(dbg) p("---- fi: "+baseURI);
+		    return;
+		} catch(IOException e) {
+		    if(dbg) p("---- failed to read as rdf/xml: "+baseURI);
+		}
 	    }
 
 	    nu.xom.Nodes nodes; 
 	    try {
-		XSLTransform transform = new XSLTransform(transform_xml);
-		nodes = transform.transform(xml);
+		nodes = getTransform().transform(xml);
 	    } catch(XSLException e) {
 		throw new IOException(""+e);
 	    }
@@ -101,10 +115,30 @@ public class FeedReader {
 
 	    InputStream bin = new ByteArrayInputStream(bos.toByteArray());
 	    Graphs.readXML(bin, baseURI, graph, namespaces);
-	    if(dbg) p("---- fi");
-	} else {
-	    throw new IOException("Unhandled content type "+contentType+" when reading "+res.getURI());
+	    if(dbg) p("---- fi: "+baseURI);
+
+	    return;
 	}
+	
+	throw new IOException("Unhandled content type "+contentType+" when reading "+res.getURI());
+    }
+
+    private static XSLTransform rss2rdf_transform;
+    private static XSLTransform getTransform() throws IOException {
+	if(rss2rdf_transform == null) {
+	    try {
+		InputStream in = 
+		    new FileInputStream("org/fenfire/fenfeed/feed-rss1.0.xsl");
+		
+		rss2rdf_transform = new XSLTransform(new Builder().build(in));
+	    } catch(ParsingException e) {
+		throw new IOException(""+e);
+	    } catch(XSLException e) {
+		throw new IOException(""+e);
+	    }
+	}
+
+	return rss2rdf_transform;
     }
 
     public static void main(String[] args) throws Exception {
