@@ -103,16 +103,23 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
     }
 
     Lob lastMainview;
-    Model lastMainviewModel;
+    Object lastMainviewNode;
 
+    private boolean equals(Object o1, Object o2) {
+	if(o1 == o2) return true;
+	if(o1 == null || o2 == null) return false;
+	return o1.equals(o2);
+    }
+    
     public Lob getMainviewLob(Model cursor) {
+	CanvasCursor c = makeCanvasCursor((Cursor)cursor.get());
+	Object node = c.getNode();
+
 	// argl, need this so that no new DragControllers are created
 	// during dragging -- they don't have isDragging set, so drag events
 	// aren't handled... :-(
-	if(lastMainviewModel == cursor) return lastMainview; 
+	if(equals(node, lastMainviewNode)) return lastMainview; 
 
-	CanvasCursor c = makeCanvasCursor((Cursor)cursor.get());
-	Object node = c.getNode();
 	Object canvas = graph.find1_X11(CANVAS2D.contains, node);
 
 	Lob canvasContent = getCanvasContent(canvas, cursor);
@@ -141,7 +148,7 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 	l = new SpatialContextLob(l, (Model)l.getTemplateParameter("cs"));
 
 	lastMainview = l;
-	lastMainviewModel = cursor;
+	lastMainviewNode = node;
 
 	return l;
     }
@@ -168,7 +175,7 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
     /**
      *  'cursor' may be null.
      */
-    protected Lob getCanvasContent(Object canvas, Model cursor) {
+    protected Lob getCanvasContent(final Object canvas, final Model cursor) {
 	
 	Tray tray = new Tray(false);
 	
@@ -177,12 +184,37 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 	for(Iterator i=graph.findN_11X_Iter(canvas, CANVAS2D.contains); 
 	    i.hasNext();) {
 	    
-	    Object n = i.next();
+	    final Object n = i.next();
 	    String s = Nodes.toString(n);
-	    Lob l = new Label(s.substring(s.length()-5));
-	    l = new BuoyConnectorLob(l, n, cs);
+	    final Lob label = new Label(s.substring(s.length()-5));
+	    Lob l = new BuoyConnectorLob(label, n, cs);
 	    
-	    Model x = getModel(n, CANVAS2D.x), y = getModel(n, CANVAS2D.y);
+	    final Model x = getModel(n, CANVAS2D.x);
+	    final Model y = getModel(n, CANVAS2D.y);
+
+	    if(cursor != null)
+		l = new ClickController(l, 1, new AbstractAction() {
+			public void run() {
+			    Cursor c0 = (Cursor)cursor.get();
+			    CanvasCursor cc = makeCanvasCursor(c0);
+
+			    float nx = x.getFloat()+label.getNatSize(Lob.X)/2;
+			    float ny = y.getFloat()+label.getNatSize(Lob.Y)/2;
+			    float nz = cc.getZoom();
+
+			    Cursor c = new CanvasCursor(canvas, n, nx, ny, nz);
+			    cursor.set(c);
+
+			    VobScene sc = winAnim.getCurrentVS();
+			    ConnectionVobMatcher m = 
+				(ConnectionVobMatcher)sc.matcher;
+			    
+			    int focus = m.getFocus();
+			    int context = m.getLink(focus, -1, "spatial context", "structure point");
+			    m.setNextFocus(m.getLink(context, 1, n, "structure point"));
+			}
+		    });
+
 	    l = new TranslationLob(l, x, y);
 	    tray.add(l);
 	}
