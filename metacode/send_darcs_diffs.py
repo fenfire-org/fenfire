@@ -66,8 +66,13 @@ def send(_proj, p):
         x=os.system("darcs changes --match 'hash %s' --repo=%s " % (p, pdir) +
                     "> send_darcs_diffs/desc")
         y=0
+        f = open('send_darcs_diffs/desc')
+        msg = f.read();
+        f.close()
+        
         f = open('send_darcs_diffs/diff', 'w')
-        f.write("This is a patch to the 'private' archive, \n"
+        f.write(msg);
+        f.write("\nThis is a patch to the 'private' archive, \n"
                 "which contains code we can currently not publish\n"
                 "due to legal issues. For this reason, this mail\n"
                 "does not include a source code diff. (Sorry.)\n")
