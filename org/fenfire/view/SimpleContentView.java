@@ -30,8 +30,10 @@ import org.fenfire.Cursor;
 import org.fenfire.lob.*;
 import org.fenfire.swamp.*;
 import org.fenfire.util.*;
+import org.nongnu.libvob.*;
 import org.nongnu.libvob.layout.*;
 import org.nongnu.libvob.layout.component.*;
+import java.awt.Color;
 import java.util.*;
 
 public class SimpleContentView implements ContentViewSettings.ContentView {
@@ -122,7 +124,16 @@ public class SimpleContentView implements ContentViewSettings.ContentView {
 	    l = new TextEditController(seq, text, tc, new IntModel(1));
 	    l = new ViewportLob(Lob.X, l, positionModel, new FloatModel(.5f));
 	} else {
-	    l = new Label(str);
+	    Model color = 
+		new UniqueColorModel(new ObjectModel(node), 0f, .6f);
+
+	    TextStyle ts = ((LobFont)Theme.getFont().get()).getTextStyle();
+	    LobFont font = new LobFont(ts, (Color)color.get());
+
+	    TextModel text = 
+		new TextModel.StringTextModel(str, new ObjectModel(font));
+
+	    l = new Label(text);
 	}
 
 	return l;

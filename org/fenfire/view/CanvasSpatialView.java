@@ -261,7 +261,7 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
     }
 
     protected Lob addBackground(Lob content, Object canvas) {
-	Model bgcolor = new UniqueColorModel(new ObjectModel(canvas));
+	Model bgcolor = new UniqueColorModel(new ObjectModel(canvas),.75f,1f);
 	return new Frame(content, bgcolor, new ObjectModel(Color.black),
 			 2, 0, false, false, true);
     }
@@ -322,42 +322,6 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 	    else throw new IllegalArgumentException("adapter type "+type);
 
 	    cursor.setSpatialCursor(new CanvasCursor(canvas, panX, panY, zoom));
-	}
-    }
-
-
-    private class UniqueColorModel extends AbstractModel.AbstractObjectModel {
-	Model key;
-
-	UniqueColorModel(Model key) {
-	    this.key = key;
-	    key.addObs(this);
-	}
-	
-	protected Replaceable[] getParams() {
-	    return new Replaceable[] { key };
-	}
-	protected Object clone(Object[] params) {
-	    return new UniqueColorModel((Model)params[0]);
-	}
-
-	Color color;
-
-	public void chg() {
-	    color = null;
-	    super.chg();
-	}
-
-	public Object get() {
-	    if(color == null) {
-		java.util.Random r = new Random(key.get().hashCode());
-		float 
-		    R = 1 - r.nextFloat() * 0.2f,
-		    G = 1 - r.nextFloat() * 0.2f,
-		    B = 1 - r.nextFloat() * 0.2f;
-		color = new Color(R,G,B); 
-	    }
-	    return color;
 	}
     }
 }
