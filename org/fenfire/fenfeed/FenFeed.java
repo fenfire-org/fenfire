@@ -44,7 +44,8 @@ import java.util.*;
 public class FenFeed extends LobLob {
 
     private static final String
-	rss = "http://purl.org/rss/1.0/";
+	rss = "http://purl.org/rss/1.0/",
+	content = "http://purl.org/rss/1.0/modules/content/";
 
     public static final Object
 	CHANNEL = Nodes.get(rss+"channel"),
@@ -52,7 +53,8 @@ public class FenFeed extends LobLob {
 	ITEMS = Nodes.get(rss+"items"),
 	TITLE = Nodes.get(rss+"title"),
 	DATE = Nodes.get(rss+"date"),
-	DESC = Nodes.get(rss+"description");
+	DESC = Nodes.get(rss+"description"),
+	ENCODED = Nodes.get(content+"encoded");
 
 
     private static final float inf = Float.POSITIVE_INFINITY;
@@ -93,7 +95,15 @@ public class FenFeed extends LobLob {
 
 	vbox.glue(5, 5, 5);
 
-	vbox.add(rlob.textArea(selectedItem, DESC));
+	Model enc = new PropValueModel(gm, selectedItem, ENCODED, 1);
+	Model desc = new PropValueModel(gm, selectedItem, DESC, 1);
+	Model NULL = new ObjectModel(null);
+	Model content = enc.equalsModel(NULL).select(desc, enc);
+	Model str = new LiteralStringModel(content);
+	TextModel text = 
+	    new TextModel.StringTextModel(str, Theme.getTextFont());
+
+	vbox.add(new TextArea(text));
 
 	setDelegate(new Margin(hbox, 5));
     }
