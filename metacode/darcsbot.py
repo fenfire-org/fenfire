@@ -32,7 +32,7 @@ from traceback import print_exc
 import darcsbot
 
 MASTER_HOSTS = ['siksak.it.jyu.fi']
-WATCH_DELAY = 15
+WATCH_DELAY = 160
 LINE_DELAY = 5
 
 # IRC-options
