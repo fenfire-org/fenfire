@@ -69,7 +69,13 @@ public final class HTTPResource {
 	dir = f.getParentFile();
 	name = f.getName();
 
-	hasLoaded = file("content").exists();
+	if(file("location").exists()) {
+	    redirect = new HTTPResource(CopyUtil.readString(in("location")),
+					context);
+	    hasLoaded = true;
+	} else {
+	    hasLoaded = file("content").exists();
+	}
     }
 
     private File file(String suffix) { 
@@ -129,30 +135,30 @@ public final class HTTPResource {
 
 	int code = conn.getResponseCode();
 	    
+	boolean changed;
 	newURI = null;
 
-	boolean changed;
+	file("content").delete();
+	file("location").delete();
+	file("header").delete();
+	file("lastRead").delete();
+
 
 	if(code == 200) {
 	    if(dbg) p("- ok");
 
+	    writeHeaders(conn);
 	    CopyUtil.copy(conn.getInputStream(), out("content"));
-
-	    Writer w = new OutputStreamWriter(out("header"), "UTF-8");
-	    
-	    for(int i=1; conn.getHeaderField(i) != null; i++) {
-		w.write(conn.getHeaderFieldKey(i)+": "+
-			conn.getHeaderField(i)+"\n");
-	    }
-
-	    w.close();
 
 	    redirect = null;
 	    changed = true;
 	} else if(code==301 || code==302 || code==303 || code==307) {
 	    if(dbg) p("- redirect");
 
+	    writeHeaders(conn);
+
 	    String location = (String)conn.getHeaderField("location");
+	    CopyUtil.writeString(location, out("location"));
 
 	    if(code == 301) newURI = location; // moved permanently
 
@@ -177,6 +183,17 @@ public final class HTTPResource {
 	CopyUtil.writeString(DateParser.getIsoDate(now), out("lastRead"));
 
 	return changed;
+    }
+
+    private void writeHeaders(URLConnection conn) throws IOException {
+	Writer w = new OutputStreamWriter(out("header"), "UTF-8");
+	    
+	for(int i=1; conn.getHeaderField(i) != null; i++) {
+	    w.write(conn.getHeaderFieldKey(i)+": "+
+		    conn.getHeaderField(i)+"\n");
+	}
+	
+	w.close();
     }
 
     public String getURI() {
