@@ -43,39 +43,19 @@ public class SimpleSpatialView implements ViewSettings.SpatialView {
 	return Collections.singleton(ViewSettings.ALL);
     }
 
-    private static class FooLob extends AbstractMonoLob {
-	private Object key;
-
-	public FooLob(Lob content, Object key) {
-	    super(content);
-	    this.key = key;
-	}
-
-	public Object clone(Object[] params) {
-	    return new FooLob((Lob)params[0], key);
-	}
-
-	public void render(VobScene scene, int into, int matchingParent,
-			   float w, float h, float d,
-			   boolean visible) {
-	    int cs = scene.coords.box(into, w, h);
-	    ConnectionVobMatcher m = (ConnectionVobMatcher)scene.matcher;
-	    m.add(matchingParent, into, "spatial context");
-	    m.add(matchingParent, cs, key);
-	    m.link(into, 1, cs, "structure point");
-	    content.render(scene, cs, cs, w, h, d, visible);
-	}
-    }
-
     public Lob getLob(Cursor c) {
 	Object node = c.getNode();
 	if(cache.get(node) != null) return (Lob)cache.get(node);
 
+	Model cs = new IntModel();
+
 	String s = Nodes.toString(node);
 	Lob l = new Label(s.substring(s.length()-5));
+	l = new BuoyConnectorLob(l, node, cs);
+	l = new AlignLob(l, .5f, .5f, .5f, .5f);
 	l = new ThemeFrame(l);
 	l = new RequestChangeLob(Lob.X, l, Float.NaN, 100, 100);
-	l = new FooLob(l, node);
+	l = new SpatialContextLob(l, cs);
 	cache.put(node, l);
 	return l;
     }

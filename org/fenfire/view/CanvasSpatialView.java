@@ -57,51 +57,6 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 	    });
     }
 
-    private int spatialContextCS;
-
-    private class FooLob extends AbstractMonoLob {
-	private Object key;
-
-	public FooLob(Lob content, Object key) {
-	    super(content);
-	    this.key = key;
-	}
-
-	public Object clone(Object[] params) {
-	    return new FooLob((Lob)params[0], key);
-	}
-
-	public void render(VobScene scene, int into, int matchingParent,
-			   float w, float h, float d,
-			   boolean visible) {
-	    int cs = scene.coords.box(into, w, h);
-	    ConnectionVobMatcher m = (ConnectionVobMatcher)scene.matcher;
-	    m.add(matchingParent, cs, key);
-	    m.link(spatialContextCS, 1, cs, "structure point");
-	    m.getLink(spatialContextCS, 1, key, "structure point");
-	    super.render(scene, cs, cs, w, h, d, visible);
-	}
-    }
-
-    private class BarLob extends AbstractMonoLob {
-	public BarLob(Lob content) {
-	    super(content);
-	}
-
-	public Object clone(Object[] params) {
-	    return new BarLob((Lob)params[0]);
-	}
-
-	public void render(VobScene scene, int into, int matchingParent,
-			   float w, float h, float d,
-			   boolean visible) {
-	    spatialContextCS = into;
-	    scene.matcher.add(matchingParent, into, "spatial context");
-	    super.render(scene, into, matchingParent, w, h, d, visible);
-	    
-	}
-    }
-
     private Model getModel(Object node, Object prop) {
 	Model m = new ObjectModel(node);
 	m = new PropValueModel(new ObjectModel(graph), m, prop, 1);
@@ -118,13 +73,15 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 
 	Tray tray = new Tray(false);
 
+	Model cs = new IntModel();
+
 	for(Iterator i=graph.findN_11X_Iter(canvas, CANVAS2D.contains); 
 	    i.hasNext();) {
 
 	    Object n = i.next();
 	    String s = Nodes.toString(n);
 	    Lob l = new Label(s.substring(s.length()-5));
-	    l = new FooLob(l, n);
+	    l = new BuoyConnectorLob(l, n, cs);
 
 	    Model x = getModel(n, CANVAS2D.x), y = getModel(n, CANVAS2D.y);
 	    l = new TranslationLob(l, x, y);
@@ -139,7 +96,7 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 				         zero.minus(y).plus(offs));
 	l = new ThemeFrame(l);
 	l = new RequestChangeLob(l, 100, 100, 100, 100, 100, 100);
-	l = new BarLob(l);
+	l = new SpatialContextLob(l, cs);
 	cache.put(node, l);
 	return l;
     }
