@@ -47,6 +47,7 @@ public class FenFeed extends LobLob {
     private static final String
 	fenfeed = "http://fenfire.org/2004/12/fenfeed#",
 	rss = "http://purl.org/rss/1.0/",
+	dc = "http://purl.org/dc/elements/1.1/",
 	content = "http://purl.org/rss/1.0/modules/content/";
 
     public static final Object
@@ -61,7 +62,11 @@ public class FenFeed extends LobLob {
 	TITLE = Nodes.get(rss+"title"),
 	DATE = Nodes.get(rss+"date"),
 	DESC = Nodes.get(rss+"description"),
-	ENCODED = Nodes.get(content+"encoded");
+	ENCODED = Nodes.get(content+"encoded"),
+	
+	DC_DATE = Nodes.get(dc+"date"),
+	DC_CREATOR = Nodes.get(dc+"creator"),
+	DC_SUBJECT = Nodes.get(dc+"subject");
 
     private static final Object[]
 	ITEM_TEXT = { ENCODED, DESC };
@@ -143,7 +148,19 @@ public class FenFeed extends LobLob {
 
 	vbox.glue(5, 5, 5);
 
-	vbox.add(rlob.textArea(selectedItem, ITEM_TEXT));
+	ListModel texts = new ListModel.Simple();
+	texts.add(rlob.textModel("Title: ", false));
+	texts.add(rlob.textModel(selectedItem, TITLE, null));
+	texts.add(rlob.textModel("\nDate: ", false));
+	texts.add(rlob.textModel(selectedItem, DC_DATE, null));
+	texts.add(rlob.textModel("\nCreator: ", false));
+	texts.add(rlob.textModel(selectedItem, DC_CREATOR, null));
+	texts.add(rlob.textModel("\nSubject: ", false));
+	texts.add(rlob.textModel(selectedItem, DC_SUBJECT, null));
+	texts.add(rlob.textModel("\n\n", false));
+	texts.add(rlob.textModel(selectedItem, ITEM_TEXT));
+	vbox.add(new TextArea(new TextModel.Concat(texts), 
+			      new ObjectModel("body")));
 
 	Lob l = new Margin(hbox, 5);
 	l = new FocusLob(l);

@@ -44,6 +44,7 @@ public class RDFLobFactory {
     }
 
     private Model model(Object o) {
+	if(o == null) return new ObjectModel(null);
 	return Nodes.isNode(o) ? new ObjectModel(o) : (Model)o;
     }
 
@@ -110,8 +111,14 @@ public class RDFLobFactory {
 
     public TextModel textModel(Object _node, Object property) {
 	Model node = model(_node);
+	return textModel(node, property, node);
+    }
+
+    public TextModel textModel(Object _node, Object property, Object _key) {
+	Model node = model(_node);
+	Model key = model(_key);
 	Model string = string(node, property);
-	return new TextModel.StringTextModel(string, font, node);
+	return new TextModel.StringTextModel(string, font, key);
     }
 
     public Label label(Object node, Object property) {
