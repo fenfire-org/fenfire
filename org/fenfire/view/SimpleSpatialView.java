@@ -78,9 +78,10 @@ public class SimpleSpatialView implements SpatialViewSettings.SpatialView {
 	    (node instanceof Literal) ? literalBorderColor : nodeBorderColor;
 
 	Lob l = contentViewSettings.getLob(node);
+	l = Lobs.margin(l, 3);
 	l = Lobs.clip(l);
 	l = BuoyConnectorLob.newInstance(l, node);
-	l = Lobs.frame(l, bgColor, borderColor, 2, 3, false);
+	l = Lobs.frame(l, bgColor, borderColor, 2, 0, false);
 
 	if(l.getLayoutableAxis() == Axis.X) {
 	    l = l.layoutOneAxis(125);
