@@ -8,7 +8,7 @@ TEST=org/
 
 LDLIB=LD_LIBRARY_PATH=/usr/lib:../libvob/src/jni:${JAVAHOME}/jre/lib/i386:${JAVAHOME}/jre/lib/i386/client
 
-FFCLASSPATH=../depends/cryptix-jce-provider.jar:./build:../navidoc/CLASSES:../storm/CLASSES:../alph/CLASSES:../libvob/CLASSES:../depends/jython.jar:../depends/jena.jar:../depends/icu4j.jar:../depends/xerces.jar:../depends/je.jar:../depends/png.jar:../depends/gnowsis/gnoclient.jar:../depends/gnowsis/xmlrpc-1.2-b1.jar:../depends/rio.jar:../depends/xom.jar
+FFCLASSPATH=../depends/cryptix-jce-provider.jar:./build:../navidoc/CLASSES:../storm/CLASSES:../alph/CLASSES:../libvob/CLASSES:../depends/jython.jar:../depends/jena.jar:../depends/icu4j.jar:../depends/je.jar:../depends/png.jar:../depends/gnowsis/gnoclient.jar:../depends/gnowsis/xmlrpc-1.2-b1.jar:../depends/rio.jar:../depends/xom-1.0b7.jar:../depends/xerces.jar
       # ../depends/libvob.jar
 
 PYTHONPATH=-Dpython.path=../depends/jythonlib.jar:../depends/jython.jar:../depends/pythonlib.jar:.:../libvob:../alph
