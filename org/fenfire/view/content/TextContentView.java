@@ -157,7 +157,7 @@ public class TextContentView implements ContentViewSettings.ContentView {
 	Model textModel = texter.model(node);
 	Model cursorModel = SimpleModel.newInstance(cursor.textCursor);
 
-	List text = Lobs.text(texter.getText(node));
+	List text = Lobs.text(Components.font(), texter.getText(node));
 	text = Lobs.keyList(text, node);
 	Lob lob = Lobs.linebreaker(text);
 	
