@@ -157,6 +157,47 @@ def test_ObservableGraph_add_obs_in_chg():
 
 
 
+def test_ObservableGraph_start_end_update():
+    node = _node
+
+    o1 = _Obs()
+    o2 = _Obs()
+
+    graph.startUpdate()
+
+    assert graph.find1_11X(node[0], node[1], o1) == None
+    assert o1.t == o2.t == 0
+
+    graph.add(node[0], node[1], node[2])
+
+    assert o1.t == o2.t == 0
+
+    graph.endUpdate()
+
+    assert o1.t == 1 and o2.t == 0
+
+    assert graph.find1_11X(node[0], node[1], o2) == node[2]
+
+    graph.startUpdate(); graph.startUpdate()
+
+    graph.rm_111(node[0], node[1], node[2])
+
+    assert o1.t == 1 and o2.t == 0
+
+    graph.endUpdate()
+
+    assert o1.t == 1 and o2.t == 0
+
+    graph.endUpdate()
+
+    assert o1.t == 1 and o2.t == 1
+
+    graph.add(node[0], node[1], node[2])
+    
+    assert o1.t == 1 and o2.t == 1
+
+
+
 def test_ObservableGraph_Func():
     node = _node
     class Func(NodeFunction):

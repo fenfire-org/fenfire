@@ -10,6 +10,9 @@ import org.nongnu.navidoc.util.Obs;
 public interface Graph extends ConstGraph {
     Graph getObservedGraph(org.nongnu.navidoc.util.Obs o);
 
+    void startUpdate();
+    void endUpdate();
+
     void set1_11X(Object subject, Object predicate, Object object);
     void add(Object subject, Object predicate, Object object);
     void addAll(Graph g);

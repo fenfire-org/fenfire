@@ -8,6 +8,9 @@
     public class HashQuadsGraph extends AbstractQuadsGraph {
 	private StdObserver observer = new StdObserver();
 
+        public void startUpdate() { observer.startUpdate(); }
+        public void endUpdate() { observer.endUpdate(); }
+
         PairMap map_X11A = new PairMap();
 public Object find1_X11A(Object pred, Object obj, Obs obs) {
     if(obs != null)

@@ -82,7 +82,7 @@ public final class SmushedQuadsGraph extends SmushedQuadsGraph_Gen {
 	if(g == null) 
 	    return node;
 	else {
-	    if(dbg) p("GET "+node+" ====> "+g.canonicalNode);
+	    //if(dbg) p("GET "+node+" ====> "+g.canonicalNode);
 	    return g.canonicalNode;
 	}
     }

@@ -8,6 +8,9 @@
     public class SimpleHashGraph extends AbstractGraph {
 	private StdObserver observer = new StdObserver();
 
+        public void startUpdate() { observer.startUpdate(); }
+        public void endUpdate() { observer.endUpdate(); }
+
         protected class Key {
             Object k1, k2;
             public Key(Object k1, Object k2) {

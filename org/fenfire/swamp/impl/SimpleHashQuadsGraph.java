@@ -8,6 +8,9 @@
     public class SimpleHashQuadsGraph extends AbstractQuadsGraph {
 	private StdObserver observer = new StdObserver();
 
+        public void startUpdate() { observer.startUpdate(); }
+        public void endUpdate() { observer.endUpdate(); }
+
         protected class Key {
             Object k1, k2, k3;
             public Key(Object k1, Object k2, Object k3) {

@@ -108,6 +108,9 @@ import org.nongnu.navidoc.util.Obs;
 public interface Graph extends ConstGraph {
     Graph getObservedGraph(org.nongnu.navidoc.util.Obs o);
 
+    void startUpdate();
+    void endUpdate();
+
     void set1_11X(Object subject, Object predicate, Object object);
     void add(Object subject, Object predicate, Object object);
     void addAll(Graph g);
@@ -191,6 +194,9 @@ spec.simpleHashGraphTemplate = """
     public class SimpleHashGraph extends AbstractGraph {
 	private StdObserver observer = new StdObserver();
 
+        public void startUpdate() { observer.startUpdate(); }
+        public void endUpdate() { observer.endUpdate(); }
+
         protected class Key {
             Object k1, k2;
             public Key(Object k1, Object k2) {
@@ -223,6 +229,9 @@ spec.hashGraphTemplate = """
 
     public class HashGraph extends AbstractGraph {
 	private StdObserver observer = new StdObserver();
+
+        public void startUpdate() { observer.startUpdate(); }
+        public void endUpdate() { observer.endUpdate(); }
 
         %s
 
@@ -292,6 +301,11 @@ public class StdObservedGraph extends StdObservedConstGraph implements Graph {
 	throw new Error("DoubleObs");
     }
 
+    
+    public void startUpdate() { graph.startUpdate(); }
+    public void endUpdate() { graph.endUpdate(); }
+
+
     public void set1_11X(Object subject, Object predicate, Object object) {
 	graph.set1_11X(subject, predicate, object);
     }
@@ -320,6 +334,9 @@ public abstract class DelegateGraph extends AbstractGraph {
     public DelegateGraph(Graph graph) {
 	this.graph = graph;
     }
+
+    public void startUpdate() { graph.startUpdate(); }
+    public void endUpdate() { graph.endUpdate(); }
     
     public void close() { graph.close(); }
     public Obs getObserver() { return graph.getObserver(); }
@@ -400,6 +417,9 @@ import org.nongnu.navidoc.util.Obs;
 public interface QuadsGraph extends QuadsConstGraph {
     QuadsGraph getObservedGraph(org.nongnu.navidoc.util.Obs o);
 
+    void startUpdate();
+    void endUpdate();
+
     void add(Object subject, Object predicate, Object object, Object context);
 
     %s
@@ -468,6 +488,9 @@ quad_spec.simpleHashGraphTemplate = """
     public class SimpleHashQuadsGraph extends AbstractQuadsGraph {
 	private StdObserver observer = new StdObserver();
 
+        public void startUpdate() { observer.startUpdate(); }
+        public void endUpdate() { observer.endUpdate(); }
+
         protected class Key {
             Object k1, k2, k3;
             public Key(Object k1, Object k2, Object k3) {
@@ -500,6 +523,9 @@ quad_spec.hashGraphTemplate = """
 
     public class HashQuadsGraph extends AbstractQuadsGraph {
 	private StdObserver observer = new StdObserver();
+
+        public void startUpdate() { observer.startUpdate(); }
+        public void endUpdate() { observer.endUpdate(); }
 
         %s
 
@@ -571,6 +597,9 @@ public class StdObservedQuadsGraph extends StdObservedQuadsConstGraph
 	throw new Error("DoubleObs");
     }
 
+    public void startUpdate() { graph.startUpdate(); }
+    public void endUpdate() { graph.endUpdate(); }
+
     %s
 
     public void add(Object subject, Object predicate, Object object, Object quad) {
@@ -591,7 +620,10 @@ public abstract class DelegateQuadsGraph extends AbstractQuadsGraph {
     public DelegateQuadsGraph(QuadsGraph graph) {
 	this.graph = graph;
     }
-    
+
+    public void startUpdate() { graph.startUpdate(); }
+    public void endUpdate() { graph.endUpdate(); }
+
     public void close() { graph.close(); }
     public Obs getObserver() { return graph.getObserver(); }
     public QuadsConstGraph getOriginalConstGraph() {
@@ -632,6 +664,9 @@ public class %s extends AbstractGraph {
         this.context = context;
     }
 
+    public void startUpdate() { graph.startUpdate(); }
+    public void endUpdate() { graph.endUpdate(); }
+
     public Obs getObserver() { return graph.getObserver(); }
     public boolean contains(Object subj, Object pred, Object obj) {
         return graph.findN_111X_Iter(subj,pred,obj).hasNext(); }
@@ -657,6 +692,9 @@ public abstract class SmushedQuadsGraph_Gen extends AbstractQuadsGraph {
     protected QuadsGraph smushed = new HashQuadsGraph();
 
     protected abstract Object get(Object node);
+
+    public void startUpdate() { smushed.startUpdate(); }
+    public void endUpdate() { smushed.endUpdate(); }
 
     public boolean contains(Object s, Object p, Object o, Object c, Obs obs) {
         return smushed.contains(get(s), get(p), get(o), c, obs);

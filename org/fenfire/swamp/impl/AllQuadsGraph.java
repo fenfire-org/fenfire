@@ -14,6 +14,9 @@ public class AllQuadsGraph extends AbstractGraph {
         this.context = context;
     }
 
+    public void startUpdate() { graph.startUpdate(); }
+    public void endUpdate() { graph.endUpdate(); }
+
     public Obs getObserver() { return graph.getObserver(); }
     public boolean contains(Object subj, Object pred, Object obj) {
         return graph.findN_111X_Iter(subj,pred,obj).hasNext(); }

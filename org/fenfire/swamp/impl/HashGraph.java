@@ -8,6 +8,9 @@
     public class HashGraph extends AbstractGraph {
 	private StdObserver observer = new StdObserver();
 
+        public void startUpdate() { observer.startUpdate(); }
+        public void endUpdate() { observer.endUpdate(); }
+
         PairMap map_X11 = new PairMap();
 public Object find1_X11(Object pred, Object obj, Obs obs) {
     if(obs != null)

@@ -11,6 +11,9 @@ public abstract class DelegateGraph extends AbstractGraph {
     public DelegateGraph(Graph graph) {
 	this.graph = graph;
     }
+
+    public void startUpdate() { graph.startUpdate(); }
+    public void endUpdate() { graph.endUpdate(); }
     
     public void close() { graph.close(); }
     public Obs getObserver() { return graph.getObserver(); }

@@ -12,6 +12,9 @@ public abstract class SmushedQuadsGraph_Gen extends AbstractQuadsGraph {
 
     protected abstract Object get(Object node);
 
+    public void startUpdate() { smushed.startUpdate(); }
+    public void endUpdate() { smushed.endUpdate(); }
+
     public boolean contains(Object s, Object p, Object o, Object c, Obs obs) {
         return smushed.contains(get(s), get(p), get(o), c, obs);
     }

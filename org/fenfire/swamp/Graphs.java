@@ -125,7 +125,13 @@ public class Graphs {
 
 	Parser parser = new org.openrdf.rio.turtle.TurtleParser();
 	setHandlers(parser, graph, namespaces);
-	parse(parser, in, baseURI);
+
+	graph.startUpdate();
+	try {
+	    parse(parser, in, baseURI);
+	} finally {
+	    graph.endUpdate();
+	}
     }
 
     public static void readTurtle(Reader r, String baseURI,
@@ -134,7 +140,13 @@ public class Graphs {
 
 	Parser parser = new org.openrdf.rio.turtle.TurtleParser();
 	setHandlers(parser, graph, namespaces);
-	parse(parser, r, baseURI);
+
+	graph.startUpdate();
+	try {
+	    parse(parser, r, baseURI);
+	} finally {
+	    graph.endUpdate();
+	}
     }
 
     public static void readXML(File file, Graph graph, Map namespaces) 
@@ -150,7 +162,13 @@ public class Graphs {
 
 	Parser parser = new org.openrdf.rio.rdfxml.RdfXmlParser();
 	setHandlers(parser, graph, namespaces);
-	parse(parser, in, baseURI);
+
+	graph.startUpdate();
+	try {
+	    parse(parser, in, baseURI);
+	} finally {
+	    graph.endUpdate();
+	}
     }
 
     public static void readXML(Reader r, String baseURI,
@@ -159,7 +177,13 @@ public class Graphs {
 
 	Parser parser = new org.openrdf.rio.rdfxml.RdfXmlParser();
 	setHandlers(parser, graph, namespaces);
-	parse(parser, r, baseURI);
+
+	graph.startUpdate();
+	try {
+	    parse(parser, r, baseURI);
+	} finally {
+	    graph.endUpdate();
+	}
     }
 
 

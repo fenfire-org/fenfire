@@ -19,6 +19,9 @@ public class StdObservedQuadsGraph extends StdObservedQuadsConstGraph
 	throw new Error("DoubleObs");
     }
 
+    public void startUpdate() { graph.startUpdate(); }
+    public void endUpdate() { graph.endUpdate(); }
+
     public void rm_111A(Object subj, Object pred, Object obj) {
     graph.rm_111A(subj, pred, obj);
 }

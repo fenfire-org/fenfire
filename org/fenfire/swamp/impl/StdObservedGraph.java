@@ -18,6 +18,11 @@ public class StdObservedGraph extends StdObservedConstGraph implements Graph {
 	throw new Error("DoubleObs");
     }
 
+    
+    public void startUpdate() { graph.startUpdate(); }
+    public void endUpdate() { graph.endUpdate(); }
+
+
     public void set1_11X(Object subject, Object predicate, Object object) {
 	graph.set1_11X(subject, predicate, object);
     }

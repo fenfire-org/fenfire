@@ -10,6 +10,9 @@ import org.nongnu.navidoc.util.Obs;
 public interface QuadsGraph extends QuadsConstGraph {
     QuadsGraph getObservedGraph(org.nongnu.navidoc.util.Obs o);
 
+    void startUpdate();
+    void endUpdate();
+
     void add(Object subject, Object predicate, Object object, Object context);
 
     void rm_111A(Object subj, Object pred, Object obj);

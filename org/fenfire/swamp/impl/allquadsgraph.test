@@ -1,0 +1,50 @@
+#-*-python-*-
+# 
+# Copyright (c) 2003, Tuomas J. Lukka and Matti Katila
+# This file is part of Fenfire.
+# 
+# Fenfire is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# Fenfire is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+# Public License for more details.
+# 
+# You should have received a copy of the GNU General
+# Public License along with Fenfire; if not, write to the Free
+# Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA  02111-1307  USA
+# 
+
+
+from org.fenfire import swamp
+
+from org.fenfire.swamp.graphtest import *
+from org.fenfire.swamp.observablegraphtest import *
+
+
+def setUp():
+    global _graph, quadsGraph
+    
+    quadsGraph = swamp.impl.HashQuadsGraph()
+    _graph = swamp.impl.AllQuadsGraph(quadsGraph, "foo:bar")
+    setUpGraphtest(_graph)
+    setUpObservableGraphTest(_graph)
+
+
+def testUniqueTripleInMultipleGraphs():
+    uriMaker = org.fenfire.util.URN5Namespace()
+    n = [Nodes.get(uriMaker.generateId()) for i in range(5)]
+    
+    quadsGraph.add(n[0], n[1], n[2], n[3])
+    quadsGraph.add(n[0], n[1], n[2], n[4])
+
+    i = quadsGraph.findN_111X_Iter(n[0], n[1], n[2])
+    i.next()
+    i.next()
+    assert not i.hasNext()
+
+    _graph.find1_11X(n[0], n[1])

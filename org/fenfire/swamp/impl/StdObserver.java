@@ -1,7 +1,7 @@
 /*
 StdObserver.java
  *    
- *    Copyright (c) 2003-2004, Tuomas J. Lukka and Benja Fallenstein
+ *    Copyright (c) 2003-2005, Tuomas J. Lukka and Benja Fallenstein
  *    This file is part of Fenfire.
  *    
  *    Fenfire is free software; you can redistribute it and/or modify it under
@@ -29,6 +29,7 @@ import org.fenfire.util.*;
 import org.fenfire.swamp.*;
 import org.nongnu.libvob.util.AbstractHashtable;
 import org.nongnu.navidoc.util.Obs;
+import java.util.*;
 
 /** Implement simple observation functions for triples.
  */
@@ -43,6 +44,22 @@ public class StdObserver extends AbstractHashtable {
 
     protected Object[] subj, pred, obj;
     protected Obs[] obs;
+
+    protected Set obsesToTrigger = new HashSet();
+    protected int updatesInProgress;
+    
+    public void startUpdate() { updatesInProgress++; }
+    public void endUpdate() {
+	updatesInProgress--;
+	if(updatesInProgress < 0) { updatesInProgress = 0; return; }
+
+	if(updatesInProgress == 0) {
+	    for(Iterator i=obsesToTrigger.iterator(); i.hasNext();)
+		((Obs)i.next()).chg();
+
+	    obsesToTrigger.clear();
+	}
+    }
 
 
     public StdObserver() {
@@ -131,7 +148,11 @@ public class StdObserver extends AbstractHashtable {
 		    // right behavior... (XXX)
 
 		    removeEntry(i);
-		    theObs.chg();
+
+		    if(updatesInProgress == 0)
+			theObs.chg();
+		    else
+			obsesToTrigger.add(theObs);
 		}
 	    }
 
