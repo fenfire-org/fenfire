@@ -49,6 +49,10 @@ public class FenFeed extends LobLob {
 	content = "http://purl.org/rss/1.0/modules/content/";
 
     public static final Object
+	CONFIGURATION = Nodes.get(fenfeed+"Configuration"),
+	SUBSCRIBED_TO = Nodes.get(fenfeed+"subscribedTo"), // config -> feed
+	READ = Nodes.get(fenfeed+"read"), // config -> item (marked as read)
+
 	CHANNEL = Nodes.get(rss+"channel"),
 	ITEM = Nodes.get(rss+"item"),
 	ITEMS = Nodes.get(rss+"items"),
@@ -60,11 +64,17 @@ public class FenFeed extends LobLob {
 
     private static final float inf = Float.POSITIVE_INFINITY;
 
-    public FenFeed(Graph g) {
+    // conf = configuration node
+    public FenFeed(final Graph g, final Object conf) { 
 	Model gm = new ObjectModel(g);
+	
+	Color col = Color.black;
+	Model font = new ObjectModel(new LobFont("Serif", 0, 20, col));
+	Model boldFont = new ObjectModel(new LobFont("Serif", 
+						     java.awt.Font.BOLD, 
+						     20, col));
 
-	RDFLobFactory rlob = 
-	    new RDFLobFactory(gm, Theme.getTextFont());
+	final RDFLobFactory rlob = new RDFLobFactory(gm, font);
 
 	SetModel channels = rlob.setModel(CHANNEL, RDF.type, -1);
 	Comparator cmp = new PropertyComparator(gm, DATE);
@@ -75,13 +85,36 @@ public class FenFeed extends LobLob {
 
 	ListModel items = rlob.containerModel(selectedChannel, ITEMS, 1);
 
-	Model selectedItem = new ObjectModel();
+	final Model selectedItem = new ObjectModel();
+
+	selectedItem.addObs(new Obs() { public void chg() {
+	    g.add(conf, READ, selectedItem.get());
+	}});
+
 	if(!items.isEmpty())
 	    selectedItem.set(items.iterator().next());
 
 	Box hbox = new Box(X);
 
-	ListBox channel_list = rlob.listBox(channels, TITLE, cmp, "channels");
+	Model channel = Parameter.model(ListModel.PARAM);
+	ListModel cis = rlob.containerModel(channel, ITEMS, 1);// channel items
+	Model allRead = new FunctionModel(cis) { public Object f(Object o,
+								 Obs obs) {
+	    boolean allRead = true;
+
+	    for(Iterator i=((Collection)o).iterator(); i.hasNext();) {
+		if(!g.contains(conf, READ, i.next(), obs))
+		    allRead = false;
+	    }
+
+	    return allRead ? Boolean.TRUE : Boolean.FALSE;
+	}};
+	Model channelFont = allRead.select(font, boldFont);
+	Lob chTemplate = new Label(rlob.string(channel, TITLE), channelFont);
+
+	ListBox channel_list = 
+	    new ListBox(rlob.listModel(channels, cmp), chTemplate, 
+			new ObjectModel("channels"));
 	channel_list.setSelectionModel(selectedChannel);
 	hbox.addRequest(channel_list, 250, 250, 250);
 
@@ -90,7 +123,16 @@ public class FenFeed extends LobLob {
 	Box vbox = new Box(Y);
 	hbox.add(vbox);
 
-	ListBox item_list = rlob.listBox(items, TITLE, "items");
+
+	SetModel itemsRead = rlob.setModel(conf, READ, 1);
+
+	Model item = Parameter.model(ListModel.PARAM);
+	Model wasRead = itemsRead.containsModel(item);
+	Model itemFont = wasRead.select(font, boldFont);
+	Lob template = new Label(rlob.string(item, TITLE), itemFont);
+
+	ListBox item_list = new ListBox(items, template, 
+					new ObjectModel("items"));
 	item_list.setSelectionModel(selectedItem);
 	vbox.addRequest(item_list, 200, 200, 200);
 
@@ -101,32 +143,66 @@ public class FenFeed extends LobLob {
 	Model NULL = new ObjectModel(null);
 	Model content = enc.equalsModel(NULL).select(desc, enc);
 	Model str = new LiteralStringModel(content);
-	TextModel text = 
-	    new TextModel.StringTextModel(str, Theme.getTextFont());
+	TextModel txt = new TextModel.StringTextModel(str, font, selectedItem);
 
-	vbox.add(new TextArea(text));
+	vbox.add(new TextArea(txt));
 
-	setDelegate(new Margin(hbox, 5));
+	Lob l = new Margin(hbox, 5);
+	l = new FocusLob(l);
+	
+	KeyController kc = new KeyController(l);
+	kc.add("Ctrl-Q", new AbstractAction() { public void run() {
+	    System.exit(0);
+	}});
+
+	setDelegate(kc);
     }
 
     public static void main(String[] args) throws IOException {
-	HTTPContext context = new HTTPContext();
-	QuadsGraph graph = new SmushedQuadsGraph();
+	final HTTPContext context = new HTTPContext();
+	final QuadsGraph graph = new SmushedQuadsGraph();
 
-	Set subscriptions = new HashSet();
+	final Graph confGraph = new OneQuadGraph(graph, "foo:fenfeed-conf");
+
+	final File confFile = new File("fenfeed_conf.turtle");
+	if(confFile.exists())
+	    Graphs.readTurtle(confFile, confGraph, new HashMap());
+
+	Object _configuration = confGraph.find1_X11(RDF.type, CONFIGURATION);
+	if(_configuration == null) {
+	    _configuration = Nodes.N();
+	    confGraph.add(_configuration, RDF.type, CONFIGURATION);
+	}
+	final Object configuration = _configuration;
+
+	Set subscriptionsModel = 
+	    new PropValueSetModel(confGraph, new ObjectModel(configuration), 
+				  SUBSCRIBED_TO, 1);
 
 	for(int i=0; i<args.length; i++)
-		subscriptions.add(args[i]);
+	    subscriptionsModel.add(Nodes.get(args[i]));
 
-	Aggregator agg = new Aggregator(graph, new HashMap(), subscriptions,
-					30, context);
+	final Set subscriptions = new HashSet(subscriptionsModel);
 
-	agg.start();
+	Runtime.getRuntime().addShutdownHook(new Thread() { public void run() {
+	    try {
+		Graphs.writeTurtle(confGraph, new HashMap(), confFile);
+	    } catch(IOException e) {
+		throw new Error(e);
+	    }
+	}});
 
-	final Graph g = new AllQuadsGraph(graph, "foo");
+	final Graph g = new AllQuadsGraph(graph, "foo:fenfeed-conf");
 
 	LobMain m = new LobMain(new Color(1, 1, .8f)) {
-		protected Lob createLob() { return new FenFeed(g); }
+		protected Lob createLob() { 
+		    Aggregator agg = new Aggregator(graph, new HashMap(), 
+						    subscriptions, 30,
+						    context);
+		    agg.start();
+
+		    return new FenFeed(g, configuration); 
+		}
 	    };
 	m.start();
     }
