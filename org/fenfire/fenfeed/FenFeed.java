@@ -104,51 +104,31 @@ public class FenFeed extends LobLob {
 	if(!items.isEmpty())
 	    selectedItem.set(items.iterator().next());
 
-	Box hbox = new Box(X);
 
-	Model channel = Parameter.model(ListModel.PARAM);
-	ListModel cis = rlob.containerModel(channel, ITEMS, 1);// channel items
-	Model allRead = new FunctionModel(cis) { public Object f(Object o,
-								 Obs obs) {
-	    boolean allRead = true;
+	ListBox channelList = new ListBox(new ListModel.ListCache(channels)); {
+	    channelList.setKey("channels");
+	    channelList.setSelection(selectedChannel);
 
-	    for(Iterator i=((Collection)o).iterator(); i.hasNext();) {
-		if(!g.contains(conf, READ, i.next(), obs))
-		    allRead = false;
-	    }
+	    // Whether all items in this channel are marked as read
+	    Model read = Models.forall(rlob.containerModel("*", ITEMS, 1),
+				       rlob.graphContains(conf, READ, "*"));
 
-	    return allRead ? Boolean.TRUE : Boolean.FALSE;
-	}};
-	Model channelFont = allRead.select(font, boldFont);
-	Lob chTemplate = new Label(rlob.string(channel, TITLE), channelFont);
-
-	ListBox channel_list = 
-	    new ListBox(rlob.listModel(channels, cmp), 
-			"template", chTemplate, 
-			"key", "channels");
-	channel_list.setSelectionModel(selectedChannel);
-	hbox.addRequest(channel_list, 250, 250, 250);
-
-	hbox.glue(5, 5, 5);
-
-	Box vbox = new Box(Y);
-	hbox.add(vbox);
+	    channelList.setTemplate(new Label(rlob.string("*", TITLE), 
+					      read.select(font, boldFont)));
+	}
 
 
-	SetModel itemsRead = rlob.setModel(conf, READ, 1);
+	ListBox itemList = new ListBox(items); {
+	    itemList.setKey("items");
+	    itemList.setSelection(selectedItem);
 
-	Model item = Parameter.model(ListModel.PARAM);
-	Model wasRead = itemsRead.containsModel(item);
-	Model itemFont = wasRead.select(font, boldFont);
-	Lob template = new Label(rlob.string(item, TITLE), itemFont);
+	    // Whether this item is marked as read
+	    Model read = rlob.graphContains(conf, READ, "*");
 
-	ListBox item_list = new ListBox(items, 
-					"template", template, 
-					"key", "items");
-	item_list.setSelectionModel(selectedItem);
-	vbox.addRequest(item_list, 200, 200, 200);
+	    itemList.setTemplate(new Label(rlob.string("*", TITLE),
+					   read.select(font, boldFont)));
+	}
 
-	vbox.glue(5, 5, 5);
 
 	ListModel texts = new ListModel.Simple();
 	texts.add(rlob.textModel("Title: ", false));
@@ -161,8 +141,25 @@ public class FenFeed extends LobLob {
 	texts.add(rlob.textsModel(selectedItem, DC_SUBJECT, null));
 	texts.add(rlob.textModel("\n\n", false));
 	texts.add(rlob.textModel(selectedItem, ITEM_TEXT));
-	vbox.add(new TextArea(new TextModel.Concat(texts), 
-			      new ObjectModel("body")));
+
+	TextArea textArea = new TextArea(new TextModel.Concat(texts), 
+					 new ObjectModel("body"));
+
+
+	Box hbox = new Box(X); {
+
+	    Box vbox = new Box(Y);
+
+	    hbox.addRequest(channelList, 250, 250, 250);
+	    hbox.glue(5, 5, 5);
+	    hbox.add(vbox); {
+		vbox.addRequest(itemList, 200, 200, 200);
+		vbox.glue(5, 5, 5);
+		vbox.add(textArea);
+	    }
+	}
+
+
 
 	Lob l = new Margin(hbox, 5);
 	l = new FocusLob(l);

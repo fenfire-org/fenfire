@@ -127,12 +127,11 @@ public class RDFNotebook extends LobLob {
 
 	hbox.glue(5, 5, 5);
 
-	ListBox noteList = 
-	    new ListBox(rlob.listModel(notes, dateCmp),
-			"template", rlob.label("*", TITLE),
-			"key", "NOTES");
-	
-	noteList.setSelectionModel(selectedNote);
+	ListBox noteList = new ListBox(rlob.listModel(notes, dateCmp)); {
+	    noteList.setTemplate(rlob.label("*", TITLE));
+	    noteList.setKey("NOTES");
+	    noteList.setSelection(selectedNote);
+	}
 
 	hbox.addRequest(noteList, 100, 250, 250);
 	hbox.glue(5, 5, 5);

@@ -49,6 +49,10 @@ public class RDFLobFactory {
 	return Nodes.isNode(o) ? new ObjectModel(o) : (Model)o;
     }
 
+    public Model graphContains(Object s, Object p, Object o) {
+	return new GraphContainsModel(graph, model(s), model(p), model(o));
+    }
+
     public Model value(Object node, Object property) {
 	return value(node, property, 1);
     }
@@ -168,9 +172,13 @@ public class RDFLobFactory {
     public ListBox listBox(CollectionModel collection, Lob template,
 			   Comparator cmp, Object key) {
 	collection = new SortedSetModel.SortedSetCache(collection, cmp);
-	return new ListBox(new ListModel.ListCache(collection), 
-			   "template", template,
-			   "key", new ObjectModel(key));
+	
+	ListBox listBox = new ListBox(new ListModel.ListCache(collection)); {
+	    listBox.setTemplate(template);
+	    listBox.setKey(key);
+	}
+
+	return listBox;
     }
 
     public ListBox listBox(CollectionModel collection, Object property,
@@ -181,9 +189,11 @@ public class RDFLobFactory {
     }
 
     public ListBox listBox(ListModel list, Object property, Object key) {
-	Lob template = 
-	    label(Parameter.model(ListModel.PARAM), property, false);
-	return new ListBox(list, "template", template, 
-			   "key", new ObjectModel(key));
+	ListBox listBox = new ListBox(list); {
+	    listBox.setTemplate(label("*", property, false));
+	    listBox.setKey(key);
+	}
+
+	return listBox;
     }
 }
