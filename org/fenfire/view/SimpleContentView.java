@@ -47,13 +47,19 @@ public class SimpleContentView implements ContentViewSettings.ContentView {
     private Set textProperties;
     private Object defaultProperty;
 
+    private float minPropBrightness, maxPropBrightness;
+
     public SimpleContentView(Graph graph, Cursor cursor, NamespaceMap nmap, 
-			     Set textProperties, Object defaultProperty) {
+			     Set textProperties, Object defaultProperty,
+			     float minPropBrightness,
+			     float maxPropBrightness) {
 	this.graph = graph;
 	this.cursor = cursor;
 	this.nmap = nmap;
 	this.textProperties = textProperties;
 	this.defaultProperty = defaultProperty;
+	this.minPropBrightness = minPropBrightness;
+	this.maxPropBrightness = maxPropBrightness;
     }
 
     public Set getTypes() {
@@ -125,7 +131,8 @@ public class SimpleContentView implements ContentViewSettings.ContentView {
 	    l = new ViewportLob(Lob.X, l, positionModel, new FloatModel(.5f));
 	} else {
 	    Model color = 
-		new UniqueColorModel(new ObjectModel(node), 0f, .6f);
+		new UniqueColorModel(new ObjectModel(node),
+				     minPropBrightness, maxPropBrightness);
 
 	    TextStyle ts = ((LobFont)Theme.getFont().get()).getTextStyle();
 	    LobFont font = new LobFont(ts, (Color)color.get());

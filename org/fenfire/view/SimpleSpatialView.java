@@ -33,16 +33,30 @@ import org.nongnu.libvob.layout.component.*;
 import org.nongnu.libvob.*;
 import org.nongnu.libvob.util.*;
 import org.nongnu.navidoc.util.Obs;
+import java.awt.Color;
 import java.util.*;
 
 public class SimpleSpatialView implements SpatialViewSettings.SpatialView {
 
     private ContentViewSettings contentViewSettings;
+    private Color bgColor;
+    private Color nodeBorderColor;
+    private Color literalBorderColor;
 
     private Map cache = new org.nongnu.navidoc.util.WeakValueMap();
 
     public SimpleSpatialView(ContentViewSettings contentViewSettings) {
+	this(contentViewSettings, new Color(.85f, .85f, .8f),
+	     new Color(.56f, .425f, 1), new Color(.85f, .425f, 0));
+    }
+
+    public SimpleSpatialView(ContentViewSettings contentViewSettings,
+			     Color bgColor, Color nodeBorderColor,
+			     Color literalBorderColor) {
 	this.contentViewSettings = contentViewSettings;
+	this.bgColor = bgColor;
+	this.nodeBorderColor = nodeBorderColor;
+	this.literalBorderColor = literalBorderColor;
     }
 
     public Set getTypes() {
@@ -62,9 +76,12 @@ public class SimpleSpatialView implements SpatialViewSettings.SpatialView {
 
 	Model cs = new IntModel();
 
+	Color borderColor = 
+	    (node instanceof Literal) ? literalBorderColor : nodeBorderColor;
+
 	Lob l = contentViewSettings.getLob(node);
 	l = new BuoyConnectorLob(l, node, cs);
-	l = new ThemeFrame(l);
+	l = new Frame(l, bgColor, borderColor, 2, 3, false, false, true);
 	l = new RequestChangeLob(Lob.X, l, Float.NaN, 100, 100);
 	l = new SpatialContextLob(l, cs);
 	cache.put(node, l);
