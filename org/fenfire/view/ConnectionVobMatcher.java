@@ -52,8 +52,6 @@ private static final String rcsid = "$Id: ConnectionVobMatcher.java,v 1.1 2003/0
     protected Object[] linkkey = new Object[16];
     protected int[] cs2 = new int[16];
     protected int[] linkcs = new int[16];
-    /** if positive, link is cs1 --> cs2 in the tree */
-    protected int[] treedir = new int[16];
 
 
     protected int focus = -1, nextFocus = -1;
@@ -84,8 +82,10 @@ private static final String rcsid = "$Id: ConnectionVobMatcher.java,v 1.1 2003/0
 
     /** Indicate that two coordinate systems are linked
      *  in a way indicated by <code>linkkey</code>.
-     *  The connections must form an acyclic graph.
-     *  If it's not, you'll get an infinite loop!
+     *  The connections must form an acyclic graph such that
+     *  if you take any connected coordinate system as the root,
+     *  the connections form a tree. If they don't, 
+     *  you'll get an infinite loop!
      *  <p>
      *  The coordinate systems must have been added using add(),
      *  or they may not be interpolated correctly.
@@ -99,8 +99,10 @@ private static final String rcsid = "$Id: ConnectionVobMatcher.java,v 1.1 2003/0
 
     /** Indicate that two coordinate systems are linked
      *  in a way indicated by <code>linkkey</code>.
-     *  The connections must form an acyclic graph.
-     *  If it's not, you'll get an infinite loop!
+     *  The connections must form an acyclic graph such that
+     *  if you take any connected coordinate system as the root,
+     *  the connections form a tree. If they don't, 
+     *  you'll get an infinite loop!
      *  <p>
      *  The coordinate systems must have been added using add(),
      *  or they may not be interpolated correctly.
@@ -123,7 +125,6 @@ private static final String rcsid = "$Id: ConnectionVobMatcher.java,v 1.1 2003/0
 	    throw new IllegalArgumentException("parent = "+parent+" < 0");
 	
 	this.linkkey[size] = linkKey;
-	this.treedir[size] = dir;
 	this.linkcs[size] = linkCS;
 
 	usedInTree[parent] = true;
@@ -163,13 +164,6 @@ private static final String rcsid = "$Id: ConnectionVobMatcher.java,v 1.1 2003/0
 	    return cs1[getLinkIndex(from, dir, childKey, linkKey)];
     }
 
-    public int getLinkByLinkCS(int linkCS) {
-	for(int i=0; i<size; i++)
-	    if(linkCS == linkcs[i])
-		return (treedir[i]<=0) ? cs1[i] : cs2[i];
-	return -1;
-    }
-
     public int getLinkIndex(int from, int dir, Object childKey,
 			    Object linkKey) {
 	if(dir > 0) {
@@ -185,27 +179,6 @@ private static final String rcsid = "$Id: ConnectionVobMatcher.java,v 1.1 2003/0
 	}
 	
 	throw new NoSuchElementException();
-    }
-
-    protected int getLinkIndexTo(int cs) {
-	for(int i=0; i<size; i++) {
-	    if(cs2[i] == cs && treedir[i] > 0) return i;
-	    if(cs1[i] == cs && treedir[i] <= 0) return i;
-	}
-	throw new NoSuchElementException();
-    }
-
-    public int getLinkParent(int cs) {
-	int i = getLinkIndexTo(cs);
-	return treedir[i] <= 0 ? cs2[i] : cs1[i];
-    }
-
-    public Object getLinkKeyTo(int cs) {
-	return linkkey[getLinkIndexTo(cs)];
-    }
-
-    public int getLinkDirTo(int cs) {
-	return treedir[getLinkIndexTo(cs)] > 0 ? 1 : -1;
     }
 
     // the link traversing -- XXX not fast
@@ -327,15 +300,13 @@ private static final String rcsid = "$Id: ConnectionVobMatcher.java,v 1.1 2003/0
 	Object[] nk = new Object[n];
 	int[] n2 = new int[n];
 	int[] nl = new int[n];
-	int[] nd = new int[n];
 	
 	System.arraycopy(cs1, 0, n1, 0, len);
 	System.arraycopy(linkkey, 0, nk, 0, len);
 	System.arraycopy(cs2, 0, n2, 0, len);
-	System.arraycopy(treedir, 0, nd, 0, len);
 	System.arraycopy(linkcs, 0, nl, 0, len); 
 	
-	cs1 = n1; linkkey = nk; cs2 = n2; treedir = nd; linkcs = nl;
+	cs1 = n1; linkkey = nk; cs2 = n2; linkcs = nl;
     }
 
     protected void expandMaxCS(int n) {
