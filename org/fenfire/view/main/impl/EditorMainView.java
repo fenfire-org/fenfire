@@ -72,7 +72,7 @@ public class EditorMainView
 			     ).window).createChildVobScene(new java.awt.Dimension(100,100), 2);
 		     editor.setSize(v.w, v.h);
 		     editor.render(vs, 1, 2, 
-				0,0, v.w, v.h, 2^32, true);
+				   v.w, v.h, 2^32, true);
 		     return vs;
 		 }
 	     };
