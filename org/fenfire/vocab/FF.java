@@ -41,8 +41,15 @@ public class FF {
      */
     static public final Object content;
 
+
+    /** Alph vocabulary for images
+     */
+    static public final Object AlphImg;
+    
+
     static {
 	content = Nodes.get(_nsId + "#content");
+	AlphImg = Nodes.get("http://fenfire.org/rdf-v/2005/03/alph-image");
     }
 }
 
