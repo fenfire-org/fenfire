@@ -28,10 +28,16 @@ import org.fenfire.swamp.*;
 import org.fenfire.swamp.impl.AllQuadsGraph;
 import org.nongnu.navidoc.util.Obs;
 import java.util.*;
+import java.security.*;
 
 public final class SmushedQuadsGraph extends SmushedQuadsGraph_Gen {
     public static boolean dbg = false;
     private static void p(String s) { System.out.println("SmushedQuadsGraph:: "+s); }
+
+    private Object 
+	MBOX = Nodes.get("http://xmlns.com/foaf/0.1/mbox"),
+	SHA1SUM = Nodes.get("http://xmlns.com/foaf/0.1/mbox_sha1sum");
+
 
     private Set ifps = new HashSet(Arrays.asList(Smusher.IFPs));
     private Comparator cmp = new Smusher.NodeComparator();
@@ -112,6 +118,11 @@ public final class SmushedQuadsGraph extends SmushedQuadsGraph_Gen {
 	unsmushed.add(subj, pred, obj, context);
 	smushed.add(get(subj), get(pred), get(obj), context);
 
+	if(pred.equals(MBOX) && Nodes.isNode(obj)) {
+	    pred = SHA1SUM;
+	    obj = new PlainLiteral(get_sha1_hex(Nodes.toString(obj)));
+	}
+
 	if(!ifps.contains(pred)) return;
 
 	if(dbg) p("Smushing:\n    "+subj+" \n    "+pred+" \n    "+obj+
@@ -184,6 +195,11 @@ public final class SmushedQuadsGraph extends SmushedQuadsGraph_Gen {
 	smushed.rm_1111(get(subj), get(pred), get(obj), context);
 
 	if(dbg) p("rm ? "+pred);
+
+	if(pred.equals(MBOX) && Nodes.isNode(obj)) {
+	    pred = SHA1SUM;
+	    obj = new PlainLiteral(get_sha1_hex(Nodes.toString(obj)));
+	}
 
 	if(!ifps.contains(pred)) return;
 
@@ -410,13 +426,27 @@ public final class SmushedQuadsGraph extends SmushedQuadsGraph_Gen {
 	    throw new Error(node+" "+findN_XA1A_Iter(node).next());
     }
 
-    public static SmushedQuadsGraph instance;
 
-    public SmushedQuadsGraph() {
-	instance = this;
-    }
+    public static String get_sha1_hex(String s) {
+	MessageDigest digest;
 
-    public static void checkInstanceSanity() {
-	instance.checkSanity();
+	try {
+	    digest = MessageDigest.getInstance("SHA1");
+	} catch(NoSuchAlgorithmException e) {
+	    throw new Error(e);
+	}
+
+	digest.update(s.getBytes());
+	byte[] b = digest.digest();
+
+	String result = "";
+	for(int i=0; i<b.length; i++) {
+	    int val = b[i]<0 ? b[i]+256 : b[i];
+
+	    if(val < 16) result += "0";
+	    result += Integer.toHexString(val);
+	}
+
+	return result;
     }
 }
