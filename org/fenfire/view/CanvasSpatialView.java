@@ -36,6 +36,7 @@ import org.nongnu.libvob.layout.component.*;
 import org.nongnu.libvob.*;
 import org.nongnu.libvob.util.*;
 import org.nongnu.navidoc.util.Obs;
+import java.awt.Color;
 import java.util.*;
 
 public class CanvasSpatialView implements ViewSettings.SpatialView {
@@ -148,8 +149,10 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 			rerender();
 		    }
 		}); 
-	    l = new UniqueColorLob(l, c.getNode());
-	    l = new ClipLob(l);
+
+	    Model bgcolor = new UniqueColorModel(new ObjectModel(c.getNode()));
+	    l = new Frame(l, bgcolor, new ObjectModel(Color.black),
+			  2, 0, false, false, true);
 
 	    coordlobs.put(c, l);
 	}
@@ -164,31 +167,36 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
     }
     
 
-    private class UniqueColorLob extends AbstractMonoLob {
-	Object k;
-	java.awt.Color color;
-	UniqueColorLob(Lob content, Object node) {
-	    super(content);
-	    k = node;
+    private class UniqueColorModel extends AbstractModel.AbstractObjectModel {
+	Model key;
 
-	    java.util.Random r = new Random(k.hashCode());
-	    float R = 1 - r.nextFloat() * 0.2f,
-		G = 1 - r.nextFloat() * 0.2f,
-		B = 1 -r.nextFloat() * 0.2f;
-	    this.color = new java.awt.Color(R,G,B); 
+	UniqueColorModel(Model key) {
+	    this.key = key;
 	}
-	public Object clone(Object[] params) {
-	    return new UniqueColorLob((Lob)params[0], k);
+	
+	protected Replaceable[] getParams() {
+	    return new Replaceable[] { key };
 	}
-	public void render(VobScene scene, int into, int matchingParent,
-		       float w, float h, float d,
-		       boolean visible) {
-	    winAnim = scene.anim;
-	    scene.put(new org.nongnu.libvob.vobs.RectBgVob(color),
-		      scene.coords.translate(scene.coords.box(into, w,h), 0,0, 1));
-	    super.content.render(scene, into, matchingParent, w,h,d,visible);
+	protected Object clone(Object[] params) {
+	    return new UniqueColorModel((Model)params[0]);
+	}
+
+	Color color;
+
+	public void chg() {
+	    color = null;
+	}
+
+	public Object get() {
+	    if(color == null) {
+		java.util.Random r = new Random(key.get().hashCode());
+		float 
+		    R = 1 - r.nextFloat() * 0.2f,
+		    G = 1 - r.nextFloat() * 0.2f,
+		    B = 1 - r.nextFloat() * 0.2f;
+		color = new Color(R,G,B); 
+	    }
+	    return color;
 	}
     }
-
-
 }
