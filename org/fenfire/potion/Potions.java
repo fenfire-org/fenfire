@@ -42,6 +42,11 @@ public class Potions {
 	    public void execute(Object[] params, Map context) {
 		Graph g = (Graph)context.get("graph");
 		g.add(params[0], params[1], params[2]);
+
+		// hmmm... it's not too nice to have this here, but how else
+		// could we make it work?
+		Cursor cursor = (Cursor)context.get("cursor");
+		cursor.setRotation(params[0], params[1], params[2]);
 	    }
 	};
 

@@ -57,6 +57,13 @@ public final class Cursor {
 	rotations.put(node, rotation);
     }
 
+    /** Set the rotation both ways.
+     */
+    public void setRotation(Object node1, Object prop, Object node2) {
+	setRotation(node1, prop, node2, 1);
+	setRotation(node2, prop, node1, -1);
+    }
+
     public void setRotation(Object node, Object rotationProperty, 
 			    Object rotationNode, int dir) {
 	rotations.put(node, new Rotation(rotationProperty, rotationNode, dir));
