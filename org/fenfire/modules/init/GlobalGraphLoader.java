@@ -40,10 +40,8 @@ public class GlobalGraphLoader implements FServer.RequestHandler {
 	this.f = f;
 
 	this.qg = new HashQuadsGraph();
-	this.g = new GraphToQuadsGraph(qg){
-		Object q = Nodes.N();
-		protected Object getQuad() { return q; }
-	    };
+	this.g = new AllQuadsGraph(qg, Nodes.N());
+
 	if (f.environment.createRequest("global graph", this))
 	    throw new Error("Storm loader already inited!");
     }

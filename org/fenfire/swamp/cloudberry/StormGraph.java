@@ -40,25 +40,21 @@ import java.io.*;
 
 /** An RDF graph used to store in storm pointer.
  */
-public class StormGraph extends GraphToQuadsGraph {
+public class StormGraph extends AllQuadsGraph {
     private void p(String s) { System.out.println("StormGraph:: "+s); }
     
     final PointerId ptr;
     final IndexedPool pool;
     
-    final Object id; 
-    protected Object getQuad() { return id; }
-
     final Object pred = 
     Nodes.get("http://org.fenfire.swamp.cloudberry.StormGraph#belongsTo.html");
 
     // import the rdf into the system
     public StormGraph(QuadsGraph g, IndexedPool pool, 
 		      PointerId ptr) throws Exception {
-	super(g);
+	super(g, Nodes.N());
 	this.pool = pool;
 	this.ptr = ptr;
-	id = Nodes.N();
 
 
 	// test case..
@@ -92,14 +88,14 @@ public class StormGraph extends GraphToQuadsGraph {
     }
 
     public void remove() {
-	graph.rm_AAA1(getQuad());
+	graph.rm_AAA1(context);
     }
     
     PythonInterpreter interp;
     
     public void flush(PointerSigner signer) throws Exception {
 	Graph graph = new HashGraph();
-	for(Iterator i=super.findN_X11_Iter(pred, id); i.hasNext(); ) {
+	for(Iterator i=super.findN_X11_Iter(pred, context); i.hasNext(); ) {
 	    Object t = i.next();
 	    Object s,p,o;
 	    s = super.find1_11X(t, RDF.subject);

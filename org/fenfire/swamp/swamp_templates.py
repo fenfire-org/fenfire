@@ -169,6 +169,120 @@ spec.hashGraphTemplate = """
     }
 """
 
+spec.stdObservedConstGraphTemplate = """
+package org.fenfire.swamp.impl;
+import org.nongnu.navidoc.util.Obs;
+import org.fenfire.swamp.*;
+import java.util.Iterator;
+
+public class StdObservedConstGraph implements ConstGraph {
+    ConstGraph constgraph;
+    Obs obs;
+
+    public StdObservedConstGraph(ConstGraph graph, Obs obs) {
+	this.constgraph = graph;
+	this.obs = obs;
+    }
+
+    public ConstGraph getObservedConstGraph(Obs obs) {
+	throw new Error("DoubleObs");
+    }
+
+    public void close() { }
+
+    public Obs getObserver() {
+	return obs;
+    }
+
+    public ConstGraph getOriginalConstGraph() {
+	return constgraph;
+    }
+
+    public boolean contains(Object e0, Object e1, Object e2) {
+	return constgraph.contains(e0, e1, e2, obs);
+    }
+    public boolean contains(Object e0, Object e1, Object e2, Obs o) {
+	throw new Error("DoubleObs");
+    }
+
+    %s
+}
+"""
+
+spec.stdObservedGraphTemplate = """
+package org.fenfire.swamp.impl;
+import org.nongnu.navidoc.util.Obs;
+import org.fenfire.swamp.*;
+import java.util.Iterator;
+
+public class StdObservedGraph extends StdObservedConstGraph implements Graph {
+    Graph graph;
+
+    public StdObservedGraph(Graph graph, Obs obs) {
+	super(graph, obs);
+	this.graph = graph;
+	this.obs = obs;
+    }
+
+    public Graph getObservedGraph(Obs obs) {
+	throw new Error("DoubleObs");
+    }
+
+    public void set1_11X(Object subject, Object predicate, Object object) {
+	graph.set1_11X(subject, predicate, object);
+    }
+
+    %s
+
+    public void add(Object subject, Object predicate, Object object) {
+	graph.add(subject, predicate, object);
+    }
+
+    public void addAll(Graph g) {
+	graph.addAll(g);
+    }
+}
+"""
+
+spec.delegateGraphTemplate = """
+package org.fenfire.swamp.impl;
+import org.nongnu.navidoc.util.Obs;
+import org.fenfire.swamp.*;
+import java.util.Iterator;
+
+public abstract class DelegateGraph extends AbstractGraph {
+    Graph graph;
+
+    public DelegateGraph(Graph graph) {
+	this.graph = graph;
+    }
+    
+    public synchronized void close() { graph.close(); }
+    public synchronized Obs getObserver() { return graph.getObserver(); }
+    public synchronized ConstGraph getOriginalConstGraph() {
+        return graph.getOriginalConstGraph();    }
+    public synchronized ConstGraph getObservedConstGraph(Obs o) {
+        return graph.getObservedConstGraph(o);    }
+    public synchronized boolean contains(Object e0, Object e1, Object e2) {
+        return graph.contains(e0,e1,e2); }
+    public synchronized boolean contains(Object e0, Object e1, Object e2, Obs o) {
+        return graph.contains(e0,e1,e2, o); }
+    public synchronized Graph getObservedGraph(org.nongnu.navidoc.util.Obs o) {
+        return graph.getObservedGraph(o); }
+    public synchronized void set1_11X(Object subject, Object predicate, Object object) {
+        graph.set1_11X(subject, predicate, object);   }
+    public synchronized void add(Object subject, Object predicate, Object object) {
+        graph.add(subject, predicate, object);     }
+    public synchronized void addAll(Graph g) {
+        graph.addAll(g);     }
+    public synchronized void rm_111(Object subject, Object predicate, Object object) {
+        graph.rm_111(subject, predicate, object);     }
+
+
+    %s
+}
+"""
+
 quad_spec.constGraphTemplate = """
 package org.fenfire.swamp;
 import java.util.Iterator;
@@ -301,6 +415,119 @@ quad_spec.hashGraphTemplate = """
 	}
     }
 """
+
+quad_spec.stdObservedConstGraphTemplate = """
+package org.fenfire.swamp.impl;
+import org.nongnu.navidoc.util.Obs;
+import org.fenfire.swamp.*;
+import java.util.Iterator;
+
+public class StdObservedQuadsConstGraph implements QuadsConstGraph {
+    QuadsConstGraph constgraph;
+    Obs obs;
+
+    public StdObservedQuadsConstGraph(QuadsConstGraph graph, Obs obs) {
+	this.constgraph = graph;
+	this.obs = obs;
+    }
+
+    public QuadsConstGraph getObservedConstGraph(Obs obs) {
+	throw new Error("DoubleObs");
+    }
+
+    public void close() { }
+
+    public Obs getObserver() {
+	return obs;
+    }
+
+    public QuadsConstGraph getOriginalConstGraph() {
+	return constgraph;
+    }
+
+    public boolean contains(Object e0, Object e1, Object e2, Object e3) {
+	return constgraph.contains(e0, e1, e2, e3, obs);
+    }
+    public boolean contains(Object e0, Object e1, Object e2,
+                            Object e3, Obs o) {
+	throw new Error("DoubleObs");
+    }
+
+    %s
+}
+"""
+
+quad_spec.stdObservedGraphTemplate = """
+package org.fenfire.swamp.impl;
+import org.nongnu.navidoc.util.Obs;
+import org.fenfire.swamp.*;
+import java.util.Iterator;
+
+public class StdObservedQuadsGraph extends StdObservedQuadsConstGraph
+         implements QuadsGraph {
+    QuadsGraph graph;
+
+    public StdObservedQuadsGraph(QuadsGraph graph, Obs obs) {
+	super(graph, obs);
+	this.graph = graph;
+	this.obs = obs;
+    }
+
+    public QuadsGraph getObservedGraph(Obs obs) {
+	throw new Error("DoubleObs");
+    }
+
+    public void set1_11XA(Object subject, Object predicate, Object object) {
+    	graph.set1_11XA(subject, predicate, object);
+    }
+
+    %s
+
+    public void add(Object subject, Object predicate, Object object, Object quad) {
+	graph.add(subject, predicate, object, quad);
+    }
+}
+"""
+
+quad_spec.delegateGraphTemplate = """
+package org.fenfire.swamp.impl;
+import org.nongnu.navidoc.util.Obs;
+import org.fenfire.swamp.*;
+import java.util.Iterator;
+
+public abstract class DelegateQuadsGraph extends AbstractQuadsGraph {
+    QuadsGraph graph;
+
+    public DelegateQuadsGraph(QuadsGraph graph) {
+	this.graph = graph;
+    }
+    
+    public synchronized void close() { graph.close(); }
+    public synchronized Obs getObserver() { return graph.getObserver(); }
+    public synchronized QuadsConstGraph getOriginalConstGraph() {
+        return graph.getOriginalConstGraph();    }
+    public synchronized QuadsConstGraph getObservedConstGraph(Obs o) {
+        return graph.getObservedConstGraph(o);    }
+    public synchronized boolean contains(Object e0, Object e1, Object e2, Object e3) {
+        return graph.contains(e0,e1,e2, e3);
+    }
+    public synchronized boolean contains(Object e0, Object e1, Object e2, Object e3, Obs o) {
+        return graph.contains(e0,e1,e2,e3, o);
+    }
+    public synchronized QuadsGraph getObservedGraph(org.nongnu.navidoc.util.Obs o) {
+        return graph.getObservedGraph(o); }
+    public synchronized void set1_11XA(Object subject, Object predicate, Object object) {
+        graph.set1_11XA(subject, predicate, object);   }
+    public synchronized void add(Object subject, Object predicate, Object object, Object context) {
+        graph.add(subject, predicate, object, context);     }
+    public synchronized void rm_1111(Object subject, Object predicate, Object object, Object context) {
+        graph.rm_1111(subject, predicate, object, context);     }
+
+
+    %s
+}
+"""
+
 
 quadAdapterTemplate = """
 package org.fenfire.swamp.impl;

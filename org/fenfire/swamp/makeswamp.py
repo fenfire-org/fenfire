@@ -1,5 +1,8 @@
 # 
-# Copyright (c) 2003-2004, Tuomas J. Lukka and Benja Fallenstein
+# Copyright (c) 2004, Benja Fallenstein
+# Portions Copyright (c) 2003, Tuomas J. Lukka
+# Portions Copyright (c) 2004, Matti J. Katila
+# 
 # This file is part of Fenfire.
 # 
 # Fenfire is free software; you can redistribute it and/or modify it under
@@ -18,720 +21,405 @@
 # MA  02111-1307  USA
 # 
 
-# Generate all swamp code
+from swamp_templates import *
 
-from __future__ import nested_scopes
+#quad_spec.find_patterns = [p+'A' for p in spec.find_patterns] + \
+#                          [p+'1' for p in spec.find_patterns] + ["111X"]
 
-find_patterns = ("11X","1X1","X11", "1XA", "XAA", "X1A")
+quad_spec.find_patterns = [
+            "111X",
 
-constgraph = []
+        "11X1", "1X11", "X111",
+        "11XA", "1X1A", "X11A",
 
-for n in (1,"N"):
-    for pattern in find_patterns:
-	constgraph.append({
-	    "Type": "find", 
-	    "NVal": n, 
-	    "Pattern": pattern})
+        "11AX",
 
-graph = []
+        "1XAA", "1XA1",
+        #"X1AA", "A1XA", "AX1A", "AA1X", "AAX1",
 
-for pattern in (
-	"111",  # Only these three removes at first...
-	"11A", 
-	"A11", 
-	"1AA",
-	):
-    graph.append({
-	"Type": "rm", 
-	"Pattern": pattern})
+        "XAAA", "XAA1", #"AXAA", "AAXA", "AAAX",
 
-#############################################
-# Expand return value type for find functions
+        "X1AA", "X1A1",
+]
 
-def map1(g):
-    if(g["NVal"] == "N"):
-	g["Return"] = "Iterator"
-    return g
+quad_spec.rm_patterns = [
+	"1111",  # Only these three removes at first...
+	"11AA", 
+#	"A111", 
+#	"1AAA",
+	"AAA1",
+        "111A", # and this one!
+]
+
+#quad_spec.rm_patterns = [p+'A' for p in spec.rm_patterns] + \
+#                        [p+'1' for p in spec.rm_patterns]
+
+
+ARGS = ['subj', 'pred', 'obj', 'context']
+
+
+def arguments(p, additionalArgs=[]):
+    """
+    Return the arguments in the argument list of a function
+    with a particular pattern.
+
+    Examples:
+        arguments('11X') == 'Object subj, Object pred'
+        arguments('1X11') == 'Object subj, Object obj, Object context'
+
+    additionalArgs -- List of additional arguments the function should have.
+
+    Example:
+        arguments('1X1A', ['Obs obs']) == 'Object subj, Object obj, Obs obs'
+    """
     
-for g in constgraph: map1(g)
+    n = [i for i in range(len(p)) if p[i]=='1']
+    return ', '.join(['Object %s' % ARGS[i] for i in n]+additionalArgs)
 
-#############################################
-# Make function names and prototypes
+def callArgs(p, additionalArgs=[]):
+    """
+    Return the arguments list for calling a function
+    with a particular pattern.
 
-def copyhash(h):
-    def foo(**h):
-	return h
-    return foo(**h)
+    Examples:
+        callArgs('11X') == 'subj, pred'
+        callArgs('1X11') == 'subj, obj, context'
 
-def funcName(g):
-    pp = []
-    for i in range(0,3):
-	if g["Pattern"][i] == "1":
-	    pp.append("e"+str(i))
-    g["Params"] = pp
+    additionalArgs -- List of additional arguments the function should have.
 
-    if g["Type"] == "find":
-	if g["NVal"] == 1:
-	    g["FRet"] = "Object"
-	    g["FName"] = "find1_" + g["Pattern"]
-	else:
-	    g["FRet"] = "Iterator"
-	    g["FName"] = "findN_"+g["Pattern"]+"_Iter"
+        Example:
+            callArgs('1X1A', ['obs']) == 'subj, obj, obs'
+    """
 
-    elif g["Type"] == "rm":
-	g["FRet"] = "void"
-	g["FName"] = "rm_"+g["Pattern"]
+    args = [ARGS[i] for i in range(len(p)) if p[i]=='1']
+    return ', '.join(args+additionalArgs)
 
-	return
-	
-    else: assert 1==0
 
-for f in constgraph: funcName(f)
-for f in graph: funcName(f)
+def callTupleArgs(p, wildcard='null', additionalArgs=[]):
+    """
+    Like callArgs, but a wildcard will be used in the place
+    of omitted parameters. Examples:
 
-def proto(g, obs=0):
-    pars = []
-    pars.extend(["Object "+i for i in g["Params"]])
-    if obs:
-	pars.append("Obs obs")
-    return (g["FRet"] + " "+g["FName"]+"("+ 
-	    ",".join(pars) +
-	    ") ")
+        callTupleArgs('111', null='null') == 'subj, pred, obj'
+        callTupleArgs('1X1A', null='null') == 'subj, null, obj, null'
+        callTupleArgs('11X', null='WILDCARD') == 'subj, pred, WILDCARD'
+
+    This is used to call methods that take a whole triple/quad.
+
+    wildcard -- the wildcard to use, defaults to 'null'
+    additionalArgs -- List of additional arguments the function should have,
+                      as in callArgs().
+    """
+
+    def choose(cond, v1, v2):
+        if cond: return v1
+        else: return v2
+
+    args = [choose(p[i]=='1', ARGS[i], wildcard) for i in range(len(p))]
+    return ', '.join(args+additionalArgs)
+
+def callIndexArgs(p, wildcard='null', additionalArgs=[]):
+    """
+    Like callArgs, but pads the argument list with a wildcard
+    to have length (len(p)-1). Examples:
+
+        callIndexArgs('11X') == 'subj, pred'
+        callIndexArgs('1XA') == 'subj, null'
+        callIndexArgs('AX1') == 'obj, null'
+        callIndexArgs('AX1A', 'WILD') == 'obj, WILD, WILD'
+
+    This is used to call methods in the indices that take a fixed-length
+    'key' of length (len(p)-1).
+
+    wildcard -- the wildcard to use, defaults to 'null'
+    additionalArgs -- List of additional arguments the function should have,
+                      as in callArgs().
+    """
     
-def decl(g, obs=0):
-    return proto(g, obs) + ";\n"
+    args = [ARGS[i] for i in range(len(p)) if p[i]=='1']
+    args += [wildcard] * (len(p)-len(args)-1)
+    return ', '.join(args+additionalArgs)
 
-def callObs(g, whatToCall, obs = None, ret = 1):
-    ps = []
-    ps.extend(g["Params"])
-    if obs:
-	ps.append(obs)
-    if ret:
-	retu = "return "
+
+
+
+def constGraph(spec):
+    s = ""
+   
+    for p in spec.find_patterns:
+        s += 'Object find1_%s(%s);\n' % (p, arguments(p))
+        s += 'Iterator findN_%s_Iter(%s);\n' % (p, arguments(p))
+        
+        s += 'Object find1_%s(%s);\n' % (p, arguments(p, ['Obs obs']))
+        s += 'Iterator findN_%s_Iter(%s);\n' % (p, arguments(p, ['Obs obs']))
+        
+    return spec.constGraphTemplate % s
+
+
+def graph(spec):
+    s = ""
+
+    for p in spec.rm_patterns:
+        s += 'void rm_%s(%s);\n' % (p, arguments(p))
+        
+    return spec.graphTemplate % s
+
+
+def abstractConstGraph(spec):
+    s = ""
+
+    for p in spec.find_patterns:
+        s += 'public Object find1_%s(%s) {\n' % (p, arguments(p))
+        s += '    return find1_%s(%s);\n' % (p, callArgs(p, ['null']))
+        s += '}\n'
+        
+        s += 'public Iterator findN_%s_Iter(%s) {\n' % (p, arguments(p))
+        s += '    return findN_%s_Iter(%s);\n' % (p, callArgs(p, ['null']))
+        s += '}\n'
+
+    return spec.abstractConstGraphTemplate % s
+
+
+def stdObservedConstGraph(spec):
+    s = ""
+
+    for p in spec.find_patterns:
+        s += 'public Object find1_%s(%s) {\n' % (p, arguments(p))
+        s += '    return constgraph.find1_%s(%s);\n' % \
+                                                     (p, callArgs(p, ['obs']))
+        s += '}\n'
+        
+        s += 'public Object find1_%s(%s) {\n' % (p, arguments(p, ['Obs obs']))
+        s += '    throw new Error("DoubleObs");\n'
+        s += '}\n'
+        
+        s += 'public Iterator findN_%s_Iter(%s) {\n' % (p, arguments(p))
+        s += '    return constgraph.findN_%s_Iter(%s);\n' % \
+                                                     (p, callArgs(p, ['obs']))
+        s += '}\n'
+
+        s += 'public Iterator findN_%s_Iter(%s) {\n' % \
+                                                (p, arguments(p, ['Obs obs']))
+        s += '    throw new Error("DoubleObs");\n'
+        s += '}\n'
+
+    return spec.stdObservedConstGraphTemplate % s
+
+def stdObservedGraph(spec):
+    s = ""
+
+    for p in spec.rm_patterns:
+        s += 'public void rm_%s(%s) {\n' % (p, arguments(p))
+        s += '    graph.rm_%s(%s);\n' % (p, callArgs(p))
+        s += '}\n'
+
+    return spec.stdObservedGraphTemplate % s
+
+
+def delegateGraph(spec):
+    s = ""
+
+    for p in spec.find_patterns:
+        s += 'public Object find1_%s(%s) {\n' % (p, arguments(p, ['Obs obs']))
+        s += '    return find1_%s(%s);\n' % (p, callArgs(p, ['obs']))
+        s += '}\n'
+        
+        s += 'public Iterator findN_%s_Iter(%s) {\n' % \
+                                                (p, arguments(p, ['Obs obs']))
+        s += '    return findN_%s_Iter(%s);\n' % (p, callArgs(p, ['obs']))
+        s += '}\n'
+
+
+    return spec.delegateGraphTemplate % s
+
+
+def simpleHashGraph(spec):
+    s = ""
+
+    for p in spec.find_patterns:
+        s += 'Map map_%s = new HashMap();\n' % p
+
+        s += 'public Object find1_%s(%s) {\n' % (p, arguments(p, ['Obs obs']))
+        s += '    Iterator i = findN_%s_Iter(%s);\n' % \
+                                                (p, callArgs(p, ['obs']))
+        s += '    if(!i.hasNext()) return null;\n'
+        s += '    Object result = i.next();\n'
+        s += '    if(i.hasNext())\n'
+        s += '        throw new NotUniqueError(%s);\n' % \
+                                                callTupleArgs(p)
+        s += '    return result;\n'
+        s += '}\n'
+        
+        s += 'public Iterator findN_%s_Iter(%s){\n' % \
+                                               (p, arguments(p, ['Obs obs']))
+        s += '    if(obs != null)\n'
+        s += '        observer.addObs(%s);\n' % \
+                               callTupleArgs(p, 'observer.WILDCARD', ['obs'])
+        s += '\n'
+        s += '    Set s = getSet_%s(%s);\n' % (p, callArgs(p))
+        s += '    return s.iterator();\n'
+        s += '}\n'
+
+        s += 'public Set getSet_%s(%s) {\n' % (p, arguments(p))
+        s += '    Map m = map_%s;\n' % p
+        s += '    Key key = new Key(%s);\n' % callIndexArgs(p, '"ANY"')
+        s += '    if(!m.containsKey(key)) m.put(key, new HashSet());\n'
+        s += '    return (Set)m.get(key);\n'
+        s += '}\n'
+
+
+    s += 'public void rm_%s(%s) {\n' % (spec.one, arguments(spec.one))
+    s += '    checkNode(subj); checkNode(pred); checkNodeOrLiteral(obj);\n'
+
+    for p in spec.find_patterns:
+        toremove = p.index('X')
+        s += '    getSet_%s(%s).remove(%s);\n' % (p, callArgs(p),
+                                                  ARGS[toremove])
+
+    s += '    \n'
+    s += '    observer.triggerObs(-1, subj, pred, obj);\n'
+    s += '}\n'
+
+
+    s += 'public void add(%s) {\n' % arguments(spec.one)
+    s += '    checkNode(subj); checkNode(pred); checkNodeOrLiteral(obj);\n'
+
+    for p in spec.find_patterns:
+        toremove = p.index('X')
+        s += '    getSet_%s(%s).add(%s);\n' % (p, callArgs(p), ARGS[toremove])
+
+    s += '    \n'
+    s += '    observer.triggerObs(1, subj, pred, obj);\n'
+    s += '}\n'
+
+
+    return spec.simpleHashGraphTemplate % s
+
+
+def hashGraph(spec):
+    s = ""
+
+    for p in spec.find_patterns:
+        s += 'PairMap map_%s = new PairMap();\n' % p
+
+        s += 'public Object find1_%s(%s) {\n' % (p, arguments(p, ['Obs obs']))
+        s += '    if(obs != null)\n'
+        s += '        observer.addObs(%s);\n' % \
+                                callTupleArgs(p, 'observer.WILDCARD', ['obs'])
+        s += '\n'
+        s += '    try {\n'
+        s += '        return map_%s.get(%s);\n' % (p, callIndexArgs(p))
+        s += '    } catch(PairMap.NotUniqueException _) {\n'
+        s += '        throw new NotUniqueError(%s);\n' % callTupleArgs(p)
+        s += '    }\n'
+        s += '}\n'
+        
+        s += 'public Iterator findN_%s_Iter(%s){\n' % \
+                                                (p, arguments(p, ['Obs obs']))
+        s += '    if(obs != null)\n'
+        s += '        observer.addObs(%s);\n' % \
+                                callTupleArgs(p, 'observer.WILDCARD', ['obs'])
+        s += '\n'
+        s += '    return map_%s.getIter(%s);\n' % (p, callIndexArgs(p))
+        s += '}\n'
+
+
+    s += 'public void rm_%s(%s) {\n' % (spec.one, arguments(spec.one))
+    s += '    checkNode(subj); checkNode(pred); checkNodeOrLiteral(obj);\n'
+
+    for p in spec.find_patterns:
+        toremove = p.index('X')
+        s += '    map_%s.rm(%s, %s);\n' % (p, callIndexArgs(p),
+                                           ARGS[toremove])
+
+    s += '    \n'
+    s += '    observer.triggerObs(-1, subj, pred, obj);\n'
+    s += '}\n'
+
+
+    s += 'public void add(%s) {\n' % arguments(spec.one)
+    s += '    checkNode(subj); checkNode(pred); checkNodeOrLiteral(obj);\n'
+
+    for p in spec.find_patterns:
+        toremove = p.index('X')
+        s += '    map_%s.add(%s, %s);\n' % (p, callIndexArgs(p),
+                                            ARGS[toremove])
+
+    s += '    \n'
+    s += '    observer.triggerObs(1, subj, pred, obj);\n'
+    s += '}\n'
+
+
+    return spec.hashGraphTemplate % s
+
+
+def quadAdapterGraph(name, findAll):
+    # findAll: whether to find triples from all subgraphs
+    # or only from the one we add triples to
+
+    if findAll:
+        c = 'A'
+        myCallArgs = lambda p: callArgs(p, ['obs'])
     else:
-	retu = ""
-    print g, ret, retu
-    return ("public "+proto(g) + 
-	    "{\n\t "+retu+" "+whatToCall+"."+
-	    g["FName"]+"("+",".join(ps) + ");\n}\n")
+        c = '1'
+        myCallArgs = lambda p: callArgs(p, ['context', 'obs'])
 
-def noDoubleObs(g):
-    return "public "+proto(g, 1) + """{
-	throw new Error("DoubleObs");
-    }"""+"\n"
+    s = ""
 
-nonobs_findprotos = "".join([ decl(g) for g in constgraph])
-obs_findprotos =  "".join([ decl(g, 1) for g in constgraph])
+    for p in spec.find_patterns:
+        s += 'public Object find1_%s(%s) {\n' % (p, arguments(p, ['Obs obs']))
+        s += '    return graph.find1_%s%s(%s);\n' % (p, c, myCallArgs(p))
+        s += '}\n'
+        
+        s += 'public Iterator findN_%s_Iter(%s){\n' % \
+                                                (p, arguments(p, ['Obs obs']))
+        s += '    return graph.findN_%s%s_Iter(%s);\n' % (p, c, myCallArgs(p))
+        s += '}\n'
 
-nonobs_callobs = "".join([ callObs(g, "this", "null") for g in constgraph])
+    s += 'public void rm_111(Object subject, Object predicate, \n'
+    s += '                   Object object) {\n'
 
-nonobs_modprotos = "".join([decl(g) for g in graph])
+    if(findAll):
+        s += 'graph.rm_111A(subject, predicate, object);\n'
+    else:
+        s += 'graph.rm_1111(subject, predicate, object, context);\n'
 
-const_nonobs_callother = "".join([ 
-		callObs(g, "constgraph", "obs") for g in constgraph])
-const_obs_nodouble = "".join([ noDoubleObs(g) for g in constgraph])
+    s += '}\n'
 
-graph_callother = "".join([ callObs(g, "graph", ret=0) for g in graph ])
+    return quadAdapterTemplate % (name, name, s)
 
 
-def delegate_proto(g, sync="synchronized ", obs=0):
-    ret = ""
-    if g["FRet"] in ["Object", "Iterator"]: ret = "return"
-    pars = []
-    pars.extend(["Object "+i for i in g["Params"]])
-    if obs:
-        pars.append("Obs o")
-        if len(pars) == 1: obs = 'o'
-        else: obs = ',o'
-    else: obs = ''
-    return ("public "+sync + g["FRet"] + " "+g["FName"]+"("+ 
-	    ",".join(pars) +
-	    ") {\n    "+ret+" graph." + g["FName"]+"("+",".join([i for i in g["Params"]])+ obs+"); }\n\n")
-delegate_calls = "".join([delegate_proto(g, "") for g in constgraph])
-delegate_calls += "".join([delegate_proto(g, "", 1) for g in constgraph])
-synch_delegate_calls = "".join([delegate_proto(g) for g in graph])
-synch_delegate_calls += "".join([delegate_proto(g) for g in constgraph])
-synch_delegate_calls += "".join([delegate_proto(g,obs=1) for g in constgraph])
 
-def mkFile(a,b):
-    f = open(a,"w")
-    f.write("// AUTOGENERATED By makeswamp.py - DO NOT EDIT.\n")
-    f.write(b)
+
+base = 'org/fenfire/swamp/'
+
+def write(filename, contents):
+    filename = base+filename
+    print 'Write', filename
+
+    contents = '// AUTOGENERATED By makeswamp2.py - DO NOT EDIT.\n'+contents
+
+    #print '='*20, filename, '='*20
+    #print contents
+
+    f = open(filename, 'w')
+    f.write(contents)
     f.close()
 
-# mkFile("org/fenfire/swamp/ConstGraph.java", """
-# package org.fenfire.swamp;
-# import java.util.Iterator;
-# import org.nongnu.navidoc.util.Obs;
-
-# /** A non-modifiable RDF graph. The iterators may implement the method
-#  *  remove, but it should not be used, as it may cause unspecified behavior.
-#  */
-# public interface ConstGraph {
-#     /** Get a ConstGraph whose queries will return the same
-#      * value as the queries for this graph, but will 
-#      * set up the Obs for those queries.
-#      * When the result of any of those queries changes,
-#      * Obs is called immediately.
-#      */
-#     ConstGraph getObservedConstGraph(org.nongnu.navidoc.util.Obs o);
-
-#     /** This observed graph will not be used any more, and
-#      * if desired, may be recycled.
-#      * This operation is allowed to be a no-op, and
-#      * if the graph this method is called on is not one that
-#      * has been returned by getObservedConstGraph, is
-#      * defined to be so..
-#      */
-#     void close();
-
-#     /** If this graph is observed (returned from getObservedConstGraph),
-#      * get the observer.
-#      */
-#     Obs getObserver();
-#     /** If this graph is observed (returned from getObservedConstGraph),
-#      * get the original.
-#      */
-#     ConstGraph getOriginalConstGraph();
-
-#     boolean contains(Object e0, Object e1, Object e2);
-#     boolean contains(Object e0, Object e1, Object e2, Obs o);
-
-#     %(nonobs_findprotos)s
-#     %(obs_findprotos)s
-
-# }
-
-# """ % locals())
-
-# mkFile("org/fenfire/swamp/Graph.java", """
-# package org.fenfire.swamp;
-# import java.util.Iterator;
-# import org.nongnu.navidoc.util.Obs;
-
-# /** A modifiable RDF graph. Existing iterators should not be used after
-#  *  the graph is modified, as it may cause unspecified behavior.
-#  */
-# public interface Graph extends ConstGraph {
-#     Graph getObservedGraph(org.nongnu.navidoc.util.Obs o);
-#     void set1_11X(Object subject, Object predicate, Object object);
-
-#     %(nonobs_modprotos)s
-
-#     void add(Object subject, Object predicate, Object object);
-
-#     void addAll(Graph g);
-# }
-
-# """ % locals())
-
-# mkFile("org/fenfire/swamp/impl/AbstractConstGraph.java", """
-# package org.fenfire.swamp.impl;
-# import org.nongnu.navidoc.util.Obs;
-# import org.fenfire.swamp.*;
-# import java.util.Iterator;
-
-# abstract public class AbstractConstGraph implements ConstGraph {
-
-#     public ConstGraph getObservedConstGraph(Obs obs) {
-# 	return new StdObservedConstGraph(this, obs);
-#     }
-#     public void close() { }
-#     public Obs getObserver() { return null; }
-#     public ConstGraph getOriginalConstGraph() { return null; }
-#     public boolean contains(Object e0, Object e1, Object e2) {
-# 	return contains(e0, e1, e2, null);
-#     }
-
-#     %(nonobs_callobs)s
-
-# }
-# """ % locals())
-
-mkFile("org/fenfire/swamp/impl/StdObservedConstGraph.java", """
-package org.fenfire.swamp.impl;
-import org.nongnu.navidoc.util.Obs;
-import org.fenfire.swamp.*;
-import java.util.Iterator;
-
-public class StdObservedConstGraph implements ConstGraph {
-    ConstGraph constgraph;
-    Obs obs;
-
-    public StdObservedConstGraph(ConstGraph graph, Obs obs) {
-	this.constgraph = graph;
-	this.obs = obs;
-    }
-
-    public ConstGraph getObservedConstGraph(Obs obs) {
-	throw new Error("DoubleObs");
-    }
-
-    public void close() { }
-
-    public Obs getObserver() {
-	return obs;
-    }
-
-    public ConstGraph getOriginalConstGraph() {
-	return constgraph;
-    }
-
-    public boolean contains(Object e0, Object e1, Object e2) {
-	return constgraph.contains(e0, e1, e2, obs);
-    }
-    public boolean contains(Object e0, Object e1, Object e2, Obs o) {
-	throw new Error("DoubleObs");
-    }
-
-    %(const_nonobs_callother)s
-    %(const_obs_nodouble)s
-
-
-}
-
-""" % locals())
-
-mkFile("org/fenfire/swamp/impl/StdObservedGraph.java", """
-package org.fenfire.swamp.impl;
-import org.nongnu.navidoc.util.Obs;
-import org.fenfire.swamp.*;
-import java.util.Iterator;
-
-public class StdObservedGraph extends StdObservedConstGraph implements Graph {
-    Graph graph;
-
-    public StdObservedGraph(Graph graph, Obs obs) {
-	super(graph, obs);
-	this.graph = graph;
-	this.obs = obs;
-    }
-
-    public Graph getObservedGraph(Obs obs) {
-	throw new Error("DoubleObs");
-    }
-
-    public void set1_11X(Object subject, Object predicate, Object object) {
-	graph.set1_11X(subject, predicate, object);
-    }
-
-    %(graph_callother)s
-
-    public void add(Object subject, Object predicate, Object object) {
-	graph.add(subject, predicate, object);
-    }
-
-    public void addAll(Graph g) {
-	graph.addAll(g);
-    }
-}
-
-""" % locals())
-
-
-mkFile("org/fenfire/swamp/impl/SynchronizedGraph.java", """
-package org.fenfire.swamp.impl;
-import org.nongnu.navidoc.util.Obs;
-import org.fenfire.swamp.*;
-import java.util.Iterator;
-
-public class SynchronizedGraph implements Graph {
-    Graph graph;
-
-    public SynchronizedGraph(Graph graph) {
-	this.graph = graph;
-    }
-    public synchronized void close() { graph.close(); }
-    public synchronized Obs getObserver() { return graph.getObserver(); }
-    public synchronized ConstGraph getOriginalConstGraph() {
-        return graph.getOriginalConstGraph();    }
-    public synchronized ConstGraph getObservedConstGraph(Obs o) {
-        return graph.getObservedConstGraph(o);    }
-    public synchronized boolean contains(Object e0, Object e1, Object e2) {
-        return graph.contains(e0,e1,e2); }
-    public synchronized boolean contains(Object e0, Object e1, Object e2, Obs o) {
-        return graph.contains(e0,e1,e2, o); }
-    public synchronized Graph getObservedGraph(org.nongnu.navidoc.util.Obs o) {
-        return graph.getObservedGraph(o); }
-    public synchronized void set1_11X(Object subject, Object predicate, Object object) {
-        graph.set1_11X(subject, predicate, object);   }
-    public synchronized void add(Object subject, Object predicate, Object object) {
-        graph.add(subject, predicate, object);     }
-    public synchronized void addAll(Graph g) {
-        graph.addAll(g);     }
-
-    %(synch_delegate_calls)s
-}
-
-""" % locals())
-
-
-mkFile("org/fenfire/swamp/impl/DelegateGraph.java", """
-package org.fenfire.swamp.impl;
-import org.nongnu.navidoc.util.Obs;
-import org.fenfire.swamp.*;
-import java.util.Iterator;
-
-public abstract class DelegateGraph extends AbstractGraph {
-    Graph graph;
-
-    public DelegateGraph(Graph graph) {
-	this.graph = graph;
-    }
-    
-    public synchronized void close() { graph.close(); }
-    public synchronized Obs getObserver() { return graph.getObserver(); }
-    public synchronized ConstGraph getOriginalConstGraph() {
-        return graph.getOriginalConstGraph();    }
-    public synchronized ConstGraph getObservedConstGraph(Obs o) {
-        return graph.getObservedConstGraph(o);    }
-    public synchronized boolean contains(Object e0, Object e1, Object e2) {
-        return graph.contains(e0,e1,e2); }
-    public synchronized boolean contains(Object e0, Object e1, Object e2, Obs o) {
-        return graph.contains(e0,e1,e2, o); }
-    public synchronized Graph getObservedGraph(org.nongnu.navidoc.util.Obs o) {
-        return graph.getObservedGraph(o); }
-    public synchronized void set1_11X(Object subject, Object predicate, Object object) {
-        graph.set1_11X(subject, predicate, object);   }
-    public synchronized void add(Object subject, Object predicate, Object object) {
-        graph.add(subject, predicate, object);     }
-    public synchronized void addAll(Graph g) {
-        graph.addAll(g);     }
-    public synchronized void rm_111(Object subject, Object predicate, Object object) {
-        graph.rm_111(subject, predicate, object);     }
-
-
-    %(delegate_calls)s
-}
-
-""" % locals())
-
-##########################################################3
-#
-#  Now, the tough part: the actual structure
-
-# Indices: 123, 132, 231
-
-def makeHashGraph(className, classJavadoc, mapClass, rmind, addind, contains,
-                  hashIndices):
-    hashNames = ["ind_"+"".join([str(i) for i in codes]) 
-		    for codes in hashIndices]
-
-    hashDecls = "".join([
-	"private %s %s = new %s();\n" % (mapClass, name, mapClass)
-	    for name in hashNames])
-    
-    def makeFind(g):
-	code = "public "+ proto(g, 1) + "{\n";
-	def ow(i, wild):
-	    if g["Pattern"][i] == "1": return "e"+str(i)
-	    else: return wild
-
-	code += "if(obs != null) observer.addObs(%s, %s, %s, obs);\n" % tuple(
-	    [ow(i, "observer.WILDCARD") for i in range(0,3)])
-
-	notUniqueParams = ",".join([ow(i, "null") for i in range(0,3)])
-
-	indsNeeded = [i for i in range(0,3) if g["Pattern"][i] == "1"]
-	indNext = [i for i in range(0,3) if g["Pattern"][i] == "X"][0]
-
-	print g, indsNeeded, indNext
-
-	success = None
-
-        if className == "SimpleHashGraph":
-            # Select the index to use
-            for i in range(0,len(hashIndices)):
-                if len(indsNeeded):
-                    firstinds = hashIndices[i][0:len(indsNeeded)]
-                    if not min([el in firstinds for el in indsNeeded]) :
-                        print "Can't be ", hashNames[i], indsNeeded, firstinds
-                        continue
-                if hashIndices[i][len(indsNeeded)] != indNext:
-                    print "Can't be (because of next set) ",hashNames[i], hashIndices[i], indNext
-                    continue
-
-                print "Is: ",hashNames[i]
-                success = i
-                break
-
-            assert success != None
-            ind = i
-
-            curHash = hashNames[ind]
-            for i in range(0,3):
-                elem = hashIndices[ind][i]
-                newHash = "hash"+str(i+1)
-                p = g["Pattern"][elem]
-                if p == "1":
-                    if i == 1: 
-                        htype = "HashSet"
-                    else:
-                        htype = "HashMap"
-                    code += """
-                        %(htype)s %(newHash)s = (%(htype)s) %(curHash)s.get(e%(elem)s);
-                        if(%(newHash)s == null) RETURN_NONE
-                    """ % locals()
-                    curHash = newHash
-                elif p == "X":
-                    if i < 2:
-                        code += """
-                            Set resSet = %(curHash)s.keySet();
-                        """ % locals()
-                    else:
-                        code += """
-                            HashSet resSet = %(curHash)s;
-                        """ % locals()
-                    break
-                elif p == "A":
-                    assert 1 == 0
-
-            if g["NVal"] == "N":
-                code += "return resSet.iterator();\n"
-                code = code.replace("RETURN_NONE", "return emptySet.iterator(); ")
-            else:
-                code += """
-                    if(resSet.size() == 0) return null;
-                    if(resSet.size() == 1) return resSet.iterator().next();
-                    throw new NotUniqueError(%(notUniqueParams)s);
-                """ % locals()
-                code = code.replace("RETURN_NONE", "return null; ")
-
-        elif className == "HashGraph":
-            ind = hashIndices.index(hashGraphIndex(g['Pattern']))
-
-            params = []
-            for i in range(3):
-                x = g['Pattern'][i]
-                if x == '1':
-                    params.append('e%s' % i)
-                elif x == 'X':
-                    pass
-                elif x == 'A':
-                    params.append('null')
-
-            if g["NVal"] == "N":
-                code += """
-                    return %s.getIter(%s);
-                """ % (hashNames[ind], ', '.join(params))
-            else:
-                code += """
-                    try {
-                        return %s.get(%s);
-                    } catch(PairMap.NotUniqueException _) {
-                        throw new NotUniqueError(%s);
-                    }
-                """ % (hashNames[ind], ', '.join(params), notUniqueParams)
-                                                
-        else:
-            assert 0
-
-
-	code += "}\n\n"
-	return code
-
-    finds = "".join([makeFind(g) for g in constgraph])
-
-
-    rm_triple = ""
-    add_triple = ""
-    for ind in range(0, len(hashIndices)):
-	name = hashNames[ind]
-        s = []
-        
-        for i in range(3):
-            x = hashIndices[ind][i]
-            if x == 'A':
-                s.append('null')
-            else:
-                s.append('e%s' % x)
-
-	s0, s1, s2 = s
-        
-	rm_triple += """
-	    rm_ind(%(name)s, %(s0)s, %(s1)s, %(s2)s);
-	""" % locals()
-	add_triple += """
-	    add_ind(%(name)s, %(s0)s, %(s1)s, %(s2)s);
-	""" % locals()
-
-    mkFile("org/fenfire/swamp/impl/%s.java" % className, """
-    package org.fenfire.swamp.impl;
-    import org.nongnu.navidoc.util.Obs;
-    import org.fenfire.swamp.*;
-
-    import java.util.HashMap;
-    import java.util.Set;
-    import java.util.HashSet;
-    import java.util.ArrayList;
-    import java.util.Iterator;
-
-    %(classJavadoc)s
-    public class %(className)s extends AbstractGraph {
-
-	%(hashDecls)s
-
-	private HashSet emptySet = new HashSet();
-	private StdObserver observer = new StdObserver();
-
-	private final void rm_ind(%(mapClass)s ind, Object o1, Object o2, Object o3) {
-        %(rmind)s
-	}
-
-	private final void add_ind(%(mapClass)s ind, Object o1, Object o2, Object o3) {
-        %(addind)s
-	}
-
-	public void set1_11X(Object subject, Object predicate, Object object) {
-	    rm_11A(subject, predicate);
-
-	    add(subject, predicate, object);
-	}
-
-	public boolean contains(Object e0, Object e1, Object e2, Obs o) {
-	    if(o != null) observer.addObs(e0, e1, e2, o);
-
-            %(contains)s
-	}
-
-	//////////////////
-	// Finds
-
-	%(finds)s
-
-
-	// --------------------------------
-	// Methods which modify the structure by calling the single-triple
-	// methods below.
-	//
-
-
-	// --------------------------------
-	// Methods which actually modify the structure
-	//
-
-	public void rm_111(Object e0, Object e1, Object e2) {
-            checkNode(e0); checkNode(e1); checkNodeOrLiteral(e2);
-	    %(rm_triple)s
-
-	    observer.triggerObs(-1, e0, e1, e2);
-	}
-
-	public void add(Object e0, Object e1, Object e2) {
-            checkNode(e0); checkNode(e1); checkNodeOrLiteral(e2);
-	    %(add_triple)s
-
-	    observer.triggerObs(1, e0, e1, e2);
-	}
-
-        public void addAll(Graph g) {
-	    for (Iterator i=g.findN_XAA_Iter(); i.hasNext();) {
-                Object subj = i.next();
-                for (Iterator j=g.findN_1XA_Iter(subj); j.hasNext();) {
-                    Object pred = j.next();
-		    for (Iterator k=g.findN_11X_Iter(subj,pred); k.hasNext();){
-		        Object obj = k.next();
-                        add(subj, pred, obj);
-                    }
-                }
-            }
-        }
-
-        protected void checkNode(Object node) {
-            if(!Nodes.isNode(node))
-                throw new IllegalArgumentException(\"Not a node: \"+node);
-        }
-
-        protected void checkNodeOrLiteral(Object node) {
-            if(!Nodes.isNode(node) && !(node instanceof Literal))
-                throw new IllegalArgumentException(\"Not a node or literal: \"+node);
-        }
-
-    }
-
-
-
-
-    """ % locals())
-
-# makeHashGraph(className="SimpleHashGraph",
-#               mapClass="HashMap",
-#               classJavadoc="""
-#               /** An RDF Graph implemented by HashMaps.
-#                * Relatively inefficient but a basic implementation
-#                * that can be used as a reference.
-#                */
-#               """,
-#               hashIndices = [(0,1,2),(0,2,1),(1,2,0),(1,0,2)],
-#               rmind="""
-#               HashMap m2 = (HashMap)ind.get(o1);
-#               if(m2 == null) return;
-#               HashSet m3 = (HashSet)m2.get(o2);
-#               if(m3 == null) return;
-#               m3.remove(o3);
-#               """,
-#               addind="""
-#               HashMap m2 = (HashMap)ind.get(o1);
-#               if(m2 == null) {
-#                   m2 = new HashMap();
-#                   ind.put(o1, m2);
-#               }
-#               HashSet s = (HashSet)m2.get(o2);
-#               if(s == null) {
-#                   s = new HashSet();
-#                   m2.put(o2, s);
-#               }
-#               s.add(o3);
-#               """,
-#               contains="""
-#               HashMap hash1 = (HashMap) ind_012.get(e0);
-#               if(hash1 == null) return false; 
-	
-#               HashSet hash2 = (HashSet) hash1.get(e1);
-#               if(hash2 == null) return false; 
-	
-#               HashSet resSet = hash2;
-#               return resSet.contains(e2);
-#               """
-#               )
-
-
-# def hashGraphIndex(pattern):
-#     index = [None,None,None]
-
-#     pos = 0
-#     for i in range(3):
-#         if pattern[i] == 'X':
-#             index[2] = i
-#         elif pattern[i] == '1':
-#             index[pos] = i
-#             pos += 1
-#         elif pattern[i] == 'A':
-#             index[pos] = 'A'
-#             pos += 1
-
-#     for el in index: assert el != None
-
-#     return tuple(index)
-
-
-# makeHashGraph(className="HashGraph",
-#               mapClass="PairMap",
-#               classJavadoc="""
-#               /** A more efficient implementation of Graph
-#                *  than SimpleHashGraph. This implementation uses PairMap,
-#                *  which is based on AbstractHashtable, for its indices,
-#                *  thus avoiding the overhead of creating objects per triple.
-#                */
-#               """,
-#               hashIndices = [hashGraphIndex(p) for p in find_patterns],
-#               rmind="""
-#               ind.rm(o1, o2, o3);
-#               """,
-#               addind="""
-#               ind.add(o1, o2, o3);
-#               """,
-#               contains="""
-#               return ind_012.contains(e0, e1, e2);
-#               """
-#               )
+def writeFamily(spec):
+    write('%s.java' % spec.ConstGraph, constGraph(spec))
+    write('%s.java' % spec.Graph, graph(spec))
+    write('impl/Abstract%s.java' % spec.ConstGraph, abstractConstGraph(spec))
+    write('impl/StdObserved%s.java' % spec.ConstGraph,
+          stdObservedConstGraph(spec))
+    write('impl/StdObserved%s.java' % spec.Graph, stdObservedGraph(spec))
+    write('impl/Delegate%s.java' % spec.Graph, delegateGraph(spec))
+    write('impl/SimpleHash%s.java' % spec.Graph, simpleHashGraph(spec))
+    write('impl/Hash%s.java' % spec.Graph, hashGraph(spec))
+
+
+writeFamily(spec)
+writeFamily(quad_spec)
+
+for (name, findAll) in [("AllQuadsGraph", 1), ("OneQuadGraph", 0)]:
+    write('impl/'+name+'.java', quadAdapterGraph(name, findAll))
