@@ -200,7 +200,6 @@ public class FenFeed extends LobLob {
 		    Aggregator agg = new Aggregator(graph, new HashMap(), 
 						    subscriptions, 30,
 						    context);
-		    agg.start();
 
 		    return new FenFeed(g, configuration); 
 		}

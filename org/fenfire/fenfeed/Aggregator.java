@@ -30,6 +30,7 @@ import org.fenfire.fenfeed.http.*;
 import org.fenfire.swamp.*;
 import org.fenfire.swamp.impl.*;
 import org.fenfire.swamp.smush.*;
+import org.nongnu.libvob.AbstractUpdateManager;
 import java.io.*;
 import java.util.*;
 
@@ -52,50 +53,79 @@ public class Aggregator implements HTTPUpdater.UpdateListener {
 
 	this.updater = new HTTPUpdater(httpContext);
 	updater.addUpdateListener(this);
-	
+
+	final Set resources = new HashSet();
+
 	for(Iterator i=subscriptions.iterator(); i.hasNext();) {
 	    String uri = (String)i.next();
-	    subscribe(uri, loadInterval);
+	    try {
+		resources.add(updater.add(uri, loadInterval));
+	    } catch(IOException e) {
+		e.printStackTrace();
+	    }
 	}
-    }
 
-    public void start() {
-	updater.start();
+	new Thread() { public void run() {
+	    setPriority(Thread.MIN_PRIORITY);
+	    for(Iterator i=resources.iterator(); i.hasNext();) {
+		read((HTTPResource)i.next());
+	    }
+	    updater.start();
+	}}.start();
     }
 
     public void subscribe(String uri, int loadInterval) {
 	System.out.println("Subscribe to "+uri);
 	try {
 	    HTTPResource r = updater.add(uri, loadInterval);
-	    FeedReader.read(r, new OneQuadGraph(graph, uri), namespaces);
+	    read(r);
 	} catch(IOException e) {
 	    System.out.println("Error while subscribing to "+uri);
 	    e.printStackTrace();
 	}
     }
 
-    public void changed(HTTPResource resource) {
-	System.out.println("Changed: "+resource.getURI());
-
-	Object context = Nodes.get(resource.getURI());
-	graph.rm_AAA1(context);
+    protected void read(final HTTPResource resource) {
+	final Graph g = new HashGraph();
+	Map nsp = new HashMap();
+	
 	try {
-	    FeedReader.read(resource, new OneQuadGraph(graph, context), 
-			    namespaces);
+	    FeedReader.read(resource, g, nsp);
 	} catch(IOException e) {
 	    System.out.println("Error while reading "+resource.getURI());
 	    e.printStackTrace();
+	    return;
 	}
 
-	try {
-	    org.nongnu.libvob.AbstractUpdateManager.chg();
-	} catch(NullPointerException e) {
-	    // AbstractUpdateManager isn't initialized yet
+	synchronized(namespaces) {
+	    namespaces.putAll(nsp);
 	}
+
+	Runnable r = new Runnable() { public void run() {
+	    Object context = Nodes.get(resource.getURI());
+	    System.out.println("Adding to graph: "+context);
+
+	    graph.rm_AAA1(context);
+	    new OneQuadGraph(graph, context).addAll(g);
+		
+	    org.nongnu.libvob.AbstractUpdateManager.chg();
+	}};
+
+	AbstractUpdateManager mgr = AbstractUpdateManager.getInstance();
+
+	if(mgr == null) 
+	    throw new IllegalStateException("updatemanager not initialized");
+
+	mgr.addTask(r, 0);
     }
+
 
     public void startUpdate(HTTPResource resource) {
 	System.out.println("Updating "+resource.getURI());
+    }
+    public void changed(HTTPResource resource) {
+	System.out.println("Changed: "+resource.getURI());
+	read(resource);
     }
     public void unchanged(HTTPResource resource) {
 	System.out.println("Unchanged: "+resource.getURI());
@@ -123,9 +153,7 @@ public class Aggregator implements HTTPUpdater.UpdateListener {
 	Aggregator agg = new Aggregator(graph, new HashMap(), subscriptions,
 					30, context);
 
-	if(start) {
-	    agg.start();
-	} else {
+	if(!start) {
 	    Graph g = new AllQuadsGraph(graph, "foo");
 	    StringWriter w = new StringWriter();
 	    Graphs.writeTurtle(g, agg.namespaces, w);
