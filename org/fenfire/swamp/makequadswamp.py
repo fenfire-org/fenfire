@@ -183,95 +183,95 @@ def mkFile(a,b):
     f.write(b)
     f.close()
 
-mkFile("org/fenfire/swamp/QuadsConstGraph.java", """
-package org.fenfire.swamp;
-import java.util.Iterator;
-import org.nongnu.navidoc.util.Obs;
+# mkFile("org/fenfire/swamp/QuadsConstGraph.java", """
+# package org.fenfire.swamp;
+# import java.util.Iterator;
+# import org.nongnu.navidoc.util.Obs;
 
-/** A non-modifiable RDF graph. The iterators may implement the method
- *  remove, but it should not be used, as it may cause unspecified behavior.
- */
-public interface QuadsConstGraph {
-    /** Get a ConstGraph whose queries will return the same
-     * value as the queries for this graph, but will 
-     * set up the Obs for those queries.
-     * When the result of any of those queries changes,
-     * Obs is called immediately.
-     */
-    QuadsConstGraph getObservedConstGraph(org.nongnu.navidoc.util.Obs o);
+# /** A non-modifiable RDF graph. The iterators may implement the method
+#  *  remove, but it should not be used, as it may cause unspecified behavior.
+#  */
+# public interface QuadsConstGraph {
+#     /** Get a ConstGraph whose queries will return the same
+#      * value as the queries for this graph, but will 
+#      * set up the Obs for those queries.
+#      * When the result of any of those queries changes,
+#      * Obs is called immediately.
+#      */
+#     QuadsConstGraph getObservedConstGraph(org.nongnu.navidoc.util.Obs o);
 
-    /** This observed graph will not be used any more, and
-     * if desired, may be recycled.
-     * This operation is allowed to be a no-op, and
-     * if the graph this method is called on is not one that
-     * has been returned by getObservedConstGraph, is
-     * defined to be so..
-     */
-    void close();
+#     /** This observed graph will not be used any more, and
+#      * if desired, may be recycled.
+#      * This operation is allowed to be a no-op, and
+#      * if the graph this method is called on is not one that
+#      * has been returned by getObservedConstGraph, is
+#      * defined to be so..
+#      */
+#     void close();
 
-    /** If this graph is observed (returned from getObservedConstGraph),
-     * get the observer.
-     */
-    Obs getObserver();
-    /** If this graph is observed (returned from getObservedConstGraph),
-     * get the original.
-     */
-    QuadsConstGraph getOriginalConstGraph();
+#     /** If this graph is observed (returned from getObservedConstGraph),
+#      * get the observer.
+#      */
+#     Obs getObserver();
+#     /** If this graph is observed (returned from getObservedConstGraph),
+#      * get the original.
+#      */
+#     QuadsConstGraph getOriginalConstGraph();
 
-    boolean contains(Object e0, Object e1, Object e2, Object e3);
-    boolean contains(Object e0, Object e1, Object e2, Object e3, Obs o);
+#     boolean contains(Object e0, Object e1, Object e2, Object e3);
+#     boolean contains(Object e0, Object e1, Object e2, Object e3, Obs o);
 
-    %(nonobs_findprotos)s
-    %(obs_findprotos)s
+#     %(nonobs_findprotos)s
+#     %(obs_findprotos)s
 
-}
+# }
 
-""" % locals())
+# """ % locals())
 
-mkFile("org/fenfire/swamp/QuadsGraph.java", """
-package org.fenfire.swamp;
-import java.util.Iterator;
-import org.nongnu.navidoc.util.Obs;
+# mkFile("org/fenfire/swamp/QuadsGraph.java", """
+# package org.fenfire.swamp;
+# import java.util.Iterator;
+# import org.nongnu.navidoc.util.Obs;
 
-/** A modifiable RDF graph. Existing iterators should not be used after
- *  the graph is modified, as it may cause unspecified behavior.
- */
-public interface QuadsGraph extends QuadsConstGraph {
-    QuadsGraph getObservedGraph(org.nongnu.navidoc.util.Obs o);
-    void set1_11XA(Object subject, Object predicate, Object object);
+# /** A modifiable RDF graph. Existing iterators should not be used after
+#  *  the graph is modified, as it may cause unspecified behavior.
+#  */
+# public interface QuadsGraph extends QuadsConstGraph {
+#     QuadsGraph getObservedGraph(org.nongnu.navidoc.util.Obs o);
+#     void set1_11XA(Object subject, Object predicate, Object object);
 
-    %(nonobs_modprotos)s
+#     %(nonobs_modprotos)s
 
-    void add(Object subject, Object predicate, Object object, Object quart) ;
-}
+#     void add(Object subject, Object predicate, Object object, Object quart) ;
+# }
 
-""" % locals())
-
-
+# """ % locals())
 
 
-mkFile("org/fenfire/swamp/impl/AbstractQuadsConstGraph.java", """
-package org.fenfire.swamp.impl;
-import org.nongnu.navidoc.util.Obs;
-import org.fenfire.swamp.*;
-import java.util.Iterator;
 
-abstract public class AbstractQuadsConstGraph implements QuadsConstGraph {
 
-    public QuadsConstGraph getObservedConstGraph(Obs obs) {
-	return new StdObservedQuadsConstGraph(this, obs);
-    }
-    public void close() { }
-    public Obs getObserver() { return null; }
-    public QuadsConstGraph getOriginalConstGraph() { return null; }
-    public boolean contains(Object e0, Object e1, Object e2, Object e3) {
-	return contains(e0, e1, e2, e3, null);
-    }
+# mkFile("org/fenfire/swamp/impl/AbstractQuadsConstGraph.java", """
+# package org.fenfire.swamp.impl;
+# import org.nongnu.navidoc.util.Obs;
+# import org.fenfire.swamp.*;
+# import java.util.Iterator;
 
-    %(nonobs_callobs)s
+# abstract public class AbstractQuadsConstGraph implements QuadsConstGraph {
 
-}
-""" % locals())
+#     public QuadsConstGraph getObservedConstGraph(Obs obs) {
+# 	return new StdObservedQuadsConstGraph(this, obs);
+#     }
+#     public void close() { }
+#     public Obs getObserver() { return null; }
+#     public QuadsConstGraph getOriginalConstGraph() { return null; }
+#     public boolean contains(Object e0, Object e1, Object e2, Object e3) {
+# 	return contains(e0, e1, e2, e3, null);
+#     }
+
+#     %(nonobs_callobs)s
+
+# }
+# """ % locals())
 
 mkFile("org/fenfire/swamp/impl/StdObservedQuadsConstGraph.java", """
 package org.fenfire.swamp.impl;

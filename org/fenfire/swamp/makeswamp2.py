@@ -21,17 +21,7 @@
 # MA  02111-1307  USA
 # 
 
-class Spec: pass
-
-spec = Spec()
-spec.Graph = "Graph"
-spec.find_patterns = ("11X","1X1","X11", "1XA", "XAA", "X1A")
-spec.rm_patterns = ("111", "11A", "A11", "1AA")
-spec.one = "111"
-
-quad_spec = Spec()
-quad_spec.Graph = "QuadsGraph"
-quad_spec.one = "1111"
+from makeswamp2_templates import *
 
 #quad_spec.find_patterns = [p+'A' for p in spec.find_patterns] + \
 #                          [p+'1' for p in spec.find_patterns] + ["111X"]
@@ -153,41 +143,41 @@ def callIndexArgs(p, wildcard='null', additionalArgs=[]):
 
 
 
-# def constGraph(spec):
-#     s = ""
-    
-#     for p in spec.find_patterns:
-#         s += ('Object find1_%s(%s);\n' % (p, arguments(p)))
-#         s += ('Iterator findN_%s_Iter(%s);\n' % (p, arguments(p)))
-
-#         s += ('Object find1_%s(%s);\n' % (p, argumentsObs(p)))
-#         s += ('Iterator findN_%s_Iter(%s);\n' % (p, argumentsObs(p)))
-
-#     return spec.constGraphTemplate % s
-
-
-# def graph(spec):
-#     s = ""
-
-#     for p in spec.rm_patterns:
-#         s += 'void rm_%s(%s);\n' % (p, arguments(p))
-
-#     return spec.graphTemplate % s
-
-
-# def abstractConstGraph(spec):
-#     s = ""
-
-#     for p in spec.find_patterns:
-#         s += 'public Object find1_%s(%s) {\n' % (p, arguments(p))
-#         s += '    return find1_%s(%s, null);\n' % (p, callArgs(p))
-#         s += '}\n'
+def constGraph(spec):
+    s = ""
+   
+    for p in spec.find_patterns:
+        s += 'Object find1_%s(%s);\n' % (p, arguments(p))
+        s += 'Iterator findN_%s_Iter(%s);\n' % (p, arguments(p))
         
-#         s += 'public Iterator findN_%s_Iter(%s) {\n' % (p, arguments(p))
-#         s += '    return findN_%s_Iter(%s, null);\n' % (p, callArgs(p))
-#         s += '}\n'
+        s += 'Object find1_%s(%s);\n' % (p, arguments(p, ['Obs obs']))
+        s += 'Iterator findN_%s_Iter(%s);\n' % (p, arguments(p, ['Obs obs']))
+        
+    return spec.constGraphTemplate % s
 
-#     return spec.abstractConstGraphTemplate % s
+
+def graph(spec):
+    s = ""
+
+    for p in spec.rm_patterns:
+        s += 'void rm_%s(%s);\n' % (p, arguments(p))
+        
+    return spec.graphTemplate % s
+
+
+def abstractConstGraph(spec):
+    s = ""
+
+    for p in spec.find_patterns:
+        s += 'public Object find1_%s(%s) {\n' % (p, arguments(p))
+        s += '    return find1_%s(%s);\n' % (p, callArgs(p, ['null']))
+        s += '}\n'
+        
+        s += 'public Iterator findN_%s_Iter(%s) {\n' % (p, arguments(p))
+        s += '    return findN_%s_Iter(%s);\n' % (p, callArgs(p, ['null']))
+        s += '}\n'
+
+    return spec.abstractConstGraphTemplate % s
 
 
 def simpleHashGraph(spec):
@@ -346,136 +336,6 @@ def quadAdapterGraph(name, findAll):
     return quadAdapterTemplate % (name, name, s)
 
 
-    
-
-spec.simpleHashGraphTemplate = """
-    package org.fenfire.swamp.impl;
-    import org.nongnu.navidoc.util.Obs;
-    import org.fenfire.swamp.*;
-    import java.util.*;
-
-    public class SimpleHashGraph extends AbstractGraph {
-	private StdObserver observer = new StdObserver();
-
-        protected class Key {
-            Object k1, k2;
-            public Key(Object k1, Object k2) {
-                this.k1 = k1; this.k2 = k2;
-            }
-            public boolean equals(Object o) {
-                if(!(o instanceof Key)) return false;
-                Key t=(Key)o;
-                return k1.equals(t.k1) && k2.equals(t.k2);
-            }
-            public int hashCode() {
-                return k1.hashCode() + 127*k2.hashCode();
-            }
-        }
-
-        %s
-
-	public boolean contains(Object subj, Object pred, Object obj, Obs o) {
-	    if(o != null) observer.addObs(subj, pred, obj, o);
-            return getSet_11X(subj, pred).contains(obj);
-	}
-    }
-"""
-
-spec.hashGraphTemplate = """
-    package org.fenfire.swamp.impl;
-    import org.nongnu.navidoc.util.Obs;
-    import org.fenfire.swamp.*;
-    import java.util.*;
-
-    public class HashGraph extends AbstractGraph {
-	private StdObserver observer = new StdObserver();
-
-        %s
-
-	public boolean contains(Object subj, Object pred, Object obj, Obs o) {
-	    if(o != null) observer.addObs(subj, pred, obj, o);
-            return map_11X.contains(subj, pred, obj);
-	}
-    }
-"""
-
-quad_spec.simpleHashGraphTemplate = """
-    package org.fenfire.swamp.impl;
-    import org.nongnu.navidoc.util.Obs;
-    import org.fenfire.swamp.*;
-    import java.util.*;
-
-    public class SimpleHashQuadsGraph extends AbstractQuadsGraph {
-	private StdObserver observer = new StdObserver();
-
-        protected class Key {
-            Object k1, k2, k3;
-            public Key(Object k1, Object k2, Object k3) {
-                this.k1 = k1; this.k2 = k2; this.k3 = k3;
-            }
-            public boolean equals(Object o) {
-                if(!(o instanceof Key)) return false;
-                Key t=(Key)o;
-                return k1.equals(t.k1) && k2.equals(t.k2) && k3.equals(t.k3);
-            }
-            public int hashCode() {
-                return k1.hashCode() + 127*k2.hashCode() + 2047*k3.hashCode();
-            }
-        }
-
-        %s
-
-	public boolean contains(Object subj, Object pred, Object obj, Object context, Obs o) {
-	    if(o != null) observer.addObs(subj, pred, obj, o);
-            return getSet_11X1(subj, pred, context).contains(obj);
-	}
-    }
-"""
-
-quad_spec.hashGraphTemplate = """
-    package org.fenfire.swamp.impl;
-    import org.nongnu.navidoc.util.Obs;
-    import org.fenfire.swamp.*;
-    import java.util.*;
-
-    public class HashQuadsGraph extends AbstractQuadsGraph {
-	private StdObserver observer = new StdObserver();
-
-        %s
-
-	public boolean contains(Object subj, Object pred, Object obj, Object context, Obs o) {
-	    if(o != null) observer.addObs(subj, pred, obj, o);
-            return map_11X1.contains(subj, pred, context, obj);
-	}
-    }
-"""
-
-quadAdapterTemplate = """
-package org.fenfire.swamp.impl;
-import org.nongnu.navidoc.util.Obs;
-import org.fenfire.swamp.*;
-import java.util.Iterator;
-
-public class %s extends AbstractGraph {
-    protected QuadsGraph graph;
-    protected Object context;
-
-    public %s(QuadsGraph graph, Object context) {
-	this.graph = graph;
-        this.context = context;
-    }
-
-    public Obs getObserver() { return graph.getObserver(); }
-    public boolean contains(Object subj, Object pred, Object obj) {
-        return graph.contains(subj,pred,obj, context); }
-    public boolean contains(Object subj, Object pred, Object obj, Obs o) {
-        return graph.contains(subj,pred,obj, context, o); }
-    public void add(Object subject, Object predicate, Object object) {
-        graph.add(subject, predicate, object, context);     }
-
-    %s
-}
-"""
 
 
 base = 'org/fenfire/swamp/'
@@ -494,6 +354,9 @@ def write(filename, contents):
     f.close()
 
 def writeFamily(spec):
+    write('%s.java' % spec.ConstGraph, constGraph(spec))
+    write('%s.java' % spec.Graph, graph(spec))
+    write('impl/Abstract%s.java' % spec.ConstGraph, abstractConstGraph(spec))
     write('impl/SimpleHash%s.java' % spec.Graph, simpleHashGraph(spec))
     write('impl/Hash%s.java' % spec.Graph, hashGraph(spec))
 
