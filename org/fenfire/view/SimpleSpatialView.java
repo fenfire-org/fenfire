@@ -60,7 +60,7 @@ public class SimpleSpatialView implements ViewSettings.SpatialView {
 			   boolean visible) {
 	    int cs = scene.coords.box(into, w, h);
 	    ConnectionVobMatcher m = (ConnectionVobMatcher)scene.matcher;
-	    m.add(matchingParent, into, "null spatial context");
+	    m.add(matchingParent, into, "spatial context");
 	    m.add(matchingParent, cs, key);
 	    m.link(into, 1, cs, "structure point");
 	    content.render(scene, cs, cs, w, h, d, visible);

@@ -96,7 +96,7 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 			   float w, float h, float d,
 			   boolean visible) {
 	    spatialContextCS = into;
-	    scene.matcher.add(matchingParent, into, "a spatial context...");
+	    scene.matcher.add(matchingParent, into, "spatial context");
 	    super.render(scene, into, matchingParent, w, h, d, visible);
 	    
 	}
