@@ -40,6 +40,30 @@ import java.util.*;
 
 public class FenFiction extends LobLob {
 
+    public static class ClassType implements BrowserLob.Type {
+	protected Graph graph;
+	protected Object rdfClass;
+
+	public ClassType(Graph graph, Object rdfClass) {
+	    this.graph = graph;
+	    this.rdfClass = rdfClass;
+	}
+
+	public boolean contains(Object state) {
+	    Object stateClass = graph.find1_11X(state, RDF.type);
+	    return stateClass != null && stateClass.equals(rdfClass);
+	}
+
+	public boolean equals(Object o) {
+	    if(!(o instanceof ClassType)) return false;
+	    ClassType t = (ClassType)o;
+	    return rdfClass.equals(t.rdfClass) && graph.equals(t.graph);
+	}
+	public int hashCode() {
+	    return rdfClass.hashCode() + graph.hashCode() + 32499;
+	}
+    }
+
     private static final String 
 	fic = "http://fenfire.org/vocab/2004/11/fenfiction#",
 	allStories = "AllStories";
@@ -163,6 +187,12 @@ public class FenFiction extends LobLob {
     }
 
 
+    protected BrowserLob.Type allStoriesType = new BrowserLob.Type() {
+	    public boolean contains(Object state) {
+		return allStories.equals(state);
+	    }
+	};
+
     protected class AllStoriesView extends AbstractView {
 	protected Model headingFont;
 	
@@ -174,8 +204,8 @@ public class FenFiction extends LobLob {
 					    30, Color.black));
 	}
 	
-	public boolean accepts(Object state) {
-	    return allStories.equals(state);
+	public Set getTypes() {
+	    return Collections.singleton(allStoriesType);
 	}
 	public Lob getViewLob(final Model state) {
 	    Lob heading = 
@@ -199,15 +229,15 @@ public class FenFiction extends LobLob {
     }
 
     protected abstract class AbstractItemView extends AbstractView {
-	private Object type;
+	private BrowserLob.Type type;
 
-	protected AbstractItemView(Graph graph, Object type) { 
+	protected AbstractItemView(Graph graph, Object rdfClass) { 
 	    super(graph);
-	    this.type = type;
+	    this.type = new ClassType(graph, rdfClass);
 	}
 
-	public boolean accepts(Object state) {
-	    return graph.find1_11X(state, RDF.type).equals(type);
+	public Set getTypes() {
+	    return Collections.singleton(type);
 	}
     }
 
@@ -313,7 +343,7 @@ public class FenFiction extends LobLob {
 
 	Graph g = gf.getGraph();
 
-	ListModel views = new ListModel.Simple();
+	Set views = new HashSet();
 	views.add(new AllStoriesView(g));
 	views.add(new StoryView(g));
 	views.add(new CharacterView(g));
