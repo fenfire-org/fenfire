@@ -25,6 +25,7 @@ Cursor.java
  * Written by Benja Fallenstein
  */
 package org.fenfire;
+import org.nongnu.libvob.layout.*;
 
 /** A Fenfire cursor position for use by BrowserLob.
  */
@@ -42,4 +43,45 @@ public interface Cursor {
 
 	public Object getNode() { return node; }
     }
+
+
+    /** Cursor for Canvas spatial view.
+     */
+    class CanvasCursor implements Cursor {
+	private Object canvas, node;
+	private final Model zoom;
+	private final Model panX;
+	private final Model panY;
+
+	public CanvasCursor(Object canvas, Object node) { 
+	    if (canvas == null) throw new Error("Canvas MUST be set.");
+	    this.canvas = canvas;
+	    this.node = node; 
+	    zoom = new FloatModel(1);
+	    panX = new FloatModel(0);
+	    panY = new FloatModel(0);
+	}
+
+	public Object getNode() { 
+	    return getCanvas(); 
+	}
+	public Object getCanvas() {
+	    return canvas;
+	}
+	public Object getNodeOnCanvas() {
+	    return node;
+	}
+
+	public Model getPanX() { return panX; }
+	public Model getPanY() { return panY; }
+	public Model getZoom() { return zoom; }
+	
+	public boolean equals(Object o) {
+	    if (!(o instanceof CanvasCursor)) return false;
+	    throw new Error("equal has not yet been implemented sanely");
+	}
+    }
+    
+    
+    
 }
