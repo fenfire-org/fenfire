@@ -87,10 +87,21 @@ public abstract class Expression {
 	for(i++; i<params.length; i++)
 	    n[i] = params[i];
 
-	return newExpression(n);
+	return newExpression(head, n);
     }
 
-    abstract protected Expression newExpression(FunctionExpression[] params);
+    public Expression instantiatePattern(Map context) {
+	FunctionExpression[] n = new FunctionExpression[params.length];
+	for(int i=0; i<params.length; i++) {
+	    if(params[i] != null)
+		n[i] = (FunctionExpression)params[i].instantiatePattern(context);
+	}
+
+	return newExpression(head.instantiatePattern(context), n);
+    }
+
+    abstract protected Expression newExpression(Head head,
+						FunctionExpression[] params);
 
     protected List[] evaluateParams(Map context) {
 	List[] result = new List[params.length];

@@ -47,7 +47,8 @@ public class CommandExpression extends Expression {
 	command.execute(evaluateParams(context), context);
     }
 
-    protected Expression newExpression(FunctionExpression[] params) {
-	return new CommandExpression(command, params);
+    protected Expression newExpression(Head head, 
+				       FunctionExpression[] params) {
+	return new CommandExpression((Command)head, params);
     }
 }

@@ -37,25 +37,12 @@ public class PotionAction extends AbstractAction {
     protected Model currentCommand;
 
     protected CommandExpression command;
-    protected boolean useCurrentNode;
     protected FunctionExpression function;
 
-    public PotionAction(Command command, boolean useCurrentNode,
-			Function function, 
-			Graph graph, Model cursor, Model currentCommand) {
-	this(command == null ? null : new CommandExpression(command), 
-	     useCurrentNode,
-	     function == null ? null : new FunctionExpression(function),
-	     graph, cursor, currentCommand);
-    }
-
-    public PotionAction(CommandExpression command, boolean useCurrentNode,
-			FunctionExpression function,
+    public PotionAction(CommandExpression command, FunctionExpression function,
 			Graph graph, Model cursor, Model currentCommand) {
 	this.command = command;
 	this.function = function;
-
-	this.useCurrentNode = useCurrentNode;
 
 	this.graph = graph;
 	this.cursor = cursor;
@@ -65,28 +52,24 @@ public class PotionAction extends AbstractAction {
     public void run() {
 	CommandExpression c = (CommandExpression)currentCommand.get();
 
+	Map context = new HashMap();
+	context.put("graph", graph);
+	context.put("cursorModel", cursor);
+	context.put("cursor", cursor.get());
+
 	if(c == null) {
 	    if(command == null) return;
 
-	    c = command;
-	    if(useCurrentNode) {
-		org.fenfire.Cursor cur = (org.fenfire.Cursor)cursor.get();
-		Object n = cur.getNode();
-		Function fn = Potions.node(n, Nodes.toString(n));
-		FunctionExpression expr = new FunctionExpression(fn);
-		c = (CommandExpression)c.setNextParam(expr);
-	    }
+	    c = (CommandExpression)command.instantiatePattern(context);
 	}
 
 	if(!c.isComplete() && function != null) {
-	    c = (CommandExpression)c.setNextParam(function);
+	    FunctionExpression expr = 
+		(FunctionExpression)function.instantiatePattern(context);
+	    c = (CommandExpression)c.setNextParam(expr);
 	}
 
 	if(c.isComplete()) {
-	    Map context = new HashMap();
-	    context.put("graph", graph);
-	    context.put("cursor", cursor);
-
 	    c.execute(context);
 	    currentCommand.set(null);
 

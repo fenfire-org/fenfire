@@ -31,4 +31,10 @@ import java.util.*;
 
 public interface Function extends Head {
     List evaluate(List[] params, Map contetxt);
+
+    FunctionExpression call();
+    FunctionExpression call(FunctionExpression p1);
+    FunctionExpression call(FunctionExpression p1, FunctionExpression p2);
+    FunctionExpression call(FunctionExpression p1, FunctionExpression p2, 
+			    FunctionExpression p3);
 }

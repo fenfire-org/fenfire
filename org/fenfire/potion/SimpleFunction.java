@@ -30,7 +30,7 @@ import java.util.*;
 
 /** Like SimpleCommand, but for functions.
  */
-public abstract class SimpleFunction extends AbstractHead implements Function {
+public abstract class SimpleFunction extends AbstractFunction {
     public SimpleFunction(Object[] spec) { super(spec); }
 
     protected abstract Object evaluate(Object[] params, Map context);

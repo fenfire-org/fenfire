@@ -46,7 +46,7 @@ public class FunctionExpression extends Expression {
 	return function.evaluate(evaluateParams(context), context);
     }
 
-    public Expression newExpression(FunctionExpression[] params) {
-	return new FunctionExpression(function, params);
+    public Expression newExpression(Head head, FunctionExpression[] params) {
+	return new FunctionExpression((Function)head, params);
     }
 }

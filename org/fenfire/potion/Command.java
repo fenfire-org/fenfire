@@ -32,4 +32,10 @@ import java.util.*;
 public interface Command extends Head {
 
     void execute(List[] params, Map context);
+
+    CommandExpression call();
+    CommandExpression call(FunctionExpression p1);
+    CommandExpression call(FunctionExpression p1, FunctionExpression p2);
+    CommandExpression call(FunctionExpression p1, FunctionExpression p2, 
+			   FunctionExpression p3);
 }

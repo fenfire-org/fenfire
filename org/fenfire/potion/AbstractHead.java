@@ -34,6 +34,10 @@ public abstract class AbstractHead implements Head {
     protected AbstractHead(Object[] spec) {
 	this.spec = spec;
     }
+
+    public Head instantiatePattern(Map context) {
+	return this;
+    }
     
     public String getString(Expression[] params, Map context) {
 	String s = "";
@@ -67,5 +71,5 @@ public abstract class AbstractHead implements Head {
 	    result[i] = (Type)types.get(i);
 
 	return result;
-    }
+    }    
 }

@@ -32,4 +32,6 @@ import java.util.*;
 public interface Head {
     String getString(Expression[] params, Map context);
     Type[] getParams();
+
+    Head instantiatePattern(Map context);
 }

@@ -26,6 +26,7 @@ Potions.java
  * Written by Benja Fallenstein
  */
 package org.fenfire.potion;
+import org.fenfire.Cursor;
 import org.fenfire.swamp.*;
 import java.util.*;
 
@@ -52,22 +53,34 @@ public class Potions {
 	    }
 	};
 
-    public static Function newNode = new SimpleFunction(new Object[] {
-	"a new node" }) {
-	    
+    public static FunctionExpression newNode = 
+	new SimpleFunction(new Object[] { "a new node" }) {
 	    public Object evaluate(Object[] params, Map context) {
 		return Nodes.N();
 	    }
-	};
+	}.call();
 
 
-    public static Function node(final Object n, String name) {
+    public static FunctionExpression currentNode = new AbstractFunction.Pattern() {
+	    public Head instantiatePattern(Map context) {
+		Cursor c = (Cursor)context.get("cursor");
+		return nodeFn(c.getNode(), Nodes.toString(c.getNode()));
+	    }
+	}.call();
+
+
+    public static Function nodeFn(final Object n, String name) {
 	return new AbstractFunction(new Object[] { name }) {
 		public List evaluate(List[] params, Map context) {
 		    return Collections.singletonList(n);
 		}
 	    };
     }
+
+    public static FunctionExpression node(final Object n, String name) {
+	return nodeFn(n, name).call();
+    }
+
     
 
     public static class SimpleType implements Type {
@@ -80,11 +93,5 @@ public class Potions {
 	public String getQuestionString() {
 	    return "[" + question + "]";
 	}
-    }
-
-    public static abstract class AbstractFunction extends AbstractHead 
-	implements Function {
-
-	public AbstractFunction(Object[] spec) { super(spec); }
     }
 }

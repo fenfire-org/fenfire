@@ -44,7 +44,7 @@ import java.util.*;
  *      {3, a, x}, {3, a, y}, {3, b, x}, {3, b, y}, {3, c, x}, {3, c, y}
  *  </pre>
  */
-public abstract class SimpleCommand extends AbstractHead implements Command {
+public abstract class SimpleCommand extends AbstractCommand {
     public SimpleCommand(Object[] spec) { super(spec); }
 
     protected abstract void execute(Object[] params, Map context);
