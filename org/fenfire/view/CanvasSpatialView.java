@@ -43,11 +43,13 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
     static private void p(String s) { System.out.println("CanvasSpatialView:: "+s); }
 
     private Graph graph;
+    private WindowAnimation winAnim;
 
     private Map cache = new org.nongnu.navidoc.util.WeakValueMap();
 
-    public CanvasSpatialView(Graph graph) {
+    public CanvasSpatialView(Graph graph, WindowAnimation winAnim) {
 	this.graph = graph;
+	this.winAnim = winAnim;
     }
 
     public Set getTypes() {
@@ -201,14 +203,14 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 	    l = new DragController(l, 3, new org.nongnu.libvob.mouse.RelativeAdapter() {
 		    public void changedRelative(float dx, float dy) {
 			zoom.setFloat(zoom.getFloat() + dy/100);
-			rerender();
+			winAnim.rerender();
 		    }
 		});
 	    l = new DragController(l, 1, new org.nongnu.libvob.mouse.RelativeAdapter() {
 		    public void changedRelative(float dx, float dy) {
 			panX.setFloat(panX.getFloat() - dx/zoom.getFloat());
 			panY.setFloat(panY.getFloat() - dy/zoom.getFloat());
-			rerender();
+			winAnim.rerender();
 		    }
 		}); 
 
@@ -221,13 +223,6 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 	return l;
     }
 
-    WindowAnimation winAnim = null;
-    private void rerender() {
-	if (winAnim != null) {
-	    winAnim.switchVS();
-	}
-    }
-    
 
     private class UniqueColorModel extends AbstractModel.AbstractObjectModel {
 	Model key;
