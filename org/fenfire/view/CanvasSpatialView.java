@@ -59,12 +59,15 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 
 
 
+    public final ViewSettings.Type TYPE = // XXX should be static
+	new ViewSettings.AbstractType() {
+	    public boolean containsNode(Object node) {
+		return graph.find1_X11(CANVAS2D.contains, node) != null;
+	    }
+	};
+    
     public Set getTypes() {
-	return Collections.singleton(new ViewSettings.AbstractType() {
-		public boolean containsNode(Object node) {
-		    return graph.find1_X11(CANVAS2D.contains, node) != null;
-		}
-	    });
+	return Collections.singleton(TYPE);
     }
 
     public boolean showBig() {

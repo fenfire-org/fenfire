@@ -148,6 +148,7 @@ public abstract class ViewSettings {
 	    t = (Type)i.next();
 	    if(v.getTypes().contains(t) && t.containsCursor(position))
 		break;
+	    t = null;
 	}
 
 	if(t == null)

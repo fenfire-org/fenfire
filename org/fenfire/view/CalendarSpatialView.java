@@ -60,14 +60,17 @@ public class CalendarSpatialView implements SpatialViewSettings.SpatialView {
 	ndays = days;
     }
 
+    public final ViewSettings.Type TYPE = // XXX should be static
+	new ViewSettings.AbstractType() {
+	    public boolean containsNode(Object node) {
+		Iterator i = graph.findN_11X_Iter(node, DC.date);
+		//p("i: "+i.hasNext());
+		return i.hasNext();
+	    }
+	};
+    
     public Set getTypes() {
-	return Collections.singleton(new ViewSettings.AbstractType() {
-		public boolean containsNode(Object node) {
-		    Iterator i = graph.findN_11X_Iter(node, DC.date);
-		    //p("i: "+i.hasNext());
-		    return i.hasNext();
-		}
-	    });
+	return Collections.singleton(TYPE);
     }
 
     public boolean showBig() {
