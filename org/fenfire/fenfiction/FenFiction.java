@@ -49,7 +49,10 @@ public class FenFiction extends LobLob {
 	NAME = Nodes.get(fic+"name"),
 	STORY = Nodes.get(fic+"Story"),
 	CHARACTER = Nodes.get(fic+"Character"),
-	ELEMENT = Nodes.get(fic+"element");
+	ELEMENT = Nodes.get(fic+"element"),
+	NOTE = Nodes.get(fic+"Note"),
+	TEXT = Nodes.get(fic+"text"),
+	RELATION = Nodes.get("http://purl.org/dc/elements/1.1/relation");
 
 
     private static final float inf = Float.POSITIVE_INFINITY;
@@ -64,12 +67,12 @@ public class FenFiction extends LobLob {
     }
 
 
-    protected Lob viewLob(Lob heading, String msg, ListModel list,
-			  Lob backButton) {
+    protected Lob assembleViewLob(Lob heading, Lob body, 
+				  Lob leftPane, Lob rightPane) {
 	Box outerHBox = new Box(X);
 
-	Lob leftPane = new AlignLob(backButton, .5f, 0, .5f, 0);
 	outerHBox.addRequest(leftPane, 100, 100, inf);
+	outerHBox.glue(20, 50, 50);
 
 	Box outerVBox = new Box(Y);
 	outerHBox.add(outerVBox);
@@ -78,8 +81,17 @@ public class FenFiction extends LobLob {
 
 	outerVBox.glue(20, 20, 20);
 
+	outerVBox.add(body);
+
+	outerHBox.glue(20, 50, 50);
+	outerHBox.addRequest(rightPane, 100, 100, inf);
+
+	return new FocusLob(new Margin(outerHBox, 20));
+    }
+
+    protected Lob viewLob(Lob heading, String msg, ListModel list,
+			  Lob backButton) {
 	Box hbox = new Box(X);
-	outerVBox.add(hbox);
 
 	Box vbox = new Box(Y);
 	hbox.addRequest(vbox, 100, 200, 200);
@@ -95,9 +107,8 @@ public class FenFiction extends LobLob {
 
 	hbox.addRequest(new Box(Y, seq), 100, 200, 200);
 
-	outerHBox.glue(0, 0, inf);
-
-	return new FocusLob(new Margin(outerHBox, 20));
+	Lob leftPane = new AlignLob(backButton, .5f, 0, .5f, 0);
+	return assembleViewLob(heading, hbox, leftPane, NullLob.instance);
     }
 
 
@@ -244,21 +255,48 @@ public class FenFiction extends LobLob {
 	    Lob heading = rlob.textField(state, NAME, state);
 	    heading = new RequestChangeLob(X, heading, 450, 450, 450);
 
-	    /*
-	    SetModel _elems = rlob.setModel(state, ELEMENT, 1);
+	    SetModel _elems = rlob.setModel(state, RELATION, 1);
 	    ListModel elems = rlob.listModel(_elems, new URIComparator());
 
-	    ListModel newCharacter = button("New Character", state,
-					    CHARACTER, ELEMENT);
+	    ListModel newCharacter = button("New Note", state,
+					    NOTE, RELATION);
 
 	    ListModel list = new ListModel.Concat(newCharacter,
 						  list(state, elems, TITLE), 
 						  end());
-	    */
-
-	    ListModel list = end();
 
 	    return viewLob(heading, null, list, backButton);
+	}
+    }
+
+    protected class NoteView extends AbstractItemView {
+	protected NoteView(Graph graph) { 
+	    super(graph, NOTE);
+	}
+	
+	public Lob getViewLob(final Model state) {
+	    ListModel listHeading = new ListModel.Simple();
+	    listHeading.add(new Label("Related items:"));
+	    listHeading.add(new Glue(Lob.Y, 10, 10, 10));
+
+	    SetModel _elems = rlob.setModel(state, RELATION, -1);
+	    ListModel elems = rlob.listModel(_elems, new URIComparator());
+
+	    ListModel list = new ListModel.Concat(listHeading,
+						  list(state, elems, NAME), 
+						  end());
+
+	    SequenceModel seq = new SequenceModel.ListSequenceModel(list);
+	    
+	    Lob related = new Box(Y, seq);
+
+
+	    Lob heading = rlob.textField(state, TITLE, state);
+	    heading = new RequestChangeLob(X, heading, 450, 450, 450);
+
+	    Lob body = rlob.textArea(state, TEXT);
+	    
+	    return assembleViewLob(heading, body, NullLob.instance, related);
 	}
     }
 
@@ -278,6 +316,7 @@ public class FenFiction extends LobLob {
 	views.add(new AllStoriesView(g));
 	views.add(new StoryView(g));
 	views.add(new CharacterView(g));
+	views.add(new NoteView(g));
 
 	Lob l = new BrowserLob(new ObjectModel(allStories), views);
 
