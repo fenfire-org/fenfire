@@ -56,7 +56,8 @@ public class FeedReader {
 	if(i >= 0) contentType = contentType.substring(0, i);
 	contentType = contentType.trim().toLowerCase();
 
-	if(contentType.equals("application/turtle")) {
+	if(contentType.equals("application/turtle") ||
+	   contentType.equals("application/x-turtle")) {
 	    InputStream in = res.getInputStream();
 	    Graphs.readTurtle(in, baseURI, graph, namespaces);
 	    return;
