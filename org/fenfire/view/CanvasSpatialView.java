@@ -39,17 +39,21 @@ import org.nongnu.navidoc.util.Obs;
 import java.awt.Color;
 import java.util.*;
 
-public class CanvasSpatialView implements ViewSettings.SpatialView {
+public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
     static private void p(String s) { System.out.println("CanvasSpatialView:: "+s); }
 
     private Graph graph;
+    private ContentViewSettings contentViewSettings;
     private WindowAnimation winAnim;
 
     private Map canvasCache = new org.nongnu.navidoc.util.WeakValueMap();
     private Map buoyCache = new org.nongnu.navidoc.util.WeakValueMap();
 
-    public CanvasSpatialView(Graph graph, WindowAnimation winAnim) {
+    public CanvasSpatialView(Graph graph, 
+			     ContentViewSettings contentViewSettings,
+			     WindowAnimation winAnim) {
 	this.graph = graph;
+	this.contentViewSettings = contentViewSettings;
 	this.winAnim = winAnim;
     }
 
@@ -178,8 +182,7 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
     }
 
     protected Lob getContentLob(Object node) {
-	String s = Nodes.toString(node);
-	return new Label(s.substring(s.length()-5));
+	return contentViewSettings.getLob(node);
     }
 
     /**

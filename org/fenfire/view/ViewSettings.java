@@ -33,7 +33,7 @@ import org.nongnu.libvob.util.*;
 import org.nongnu.navidoc.util.Obs;
 import java.util.*;
 
-public class ViewSettings {
+public abstract class ViewSettings {
 
     public interface Type {
 	boolean containsCursor(Cursor cursor);
@@ -46,11 +46,8 @@ public class ViewSettings {
 	}
     }
 
-    public interface SpatialView {
+    public interface View {
 	Set getTypes();
-	boolean showBig(); // whether the mainview should be shown big
-	Lob getMainviewLob(Cursor cursor);
-	Lob getBuoyLob(Object node);
     }
 
     public static Type ALL = new AbstractType() {
@@ -73,7 +70,7 @@ public class ViewSettings {
 	this.viewListByType = new HashMap();
 
 	for(Iterator i=views.iterator(); i.hasNext();) {
-	    SpatialView v = (SpatialView)i.next();
+	    View v = (View)i.next();
 	    Set typeSet = (Set)v.getTypes();
 
 	    for(Iterator j=typeSet.iterator(); j.hasNext();) {
@@ -96,61 +93,28 @@ public class ViewSettings {
 	}
     }
 
-    protected Replaceable[] getParams() {
-	return new Replaceable[] { };
-    }
-    protected Object clone(Object[] params) {
-	return new ViewSettings(views);
-    }
-
-    protected SpatialView getViewByCursor(Cursor cursor) {
+    protected View getViewByCursor(Cursor cursor) {
 	// use numeric iteration instead of Iterator
 	// because this is called in an inner loop
 	for(int i=0; i<types.size(); i++) {
 	    Type type = (Type)types.get(i);
 	    if(type.containsCursor(cursor))
-		return (SpatialView)viewByType.get(type);
+		return (View)viewByType.get(type);
 	}
 
 	return null;
     }
 
-    protected SpatialView getViewByNode(Object node) {
+    protected View getViewByNode(Object node) {
 	// use numeric iteration instead of Iterator
 	// because this is called in an inner loop
 	for(int i=0; i<types.size(); i++) {
 	    Type type = (Type)types.get(i);
 	    if(type.containsNode(node))
-		return (SpatialView)viewByType.get(type);
+		return (View)viewByType.get(type);
 	}
 
 	return null;
-    }
-
-    private Lob errorLob = new org.nongnu.libvob.layout.component.Label("No matching nodeview found!");
-
-    public Lob getMainviewLob(Cursor cursor) {
-	SpatialView v = getViewByCursor(cursor);
-	if(v != null)
-	    return v.getMainviewLob(cursor);
-	else
-	    return errorLob;
-    }
-
-    public Lob getBuoyLob(Object node) {
-	SpatialView v = getViewByNode(node);
-	if(v != null)
-	    return v.getBuoyLob(node);
-	else
-	    return errorLob;
-    }
-
-    public boolean showBig(Cursor cursor) {
-	SpatialView v = getViewByCursor(cursor);
-	if(v != null)
-	    return v.showBig();
-	else
-	    return false;
     }
 
     public void changeView(Cursor position, int steps) {
@@ -158,7 +122,7 @@ public class ViewSettings {
 	System.out.println("views: "+list);
 
 	for(Iterator i=views.iterator(); i.hasNext();) {
-	    SpatialView v = (SpatialView)i.next();
+	    View v = (View)i.next();
 
 	    for(Iterator j=v.getTypes().iterator(); j.hasNext();) {
 		Type t = (Type)j.next();
@@ -173,10 +137,10 @@ public class ViewSettings {
 	index = (index + steps) % list.size();
 	if(index < 0) index += list.size();
 	System.out.println("move to index "+index);
-	changeView(position, (SpatialView)list.get(index));
+	changeView(position, (View)list.get(index));
     }
 
-    public void changeView(Cursor position, SpatialView v) {
+    public void changeView(Cursor position, View v) {
 	// find first matching type
 
 	Type t = null;

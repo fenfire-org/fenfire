@@ -39,18 +39,21 @@ import org.nongnu.navidoc.util.Obs;
 import java.awt.Color;
 import java.util.*;
 
-public class CalendarSpatialView implements ViewSettings.SpatialView {
+public class CalendarSpatialView implements SpatialViewSettings.SpatialView {
     static private void p(String s) { System.out.println("CalendarSpatialView:: "+s); }
 
     private Graph graph;
+    private ContentViewSettings contentViewSettings;
     private WindowAnimation winAnim;
     private int ndays;
 
     private Map cache = new org.nongnu.navidoc.util.WeakValueMap();
 
     public CalendarSpatialView(Graph graph, 
+			       ContentViewSettings contentViewSettings,
 			       WindowAnimation winAnim, int days) {
 	this.graph = graph;
+	this.contentViewSettings = contentViewSettings;
 	this.winAnim = winAnim;
 	
 	if (days < 0) throw new IllegalArgumentException("0 > days = "+days);
@@ -143,8 +146,7 @@ public class CalendarSpatialView implements ViewSettings.SpatialView {
 	    //p(cc.getShownDates()[i].getString());
 	    for (Iterator j=graph.findN_X11_Iter(DC.date,date); j.hasNext();) {
 		Object n = j.next();
-		String s = Nodes.toString(n);
-		Lob l3 = new Label(s.substring(s.length()-5));
+		Lob l3 = contentViewSettings.getLob(n);
 		// add click controller to select new focus...
 		l3 = new BuoyConnectorLob(l3, n, cs);
 		l3 = new AlignLob(l3, .5f,.5f,.5f,.5f);

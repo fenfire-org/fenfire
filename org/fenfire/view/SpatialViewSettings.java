@@ -1,5 +1,5 @@
 /*
-SimpleSpatialView.java
+SpatialViewSettings.java
  *    
  *    Copyright (c) 2004-2005, Benja Fallenstein and Matti Katila
  *
@@ -27,48 +27,54 @@ SimpleSpatialView.java
  */
 package org.fenfire.view;
 import org.fenfire.Cursor;
-import org.fenfire.swamp.*;
 import org.nongnu.libvob.layout.*;
-import org.nongnu.libvob.layout.component.*;
 import org.nongnu.libvob.*;
 import org.nongnu.libvob.util.*;
 import org.nongnu.navidoc.util.Obs;
 import java.util.*;
 
-public class SimpleSpatialView implements SpatialViewSettings.SpatialView {
+public class SpatialViewSettings extends ViewSettings {
 
-    private ContentViewSettings contentViewSettings;
-
-    private Map cache = new org.nongnu.navidoc.util.WeakValueMap();
-
-    public SimpleSpatialView(ContentViewSettings contentViewSettings) {
-	this.contentViewSettings = contentViewSettings;
+    public interface SpatialView extends View {
+	boolean showBig(); // whether the mainview should be shown big
+	Lob getMainviewLob(Cursor cursor);
+	Lob getBuoyLob(Object node);
     }
 
-    public Set getTypes() {
-	return Collections.singleton(ViewSettings.ALL);
+    public SpatialViewSettings(Set views) {
+	super(views);
     }
 
-    public boolean showBig() {
-	return false;
+    protected Replaceable[] getParams() {
+	return new Replaceable[] { };
     }
+    protected Object clone(Object[] params) {
+	return new SpatialViewSettings(views);
+    }
+
+    private Lob errorLob = new org.nongnu.libvob.layout.component.Label("No matching spatial view found!");
 
     public Lob getMainviewLob(Cursor cursor) {
-	return getBuoyLob(cursor.getNode());
+	SpatialView v = (SpatialView)getViewByCursor(cursor);
+	if(v != null)
+	    return v.getMainviewLob(cursor);
+	else
+	    return errorLob;
     }
 
     public Lob getBuoyLob(Object node) {
-	if(cache.get(node) != null) return (Lob)cache.get(node);
+	SpatialView v = (SpatialView)getViewByNode(node);
+	if(v != null)
+	    return v.getBuoyLob(node);
+	else
+	    return errorLob;
+    }
 
-	Model cs = new IntModel();
-
-	Lob l = contentViewSettings.getLob(node);
-	l = new BuoyConnectorLob(l, node, cs);
-	l = new AlignLob(l, .5f, .5f, .5f, .5f);
-	l = new ThemeFrame(l);
-	l = new RequestChangeLob(Lob.X, l, Float.NaN, 100, 100);
-	l = new SpatialContextLob(l, cs);
-	cache.put(node, l);
-	return l;
+    public boolean showBig(Cursor cursor) {
+	SpatialView v = (SpatialView)getViewByCursor(cursor);
+	if(v != null)
+	    return v.showBig();
+	else
+	    return false;
     }
 }
