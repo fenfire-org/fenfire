@@ -25,7 +25,7 @@ Nodes.java
  */
 
 package org.fenfire.swamp;
-import org.fenfire.util.URN5Namespace;
+import org.nongnu.storm.util.URN5Namespace;
 
 /** Mapping between URI strings and RDF nodes.
  * One of swamp's main goals is efficiency, both in time and space.

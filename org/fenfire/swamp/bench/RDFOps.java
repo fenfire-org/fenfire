@@ -27,7 +27,7 @@ RDFOps.java
 package org.fenfire.swamp.bench;
 import org.fenfire.swamp.*;
 import org.fenfire.swamp.impl.*;
-import org.fenfire.util.*;
+import org.nongnu.storm.util.URN5Namespace;
 
 /** Benchmark methods for various RDF operations.
  * For use from jython: set the attributes and then call
