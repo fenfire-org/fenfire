@@ -1,5 +1,5 @@
 /*
-Smush.java
+Smusher.java
  *    
  *    Copyright (c) 2004, Benja Fallenstein
  *    This file is part of Fenfire.

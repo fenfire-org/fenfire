@@ -82,7 +82,7 @@ public class FeedReader {
 	    InputStream bin = new ByteArrayInputStream(bos.toByteArray());
 	    Graphs.readXML(bin, baseURI, graph, namespaces);
 	} else {
-	    throw new IOException("Unhandled content type: "+contentType);
+	    throw new IOException("Unhandled content type "+contentType+" when reading "+res.getURI());
 	}
     }
 

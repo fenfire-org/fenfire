@@ -55,8 +55,13 @@ public class Aggregator implements HTTPUpdater.UpdateListener {
 	for(Iterator i=subscriptions.iterator(); i.hasNext();) {
 	    String uri = (String)i.next();
 	    HTTPResource r = updater.add(uri, loadInterval);
-	    FeedReader.read(r, new OneQuadGraph(graph, Nodes.get(uri)), 
-			    namespaces);
+	    try {
+		FeedReader.read(r, new OneQuadGraph(graph, Nodes.get(uri)), 
+				namespaces);
+	    } catch(IOException e) {
+		System.out.println("Error while reading "+uri);
+		e.printStackTrace();
+	    }
 	}
     }
 
@@ -71,7 +76,8 @@ public class Aggregator implements HTTPUpdater.UpdateListener {
 	    FeedReader.read(resource, new OneQuadGraph(graph, context), 
 			    namespaces);
 	} catch(IOException e) {
-	    throw new Error(e);
+	    System.out.println("Error while reading "+resource.getURI());
+	    e.printStackTrace();
 	}
 
 	org.nongnu.libvob.AbstractUpdateManager.chg();
