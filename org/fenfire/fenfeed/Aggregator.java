@@ -44,7 +44,7 @@ public class Aggregator implements HTTPUpdater.UpdateListener {
 
     public Aggregator(QuadsGraph graph, Map namespaces,
 		      Set subscriptions, int loadInterval,
-		      HTTPContext httpContext) throws IOException {
+		      HTTPContext httpContext) {
 	this.graph = graph;
 	this.namespaces = namespaces;
 	this.subscriptions = subscriptions;
@@ -67,15 +67,16 @@ public class Aggregator implements HTTPUpdater.UpdateListener {
 	System.out.println("Subscribe to "+uri);
 	try {
 	    HTTPResource r = updater.add(uri, loadInterval);
-	    FeedReader.read(r, new OneQuadGraph(graph, Nodes.get(uri)), 
-			    namespaces);
+	    FeedReader.read(r, new OneQuadGraph(graph, uri), namespaces);
 	} catch(IOException e) {
-	    System.out.println("Error while reading "+uri);
+	    System.out.println("Error while subscribing to "+uri);
 	    e.printStackTrace();
 	}
     }
 
     public void changed(HTTPResource resource) {
+	System.out.println("Changed: "+resource.getURI());
+
 	Object context = Nodes.get(resource.getURI());
 	graph.rm_AAA1(context);
 	try {
@@ -86,12 +87,23 @@ public class Aggregator implements HTTPUpdater.UpdateListener {
 	    e.printStackTrace();
 	}
 
-	org.nongnu.libvob.AbstractUpdateManager.chg();
+	try {
+	    org.nongnu.libvob.AbstractUpdateManager.chg();
+	} catch(NullPointerException e) {
+	    // AbstractUpdateManager isn't initialized yet
+	}
     }
 
-    public void startUpdate(HTTPResource resource) {}
-    public void unchanged(HTTPResource resource) {}
-    public void updateFailed(HTTPResource resource, IOException error) {}
+    public void startUpdate(HTTPResource resource) {
+	System.out.println("Updating "+resource.getURI());
+    }
+    public void unchanged(HTTPResource resource) {
+	System.out.println("Unchanged: "+resource.getURI());
+    }
+    public void updateFailed(HTTPResource resource, IOException error) {
+	System.out.println("Update of "+resource.getURI()+" failed:");
+	error.printStackTrace();
+    }
 
 
     public static void main(String[] args) throws Exception {

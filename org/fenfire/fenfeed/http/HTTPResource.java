@@ -52,12 +52,14 @@ public final class HTTPResource {
 
     private HTTPContext context;
 
-    private HTTPResource redirect;
-    private String newURI;
-
     private String uri;
     private File dir;
     private String name;
+
+    private boolean hasLoaded;
+
+    private HTTPResource redirect;
+    private String newURI;
 
     public HTTPResource(String uri, HTTPContext context) throws IOException {
 	this.uri = uri;
@@ -66,8 +68,8 @@ public final class HTTPResource {
 	File f = context.getResourceFile(uri);
 	dir = f.getParentFile();
 	name = f.getName();
-	
-	reload(false);
+
+	hasLoaded = file("content").exists();
     }
 
     private File file(String suffix) { 
@@ -90,6 +92,8 @@ public final class HTTPResource {
 	if(dbg) p("FETCH "+uri);
 
 	HttpURLConnection conn = getConnection(uri);
+
+	hasLoaded = true;
 	    
 	if(file("header").exists()) {
 	    Map hdr = header();
@@ -180,11 +184,13 @@ public final class HTTPResource {
     }
 
     public InputStream getInputStream() throws IOException {
+	if(!hasLoaded) reload(false);
 	if(redirect != null) return redirect.getInputStream();
 	return in("content");
     }
 
     public String getContentType() throws IOException {
+	if(!hasLoaded) reload(false);
 	if(redirect != null) return redirect.getContentType();
 	return (String)header().get("content-type");
     }
@@ -197,6 +203,7 @@ public final class HTTPResource {
      *  is <em>not</em> contacted, the date remains the same.
      */
     public Date lastRead() throws IOException {
+	if(!hasLoaded) reload(false);
 	return DateParser.parse(CopyUtil.readString(in("lastRead")));
     }
 

@@ -44,6 +44,7 @@ import java.util.*;
 public class FenFeed extends LobLob {
 
     private static final String
+	fenfeed = "http://fenfire.org/2004/12/fenfeed#",
 	rss = "http://purl.org/rss/1.0/",
 	content = "http://purl.org/rss/1.0/modules/content/";
 

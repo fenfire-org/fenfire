@@ -35,7 +35,9 @@ import java.io.*;
 import java.util.*;
 
 public class FeedReader {
-
+    public static boolean dbg = false;
+    private static void p(String s) { System.out.println("FeedReader:: "+s); }
+    
     public static final String ACCEPT =
 	"application/turtle, application/rdf+xml; q=0.9";
 
@@ -53,10 +55,14 @@ public class FeedReader {
 	if(contentType.equals("application/turtle")) {
 	    Graphs.readTurtle(in, baseURI, graph, namespaces);
 	} else if(contentType.equals("application/rdf+xml")) {
+	    if(dbg) p("---- read rdf/xml");
 	    Graphs.readXML(in, baseURI, graph, namespaces);
+	    if(dbg) p("---- fi");
 	} else if(contentType.equals("application/rss+xml") ||
 		  contentType.equals("application/xml") ||
 		  contentType.equals("text/xml")) {
+	    if(dbg) p("---- read rss");
+
 	    Builder b = new Builder();
 	    Document xml, transform_xml;
 
@@ -74,8 +80,10 @@ public class FeedReader {
 	    if(root.getNamespaceURI().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#") && root.getLocalName().equals("RDF")) {
 		// this is RDF/XML -- skip the chase and read it directly
 
+		if(dbg) p("---- no, read xml");
 		Graphs.readXML(res.getInputStream(), baseURI, 
 			       graph, namespaces);
+		if(dbg) p("---- fi");
 		return;
 	    }
 
@@ -87,20 +95,13 @@ public class FeedReader {
 		throw new IOException(""+e);
 	    }
 
-	    ByteArrayOutputStream bos0 = new ByteArrayOutputStream();
-	    Serializer serializer0 = new Serializer(bos0, "UTF-8");
-	    serializer0.write(xml);
-	    System.out.println(new String(bos0.toByteArray(), "UTF-8"));
-
 	    ByteArrayOutputStream bos = new ByteArrayOutputStream();
 	    Serializer serializer = new Serializer(bos, "UTF-8");
 	    serializer.write(new Document((Element)nodes.get(0)));
 
-	    System.out.println("=======================================");
-	    System.out.println(new String(bos.toByteArray(), "UTF-8"));
-	    
 	    InputStream bin = new ByteArrayInputStream(bos.toByteArray());
 	    Graphs.readXML(bin, baseURI, graph, namespaces);
+	    if(dbg) p("---- fi");
 	} else {
 	    throw new IOException("Unhandled content type "+contentType+" when reading "+res.getURI());
 	}

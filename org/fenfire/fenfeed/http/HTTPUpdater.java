@@ -71,6 +71,8 @@ public final class HTTPUpdater implements Runnable {
 	}
 
 	public void run() {
+	    Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+
 	    if(updateInProgress)
 		return;
 
