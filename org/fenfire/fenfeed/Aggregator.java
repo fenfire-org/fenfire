@@ -94,11 +94,27 @@ public class Aggregator implements HTTPUpdater.UpdateListener {
 
 	Set subscriptions = new HashSet();
 
-	for(int i=0; i<args.length; i++)
-	    subscriptions.add(args[i]);
+	boolean start = false;
+	for(int i=0; i<args.length; i++) {
+	    if(args[i].equals("-start"))
+		start = true;
+	    else
+		subscriptions.add(args[i]);
+	}
 
 	Aggregator agg = new Aggregator(graph, new HashMap(), subscriptions,
 					30, context);
-	agg.start();
+
+	if(start) {
+	    agg.start();
+	} else {
+	    QuadsGraph qg = new HashQuadsGraph();
+	    org.fenfire.swamp.smush.Smusher.smush(graph, qg);
+	    
+	    Graph g = new org.fenfire.swamp.impl.AllQuadsGraph(qg, "foo");
+	    StringWriter w = new StringWriter();
+	    Graphs.writeTurtle(g, agg.namespaces, w);
+	    System.out.println(w.toString());
+	}
     }
 }

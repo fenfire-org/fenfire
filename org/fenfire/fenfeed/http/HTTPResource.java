@@ -66,7 +66,7 @@ public final class HTTPResource {
 	File f = context.getResourceFile(uri);
 	dir = f.getParentFile();
 	name = f.getName();
-
+	
 	reload(false);
     }
 
