@@ -70,7 +70,7 @@ public final class Cursor {
 
     public void set(Object node, Object rotationProperty, 
 		    Object rotationNode, int dir) {
-	setNode(node);
+	set(node);
 	setRotation(node, rotationProperty, rotationNode, dir);
     }
 
