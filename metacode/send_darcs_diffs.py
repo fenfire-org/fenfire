@@ -62,8 +62,8 @@ def send(_proj, p):
                     "> send_darcs_diffs/diff")
     else:
         proj = _proj[1:]
-        x=os.system("cd /home/b/befallen/darcs/" +
-                    "darcs changes --match 'hash %s' --repo=%s " % (p, proj) +
+        pdir = '/home/b/befallen/darcs/%s' % proj
+        x=os.system("darcs changes --match 'hash %s' --repo=%s " % (p, pdir) +
                     "> send_darcs_diffs/desc")
         y=0
         f = open('send_darcs_diffs/diff', 'w')
@@ -122,21 +122,21 @@ def send(_proj, p):
 
 def project(_proj):
     if _proj[0] != '!':
-        proj = _proj
-        if not os.path.isdir(proj):
-            # we don't have that project -- skip
-            return
+        proj = pdir = _proj
     else:
         proj = _proj[1:]
-        if not os.path.isdir('/home/b/befallen/darcs/%s' % proj):
-            return
+        pdir = '/home/b/befallen/darcs/%s' % proj
+
+    if not os.path.isdir(pdir):
+        # we don't have that project -- skip
+        return
     
     FILE = 'send_darcs_diffs/%s-patches-sent' % proj
 
     os.system('touch '+FILE)
 
     patches_sent = [l[:-1] for l in open(FILE, 'r').xreadlines()]
-    patches = [s for s in os.listdir('%s/_darcs/patches/' % proj)
+    patches = [s for s in os.listdir('%s/_darcs/patches/' % pdir)
                  if s.endswith('.gz')]
     
     patches.sort()
