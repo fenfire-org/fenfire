@@ -108,11 +108,13 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
     }
 
     Lob mainviewCache;
-    Cursor cachedMainviewCursor;
     
     public Lob getMainviewLob(Cursor cursor) {
-	if(cursor == null) throw new NullPointerException("null cursor");
-	if(cursor == cachedMainviewCursor) return mainviewCache;
+	if(mainviewCache != null) {
+	    Lob result = mainviewCache;
+	    mainviewCache = null;
+	    return result;
+	}
 
 	Object node = cursor.getNode();
 	Object canvas = getCanvasCursor(cursor).getCanvas();
@@ -123,29 +125,52 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 	final Model panY = new Adapter(cursor, 1);
 	final Model zoom = new Adapter(cursor, 2);
 
-	Lob l = canvasContent;
-	l = new PanZoomLob(l, panX, panY, zoom);
-	l = new DragController(l, 3, new org.nongnu.libvob.mouse.RelativeAdapter() {
+	final MonoLob result = new SpatialContextLob(NullLob.instance, (Model)canvasContent.getTemplateParameter("cs"));
+
+	final PanZoomLob pzl = new PanZoomLob(canvasContent, panX.getFloat(), panY.getFloat(), zoom.getFloat());
+
+	Lob l = new DragController(pzl, 3, new org.nongnu.libvob.mouse.RelativeAdapter() {
+		public void startDrag(int x, int y) {
+		    super.startDrag(x, y);
+		    mainviewCache = result;
+		}
+
 		public void changedRelative(float dx, float dy) {
-		    zoom.setFloat(zoom.getFloat() + dy/100);
+		    float nx = panX.getFloat();
+		    float ny = panY.getFloat();
+		    float nz = zoom.getFloat() + dy/100;
+
+		    zoom.setFloat(nz);
+
+		    pzl.setParams(nx, ny, nz);
+		    mainviewCache = result;
 		    winAnim.rerender();
 		}
 	    });
 	l = new DragController(l, 1, new org.nongnu.libvob.mouse.RelativeAdapter() {
+		public void startDrag(int x, int y) {
+		    super.startDrag(x, y);
+		    mainviewCache = result;
+		}
+
 		public void changedRelative(float dx, float dy) {
-		    panX.setFloat(panX.getFloat() - dx/zoom.getFloat());
-		    panY.setFloat(panY.getFloat() - dy/zoom.getFloat());
+		    float nx = panX.getFloat() - dx/zoom.getFloat();
+		    float ny = panY.getFloat() - dy/zoom.getFloat();
+		    float nz = zoom.getFloat();
+
+		    panX.setFloat(nx);
+		    panY.setFloat(ny);
+
+		    pzl.setParams(nx, ny, nz);
+		    mainviewCache = result;
 		    winAnim.rerender();
 		}
 	    }); 
 
 	l = addBackground(l, canvas);
-	l = new SpatialContextLob(l, (Model)l.getTemplateParameter("cs"));
 
-	mainviewCache = l;
-	cachedMainviewCursor = cursor;
-
-	return l;
+	result.setContent(l);
+	return result;
     }
 
     public Lob getBuoyLob(Object node) {
