@@ -35,6 +35,13 @@ quad_spec.Graph = "QuadsGraph"
 quad_spec.ConstGraph = "QuadsConstGraph"
 quad_spec.one = "1111"
 
+quad_spec.find_patterns = [p+'A' for p in spec.find_patterns] + \
+                          [p+'1' for p in spec.find_patterns] + \
+                          ["111X", "AAAX"]
+
+quad_spec.rm_patterns = [p+'A' for p in spec.rm_patterns] + \
+                        [p+'1' for p in spec.rm_patterns] + ["AAA1"]
+
 spec.constGraphTemplate = """
 package org.fenfire.swamp;
 import java.util.Iterator;
@@ -112,6 +119,50 @@ abstract public class AbstractConstGraph implements ConstGraph {
     public ConstGraph getOriginalConstGraph() { return null; }
     public boolean contains(Object e0, Object e1, Object e2) {
 	return contains(e0, e1, e2, null);
+    }
+
+    %s
+}
+"""
+
+spec.abstractGraphTemplate = """
+package org.fenfire.swamp.impl;
+import org.fenfire.swamp.*;
+import org.nongnu.navidoc.util.Obs;
+import java.util.Iterator;
+import java.util.ArrayList;
+
+abstract public class AbstractGraph extends AbstractConstGraph implements Graph {
+    public Graph getObservedGraph(Obs o) {
+	return new StdObservedGraph(this, o);
+    }
+
+    public void set1_11X(Object subject, Object predicate, Object object) {
+	rm_11A(subject, predicate);
+	add(subject, predicate, object);
+    }
+
+    public void addAll(Graph g) {
+	for (Iterator i=g.findN_XAA_Iter(); i.hasNext();) {
+	    Object subj = i.next();
+	    for (Iterator j=g.findN_1XA_Iter(subj); j.hasNext();) {
+		Object pred = j.next();
+		for (Iterator k=g.findN_11X_Iter(subj,pred); k.hasNext();){
+		    Object obj = k.next();
+		    add(subj, pred, obj);
+		}
+	    }
+	}
+    }
+
+    protected void checkNode(Object node) {
+	if(!Nodes.isNode(node))
+	    throw new IllegalArgumentException("Not a node: "+node);
+    }
+    
+    protected void checkNodeOrLiteral(Object node) {
+	if(!Nodes.isNode(node) && !(node instanceof Literal))
+	    throw new IllegalArgumentException("Not a node or literal: "+node);
     }
 
     %s
@@ -257,25 +308,25 @@ public abstract class DelegateGraph extends AbstractGraph {
 	this.graph = graph;
     }
     
-    public synchronized void close() { graph.close(); }
-    public synchronized Obs getObserver() { return graph.getObserver(); }
-    public synchronized ConstGraph getOriginalConstGraph() {
+    public void close() { graph.close(); }
+    public Obs getObserver() { return graph.getObserver(); }
+    public ConstGraph getOriginalConstGraph() {
         return graph.getOriginalConstGraph();    }
-    public synchronized ConstGraph getObservedConstGraph(Obs o) {
+    public ConstGraph getObservedConstGraph(Obs o) {
         return graph.getObservedConstGraph(o);    }
-    public synchronized boolean contains(Object e0, Object e1, Object e2) {
+    public boolean contains(Object e0, Object e1, Object e2) {
         return graph.contains(e0,e1,e2); }
-    public synchronized boolean contains(Object e0, Object e1, Object e2, Obs o) {
+    public boolean contains(Object e0, Object e1, Object e2, Obs o) {
         return graph.contains(e0,e1,e2, o); }
-    public synchronized Graph getObservedGraph(org.nongnu.navidoc.util.Obs o) {
+    public Graph getObservedGraph(org.nongnu.navidoc.util.Obs o) {
         return graph.getObservedGraph(o); }
-    public synchronized void set1_11X(Object subject, Object predicate, Object object) {
+    public void set1_11X(Object subject, Object predicate, Object object) {
         graph.set1_11X(subject, predicate, object);   }
-    public synchronized void add(Object subject, Object predicate, Object object) {
+    public void add(Object subject, Object predicate, Object object) {
         graph.add(subject, predicate, object);     }
-    public synchronized void addAll(Graph g) {
+    public void addAll(Graph g) {
         graph.addAll(g);     }
-    public synchronized void rm_111(Object subject, Object predicate, Object object) {
+    public void rm_111(Object subject, Object predicate, Object object) {
         graph.rm_111(subject, predicate, object);     }
 
 
@@ -336,7 +387,6 @@ import org.nongnu.navidoc.util.Obs;
 public interface QuadsGraph extends QuadsConstGraph {
     QuadsGraph getObservedGraph(org.nongnu.navidoc.util.Obs o);
 
-    void set1_11XA(Object subject, Object predicate, Object object);
     void add(Object subject, Object predicate, Object object, Object context);
 
     %s
@@ -359,6 +409,37 @@ abstract public class AbstractQuadsConstGraph implements QuadsConstGraph {
     public QuadsConstGraph getOriginalConstGraph() { return null; }
     public boolean contains(Object e0, Object e1, Object e2, Object e3) {
 	return contains(e0, e1, e2, e3, null);
+    }
+
+    %s
+}
+"""
+
+quad_spec.abstractGraphTemplate = """
+package org.fenfire.swamp.impl;
+import org.fenfire.swamp.*;
+import org.nongnu.navidoc.util.Obs;
+import java.util.Iterator;
+import java.util.ArrayList;
+
+import java.util.*;
+
+abstract public class AbstractQuadsGraph extends AbstractQuadsConstGraph implements QuadsGraph {
+    static public boolean dbg = false;
+    private void p(String s) { System.out.println("AbstractQuadsGraph:: "+s); }
+
+    public QuadsGraph getObservedGraph(Obs o) {
+	return new StdObservedQuadsGraph(this, o);
+    }
+
+    protected void checkNode(Object node) {
+	if(!Nodes.isNode(node))
+	    throw new IllegalArgumentException("Not a node: "+node);
+    }
+    
+    protected void checkNodeOrLiteral(Object node) {
+	if(!Nodes.isNode(node) && !(node instanceof Literal))
+	    throw new IllegalArgumentException("Not a node or literal: "+node);
     }
 
     %s
@@ -477,10 +558,6 @@ public class StdObservedQuadsGraph extends StdObservedQuadsConstGraph
 	throw new Error("DoubleObs");
     }
 
-    public void set1_11XA(Object subject, Object predicate, Object object) {
-    	graph.set1_11XA(subject, predicate, object);
-    }
-
     %s
 
     public void add(Object subject, Object predicate, Object object, Object quad) {
@@ -502,25 +579,23 @@ public abstract class DelegateQuadsGraph extends AbstractQuadsGraph {
 	this.graph = graph;
     }
     
-    public synchronized void close() { graph.close(); }
-    public synchronized Obs getObserver() { return graph.getObserver(); }
-    public synchronized QuadsConstGraph getOriginalConstGraph() {
+    public void close() { graph.close(); }
+    public Obs getObserver() { return graph.getObserver(); }
+    public QuadsConstGraph getOriginalConstGraph() {
         return graph.getOriginalConstGraph();    }
-    public synchronized QuadsConstGraph getObservedConstGraph(Obs o) {
+    public QuadsConstGraph getObservedConstGraph(Obs o) {
         return graph.getObservedConstGraph(o);    }
-    public synchronized boolean contains(Object e0, Object e1, Object e2, Object e3) {
+    public boolean contains(Object e0, Object e1, Object e2, Object e3) {
         return graph.contains(e0,e1,e2, e3);
     }
-    public synchronized boolean contains(Object e0, Object e1, Object e2, Object e3, Obs o) {
+    public boolean contains(Object e0, Object e1, Object e2, Object e3, Obs o) {
         return graph.contains(e0,e1,e2,e3, o);
     }
-    public synchronized QuadsGraph getObservedGraph(org.nongnu.navidoc.util.Obs o) {
+    public QuadsGraph getObservedGraph(org.nongnu.navidoc.util.Obs o) {
         return graph.getObservedGraph(o); }
-    public synchronized void set1_11XA(Object subject, Object predicate, Object object) {
-        graph.set1_11XA(subject, predicate, object);   }
-    public synchronized void add(Object subject, Object predicate, Object object, Object context) {
+    public void add(Object subject, Object predicate, Object object, Object context) {
         graph.add(subject, predicate, object, context);     }
-    public synchronized void rm_1111(Object subject, Object predicate, Object object, Object context) {
+    public void rm_1111(Object subject, Object predicate, Object object, Object context) {
         graph.rm_1111(subject, predicate, object, context);     }
 
 
