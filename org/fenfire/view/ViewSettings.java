@@ -42,6 +42,7 @@ public class ViewSettings {
     public interface SpatialView {
 	Set getTypes();
 	Lob getLob(Cursor cursor);
+	boolean showBig(); // whether the mainview should be shown big
     }
 
     public static Type ALL = new Type() {
@@ -114,6 +115,14 @@ public class ViewSettings {
 	    return v.getLob(cursor);
 	else
 	    return errorLob;
+    }
+
+    public boolean showBig(Cursor cursor) {
+	SpatialView v = getView(cursor);
+	if(v != null)
+	    return v.showBig();
+	else
+	    return false;
     }
 
     public void changeView(Cursor position, int steps) {

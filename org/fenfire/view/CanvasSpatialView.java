@@ -57,6 +57,10 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 	    });
     }
 
+    public boolean showBig() {
+	return true;
+    }
+
     private Model getModel(Object node, Object prop) {
 	Model m = new ObjectModel(node);
 	m = new PropValueModel(new ObjectModel(graph), m, prop, 1);
@@ -75,12 +79,15 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 
 	Model cs = new IntModel();
 
+	Lob nl = null;
+
 	for(Iterator i=graph.findN_11X_Iter(canvas, CANVAS2D.contains); 
 	    i.hasNext();) {
 
 	    Object n = i.next();
 	    String s = Nodes.toString(n);
 	    Lob l = new Label(s.substring(s.length()-5));
+	    if(n.equals(node)) nl = l;
 	    l = new BuoyConnectorLob(l, n, cs);
 
 	    Model x = getModel(n, CANVAS2D.x), y = getModel(n, CANVAS2D.y);
@@ -89,11 +96,11 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 	}
 
 	Model x = getModel(node, CANVAS2D.x), y = getModel(node, CANVAS2D.y);
-	Model zero = new FloatModel(0);
-	Model offs = new FloatModel(35);
+	Model middle = new FloatModel(.5f);
 
-	Lob l = new TranslationLob(tray, zero.minus(x).plus(offs), 
-				         zero.minus(y).plus(offs));
+	Lob l = tray;
+	l = new ViewportLob(Lob.X, l, x.plus(nl.getNatSize(Lob.X)/2f), middle);
+	l = new ViewportLob(Lob.Y, l, y.plus(nl.getNatSize(Lob.Y)/2f), middle);
 	l = new ThemeFrame(l);
 	l = new RequestChangeLob(l, 100, 100, 100, 100, 100, 100);
 	l = new SpatialContextLob(l, cs);

@@ -43,6 +43,10 @@ public class SimpleSpatialView implements ViewSettings.SpatialView {
 	return Collections.singleton(ViewSettings.ALL);
     }
 
+    public boolean showBig() {
+	return false;
+    }
+
     public Lob getLob(Cursor c) {
 	Object node = c.getNode();
 	if(cache.get(node) != null) return (Lob)cache.get(node);
