@@ -26,6 +26,9 @@ java:
 applet_java:
 	$(JAVAC) -d build -classpath $(FFCLASSPATH):$(CLASSPATH) FenApplet.java
 
+clean:
+	rm -Rf build
+
 JAVACMD=$(JAVA) -cp $(FFCLASSPATH):$(CLASSPATH) $(PYTHONPATH) 
 
 RUNTEST=$(LDLIB) $(JAVACMD) org.python.util.jython org/fenfire/test/test.py 
