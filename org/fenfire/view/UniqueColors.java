@@ -1,5 +1,5 @@
 /*
-UniqueColorModel.java
+UniqueColors.java
  *    
  *    Copyright (c) 2005, Benja Fallenstein and Matti Katila
  *
@@ -37,48 +37,25 @@ import org.nongnu.navidoc.util.Obs;
 import java.awt.Color;
 import java.util.*;
 
-public class UniqueColorModel {}/*extends AbstractModel.AbstractObjectModel {
-    private Model node;
-    private float minBrightness, maxBrightness;
-
-    public UniqueColorModel(Model node, float minBrightness, 
-			    float maxBrightness) {
-	this.node = node;
-	this.minBrightness = minBrightness;
-	this.maxBrightness = maxBrightness;
-	node.addObs(this);
+public class UniqueColors {
+    public static Color getColor(Object o, float minBrightness,
+				 float maxBrightness) {
+	return getColor(o.hashCode(), minBrightness, maxBrightness);
     }
+
+    public static Color getColor(int hashCode,
+				 float minBrightness, float maxBrightness) {
+	float min = minBrightness, range = maxBrightness-min;
 	
-    protected Replaceable[] getParams() {
-	return new Replaceable[] { node };
-    }
-    protected Object clone(Object[] params) {
-	return new UniqueColorModel((Model)params[0], minBrightness,
-				    maxBrightness);
-    }
-
-    Color color;
-
-    public void chg() {
-	color = null;
-	super.chg();
-    }
-
-    public Object get() {
-	if(color == null) {
-	    float min = minBrightness, range = maxBrightness-min;
-
-	    java.util.Random r = new Random(node.get().hashCode());
-	    float 
-		R = min + r.nextFloat() * range,
-		G = min + r.nextFloat() * range,
-		B = min + r.nextFloat() * range;
-	    color = new Color(R,G,B);
-
-	    //color = Color.getHSBColor(r.nextFloat(), r.nextFloat(),
-	    //			      min + r.nextFloat() * range);
-	}
-	return color;
+	java.util.Random r = new Random(hashCode);
+	float 
+	    R = min + r.nextFloat() * range,
+	    G = min + r.nextFloat() * range,
+	    B = min + r.nextFloat() * range;
+	return new Color(R,G,B);
+	
+	//color = Color.getHSBColor(r.nextFloat(), r.nextFloat(),
+	//			      min + r.nextFloat() * range);
     }
 }
-*/
+
