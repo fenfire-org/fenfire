@@ -270,12 +270,25 @@ private static final String rcsid = "$Id: ConnectionVobMatcher.java,v 1.1 2003/0
 	if(towardsOther && nextFocus >= 0 && o.focus >= 0) {
 	    root = nextFocus;
 	    oroot = o.focus;
+
+	    if(!getKey(root).equals(o.getKey(oroot))) {
+		oroot = o.getCS(o.getParent(o.focus), getKey(focus));
+	    }
+
 	    hasFocus = true;
 	} else if(!towardsOther && o.nextFocus >= 0 && focus >= 0) {
 	    root = focus;
 	    oroot = o.nextFocus;
+
+	    if(!getKey(root).equals(o.getKey(oroot))) {
+		root = getCS(getParent(focus), o.getKey(o.focus));
+	    }
+
 	    hasFocus = true;
 	}
+
+	//p("oRoot: "+oroot+" "+o.getKey(oroot));
+	//p("Root: "+root+" "+getKey(root));
 
 	//p("hasFocus = "+hasFocus);
 
@@ -319,6 +332,8 @@ private static final String rcsid = "$Id: ConnectionVobMatcher.java,v 1.1 2003/0
 	      ", getCSCalls="+o.getCSCalls+", uIT="+usedInTrees+", "+
 	      "parentNI="+parentNotInterp);
 	*/
+
+	//p("root interpolated to: "+list[root]);
 
 	return list;
     }

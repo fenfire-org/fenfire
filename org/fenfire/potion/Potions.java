@@ -28,6 +28,7 @@ Potions.java
 package org.fenfire.potion;
 import org.fenfire.Cursor;
 import org.fenfire.swamp.*;
+import org.nongnu.libvob.layout.Model;
 import java.util.*;
 
 public class Potions {
@@ -56,7 +57,14 @@ public class Potions {
     public static FunctionExpression newNode = 
 	new SimpleFunction(new Object[] { "a new node" }) {
 	    public Object evaluate(Object[] params, Map context) {
-		return Nodes.N();
+		Object node = Nodes.N();
+
+		// hmmm... it's not too nice to have this here, but how else
+		// could we make it work?
+		Model cursor = (Model)context.get("cursorModel");
+		cursor.set(new Cursor(node));
+
+		return node;
 	    }
 	}.call();
 
