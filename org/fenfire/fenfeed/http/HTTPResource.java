@@ -102,7 +102,7 @@ public final class HTTPResource {
 		Date expires = new Date((String)hdr.get("expires"));
 		Date now = new Date();
 
-		if(expires.before(now)) {
+		if(expires.after(now)) {
 		    if(dbg) p("- use cached version");
 		    // does not update lastRead because we didn't
 		    // contact the server
