@@ -93,12 +93,18 @@ public class FeedReader {
 
 	HTTPResource res = new HTTPResource(uri, context);
 	
-	Graph graph = new org.fenfire.swamp.impl.SimpleHashGraph();
+	QuadsGraph qgraph = new org.fenfire.swamp.impl.SimpleHashQuadsGraph();
+	Graph graph = new org.fenfire.swamp.impl.AllQuadsGraph(qgraph, "foo");
 	Map namespaces = new HashMap();
 
 	read(res, graph, namespaces);
 
-	Writer w = new OutputStreamWriter(System.out);
-	Graphs.writeTurtle(graph, namespaces, w);
+	QuadsGraph q2 = new org.fenfire.swamp.impl.SimpleHashQuadsGraph();
+	org.fenfire.swamp.smush.Smusher.smush(qgraph, q2);
+	Graph g2 = new org.fenfire.swamp.impl.AllQuadsGraph(q2, "foo");
+
+	StringWriter w = new StringWriter();
+	Graphs.writeTurtle(g2, namespaces, w);
+	System.out.println(w.toString());
     }
 }
