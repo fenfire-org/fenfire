@@ -66,8 +66,12 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
     }
 
     public Cursor createViewSpecificCursor(Cursor c) {
+	return makeCanvasCursor(c);
+    }
+
+    protected CanvasCursor makeCanvasCursor(Cursor c) {
 	if (c instanceof CanvasCursor) {
-	    return c;
+	    return (CanvasCursor)c;
 	} else {
 	    Object n = c.getNode();
 	    Iterator canvases = graph.findN_X11_Iter(CANVAS2D.contains, n);
@@ -97,7 +101,8 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 	return m;
     }
 
-    public Lob getLob(Cursor c) {
+    public Lob getLob(Model cmodel) {
+	CanvasCursor c = makeCanvasCursor((Cursor)cmodel.get());
 	Object node = c.getNode();
 	Object canvas = graph.find1_X11(CANVAS2D.contains, node);
 
@@ -131,7 +136,7 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 	}
 
 	Lob l = canvasContent;
-	l = getCoordinateLob(l, c);
+	l = getCoordinateLob(l, cmodel);
 	l = new SpatialContextLob(l, (Model)l.getTemplateParameter("cs"));
 	return l;
     }
@@ -141,24 +146,29 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 	protected Model cursor;
 	protected int type;
 
+	protected Object myNode;
+
 	protected float cache;
 	protected boolean current;
 	
 	public Adapter(Model cursor, int type) {
 	    this.cursor = cursor; this.type = type;
+	    myNode = ((Cursor)cursor.get()).getNode();
 	    cursor.addObs(this);
 	}
 
 	public void chg() {
-	    current = false;
-	    super.chg();
+	    Cursor c = (Cursor)cursor.get();
+	    if(myNode.equals(c.getNode())) {
+		current = false;
+		super.chg();
+	    }
 	}
 	
 	public float getFloat() {
 	    if(!current) {
-		CanvasCursor c = 
-		    (CanvasCursor)createViewSpecificCursor((Cursor)cursor.get());
-		if(c == null) cache = 0;
+		CanvasCursor c = makeCanvasCursor((Cursor)cursor.get());
+		if(c == null) cache = (type==2) ? 1 : 0;
 		else if(type == 0) cache = c.getPanX();
 		else if(type == 1) cache = c.getPanY();
 		else if(type == 2) cache = c.getZoom();
@@ -171,8 +181,10 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 
 	public void setFloat(float value) {
 	    if(current && value == cache) return;
-	    CanvasCursor c = 
-		(CanvasCursor)createViewSpecificCursor((Cursor)cursor.get());
+	    
+	    Cursor c0 = (Cursor)cursor.get();
+	    if(!myNode.equals(c0.getNode())) return;
+	    CanvasCursor c = makeCanvasCursor(c0);
 
 	    if(c == null) return;
 	    
@@ -189,14 +201,15 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 
 
     protected Map coordlobs = new org.nongnu.navidoc.util.WeakValueMap();
-    public Lob getCoordinateLob(Lob content, Cursor c) {
+    public Lob getCoordinateLob(Lob content, Model cmodel) {
+	Cursor c = (Cursor)cmodel.get();
 	Lob l = (Lob) coordlobs.get(c);
 	if (l == null) {
-	    CanvasCursor ca = (CanvasCursor)createViewSpecificCursor(c);
-	    
-	    final Model panX = new FloatModel(ca.getPanX());
-	    final Model panY = new FloatModel(ca.getPanY());
-	    final Model zoom = new FloatModel(ca.getZoom());
+	    CanvasCursor ca = makeCanvasCursor(c);
+
+	    final Model panX = new Adapter(cmodel, 0);
+	    final Model panY = new Adapter(cmodel, 1);
+	    final Model zoom = new Adapter(cmodel, 2);
 
 	    l = content;
 	    l = new PanZoomLob(l, panX, panY, zoom);
