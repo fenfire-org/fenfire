@@ -107,6 +107,16 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 	return m;
     }
 
+    /**
+     *  Cache of the mainview lob during dragging.
+     *  The problem was that we can't re-create the mainview during
+     *  dragging / when starting to drag, because then 
+     *  the DragControllers are re-created and the new controllers' 
+     *  isDragging is set to 'false'... :-o
+     *
+     *  So I hacked it so that the drag listeners set the mainview cache.
+     *  It's ugly.
+     */
     Lob mainviewCache;
     
     public Lob getMainviewLob(Cursor cursor) {
