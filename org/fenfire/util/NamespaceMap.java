@@ -25,6 +25,7 @@ NamespaceMap.java
  * Written by Benja Fallenstein
  */
 package org.fenfire.util;
+import org.nongnu.libvob.layout.*;
 import java.io.*;
 import java.util.*;
 import org.xml.sax.*;
@@ -32,7 +33,7 @@ import org.xml.sax.*;
 /** A class mapping XML namespace abbreviations like "rdf:" to
  *  namespace URIs.
  */
-public class NamespaceMap {
+public class NamespaceMap extends ObsSet.AbstractObservable {
     int n = 0; // number of mappings currently stored
     String[] names = new String[10], uris = new String[10];
 
@@ -56,6 +57,20 @@ public class NamespaceMap {
 	}
 	names[n] = name; uris[n] = uri;
 	n++;
+
+	obses.trigger();
+    }
+
+    public void putAll(Map map) {
+	obses.startUpdate();
+	for(Iterator i=map.keySet().iterator(); i.hasNext();) {
+	    
+	    String qnamePrefix = (String)i.next();
+	    String uri = (String)map.get(qnamePrefix);
+	    
+	    put(qnamePrefix, uri);
+	}
+	obses.endUpdate();
     }
     
     /** Get the abbreviation of an RDF resource URI.

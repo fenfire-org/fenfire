@@ -60,6 +60,7 @@ public class NodeTextModel extends AbstractModel.AbstractObjectModel {
 	this.defaultProperty = defaultProperty;
 
 	node.addObs(this);
+	nmap.addObs(this);
     }
 
     public Replaceable[] getParams() {
