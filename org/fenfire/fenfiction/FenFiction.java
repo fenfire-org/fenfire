@@ -31,6 +31,7 @@ import org.nongnu.libvob.layout.*;
 import org.nongnu.libvob.layout.component.*;
 import org.nongnu.libvob.impl.LobMain;
 import org.nongnu.navidoc.util.Obs;
+import org.fenfire.*;
 import org.fenfire.swamp.*;
 import org.fenfire.lob.*;
 import org.fenfire.vocab.*;
@@ -50,7 +51,8 @@ public class FenFiction extends LobLob {
 	}
 
 	public boolean contains(Object state) {
-	    Object stateClass = graph.find1_11X(state, RDF.type);
+	    Cursor c = (Cursor)state;
+	    Object stateClass = graph.find1_11X(c.getNode(), RDF.type);
 	    return stateClass != null && stateClass.equals(rdfClass);
 	}
 
@@ -81,15 +83,6 @@ public class FenFiction extends LobLob {
 
 
     private static final float inf = Float.POSITIVE_INFINITY;
-
-
-    protected class State {
-	protected Object item, screen;
-
-	protected State(Object item, Object screen) {
-	    this.item = item; this.screen = screen;
-	}
-    }
 
 
     protected Lob assembleViewLob(Lob heading, Lob body, 
@@ -137,6 +130,24 @@ public class FenFiction extends LobLob {
     }
 
 
+    protected class SetCursor extends AbstractAction {
+	protected Model state, node;
+	public SetCursor(Model state, Model node) {
+	    this.state = state; this.node = node;
+	}
+	public void run() {
+	    state.set(new Cursor.SimpleCursor(node.get()));
+	}
+
+	protected Replaceable[] getParams() {
+	    return new Replaceable[] { state, node };
+	}
+	protected Object clone(Object[] params) {
+	    return new SetCursor((Model)params[0], (Model)params[1]);
+	}
+    }
+
+
     protected abstract class AbstractView implements BrowserLob.View {
 	protected Graph graph;
 	protected RDFLobFactory rlob;
@@ -153,7 +164,7 @@ public class FenFiction extends LobLob {
 	    Lob template = rlob.label(param, property);
 	    template = new ThemeFrame(template, param);
 	    template = new ClickController(template, 1, 
-					   new Model.Change(state, param));
+					   new SetCursor(state, param));
 	    
 	    list = new ListModel.Transform(list, template);
 	    
@@ -168,11 +179,13 @@ public class FenFiction extends LobLob {
 	    list.add(new NoGrowLob(Y, new Button(caption, 
 						 new AbstractAction() {
 		    public void run() {
+			Cursor c = (Cursor)state.get();
+			
 			Object n = Nodes.N();
 			graph.add(n, RDF.type, type);
 			if(property != null)
-			    graph.add(state.get(), property, n);
-			state.set(n);
+			    graph.add(c.getNode(), property, n);
+			state.set(new Cursor.SimpleCursor(n));
 		    }
 		})));
 	    list.add(new Glue(Lob.Y, 10, 10, 10));
@@ -190,7 +203,7 @@ public class FenFiction extends LobLob {
 
     protected BrowserLob.Type allStoriesType = new BrowserLob.Type() {
 	    public boolean contains(Object state) {
-		return ALL_STORIES.equals(state);
+		return ALL_STORIES.equals(((Cursor)state).getNode());
 	    }
 	};
 
@@ -208,7 +221,7 @@ public class FenFiction extends LobLob {
 	public Set getTypes() {
 	    return Collections.singleton(allStoriesType);
 	}
-	public Lob getViewLob(final Model state, final Model viewState) {
+	public Lob getViewLob(final Model state) {
 	    Lob heading = 
 		new KeyLob(new Label("All stories", headingFont),
 			   ALL_STORIES);
@@ -247,17 +260,19 @@ public class FenFiction extends LobLob {
 	    super(graph, STORY);
 	}
 	
-	public Lob getViewLob(final Model state, final Model viewState) {
+	public Lob getViewLob(final Model state) {
 	    Lob backButton = new Button("All stories", new AbstractAction() {
 		    public void run() {
-			state.set(ALL_STORIES);
+			state.set(new Cursor.SimpleCursor(ALL_STORIES));
 		    }
 		}, new ObjectModel(ALL_STORIES));
 
-	    Lob heading = rlob.textField(state, TITLE, state);
+	    Model node = Models.adaptMethod(state, Cursor.class, "getNode");
+
+	    Lob heading = rlob.textField(node, TITLE, node);
 	    heading = new RequestChangeLob(X, heading, 450, 450, 450);
 
-	    SetModel _elems = rlob.setModel(state, ELEMENT, 1);
+	    SetModel _elems = rlob.setModel(node, ELEMENT, 1);
 	    ListModel elems = rlob.listModel(_elems, new URIComparator());
 
 	    ListModel newCharacter = button("New Character", state,
@@ -276,17 +291,19 @@ public class FenFiction extends LobLob {
 	    super(graph, CHARACTER);
 	}
 	
-	public Lob getViewLob(final Model state, final Model viewState) {
-	    final Model story = rlob.value(state, ELEMENT, -1);
+	public Lob getViewLob(final Model state) {
+	    Model node = Models.adaptMethod(state, Cursor.class, "getNode");
+
+	    final Model story = rlob.value(node, ELEMENT, -1);
 	    Lob label = rlob.label(story, TITLE);
 
-	    Lob backButton = new Button(label, new Model.Change(state, story),
+	    Lob backButton = new Button(label, new SetCursor(state, story),
 					story);
 
-	    Lob heading = rlob.textField(state, NAME, state);
+	    Lob heading = rlob.textField(node, NAME, node);
 	    heading = new RequestChangeLob(X, heading, 450, 450, 450);
 
-	    SetModel _elems = rlob.setModel(state, RELATION, 1);
+	    SetModel _elems = rlob.setModel(node, RELATION, 1);
 	    ListModel elems = rlob.listModel(_elems, new URIComparator());
 
 	    ListModel newCharacter = button("New Note", state,
@@ -305,12 +322,14 @@ public class FenFiction extends LobLob {
 	    super(graph, NOTE);
 	}
 	
-	public Lob getViewLob(final Model state, final Model viewState) {
+	public Lob getViewLob(final Model state) {
+	    Model node = Models.adaptMethod(state, Cursor.class, "getNode");
+
 	    ListModel listHeading = new ListModel.Simple();
 	    listHeading.add(new Label("Related items:"));
 	    listHeading.add(new Glue(Lob.Y, 10, 10, 10));
 
-	    SetModel _elems = rlob.setModel(state, RELATION, -1);
+	    SetModel _elems = rlob.setModel(node, RELATION, -1);
 	    ListModel elems = rlob.listModel(_elems, new URIComparator());
 
 	    ListModel list = new ListModel.Concat(listHeading,
@@ -322,10 +341,10 @@ public class FenFiction extends LobLob {
 	    Lob related = new Box(Y, seq);
 
 
-	    Lob heading = rlob.textField(state, TITLE, state);
+	    Lob heading = rlob.textField(node, TITLE, node);
 	    heading = new RequestChangeLob(X, heading, 450, 450, 450);
 
-	    Lob body = rlob.textArea(state, TEXT);
+	    Lob body = rlob.textArea(node, TEXT);
 	    
 	    return assembleViewLob(heading, body, NullLob.instance, related);
 	}
@@ -353,8 +372,7 @@ public class FenFiction extends LobLob {
 
 	Graph g = gf.getGraph();
 
-	Lob l = new BrowserLob(new ObjectModel(ALL_STORIES), 
-			       new ObjectModel(null),
+	Lob l = new BrowserLob(new ObjectModel(new Cursor.SimpleCursor(ALL_STORIES)), 
 			       getViews(g));
 
 	KeyController k = new KeyController(l);
