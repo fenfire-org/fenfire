@@ -191,8 +191,14 @@ public class CalendarSpatialView
 
 	Lob l = getCalendarContent(getCalendarCursor(cursor), cursor);
 	l = new AlignLob(l, .5f, .5f, .5f, .5f);
+	l = new DepthChangeLob(l, -8);
 	l = new ThemeFrame(l);
+	l = new DepthChangeLob(l, 8);
 	l = new SpatialContextLob(l, (Model)l.getTemplateParameter("cs"));
+
+	l = new Margin(l, 200, 0);
+	l = new Between(new KeyLob(NullLob.instance, "buoy circle"), l,
+			NullLob.instance);
 
 	l = new AlignLob(l, .5f, .5f, .5f, .5f);
 
@@ -229,33 +235,40 @@ public class CalendarSpatialView
 
 	    final Date time = day.getTime();
 
-	    Box v = new Box(Lob.Y);
 	    Lob l = new Label(dateFormat.format(time));
+	    l = new AlignLob(l, .5f,.5f,.5f,.5f);
 	    l = new ThemeFrame(l);
 
 	    // argl
 	    l = new BuoyConnectorLob(l, Nodes.get("day:"+org.nongnu.storm.util.DateParser.getIsoDate(time)), cs);
 
-	    l = new AlignLob(l, .5f,.5f,.5f,.5f);
 	    if(cursor != null) {
 		l = new ClickController(l, 1, new Model.Change(cursor.spatialCursor, new ObjectModel(cc.getCursor(day))));
 	    }
-	    v.add(l);
+	    dateList.add(l);
 
 	    Set nodes = (Set)nodesByDay.get(day);
+	    Box v = new Box(Lob.Y);
 	    if(nodes != null) {
+		v.glue(25, 25, 25);
 		for (Iterator j=nodes.iterator(); j.hasNext();) {
 		    Object n = j.next();
 		    Lob l3 = contentViewSettings.getLob(n);
-		    // add click controller to select new focus...
+		    l3 = new RequestChangeLob(Lob.X, l3,
+					      Float.NaN, Float.NaN, 160);
+		    // XXX add click controller to select new focus...
+		    l3 = new ThemeFrame(l3);
 		    l3 = new BuoyConnectorLob(l3, n, cs);
+		    l3 = new DepthChangeLob(l3, 2);
 		    l3 = new AlignLob(l3, .5f,.5f,.5f,.5f);
 		    v.add(l3);
+		    v.glue(25, 25, 25);
 		}
 	    }
 
+	    //dateList.add(new Margin(v, 60, 0));
 	    dateList.add(v);
-	    dateList.glue(5, 5, 5);
+	    //dateList.glue(5, 5, 5);
 	}
 
 	return dateList;
