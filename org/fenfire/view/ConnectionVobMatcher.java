@@ -256,7 +256,7 @@ private static final String rcsid = "$Id: ConnectionVobMatcher.java,v 1.1 2003/0
 
 	boolean hasFocus = false;
 
-	p(towardsOther+" "+nextFocus+" "+o.nextFocus+" "+this+" "+o);
+	//p(towardsOther+" "+nextFocus+" "+o.nextFocus+" "+this+" "+o);
 
 	int root=0, oroot=0;
 	if(towardsOther && nextFocus >= 0 && o.focus >= 0) {
@@ -269,7 +269,7 @@ private static final String rcsid = "$Id: ConnectionVobMatcher.java,v 1.1 2003/0
 	    hasFocus = true;
 	}
 
-	p("hasFocus = "+hasFocus);
+	//p("hasFocus = "+hasFocus);
 
 	int[] list = new int[maxCS+1];
 	list[0] = 0; // interpolate 0 cs to 0 cs by default
