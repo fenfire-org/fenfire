@@ -54,10 +54,11 @@ public class StdObserver extends AbstractHashtable {
 	if(updatesInProgress < 0) { updatesInProgress = 0; return; }
 
 	if(updatesInProgress == 0) {
-	    for(Iterator i=obsesToTrigger.iterator(); i.hasNext();)
-		((Obs)i.next()).chg();
+	    Set s = obsesToTrigger;
+	    obsesToTrigger = new HashSet();
 
-	    obsesToTrigger.clear();
+	    for(Iterator i=s.iterator(); i.hasNext();)
+		((Obs)i.next()).chg();
 	}
     }
 

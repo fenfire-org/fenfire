@@ -46,4 +46,32 @@ def testCallNodup():
     o.triggerObs(-1, 1, 2, 3)
     assert o1.t == 1
 
+def testConcurrentModification():
+    class Obz(org.nongnu.navidoc.util.Obs):
+        t = 0
+        def chg(self):
+            o.startUpdate()
+            o.triggerObs(1, 4, 5, 6);
+            o.endUpdate()
+            self.t = self.t + 1
+    
+    o1, o2 = Obz(), _Obs()
+    o.addObs(1, 2, 3, o1)
+    o.addObs(4, 5, 6, o2)
+
+    o.startUpdate()
+    o.triggerObs(1, 1, 2, 3)
+    assert o1.t == o2.t == 0
+    o.endUpdate()
+    assert o1.t == o2.t == 1
+
+    o.addObs(1, 2, 3, o1)
+    o.addObs(4, 5, 6, o2)
+
+    o.startUpdate()
+    o.triggerObs(1, 1, 2, 3)
+    assert o1.t == o2.t == 1
+    o.endUpdate()
+    assert o1.t == o2.t == 2
+
 # XXX Triple!
