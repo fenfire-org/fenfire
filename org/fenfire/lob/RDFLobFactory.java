@@ -101,6 +101,13 @@ public class RDFLobFactory {
 	return listModel(setModel(type), cmp);
     }
 
+    public TextModel textModel(String string, boolean lineEnd) {
+	TextModel.StringTextModel m =
+	    new TextModel.StringTextModel(new ObjectModel(string), font);
+	m.setIncludeLineEnd(lineEnd);
+	return m;
+    }
+
     public TextModel textModel(Object _node, Object property) {
 	Model node = model(_node);
 	Model string = string(node, property);

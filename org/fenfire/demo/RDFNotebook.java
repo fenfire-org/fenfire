@@ -142,7 +142,12 @@ public class RDFNotebook extends LobLob {
 
 	vbox.glue(5, 5, 5);
 
-	vbox.add(new KeyLob(rlob.label(selectedNote, DATE), DATE));
+
+	TextModel dateTM = 
+	    new TextModel.Concat(rlob.textModel("Date: ", false), 
+				 rlob.textModel(selectedNote, DATE));
+
+	vbox.add(new Label(dateTM));
 
 	vbox.glue(5, 5, 5);
 
