@@ -118,7 +118,8 @@ public class TextContentView implements ContentViewSettings.ContentView {
 
     private Lob makeLob(Object node, boolean isPropertyLob) {
 	if(node instanceof Literal) {
-	    throw new Error();
+	    return Components.label(node.toString());
+
 	    /*
 	    Model nodeModel = new ObjectModel(node);
 
