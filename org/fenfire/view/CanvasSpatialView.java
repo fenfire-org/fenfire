@@ -45,7 +45,8 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
     private Graph graph;
     private WindowAnimation winAnim;
 
-    private Map cache = new org.nongnu.navidoc.util.WeakValueMap();
+    private Map canvasCache = new org.nongnu.navidoc.util.WeakValueMap();
+    private Map buoyCache = new org.nongnu.navidoc.util.WeakValueMap();
 
     public CanvasSpatialView(Graph graph, WindowAnimation winAnim) {
 	this.graph = graph;
@@ -101,44 +102,98 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 	return m;
     }
 
-    public Lob getLob(Model cmodel) {
-	CanvasCursor c = makeCanvasCursor((Cursor)cmodel.get());
+    Lob lastMainview;
+    Model lastMainviewModel;
+
+    public Lob getMainviewLob(Model cursor) {
+	// argl, need this so that no new DragControllers are created
+	// during dragging -- they don't have isDragging set, so drag events
+	// aren't handled... :-(
+	if(lastMainviewModel == cursor) return lastMainview; 
+
+	CanvasCursor c = makeCanvasCursor((Cursor)cursor.get());
 	Object node = c.getNode();
 	Object canvas = graph.find1_X11(CANVAS2D.contains, node);
 
-	Lob canvasContent = (Lob)cache.get(canvas);
-	
-	if(canvasContent == null) {
-	    Tray tray = new Tray(false);
+	Lob canvasContent = getCanvasContent(canvas, cursor);
 
-	    Model cs = Parameter.model("cs", new IntModel());
-
-	    Lob nl = null;
-
-	    for(Iterator i=graph.findN_11X_Iter(canvas, CANVAS2D.contains); 
-		i.hasNext();) {
-
-		Object n = i.next();
-		String s = Nodes.toString(n);
-		Lob l = new Label(s.substring(s.length()-5));
-		if(n.equals(node)) nl = l;
-		l = new BuoyConnectorLob(l, n, cs);
-
-		Model x = getModel(n, CANVAS2D.x), y = getModel(n, CANVAS2D.y);
-		l = new TranslationLob(l, x, y);
-		tray.add(l);
-	    }
-
-	    canvasContent = 
-		new RequestChangeLob(tray, 100, 100, 100, 100, 100, 100);
-
-	    cache.put(node, canvasContent);
-	}
+	final Model panX = new Adapter(cursor, 0);
+	final Model panY = new Adapter(cursor, 1);
+	final Model zoom = new Adapter(cursor, 2);
 
 	Lob l = canvasContent;
-	l = getCoordinateLob(l, cmodel);
+	l = new PanZoomLob(l, panX, panY, zoom);
+	l = new DragController(l, 3, new org.nongnu.libvob.mouse.RelativeAdapter() {
+		public void changedRelative(float dx, float dy) {
+		    zoom.setFloat(zoom.getFloat() + dy/100);
+		    winAnim.rerender();
+		}
+	    });
+	l = new DragController(l, 1, new org.nongnu.libvob.mouse.RelativeAdapter() {
+		public void changedRelative(float dx, float dy) {
+		    panX.setFloat(panX.getFloat() - dx/zoom.getFloat());
+		    panY.setFloat(panY.getFloat() - dy/zoom.getFloat());
+		    winAnim.rerender();
+		}
+	    }); 
+
+	l = addBackground(l, canvas);
 	l = new SpatialContextLob(l, (Model)l.getTemplateParameter("cs"));
+
+	lastMainview = l;
+	lastMainviewModel = cursor;
+
 	return l;
+    }
+
+    public Lob getBuoyLob(Object node) {
+	if(buoyCache.containsKey(node)) return (Lob)buoyCache.get(node);
+
+	Object canvas = graph.find1_X11(CANVAS2D.contains, node);
+	Lob canvasContent = (Lob)canvasCache.get(canvas);
+	if(canvasContent == null) {
+	    canvasContent = getCanvasContent(canvas, null);
+	    canvasCache.put(canvas, canvasContent);
+	}
+	
+	Lob l = new PanZoomLob(canvasContent, getModel(node, CANVAS2D.x),
+			       getModel(node, CANVAS2D.y), new FloatModel(1));
+	l = addBackground(l, canvas);
+	l = new SpatialContextLob(l, (Model)l.getTemplateParameter("cs"));
+	
+	buoyCache.put(node, l);
+	return l;
+    }
+
+    /**
+     *  'cursor' may be null.
+     */
+    protected Lob getCanvasContent(Object canvas, Model cursor) {
+	
+	Tray tray = new Tray(false);
+	
+	Model cs = Parameter.model("cs", new IntModel());
+	
+	for(Iterator i=graph.findN_11X_Iter(canvas, CANVAS2D.contains); 
+	    i.hasNext();) {
+	    
+	    Object n = i.next();
+	    String s = Nodes.toString(n);
+	    Lob l = new Label(s.substring(s.length()-5));
+	    l = new BuoyConnectorLob(l, n, cs);
+	    
+	    Model x = getModel(n, CANVAS2D.x), y = getModel(n, CANVAS2D.y);
+	    l = new TranslationLob(l, x, y);
+	    tray.add(l);
+	}
+	
+	return new RequestChangeLob(tray, 100, 100, 100, 100, 100, 100);
+    }
+
+    protected Lob addBackground(Lob content, Object canvas) {
+	Model bgcolor = new UniqueColorModel(new ObjectModel(canvas));
+	return new Frame(content, bgcolor, new ObjectModel(Color.black),
+			 2, 0, false, false, true);
     }
 
 
@@ -197,43 +252,6 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 	    cursor.set(new CanvasCursor(c.getCanvas(), c.getNode(),
 					panX, panY, zoom));
 	}
-    }
-
-
-    protected Map coordlobs = new org.nongnu.navidoc.util.WeakValueMap();
-    public Lob getCoordinateLob(Lob content, Model cmodel) {
-	Cursor c = (Cursor)cmodel.get();
-	Lob l = (Lob) coordlobs.get(c);
-	if (l == null) {
-	    CanvasCursor ca = makeCanvasCursor(c);
-
-	    final Model panX = new Adapter(cmodel, 0);
-	    final Model panY = new Adapter(cmodel, 1);
-	    final Model zoom = new Adapter(cmodel, 2);
-
-	    l = content;
-	    l = new PanZoomLob(l, panX, panY, zoom);
-	    l = new DragController(l, 3, new org.nongnu.libvob.mouse.RelativeAdapter() {
-		    public void changedRelative(float dx, float dy) {
-			zoom.setFloat(zoom.getFloat() + dy/100);
-			winAnim.rerender();
-		    }
-		});
-	    l = new DragController(l, 1, new org.nongnu.libvob.mouse.RelativeAdapter() {
-		    public void changedRelative(float dx, float dy) {
-			panX.setFloat(panX.getFloat() - dx/zoom.getFloat());
-			panY.setFloat(panY.getFloat() - dy/zoom.getFloat());
-			winAnim.rerender();
-		    }
-		}); 
-
-	    Model bgcolor = new UniqueColorModel(new ObjectModel(c.getNode()));
-	    l = new Frame(l, bgcolor, new ObjectModel(Color.black),
-			  2, 0, false, false, true);
-
-	    coordlobs.put(c, l);
-	}
-	return l;
     }
 
 

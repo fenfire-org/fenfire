@@ -42,8 +42,8 @@ public class ViewSettings {
     public interface SpatialView {
 	Set getTypes();
 	boolean showBig(); // whether the mainview should be shown big
-	Lob getLob(Model cursor);
-	Lob getCoordinateLob(Lob content, Model cursor);
+	Lob getMainviewLob(Model cursor);
+	Lob getBuoyLob(Object node);
 	Cursor createViewSpecificCursor(Cursor old);
     }
 
@@ -111,11 +111,19 @@ public class ViewSettings {
 
     private Lob errorLob = new org.nongnu.libvob.layout.component.Label("No matching nodeview found!");
 
-    public Lob getLob(Model cursorModel) {
+    public Lob getMainviewLob(Model cursorModel) {
 	Cursor cursor = (Cursor)cursorModel.get();
 	SpatialView v = getView(cursor);
 	if(v != null)
-	    return v.getLob(cursorModel);
+	    return v.getMainviewLob(cursorModel);
+	else
+	    return errorLob;
+    }
+
+    public Lob getBuoyLob(Object node) {
+	SpatialView v = getView(new Cursor.SimpleCursor(node)); // XXX
+	if(v != null)
+	    return v.getBuoyLob(node);
 	else
 	    return errorLob;
     }
