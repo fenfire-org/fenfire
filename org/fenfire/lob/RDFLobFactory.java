@@ -44,7 +44,11 @@ public class RDFLobFactory {
     }
 
     public Model value(Model node, Object property) {
-	return new PropValueModel(graph, node, property, 1);
+	return value(node, property, 1);
+    }
+
+    public Model value(Model node, Object property, int dir) {
+	return new PropValueModel(graph, node, property, dir);
     }
 
     public Model string(Model node, Object property) {

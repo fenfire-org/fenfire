@@ -225,8 +225,41 @@ public class FenFiction extends LobLob {
 					    CHARACTER, ELEMENT);
 
 	    ListModel list = new ListModel.Concat(newCharacter,
+						  list(state, elems, NAME), 
+						  end());
+
+	    return viewLob(heading, null, list, backButton);
+	}
+    }
+
+    protected class CharacterView extends AbstractItemView {
+	protected CharacterView(Graph graph) { 
+	    super(graph, CHARACTER);
+	}
+	
+	public Lob getViewLob(final Model state) {
+	    final Model story = rlob.value(state, ELEMENT, -1);
+	    Lob label = rlob.label(story, TITLE);
+
+	    Lob backButton = new Button(label, new Model.Change(state, story),
+					story);
+
+	    Lob heading = rlob.textField(state, NAME, state);
+	    heading = new RequestChangeLob(X, heading, 450, 450, 450);
+
+	    /*
+	    SetModel _elems = rlob.setModel(state, ELEMENT, 1);
+	    ListModel elems = rlob.listModel(_elems, new URIComparator());
+
+	    ListModel newCharacter = button("New Character", state,
+					    CHARACTER, ELEMENT);
+
+	    ListModel list = new ListModel.Concat(newCharacter,
 						  list(state, elems, TITLE), 
 						  end());
+	    */
+
+	    ListModel list = end();
 
 	    return viewLob(heading, null, list, backButton);
 	}
@@ -247,6 +280,7 @@ public class FenFiction extends LobLob {
 	ListModel views = new ListModel.Simple();
 	views.add(new AllStoriesView(g));
 	views.add(new StoryView(g));
+	views.add(new CharacterView(g));
 
 	Lob l = new BrowserLob(new ObjectModel(allStories), views);
 
