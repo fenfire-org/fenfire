@@ -51,6 +51,8 @@ public class NodeTextModel extends AbstractModel.AbstractObjectModel {
     private Set textProperties;
     private Object defaultProperty;
 
+    private Object cache;
+
     public NodeTextModel(Graph graph, Model node, NamespaceMap nmap, 
 			 Set textProperties, Object defaultProperty) {
 	this.graph = graph;
@@ -69,6 +71,11 @@ public class NodeTextModel extends AbstractModel.AbstractObjectModel {
     public Object clone(Object[] params) {
 	return new NodeTextModel(graph, (Model)params[0], nmap,
 				 textProperties, defaultProperty);
+    }
+
+    public void chg() {
+	cache = null;
+	super.chg();
     }
     
     Object getProperty() {
@@ -104,9 +111,16 @@ public class NodeTextModel extends AbstractModel.AbstractObjectModel {
     }
 
     public Object get() {
-	Object n = node.get(), p = getProperty();
-	if(p == null) return fallback();
-	return ((Literal)graph.findN_11X_Iter(n, p, this).next()).getString();
+	if(cache == null) {
+	    Object n = node.get(), p = getProperty();
+	    if(p == null) 
+		cache = fallback();
+	    else {
+		Iterator i = graph.findN_11X_Iter(n, p, this);
+		cache = ((Literal)i.next()).getString();
+	    }
+	}
+	return cache;
     }
 
     public void set(Object value) {
