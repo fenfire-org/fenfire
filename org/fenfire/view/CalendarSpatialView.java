@@ -166,7 +166,13 @@ public class CalendarSpatialView
     }
 
 
+    private Map mainviewCache = new org.nongnu.navidoc.util.WeakValueMap();
+    private Map buoyCache = new org.nongnu.navidoc.util.WeakValueMap();
+
     public Lob getBuoyLob(Object node) {
+	if(buoyCache.get(node) != null) 
+	    return (Lob)buoyCache.get(node);
+
 	Lob l = getCalendarContent(makeCalendarCursor(node), null);
 	l = new AlignLob(l, .5f, .5f, .5f, .5f);
 	l = new ThemeFrame(l);
@@ -175,10 +181,14 @@ public class CalendarSpatialView
 	float s = 100;
 	l = new RequestChangeLob(l, s,s, s,s, s,s);
 
+	buoyCache.put(node, l);
 	return l;
     }
 
     public Lob getMainviewLob(Cursor cursor) {
+	if(mainviewCache.get(cursor.getSpatialCursor()) != null) 
+	    return (Lob)mainviewCache.get(cursor.getSpatialCursor());
+
 	Lob l = getCalendarContent(getCalendarCursor(cursor), cursor);
 	l = new AlignLob(l, .5f, .5f, .5f, .5f);
 	l = new ThemeFrame(l);
@@ -186,6 +196,7 @@ public class CalendarSpatialView
 
 	l = new AlignLob(l, .5f, .5f, .5f, .5f);
 
+	mainviewCache.put(cursor.getSpatialCursor(), l);
 	return l;
     }
 
