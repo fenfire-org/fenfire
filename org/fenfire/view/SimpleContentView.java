@@ -121,6 +121,7 @@ public class SimpleContentView implements ContentViewSettings.ContentView {
 		new TextModel.StringTextModel(str, Theme.getFont());
 
 	    Model tc = cursor.textCursor;
+	    tc = cursor.node.equalsModel(nodeModel).select(tc, new IntModel(-1));
 
 	    Sequence seq = new Box(Lob.X, text);
 	    seq = new TextCursorLob(seq, tc, 
