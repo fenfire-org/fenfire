@@ -38,6 +38,10 @@ public class FunctionExpression extends Expression {
 	this.function = function;
     }
 
+    public FunctionExpression(Function function) {
+	this(function, new FunctionExpression[function.getParams().length]);
+    }
+
     public List evaluate(Map context) {
 	return function.evaluate(evaluateParams(context), context);
     }

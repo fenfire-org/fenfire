@@ -1,7 +1,7 @@
 /*
-CommandExpression.java
+SimpleFunction.java
  *    
- *    Copyright (c) 2003-2005, Benja Fallenstein
+ *    Copyright (c) 2005, Benja Fallenstein
  *    
  *    This file is part of Fenfire.
  *    
@@ -25,29 +25,34 @@ CommandExpression.java
 /*
  * Written by Benja Fallenstein
  */
-
 package org.fenfire.potion;
-
 import java.util.*;
 
-public class CommandExpression extends Expression {
+/** Like SimpleCommand, but for functions.
+ */
+public abstract class SimpleFunction extends AbstractHead implements Function {
+    public SimpleFunction(Object[] spec) { super(spec); }
 
-    Command command;
+    protected abstract Object evaluate(Object[] params, Map context);
+	
+    public List evaluate(List[] lists, Map context) {
+	Object[] params = new Object[lists.length];
+	List results = new ArrayList();
 
-    public CommandExpression(Command command, FunctionExpression[] params) {
-	super(command, params);
-	this.command = command;
+	recursive(lists, params, 0, results, context);
+
+	return results;
     }
 
-    public CommandExpression(Command command) {
-	this(command, new FunctionExpression[command.getParams().length]);
-    }
-
-    public void execute(Map context) {
-	command.execute(evaluateParams(context), context);
-    }
-
-    protected Expression newExpression(FunctionExpression[] params) {
-	return new CommandExpression(command, params);
+    private void recursive(List[] lists, Object[] params, int i, List results,
+			   Map context) {
+	if(i >= lists.length) {
+	    results.add(evaluate(params, context));
+	} else {
+	    for(Iterator iter=lists[i].iterator(); iter.hasNext();) {
+		params[i] = iter.next();
+		recursive(lists, params, i+1, results, context);
+	    }
+	}
     }
 }

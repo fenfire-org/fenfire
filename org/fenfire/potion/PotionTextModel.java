@@ -1,7 +1,7 @@
 /*
-CommandExpression.java
+PotionTextModel.java
  *    
- *    Copyright (c) 2003-2005, Benja Fallenstein
+ *    Copyright (c) 2005, Benja Fallenstein
  *    
  *    This file is part of Fenfire.
  *    
@@ -25,29 +25,30 @@ CommandExpression.java
 /*
  * Written by Benja Fallenstein
  */
-
 package org.fenfire.potion;
-
+import org.fenfire.swamp.*;
+import org.nongnu.libvob.layout.*;
 import java.util.*;
 
-public class CommandExpression extends Expression {
+public class PotionTextModel extends AbstractModel.AbstractObjectModel {
 
-    Command command;
+    protected Model expression;
 
-    public CommandExpression(Command command, FunctionExpression[] params) {
-	super(command, params);
-	this.command = command;
+    public PotionTextModel(Model expression) { 
+	this.expression = expression;
+	expression.addObs(this);
     }
 
-    public CommandExpression(Command command) {
-	this(command, new FunctionExpression[command.getParams().length]);
+    protected Replaceable[] getParams() {
+	return new Replaceable[] { expression };
+    }
+    protected Object clone(Object[] params) {
+	return new PotionTextModel((Model)params[0]);
     }
 
-    public void execute(Map context) {
-	command.execute(evaluateParams(context), context);
-    }
-
-    protected Expression newExpression(FunctionExpression[] params) {
-	return new CommandExpression(command, params);
+    public Object get() {
+	Expression e = (Expression)expression.get();
+	if(e == null) return "";
+	return e.getString(new HashMap());
     }
 }
