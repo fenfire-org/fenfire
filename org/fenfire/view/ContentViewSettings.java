@@ -37,6 +37,7 @@ public class ContentViewSettings extends ViewSettings {
 
     public interface ContentView extends View {
 	Lob getLob(Object node);
+	Lob getPropertyLob(Object prop);
     }
 
     public ContentViewSettings(Set views) {
@@ -56,6 +57,14 @@ public class ContentViewSettings extends ViewSettings {
 	ContentView v = (ContentView)getViewByNode(node);
 	if(v != null)
 	    return v.getLob(node);
+	else
+	    return errorLob;
+    }
+
+    public Lob getPropertyLob(Object node) {
+	ContentView v = (ContentView)getViewByNode(node);
+	if(v != null)
+	    return v.getPropertyLob(node);
 	else
 	    return errorLob;
     }

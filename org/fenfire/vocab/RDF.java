@@ -31,21 +31,16 @@ import org.fenfire.swamp.*;
  */
 public class RDF {
 
+    static private String voc = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+
+
     /** The RDF type attribute. A node's type can be declared 
      * to be Foo 
      * by a triple (node, RDF.type, Foo).
      */
-    static public Object type;
+    static public Object type = Nodes.get(voc + "type");
 
-    static public Object subject;
-    static public Object predicate;
-    static public Object object;
-
-    static {
-	String voc = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-	type = Nodes.get(voc + "type");
-	subject = Nodes.get(voc + "subject");
-	predicate = Nodes.get(voc + "predicate");
-	object = Nodes.get(voc + "object");
-    }
+    static public Object subject = Nodes.get(voc + "subject");
+    static public Object predicate = Nodes.get(voc + "predicate");
+    static public Object object = Nodes.get(voc + "object");
 }
