@@ -62,6 +62,11 @@ run_notebook:
 run_fiction:
 	$(LDLIB) $(JAVACMD) $(DBG) org.fenfire.fenfiction.FenFiction
 
+FEEDS='http://tbray.org/ongoing/ongoing.rss' 'http://dannyayers.com/index.rdf' 'http://captsolo.net/info/xmlsrv/rdf.php?blog=2' 'http://planet.classpath.org/rss10.xml'
+
+run_feed:
+	$(LDLIB) $(JAVACMD) $(DBG) org.fenfire.fenfeed.FenFeed $(FEEDS)
+
 run_f:
 	$(LDLIB) $(JAVACMD) -Dvob.api=$(API) -Dfenfire.settings.dir=$(SETTINGS) -Dstorm.pooldir=$(POOLDIR) $(DBG) org.fenfire.view.management.FServer
 

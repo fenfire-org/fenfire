@@ -50,10 +50,13 @@ public class Graphs {
 	    return Nodes.get("bnode:"+bnodeBase+((BNode)node).getID());
 	else if(node instanceof org.openrdf.model.Literal) {
 	    org.openrdf.model.Literal l = (org.openrdf.model.Literal)node;
-	    if(l.getDatatype() != null)
-		return new TypedLiteral(l.getLabel(), l.getDatatype());
-	    else
+	    if(l.getDatatype() != null) {
+		URI type = (URI)l.getDatatype();
+		return new TypedLiteral(l.getLabel(), 
+					Nodes.get(type.getURI()));
+	    } else {
 		return new PlainLiteral(l.getLabel(), l.getLanguage());
+	    }
 	} else {
 	    throw new ClassCastException(""+node);
 	}

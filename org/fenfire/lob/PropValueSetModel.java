@@ -56,8 +56,8 @@ public class PropValueSetModel extends SetModel.AbstractSetModel {
 	return new Replaceable[] { graph, node, property, dir };
     }
     protected Object clone(Object[] params) {
-	return new PropValueModel((Model)params[0], (Model)params[1],
-				  (Model)params[2], (Model)params[3]);
+	return new PropValueSetModel((Model)params[0], (Model)params[1],
+				     (Model)params[2], (Model)params[3]);
     }
 
     public Iterator iterator() {

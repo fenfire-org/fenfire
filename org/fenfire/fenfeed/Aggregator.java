@@ -55,19 +55,24 @@ public class Aggregator implements HTTPUpdater.UpdateListener {
 	
 	for(Iterator i=subscriptions.iterator(); i.hasNext();) {
 	    String uri = (String)i.next();
-	    HTTPResource r = updater.add(uri, loadInterval);
-	    try {
-		FeedReader.read(r, new OneQuadGraph(graph, Nodes.get(uri)), 
-				namespaces);
-	    } catch(IOException e) {
-		System.out.println("Error while reading "+uri);
-		e.printStackTrace();
-	    }
+	    subscribe(uri, loadInterval);
 	}
     }
 
     public void start() {
 	updater.start();
+    }
+
+    public void subscribe(String uri, int loadInterval) {
+	System.out.println("Subscribe to "+uri);
+	try {
+	    HTTPResource r = updater.add(uri, loadInterval);
+	    FeedReader.read(r, new OneQuadGraph(graph, Nodes.get(uri)), 
+			    namespaces);
+	} catch(IOException e) {
+	    System.out.println("Error while reading "+uri);
+	    e.printStackTrace();
+	}
     }
 
     public void changed(HTTPResource resource) {

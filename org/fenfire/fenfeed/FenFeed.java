@@ -47,7 +47,9 @@ public class FenFeed extends LobLob {
 	rss = "http://purl.org/rss/1.0/";
 
     public static final Object
+	CHANNEL = Nodes.get(rss+"channel"),
 	ITEM = Nodes.get(rss+"item"),
+	ITEMS = Nodes.get(rss+"items"),
 	TITLE = Nodes.get(rss+"title"),
 	DATE = Nodes.get(rss+"date"),
 	DESC = Nodes.get(rss+"description");
@@ -61,22 +63,37 @@ public class FenFeed extends LobLob {
 	RDFLobFactory rlob = 
 	    new RDFLobFactory(gm, Theme.getTextFont());
 
-	SetModel items = rlob.setModel(ITEM, RDF.type, -1);
+	SetModel channels = rlob.setModel(CHANNEL, RDF.type, -1);
 	Comparator cmp = new PropertyComparator(gm, DATE);
 
-	Model selection = new ObjectModel();
+	Model selectedChannel = new ObjectModel();
+	if(!channels.isEmpty())
+	    selectedChannel.set(channels.iterator().next());
+
+	ListModel items = rlob.containerModel(selectedChannel, ITEMS, 1);
+
+	Model selectedItem = new ObjectModel();
 	if(!items.isEmpty())
-	    selection.set(items.iterator().next());
+	    selectedItem.set(items.iterator().next());
 
 	Box hbox = new Box(X);
 
-	ListBox list = rlob.listBox(items, TITLE, cmp, "items");
-	list.setSelectionModel(selection);
-	hbox.addRequest(list, 250, 250, 250);
+	ListBox channel_list = rlob.listBox(channels, TITLE, cmp, "channels");
+	channel_list.setSelectionModel(selectedChannel);
+	hbox.addRequest(channel_list, 250, 250, 250);
 
 	hbox.glue(5, 5, 5);
 
-	hbox.add(rlob.textArea(selection, DESC));
+	Box vbox = new Box(Y);
+	hbox.add(vbox);
+
+	ListBox item_list = rlob.listBox(items, TITLE, "items");
+	item_list.setSelectionModel(selectedItem);
+	vbox.addRequest(item_list, 200, 200, 200);
+
+	vbox.glue(5, 5, 5);
+
+	vbox.add(rlob.textArea(selectedItem, DESC));
 
 	setDelegate(new Margin(hbox, 5));
     }
@@ -87,13 +104,8 @@ public class FenFeed extends LobLob {
 
 	Set subscriptions = new HashSet();
 
-	boolean start = false;
-	for(int i=0; i<args.length; i++) {
-	    if(args[i].equals("-start"))
-		start = true;
-	    else
+	for(int i=0; i<args.length; i++)
 		subscriptions.add(args[i]);
-	}
 
 	Aggregator agg = new Aggregator(graph, new HashMap(), subscriptions,
 					30, context);

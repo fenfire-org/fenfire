@@ -31,7 +31,7 @@ import org.nongnu.libvob.layout.*;
 import org.nongnu.libvob.layout.component.*;
 import org.fenfire.swamp.*;
 import org.fenfire.vocab.*;
-import java.util.Comparator;
+import java.util.*;
 
 public class RDFLobFactory {
 
@@ -60,6 +60,14 @@ public class RDFLobFactory {
 	Model pm = Nodes.isNode(prop) ? new ObjectModel(prop) : (Model)prop;
 
 	return new PropValueSetModel(graph, nm, pm, new IntModel(dir));
+    }
+
+    public ListModel containerModel(Object node, Object prop, int dir) {
+	Model nm = Nodes.isNode(node) ? new ObjectModel(node) : (Model)node;
+	Model pm = Nodes.isNode(prop) ? new ObjectModel(prop) : (Model)prop;
+
+	Model container = new PropValueModel(graph, nm, pm, new IntModel(dir));
+	return new ContainerModel(graph, container);
     }
 
     public SetModel setModel(Object type) {
@@ -111,11 +119,25 @@ public class RDFLobFactory {
 
     public ListBox listBox(CollectionModel collection, Object property,
 			   Comparator cmp, Object key) {
-	// doesn't throw a NullPointerException... argl
-	Model m0 = new ObjectModel(collection.iterator().next());
+	Model m0 = new ObjectModel();
+
+	// prevent NullPointerException... argl
+	Iterator i = collection.iterator();
+	if(i.hasNext()) m0.set(i.next());
 
 	Lob template = 
 	    label(Parameter.model(ListModel.PARAM), property, false);
 	return listBox(collection, template, cmp, key);
+    }
+
+    public ListBox listBox(ListModel list, Object property, Object key) {
+	Model m0 = new ObjectModel();
+
+	// prevent NullPointerException... argl
+	if(!list.isEmpty()) m0.set(list.get(0));
+
+	Lob template = 
+	    label(Parameter.model(ListModel.PARAM), property, false);
+	return new ListBox(list, template, new ObjectModel(key));
     }
 }

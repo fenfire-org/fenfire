@@ -54,30 +54,50 @@ public class FeedReader {
 	    Graphs.readTurtle(in, baseURI, graph, namespaces);
 	} else if(contentType.equals("application/rdf+xml")) {
 	    Graphs.readXML(in, baseURI, graph, namespaces);
-	} else if(contentType.equals("application/rss+xml")) {
+	} else if(contentType.equals("application/rss+xml") ||
+		  contentType.equals("application/xml") ||
+		  contentType.equals("text/xml")) {
 	    Builder b = new Builder();
-	    Document xml;
+	    Document xml, transform_xml;
 
 	    try { 
+		InputStream tr_in = 
+		    new FileInputStream("org/fenfire/fenfeed/feed-rss1.0.xsl");
+
 		xml = b.build(in);	
+		transform_xml = b.build(tr_in);
 	    } catch(ParsingException e) {
 		throw new IOException(""+e);
 	    }
 
+	    Element root = xml.getRootElement();
+	    if(root.getNamespaceURI().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#") && root.getLocalName().equals("RDF")) {
+		// this is RDF/XML -- skip the chase and read it directly
+
+		Graphs.readXML(res.getInputStream(), baseURI, 
+			       graph, namespaces);
+		return;
+	    }
+
 	    nu.xom.Nodes nodes; 
 	    try {
-		InputStream tr_in = 
-		    new FileInputStream("org/fenfire/fenfeed/feed-rss1.0.xsl");
-
-		XSLTransform transform = new XSLTransform(tr_in);
+		XSLTransform transform = new XSLTransform(transform_xml);
 		nodes = transform.transform(xml);
 	    } catch(XSLException e) {
 		throw new IOException(""+e);
 	    }
 
+	    ByteArrayOutputStream bos0 = new ByteArrayOutputStream();
+	    Serializer serializer0 = new Serializer(bos0, "UTF-8");
+	    serializer0.write(xml);
+	    System.out.println(new String(bos0.toByteArray(), "UTF-8"));
+
 	    ByteArrayOutputStream bos = new ByteArrayOutputStream();
 	    Serializer serializer = new Serializer(bos, "UTF-8");
 	    serializer.write(new Document((Element)nodes.get(0)));
+
+	    System.out.println("=======================================");
+	    System.out.println(new String(bos.toByteArray(), "UTF-8"));
 	    
 	    InputStream bin = new ByteArrayInputStream(bos.toByteArray());
 	    Graphs.readXML(bin, baseURI, graph, namespaces);
@@ -93,18 +113,13 @@ public class FeedReader {
 
 	HTTPResource res = new HTTPResource(uri, context);
 	
-	QuadsGraph qgraph = new org.fenfire.swamp.impl.SimpleHashQuadsGraph();
-	Graph graph = new org.fenfire.swamp.impl.AllQuadsGraph(qgraph, "foo");
+	Graph graph = new org.fenfire.swamp.impl.HashGraph();
 	Map namespaces = new HashMap();
 
 	read(res, graph, namespaces);
 
-	QuadsGraph q2 = new org.fenfire.swamp.impl.SimpleHashQuadsGraph();
-	org.fenfire.swamp.smush.Smusher.smush(qgraph, q2);
-	Graph g2 = new org.fenfire.swamp.impl.AllQuadsGraph(q2, "foo");
-
 	StringWriter w = new StringWriter();
-	Graphs.writeTurtle(g2, namespaces, w);
+	Graphs.writeTurtle(graph, namespaces, w);
 	System.out.println(w.toString());
     }
 }
