@@ -27,8 +27,7 @@ HTTPUpdater.java
  */
 package org.fenfire.fenfeed.http;
 import org.nongnu.storm.util.CopyUtil;
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
 import java.util.*;
 
 /** A Runnable keeping a set of resources updated by reloading them 
@@ -39,31 +38,31 @@ import java.util.*;
  *  <p>
  *  XXX don't check all feeds at once if they have the same update interval
  */
-public class HTTPUpdater implements Runnable {
+public final class HTTPUpdater implements Runnable {
     public interface UpdateListener {
-	void startUpdate(Resource resource);
-	void changed(Resource resource);
-	void unchanged(Resource resource);
-	void updateFailed(Resource resource, IOException error);
+	void startUpdate(HTTPResource resource);
+	void changed(HTTPResource resource);
+	void unchanged(HTTPResource resource);
+	void updateFailed(HTTPResource resource, IOException error);
     }
 
-    protected class Feed implements Runnable {
-	protected Resource resource;
-	protected int loadInterval;  // in millis
-	protected long lastRead;     // in millis
+    private class Feed implements Runnable {
+	private HTTPResource resource;
+	private int loadInterval;  // in millis
+	private long lastRead;     // in millis
 
-	protected boolean updateInProgress = false;
+	private boolean updateInProgress = false;
 
-	protected Feed(Resource resource, int loadInterval)
+	private Feed(String uri, int loadInterval)
 	    throws IOException {
 
-	    this.resource = resource;
+	    this.resource = new HTTPResource(uri, context);
 	    this.loadInterval = loadInterval;
 	    this.lastRead = resource.lastRead().getTime();
 	}
 
 	/** Reload if necessary */
-	protected void check() {
+	private void check() {
 	    if(updateInProgress) return;
 
 	    long now = System.currentTimeMillis();
@@ -96,12 +95,12 @@ public class HTTPUpdater implements Runnable {
 	}
     }
 
-    protected HTTPClient http;
-    protected Map feeds = Collections.synchronizedMap(new LinkedHashMap());
-    protected Set listeners = Collections.synchronizedSet(new LinkedHashSet());
+    private HTTPContext context;
+    private Map feeds = Collections.synchronizedMap(new LinkedHashMap());
+    private Set listeners = Collections.synchronizedSet(new LinkedHashSet());
 
-    public HTTPUpdater(HTTPClient http) {
-	this.http = http;
+    public HTTPUpdater(HTTPContext context) {
+	this.context = context;
     }
 
     public void start() {
@@ -110,8 +109,7 @@ public class HTTPUpdater implements Runnable {
 
     public void add(String uri, int loadIntervalMinutes) throws IOException {
 	int loadInterval = loadIntervalMinutes * 60 * 1000;
-
-	feeds.put(uri, new Feed(http.get(uri), loadInterval));
+	feeds.put(uri, new Feed(uri, loadInterval));
     }
 
     public void remove(String uri) {
@@ -143,25 +141,25 @@ public class HTTPUpdater implements Runnable {
 	}
     }
 
-    protected void startUpdate(Resource resource) {
+    private void startUpdate(HTTPResource resource) {
 	synchronized(listeners) {
 	    for(Iterator i=listeners.iterator(); i.hasNext();)
 		((UpdateListener)i.next()).startUpdate(resource);
 	}
     }
-    protected void changed(Resource resource) {
+    private void changed(HTTPResource resource) {
 	synchronized(listeners) {
 	    for(Iterator i=listeners.iterator(); i.hasNext();)
 		((UpdateListener)i.next()).changed(resource);
 	}
     }
-    protected void unchanged(Resource resource) {
+    private void unchanged(HTTPResource resource) {
 	synchronized(listeners) {
 	    for(Iterator i=listeners.iterator(); i.hasNext();)
 		((UpdateListener)i.next()).unchanged(resource);
 	}
     }
-    protected void updateFailed(Resource resource, IOException error) {
+    private void updateFailed(HTTPResource resource, IOException error) {
 	synchronized(listeners) {
 	    for(Iterator i=listeners.iterator(); i.hasNext();)
 		((UpdateListener)i.next()).updateFailed(resource, error);
@@ -171,22 +169,22 @@ public class HTTPUpdater implements Runnable {
     /** Parameters: "uri1 loadInterval1 uri2 loadInterval2 ..."
      */
     public static void main(String[] args) throws Exception {
-	HTTPClient.dbg = true;
+	HTTPResource.dbg = true;
 	
-	HTTPClient http = new HTTPClient();
-	HTTPUpdater upd = new HTTPUpdater(http);
+	HTTPContext context = new HTTPContext();
+	HTTPUpdater upd = new HTTPUpdater(context);
 
 	upd.addUpdateListener(new UpdateListener() {
-		public void startUpdate(Resource r) {
+		public void startUpdate(HTTPResource r) {
 		    System.out.println("start update: "+r.getURI());
 		}
-		public void changed(Resource r) {
+		public void changed(HTTPResource r) {
 		    System.out.println("changed: "+r.getURI());
 		}
-		public void unchanged(Resource r) {
+		public void unchanged(HTTPResource r) {
 		    System.out.println("unchanged: "+r.getURI());
 		}
-		public void updateFailed(Resource r, IOException e) {
+		public void updateFailed(HTTPResource r, IOException e) {
 		    e.printStackTrace();
 		    System.out.println("update failed: "+r.getURI());
 		    System.out.println("(see exception above)");
