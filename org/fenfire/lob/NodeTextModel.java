@@ -105,7 +105,7 @@ public class NodeTextModel extends AbstractModel.AbstractObjectModel {
     public Object get() {
 	Object n = node.get(), p = getProperty();
 	if(p == null) return fallback();
-	return ((Literal)graph.find1_11X(n, p, this)).getString();
+	return ((Literal)graph.findN_11X_Iter(n, p, this).next()).getString();
     }
 
     public void set(Object value) {
