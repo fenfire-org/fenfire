@@ -178,6 +178,9 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 	    }); 
 
 	l = addBackground(l, canvas);
+	l = new DepthChangeLob(l, 5); // XXX how to get the background rendered
+                                      // at the right time before fading it?!?
+                                      // should we change the fader? hmmm...
 
 	result.setContent(l);
 	return result;

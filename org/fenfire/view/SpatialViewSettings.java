@@ -36,8 +36,19 @@ import java.util.*;
 public class SpatialViewSettings extends ViewSettings {
 
     public interface SpatialView extends View {
-	boolean showBig(); // whether the mainview should be shown big
+	/** Return a lob used when the cursor is on this spatial view.
+	 *  The lob is rendered into the whole box 
+	 *  filled by the structure view, i.e. if the structure view
+	 *  is full-screen, the lob will be rendered full-screen.
+	 *  If the view only wants to render a node in the center,
+	 *  it can use AlignLob (see SimpleSpatialView for an example).
+	 */
 	Lob getMainviewLob(Cursor cursor);
+
+	/** Return a lob used to show the given node as a buoy.
+	 *  The lob's size request should be that of the buoy;
+	 *  the lob will be rendered into the buoy box.
+	 */
 	Lob getBuoyLob(Object node);
     }
 
@@ -68,13 +79,5 @@ public class SpatialViewSettings extends ViewSettings {
 	    return v.getBuoyLob(node);
 	else
 	    return errorLob;
-    }
-
-    public boolean showBig(Cursor cursor) {
-	SpatialView v = (SpatialView)getViewByCursor(cursor);
-	if(v != null)
-	    return v.showBig();
-	else
-	    return false;
     }
 }

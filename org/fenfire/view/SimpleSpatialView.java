@@ -69,14 +69,14 @@ public class SimpleSpatialView implements SpatialViewSettings.SpatialView {
     }
 
     public Lob getMainviewLob(Cursor cursor) {
-	return getLob(cursor.getNode(), mainviewCache, 150);
+	return getLob(cursor.getNode(), mainviewCache, 150, true);
     }
 
     public Lob getBuoyLob(Object node) {
-	return getLob(node, buoyCache, 75);
+	return getLob(node, buoyCache, 75, false);
     }
 
-    private Lob getLob(Object node, Map cache, float maxY) {
+    private Lob getLob(Object node, Map cache, float maxY, boolean align) {
 	if(cache.get(node) != null) return (Lob)cache.get(node);
 
 	Model cs = new IntModel();
@@ -89,8 +89,13 @@ public class SimpleSpatialView implements SpatialViewSettings.SpatialView {
 	l = new Frame(l, bgColor, borderColor, 2, 3, false, false, true);
 	l = new RequestChangeLob(l, Float.NaN, 125, 125,
 				 Float.NaN, Float.NaN, maxY);
+
 	l = new SpatialContextLob(l, cs);
 	l = new Stamp(l);
+
+	if(align)
+	    l = new AlignLob(l, .5f, .5f, .5f, .5f);
+
 	cache.put(node, l);
 	return l;
     }

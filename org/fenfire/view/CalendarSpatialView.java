@@ -184,6 +184,8 @@ public class CalendarSpatialView
 	l = new ThemeFrame(l);
 	l = new SpatialContextLob(l, (Model)l.getTemplateParameter("cs"));
 
+	l = new AlignLob(l, .5f, .5f, .5f, .5f);
+
 	return l;
     }
 
