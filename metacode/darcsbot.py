@@ -115,14 +115,20 @@ class BotFactory(protocol.ClientFactory):
     def __init__(self, botnick, channel):
         self.nick = botnick
         self.channel = channel
+        self.backoff = None # fail fast if we can't make the first connection
  
     def clientConnectionLost(self, connector, reason):
         """If we get disconnected, reconnect to server."""
+        self.backoff = 15 # seconds. setting this starts retrying connects
         connector.connect()
 
     def clientConnectionFailed(self, connector, reason):
         print "connection failed:", reason
-        reactor.stop()
+        if self.backoff != None:
+            reactor.callLater(self.backoff, connector.connect)
+            self.backoff = self.backoff * 2
+        else:
+            reactor.stop()
 
 
 
