@@ -50,7 +50,9 @@ public class SpatialContextLob extends AbstractMonoLob {
     public void render(VobScene scene, int into, int matchingParent,
 		       float w, float h, float d,
 		       boolean visible) {
-	cs.setInt(into);
+	if(cs != null)
+	    cs.setInt(into);
+
 	scene.matcher.add(matchingParent, into, "spatial context");
 	super.render(scene, into, matchingParent, w, h, d, visible);
     }

@@ -167,7 +167,7 @@ public class CalendarSpatialView
 
 
     public Lob getBuoyLob(Object node) {
-	Lob l = getCalendarContent(makeCalendarCursor(node));
+	Lob l = getCalendarContent(makeCalendarCursor(node), null);
 	l = new AlignLob(l, .5f, .5f, .5f, .5f);
 	l = new ThemeFrame(l);
 	l = new SpatialContextLob(l, (Model)l.getTemplateParameter("cs"));
@@ -179,10 +179,11 @@ public class CalendarSpatialView
     }
 
     public Lob getMainviewLob(Cursor cursor) {
-	Lob l = getCalendarContent(getCalendarCursor(cursor));
+	Lob l = getCalendarContent(getCalendarCursor(cursor), cursor);
 	l = new AlignLob(l, .5f, .5f, .5f, .5f);
 	l = new ThemeFrame(l);
 	l = new SpatialContextLob(l, (Model)l.getTemplateParameter("cs"));
+
 	return l;
     }
 
@@ -200,7 +201,8 @@ public class CalendarSpatialView
     }
     */	
 
-    protected Lob getCalendarContent(CalendarCursor cc) {
+    protected Lob getCalendarContent(final CalendarCursor cc, 
+				     final Cursor cursor) {
 	updateNodes();
 	
 	Model cs = Parameter.model("cs", new IntModel());
@@ -216,8 +218,15 @@ public class CalendarSpatialView
 
 	    Box v = new Box(Lob.Y);
 	    Lob l = new Label(dateFormat.format(time));
-	    l = new ThemeFrame(l, new ObjectModel(time));
+	    l = new ThemeFrame(l);
+
+	    // argl
+	    l = new BuoyConnectorLob(l, Nodes.get("day:"+org.nongnu.storm.util.DateParser.getIsoDate(time)), cs);
+
 	    l = new AlignLob(l, .5f,.5f,.5f,.5f);
+	    if(cursor != null) {
+		l = new ClickController(l, 1, new Model.Change(cursor.spatialCursor, new ObjectModel(cc.getCursor(day))));
+	    }
 	    v.add(l);
 
 	    Set nodes = (Set)nodesByDay.get(day);
@@ -231,6 +240,7 @@ public class CalendarSpatialView
 		    v.add(l3);
 		}
 	    }
+
 	    dateList.add(v);
 	    dateList.glue(5, 5, 5);
 	}
