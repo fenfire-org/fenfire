@@ -94,8 +94,7 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
     }
 
     protected CanvasCursor makeCanvasCursor(Object n) {
-	String s = Nodes.toString(n);
-	Lob l = new Label(s.substring(s.length()-5));
+	Lob l = getContentLob(n);
 	
 	Model xm = getModel(n, CANVAS2D.x), ym = getModel(n, CANVAS2D.y);
 	
@@ -164,14 +163,23 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 	    canvasContent = getCanvasContent(canvas, null);
 	    canvasCache.put(canvas, canvasContent);
 	}
+
+	Lob ct = getContentLob(node);
+	Model x = getModel(node, CANVAS2D.x), y = getModel(node, CANVAS2D.y);
+	x = x.plus(ct.getNatSize(Lob.X) / 2);
+	y = y.plus(ct.getNatSize(Lob.Y) / 2);
 	
-	Lob l = new PanZoomLob(canvasContent, getModel(node, CANVAS2D.x),
-			       getModel(node, CANVAS2D.y), new FloatModel(1));
+	Lob l = new PanZoomLob(canvasContent, x, y, new FloatModel(1));
 	l = addBackground(l, canvas);
 	l = new SpatialContextLob(l, (Model)l.getTemplateParameter("cs"));
 	
 	buoyCache.put(node, l);
 	return l;
+    }
+
+    protected Lob getContentLob(Object node) {
+	String s = Nodes.toString(node);
+	return new Label(s.substring(s.length()-5));
     }
 
     /**
@@ -187,8 +195,7 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 	    i.hasNext();) {
 	    
 	    final Object n = i.next();
-	    String s = Nodes.toString(n);
-	    final Lob label = new Label(s.substring(s.length()-5));
+	    final Lob label = getContentLob(n);
 	    Lob l = new BuoyConnectorLob(label, n, cs);
 
 	    final Model x = getModel(n, CANVAS2D.x);
