@@ -68,10 +68,11 @@ public class FenFiction extends LobLob {
 	FIC = "http://fenfire.org/vocab/2004/11/fenfiction#";
 
     public static final Object
-	ALL_STORIES = Nodes.get(FIC+"allStories"),
+	//ALL_STORIES = Nodes.get(FIC+"allStories"),
 	TITLE = Nodes.get("http://purl.org/dc/elements/1.1/title"), 
 	NAME = Nodes.get(FIC+"name"),
 	STORY = Nodes.get(FIC+"Story"),
+	ALL_STORIES = STORY,
 	CHARACTER = Nodes.get(FIC+"Character"),
 	ELEMENT = Nodes.get(FIC+"element"),
 	NOTE = Nodes.get(FIC+"Note"),
@@ -210,7 +211,7 @@ public class FenFiction extends LobLob {
 	public Lob getViewLob(final Model state, final Model viewState) {
 	    Lob heading = 
 		new KeyLob(new Label("All stories", headingFont),
-			   "AllStories");
+			   ALL_STORIES);
 
 	    String msg =
 		"Please select a story from the right "+
@@ -251,7 +252,7 @@ public class FenFiction extends LobLob {
 		    public void run() {
 			state.set(ALL_STORIES);
 		    }
-		}, new ObjectModel("AllStories"));
+		}, new ObjectModel(ALL_STORIES));
 
 	    Lob heading = rlob.textField(state, TITLE, state);
 	    heading = new RequestChangeLob(X, heading, 450, 450, 450);
