@@ -90,6 +90,11 @@ public interface ConstGraph {
      */
     ConstGraph getOriginalConstGraph();
 
+    /** If the given node has been smushed with another node,
+     *  return that other node; else, return this node.
+     */
+    Object getSmushedNode(Object o);
+
     boolean contains(Object e0, Object e1, Object e2);
     boolean contains(Object e0, Object e1, Object e2, Obs o);
 
@@ -135,6 +140,10 @@ abstract public class AbstractConstGraph implements ConstGraph {
     public ConstGraph getOriginalConstGraph() { return null; }
     public boolean contains(Object e0, Object e1, Object e2) {
 	return contains(e0, e1, e2, null);
+    }
+
+    public Object getSmushedNode(Object o) {
+        return o;
     }
 
     %s
@@ -271,6 +280,10 @@ public class StdObservedConstGraph implements ConstGraph {
 	return constgraph;
     }
 
+    public Object getSmushedNode(Object o) {
+        return constgraph.getSmushedNode(o);
+    }
+
     public boolean contains(Object e0, Object e1, Object e2) {
 	return constgraph.contains(e0, e1, e2, obs);
     }
@@ -399,6 +412,11 @@ public interface QuadsConstGraph {
      */
     QuadsConstGraph getOriginalConstGraph();
 
+    /** If the given node has been smushed with another node,
+     *  return that other node; else, return this node.
+     */
+    Object getSmushedNode(Object o);
+
     boolean contains(Object e0, Object e1, Object e2, Object context);
     boolean contains(Object e0, Object e1, Object e2, Object context, Obs o);
 
@@ -442,6 +460,10 @@ abstract public class AbstractQuadsConstGraph implements QuadsConstGraph {
     public QuadsConstGraph getOriginalConstGraph() { return null; }
     public boolean contains(Object e0, Object e1, Object e2, Object e3) {
 	return contains(e0, e1, e2, e3, null);
+    }
+
+    public Object getSmushedNode(Object o) {
+        return o;
     }
 
     %s
@@ -565,6 +587,10 @@ public class StdObservedQuadsConstGraph implements QuadsConstGraph {
 	return constgraph;
     }
 
+    public Object getSmushedNode(Object o) {
+        return constgraph.getSmushedNode(o);
+    }
+
     public boolean contains(Object e0, Object e1, Object e2, Object e3) {
 	return constgraph.contains(e0, e1, e2, e3, obs);
     }
@@ -674,6 +700,10 @@ public class %s extends AbstractGraph {
         return graph.findN_111X_Iter(subj,pred,obj,o).hasNext(); }
     public void add(Object subject, Object predicate, Object object) {
         graph.add(subject, predicate, object, context);     }
+
+    public Object getSmushedNode(Object o) {
+        return graph.getSmushedNode(o);
+    }
 
     %s
 }

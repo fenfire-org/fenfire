@@ -34,6 +34,11 @@ public interface QuadsConstGraph {
      */
     QuadsConstGraph getOriginalConstGraph();
 
+    /** If the given node has been smushed with another node,
+     *  return that other node; else, return this node.
+     */
+    Object getSmushedNode(Object o);
+
     boolean contains(Object e0, Object e1, Object e2, Object context);
     boolean contains(Object e0, Object e1, Object e2, Object context, Obs o);
 

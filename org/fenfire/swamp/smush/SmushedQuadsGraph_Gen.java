@@ -20,58 +20,58 @@ public abstract class SmushedQuadsGraph_Gen extends AbstractQuadsGraph {
     }
 
     public Object find1_X11A(Object pred, Object obj, Obs obs) {
-    return smushed.find1_X11A(get(pred), get(obj), obs);
+    return smushed.find1_X11A(pred, obj, obs);
 }
 public Iterator findN_X11A_Iter(Object pred, Object obj, Obs obs) {
-    return smushed.findN_X11A_Iter(get(pred), get(obj), obs);
+    return smushed.findN_X11A_Iter(pred, obj, obs);
 }
 public Object find1_1X1A(Object subj, Object obj, Obs obs) {
-    return smushed.find1_1X1A(get(subj), get(obj), obs);
+    return smushed.find1_1X1A(subj, obj, obs);
 }
 public Iterator findN_1X1A_Iter(Object subj, Object obj, Obs obs) {
-    return smushed.findN_1X1A_Iter(get(subj), get(obj), obs);
+    return smushed.findN_1X1A_Iter(subj, obj, obs);
 }
 public Object find1_11XA(Object subj, Object pred, Obs obs) {
-    return smushed.find1_11XA(get(subj), get(pred), obs);
+    return smushed.find1_11XA(subj, pred, obs);
 }
 public Iterator findN_11XA_Iter(Object subj, Object pred, Obs obs) {
-    return smushed.findN_11XA_Iter(get(subj), get(pred), obs);
+    return smushed.findN_11XA_Iter(subj, pred, obs);
 }
 public Object find1_X1AA(Object pred, Obs obs) {
-    return smushed.find1_X1AA(get(pred), obs);
+    return smushed.find1_X1AA(pred, obs);
 }
 public Iterator findN_X1AA_Iter(Object pred, Obs obs) {
-    return smushed.findN_X1AA_Iter(get(pred), obs);
+    return smushed.findN_X1AA_Iter(pred, obs);
 }
 public Object find1_1XAA(Object subj, Obs obs) {
-    return smushed.find1_1XAA(get(subj), obs);
+    return smushed.find1_1XAA(subj, obs);
 }
 public Iterator findN_1XAA_Iter(Object subj, Obs obs) {
-    return smushed.findN_1XAA_Iter(get(subj), obs);
+    return smushed.findN_1XAA_Iter(subj, obs);
 }
 public Object find1_1AXA(Object subj, Obs obs) {
-    return smushed.find1_1AXA(get(subj), obs);
+    return smushed.find1_1AXA(subj, obs);
 }
 public Iterator findN_1AXA_Iter(Object subj, Obs obs) {
-    return smushed.findN_1AXA_Iter(get(subj), obs);
+    return smushed.findN_1AXA_Iter(subj, obs);
 }
 public Object find1_XA1A(Object obj, Obs obs) {
-    return smushed.find1_XA1A(get(obj), obs);
+    return smushed.find1_XA1A(obj, obs);
 }
 public Iterator findN_XA1A_Iter(Object obj, Obs obs) {
-    return smushed.findN_XA1A_Iter(get(obj), obs);
+    return smushed.findN_XA1A_Iter(obj, obs);
 }
 public Object find1_AX1A(Object obj, Obs obs) {
-    return smushed.find1_AX1A(get(obj), obs);
+    return smushed.find1_AX1A(obj, obs);
 }
 public Iterator findN_AX1A_Iter(Object obj, Obs obs) {
-    return smushed.findN_AX1A_Iter(get(obj), obs);
+    return smushed.findN_AX1A_Iter(obj, obs);
 }
 public Object find1_A1XA(Object pred, Obs obs) {
-    return smushed.find1_A1XA(get(pred), obs);
+    return smushed.find1_A1XA(pred, obs);
 }
 public Iterator findN_A1XA_Iter(Object pred, Obs obs) {
-    return smushed.findN_A1XA_Iter(get(pred), obs);
+    return smushed.findN_A1XA_Iter(pred, obs);
 }
 public Object find1_XAAA(Obs obs) {
     return smushed.find1_XAAA(obs);
@@ -92,58 +92,58 @@ public Iterator findN_AAXA_Iter(Obs obs) {
     return smushed.findN_AAXA_Iter(obs);
 }
 public Object find1_X111(Object pred, Object obj, Object context, Obs obs) {
-    return smushed.find1_X111(get(pred), get(obj), context, obs);
+    return smushed.find1_X111(pred, obj, context, obs);
 }
 public Iterator findN_X111_Iter(Object pred, Object obj, Object context, Obs obs) {
-    return smushed.findN_X111_Iter(get(pred), get(obj), context, obs);
+    return smushed.findN_X111_Iter(pred, obj, context, obs);
 }
 public Object find1_1X11(Object subj, Object obj, Object context, Obs obs) {
-    return smushed.find1_1X11(get(subj), get(obj), context, obs);
+    return smushed.find1_1X11(subj, obj, context, obs);
 }
 public Iterator findN_1X11_Iter(Object subj, Object obj, Object context, Obs obs) {
-    return smushed.findN_1X11_Iter(get(subj), get(obj), context, obs);
+    return smushed.findN_1X11_Iter(subj, obj, context, obs);
 }
 public Object find1_11X1(Object subj, Object pred, Object context, Obs obs) {
-    return smushed.find1_11X1(get(subj), get(pred), context, obs);
+    return smushed.find1_11X1(subj, pred, context, obs);
 }
 public Iterator findN_11X1_Iter(Object subj, Object pred, Object context, Obs obs) {
-    return smushed.findN_11X1_Iter(get(subj), get(pred), context, obs);
+    return smushed.findN_11X1_Iter(subj, pred, context, obs);
 }
 public Object find1_X1A1(Object pred, Object context, Obs obs) {
-    return smushed.find1_X1A1(get(pred), context, obs);
+    return smushed.find1_X1A1(pred, context, obs);
 }
 public Iterator findN_X1A1_Iter(Object pred, Object context, Obs obs) {
-    return smushed.findN_X1A1_Iter(get(pred), context, obs);
+    return smushed.findN_X1A1_Iter(pred, context, obs);
 }
 public Object find1_1XA1(Object subj, Object context, Obs obs) {
-    return smushed.find1_1XA1(get(subj), context, obs);
+    return smushed.find1_1XA1(subj, context, obs);
 }
 public Iterator findN_1XA1_Iter(Object subj, Object context, Obs obs) {
-    return smushed.findN_1XA1_Iter(get(subj), context, obs);
+    return smushed.findN_1XA1_Iter(subj, context, obs);
 }
 public Object find1_1AX1(Object subj, Object context, Obs obs) {
-    return smushed.find1_1AX1(get(subj), context, obs);
+    return smushed.find1_1AX1(subj, context, obs);
 }
 public Iterator findN_1AX1_Iter(Object subj, Object context, Obs obs) {
-    return smushed.findN_1AX1_Iter(get(subj), context, obs);
+    return smushed.findN_1AX1_Iter(subj, context, obs);
 }
 public Object find1_XA11(Object obj, Object context, Obs obs) {
-    return smushed.find1_XA11(get(obj), context, obs);
+    return smushed.find1_XA11(obj, context, obs);
 }
 public Iterator findN_XA11_Iter(Object obj, Object context, Obs obs) {
-    return smushed.findN_XA11_Iter(get(obj), context, obs);
+    return smushed.findN_XA11_Iter(obj, context, obs);
 }
 public Object find1_AX11(Object obj, Object context, Obs obs) {
-    return smushed.find1_AX11(get(obj), context, obs);
+    return smushed.find1_AX11(obj, context, obs);
 }
 public Iterator findN_AX11_Iter(Object obj, Object context, Obs obs) {
-    return smushed.findN_AX11_Iter(get(obj), context, obs);
+    return smushed.findN_AX11_Iter(obj, context, obs);
 }
 public Object find1_A1X1(Object pred, Object context, Obs obs) {
-    return smushed.find1_A1X1(get(pred), context, obs);
+    return smushed.find1_A1X1(pred, context, obs);
 }
 public Iterator findN_A1X1_Iter(Object pred, Object context, Obs obs) {
-    return smushed.findN_A1X1_Iter(get(pred), context, obs);
+    return smushed.findN_A1X1_Iter(pred, context, obs);
 }
 public Object find1_XAA1(Object context, Obs obs) {
     return smushed.find1_XAA1(context, obs);
@@ -164,10 +164,10 @@ public Iterator findN_AAX1_Iter(Object context, Obs obs) {
     return smushed.findN_AAX1_Iter(context, obs);
 }
 public Object find1_111X(Object subj, Object pred, Object obj, Obs obs) {
-    return smushed.find1_111X(get(subj), get(pred), get(obj), obs);
+    return smushed.find1_111X(subj, pred, obj, obs);
 }
 public Iterator findN_111X_Iter(Object subj, Object pred, Object obj, Obs obs) {
-    return smushed.findN_111X_Iter(get(subj), get(pred), get(obj), obs);
+    return smushed.findN_111X_Iter(subj, pred, obj, obs);
 }
 public Object find1_AAAX(Obs obs) {
     return smushed.find1_AAAX(obs);

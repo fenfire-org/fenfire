@@ -26,16 +26,44 @@ Cursor.java
  */
 package org.fenfire;
 import org.nongnu.libvob.layout.*;
+import org.fenfire.swamp.smush.SmushListener;
 import java.util.*;
 
 /** A Fenfire cursor position.
  */
-public final class Cursor {
+public final class Cursor implements SmushListener {
 
     public final Model node = new ObjectModel();
     public final Model spatialCursor = new ObjectModel();
     public final Model textCursor = new IntModel(-1);
     public final Map rotations = new HashMap(); // should perhaps be LRU...
+
+
+    public void smushed(Object old, Object into) {
+	if(old.equals(node.get())) node.set(into);
+
+	System.out.println("*** smushed => "+old+" => "+into+" ***");
+
+	Map old_r = new HashMap(rotations);
+
+	for(Iterator i=old_r.keySet().iterator(); i.hasNext();) {
+	    Object n = i.next();
+	    Rotation r = (Rotation)old_r.get(n);
+
+	    Object n1 = old.equals(n) ? into : n;
+
+	    Object p = r.rotationProperty, n2 = r.rotationNode;
+	    if(old.equals(p))  p = into;
+	    if(old.equals(n2)) n2 = into;
+
+	    rotations.remove(n);
+	    rotations.put(n1, new Rotation(p, n2, r.rotationDir));
+	}
+	
+	if(getSpatialCursor() instanceof SmushListener)
+	    ((SmushListener)getSpatialCursor()).smushed(old, into);
+    }
+
 
     public Object getNode() {
 	return node.get();

@@ -424,8 +424,9 @@ def smushedGraph():
     s = ""
 
     def arg(i):
-        if ARGS[i] == 'context': return ARGS[i]
-        else:                    return 'get(%s)' % ARGS[i]
+        return ARGS[i]
+        #if ARGS[i] == 'context': return ARGS[i]
+        #else:                    return 'get(%s)' % ARGS[i]
 
     def smushArgs(p):
         args = [arg(i) for i in range(len(p)) if p[i]=='1']

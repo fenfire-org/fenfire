@@ -17,6 +17,10 @@ abstract public class AbstractConstGraph implements ConstGraph {
 	return contains(e0, e1, e2, null);
     }
 
+    public Object getSmushedNode(Object o) {
+        return o;
+    }
+
     public Object find1_X11(Object pred, Object obj) {
     return find1_X11(pred, obj, null);
 }

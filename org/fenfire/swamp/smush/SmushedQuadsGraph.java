@@ -1,7 +1,7 @@
 /*
 SmushedQuadsGraph.java
  *    
- *    Copyright (c) 2004, Benja Fallenstein
+ *    Copyright (c) 2004-2005, Benja Fallenstein
  *    This file is part of Fenfire.
  *    
  *    Fenfire is free software; you can redistribute it and/or modify it under
@@ -41,6 +41,9 @@ public final class SmushedQuadsGraph extends SmushedQuadsGraph_Gen {
     private Map groupsByPair = new HashMap();
 
 
+    private Set smushListeners = new HashSet();
+
+
     private class Pair extends org.fenfire.util.Pair {
 	Pair(Object p, Object o) { super(p, o); }
 
@@ -74,6 +77,18 @@ public final class SmushedQuadsGraph extends SmushedQuadsGraph_Gen {
     }
 
 
+    public void addSmushListener(SmushListener l) {
+	smushListeners.add(l);
+    }
+    public void removeSmushListener(SmushListener l) {
+	smushListeners.remove(l);
+    }
+
+
+    public Object getSmushedNode(Object o) {
+	return get(o);
+    }
+
     /** Get the canonical node of the resource represented by a given node.
      */
     public Object get(Object node) {
@@ -91,6 +106,8 @@ public final class SmushedQuadsGraph extends SmushedQuadsGraph_Gen {
     public void add(Object subj, Object pred, Object obj, Object context) {
 	if(subj == null || pred == null || obj == null || context == null)
 	    throw new NullPointerException(subj+" "+pred+" "+obj+" "+context);
+
+	//if(dbg) p("A ---- "+subj+" "+pred+" "+obj+" "+context+" ------ "+get(subj)+" "+get(pred)+" "+get(obj));
 
 	unsmushed.add(subj, pred, obj, context);
 	smushed.add(get(subj), get(pred), get(obj), context);
@@ -152,6 +169,13 @@ public final class SmushedQuadsGraph extends SmushedQuadsGraph_Gen {
 
 	    remove(g2.canonicalNode);
 	    putAll(g2.subjects);
+	    
+	    if(dbg) p("All =============== CLEAN-o! ================= for "+g2.canonicalNode);
+
+	    for(Iterator i = smushListeners.iterator(); i.hasNext();) {
+		((SmushListener)i.next()).smushed(g2.canonicalNode, 
+						  g1.canonicalNode);
+	    }
 	}
     }
 
@@ -297,6 +321,8 @@ public final class SmushedQuadsGraph extends SmushedQuadsGraph_Gen {
 	smushed.rm_1AAA(node);
 	smushed.rm_A1AA(node);
 	smushed.rm_AA1A(node);
+
+	if(dbg) checkSanity();
     }
 
 
@@ -355,5 +381,42 @@ public final class SmushedQuadsGraph extends SmushedQuadsGraph_Gen {
 		}
 	    }
 	}
+    }
+
+    public void checkSanity() {
+	for(Iterator i=groupsBySubject.values().iterator(); i.hasNext();) {
+	    checkSanity((Group)i.next());
+	}
+    }
+
+    public void checkSanity(Group g) {
+	for(Iterator i=g.subjects.iterator(); i.hasNext();) {
+	    Object o = i.next();
+	    if(!o.equals(g.canonicalNode)) checkSanity(o);
+	}
+    }
+
+    /** check that a node doesn't appear in the smushed graph
+     */
+    public void checkSanity(Object node) {
+	if(smushed.findN_1AXA_Iter(node).hasNext())
+	    throw new Error(node+" "+smushed.findN_1AXA_Iter(node).next());
+	if(smushed.findN_XA1A_Iter(node).hasNext())
+	    throw new Error(node+" "+smushed.findN_XA1A_Iter(node).next());
+
+	if(findN_1AXA_Iter(node).hasNext())
+	    throw new Error(node+" "+findN_1AXA_Iter(node).next());
+	if(findN_XA1A_Iter(node).hasNext())
+	    throw new Error(node+" "+findN_XA1A_Iter(node).next());
+    }
+
+    public static SmushedQuadsGraph instance;
+
+    public SmushedQuadsGraph() {
+	instance = this;
+    }
+
+    public static void checkInstanceSanity() {
+	instance.checkSanity();
     }
 }

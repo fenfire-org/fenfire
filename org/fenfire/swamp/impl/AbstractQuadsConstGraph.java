@@ -17,6 +17,10 @@ abstract public class AbstractQuadsConstGraph implements QuadsConstGraph {
 	return contains(e0, e1, e2, e3, null);
     }
 
+    public Object getSmushedNode(Object o) {
+        return o;
+    }
+
     public Object find1_X11A(Object pred, Object obj) {
     return find1_X11A(pred, obj, null);
 }

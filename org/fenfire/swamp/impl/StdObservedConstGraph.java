@@ -28,6 +28,10 @@ public class StdObservedConstGraph implements ConstGraph {
 	return constgraph;
     }
 
+    public Object getSmushedNode(Object o) {
+        return constgraph.getSmushedNode(o);
+    }
+
     public boolean contains(Object e0, Object e1, Object e2) {
 	return constgraph.contains(e0, e1, e2, obs);
     }

@@ -28,6 +28,10 @@ public class StdObservedQuadsConstGraph implements QuadsConstGraph {
 	return constgraph;
     }
 
+    public Object getSmushedNode(Object o) {
+        return constgraph.getSmushedNode(o);
+    }
+
     public boolean contains(Object e0, Object e1, Object e2, Object e3) {
 	return constgraph.contains(e0, e1, e2, e3, obs);
     }

@@ -25,6 +25,10 @@ public class OneQuadGraph extends AbstractGraph {
     public void add(Object subject, Object predicate, Object object) {
         graph.add(subject, predicate, object, context);     }
 
+    public Object getSmushedNode(Object o) {
+        return graph.getSmushedNode(o);
+    }
+
     public Object find1_X11(Object pred, Object obj, Obs obs) {
     return graph.find1_X111(pred, obj, context, obs);
 }
