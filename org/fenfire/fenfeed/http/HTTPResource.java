@@ -138,10 +138,12 @@ public final class HTTPResource {
 	boolean changed;
 	newURI = null;
 
-	file("content").delete();
-	file("location").delete();
-	file("header").delete();
-	file("lastRead").delete();
+	if(code != 304) {
+	    file("content").delete();
+	    file("location").delete();
+	    file("header").delete();
+	    file("lastRead").delete();
+	}
 
 
 	if(code == 200) {
