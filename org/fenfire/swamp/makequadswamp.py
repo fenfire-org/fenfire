@@ -595,7 +595,7 @@ def makeHashGraph():
 
     """ % locals())
 
-makeHashGraph()
+#makeHashGraph()
 
 
 
@@ -682,6 +682,18 @@ public abstract class GraphToQuadsGraph extends AbstractGraph {
     public synchronized void rm_111(Object subject, Object predicate, Object object) {
         graph.rm_1111(subject, predicate, object, getQuad());     }
 
+    public synchronized void addAll(Graph g) {
+       for (Iterator i=g.findN_XAA_Iter(); i.hasNext();) {
+           Object subj = i.next();
+           for (Iterator j=g.findN_1XA_Iter(subj); j.hasNext();) {
+               Object pred = j.next();
+               for (Iterator k=g.findN_11X_Iter(subj,pred); k.hasNext();){
+                   Object obj = k.next();
+                   graph.add(subj, pred, obj, getQuad());
+               }
+           }
+       }
+    }
 
     %(delegate_calls)s
 }

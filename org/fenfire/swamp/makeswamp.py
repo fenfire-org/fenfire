@@ -654,84 +654,84 @@ def makeHashGraph(className, classJavadoc, mapClass, rmind, addind, contains,
 
     """ % locals())
 
-makeHashGraph(className="SimpleHashGraph",
-              mapClass="HashMap",
-              classJavadoc="""
-              /** An RDF Graph implemented by HashMaps.
-               * Relatively inefficient but a basic implementation
-               * that can be used as a reference.
-               */
-              """,
-              hashIndices = [(0,1,2),(0,2,1),(1,2,0),(1,0,2)],
-              rmind="""
-              HashMap m2 = (HashMap)ind.get(o1);
-              if(m2 == null) return;
-              HashSet m3 = (HashSet)m2.get(o2);
-              if(m3 == null) return;
-              m3.remove(o3);
-              """,
-              addind="""
-              HashMap m2 = (HashMap)ind.get(o1);
-              if(m2 == null) {
-                  m2 = new HashMap();
-                  ind.put(o1, m2);
-              }
-              HashSet s = (HashSet)m2.get(o2);
-              if(s == null) {
-                  s = new HashSet();
-                  m2.put(o2, s);
-              }
-              s.add(o3);
-              """,
-              contains="""
-              HashMap hash1 = (HashMap) ind_012.get(e0);
-              if(hash1 == null) return false; 
+# makeHashGraph(className="SimpleHashGraph",
+#               mapClass="HashMap",
+#               classJavadoc="""
+#               /** An RDF Graph implemented by HashMaps.
+#                * Relatively inefficient but a basic implementation
+#                * that can be used as a reference.
+#                */
+#               """,
+#               hashIndices = [(0,1,2),(0,2,1),(1,2,0),(1,0,2)],
+#               rmind="""
+#               HashMap m2 = (HashMap)ind.get(o1);
+#               if(m2 == null) return;
+#               HashSet m3 = (HashSet)m2.get(o2);
+#               if(m3 == null) return;
+#               m3.remove(o3);
+#               """,
+#               addind="""
+#               HashMap m2 = (HashMap)ind.get(o1);
+#               if(m2 == null) {
+#                   m2 = new HashMap();
+#                   ind.put(o1, m2);
+#               }
+#               HashSet s = (HashSet)m2.get(o2);
+#               if(s == null) {
+#                   s = new HashSet();
+#                   m2.put(o2, s);
+#               }
+#               s.add(o3);
+#               """,
+#               contains="""
+#               HashMap hash1 = (HashMap) ind_012.get(e0);
+#               if(hash1 == null) return false; 
 	
-              HashSet hash2 = (HashSet) hash1.get(e1);
-              if(hash2 == null) return false; 
+#               HashSet hash2 = (HashSet) hash1.get(e1);
+#               if(hash2 == null) return false; 
 	
-              HashSet resSet = hash2;
-              return resSet.contains(e2);
-              """
-              )
+#               HashSet resSet = hash2;
+#               return resSet.contains(e2);
+#               """
+#               )
 
 
-def hashGraphIndex(pattern):
-    index = [None,None,None]
+# def hashGraphIndex(pattern):
+#     index = [None,None,None]
 
-    pos = 0
-    for i in range(3):
-        if pattern[i] == 'X':
-            index[2] = i
-        elif pattern[i] == '1':
-            index[pos] = i
-            pos += 1
-        elif pattern[i] == 'A':
-            index[pos] = 'A'
-            pos += 1
+#     pos = 0
+#     for i in range(3):
+#         if pattern[i] == 'X':
+#             index[2] = i
+#         elif pattern[i] == '1':
+#             index[pos] = i
+#             pos += 1
+#         elif pattern[i] == 'A':
+#             index[pos] = 'A'
+#             pos += 1
 
-    for el in index: assert el != None
+#     for el in index: assert el != None
 
-    return tuple(index)
+#     return tuple(index)
 
 
-makeHashGraph(className="HashGraph",
-              mapClass="PairMap",
-              classJavadoc="""
-              /** A more efficient implementation of Graph
-               *  than SimpleHashGraph. This implementation uses PairMap,
-               *  which is based on AbstractHashtable, for its indices,
-               *  thus avoiding the overhead of creating objects per triple.
-               */
-              """,
-              hashIndices = [hashGraphIndex(p) for p in find_patterns],
-              rmind="""
-              ind.rm(o1, o2, o3);
-              """,
-              addind="""
-              ind.add(o1, o2, o3);
-              """,
-              contains="""
-              return ind_012.contains(e0, e1, e2);
-              """
-              )
+# makeHashGraph(className="HashGraph",
+#               mapClass="PairMap",
+#               classJavadoc="""
+#               /** A more efficient implementation of Graph
+#                *  than SimpleHashGraph. This implementation uses PairMap,
+#                *  which is based on AbstractHashtable, for its indices,
+#                *  thus avoiding the overhead of creating objects per triple.
+#                */
+#               """,
+#               hashIndices = [hashGraphIndex(p) for p in find_patterns],
+#               rmind="""
+#               ind.rm(o1, o2, o3);
+#               """,
+#               addind="""
+#               ind.add(o1, o2, o3);
+#               """,
+#               contains="""
+#               return ind_012.contains(e0, e1, e2);
+#               """
+#               )
