@@ -72,6 +72,7 @@ public interface Resource {
      *  @param force If true, a request to the server will be
      *         executed even if the 'Expires' header of the cached version
      *         specifies a date in the future.
+     *  @return Whether the resource changed.
      */
-    void reload(boolean force) throws IOException;
+    boolean reload(boolean force) throws IOException;
 }

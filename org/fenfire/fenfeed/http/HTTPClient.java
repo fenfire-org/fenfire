@@ -27,6 +27,7 @@ HTTPClient.java
  */
 package org.fenfire.fenfeed.http;
 import org.nongnu.storm.util.CopyUtil;
+import org.nongnu.storm.util.DateParser;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -57,6 +58,8 @@ import java.util.*;
  *  is in the future.
  */
 public class HTTPClient {
+    public static boolean dbg = false;
+    private void p(String s) { System.out.println("HTTPClient:: "+s); }
 
     /** An IOException signalling that the HTTP server replied with
      *  an unhandled status code. The status code and message
@@ -123,8 +126,8 @@ public class HTTPClient {
 	    return new FileOutputStream(file(name)); 
 	}
 
-	public void reload(boolean force) throws IOException {
-	    System.err.println("FETCH "+uri);
+	public boolean reload(boolean force) throws IOException {
+	    if(dbg) p("FETCH "+uri);
 
 	    HttpURLConnection conn =
 		(HttpURLConnection)new URL(uri).openConnection();
@@ -137,10 +140,10 @@ public class HTTPClient {
 		    Date now = new Date();
 
 		    if(expires.before(now)) {
-			System.out.println("- use cached version");
+			if(dbg) p("- use cached version");
 			// does not update lastRead because we didn't
 			// contact the server
-			return;
+			return false;
 		    }
 		}
 
@@ -163,8 +166,10 @@ public class HTTPClient {
 	    redirect = null;
 	    newURI = null;
 
+	    boolean changed;
+
 	    if(code == 200) {
-		System.out.println("- ok");
+		if(dbg) p("- ok");
 
 		CopyUtil.copy(conn.getInputStream(), out("content"));
 
@@ -176,16 +181,19 @@ public class HTTPClient {
 		}
 
 		w.close();
+		changed = true;
 	    } else if(code==301 || code==302 || code==303 || code==307) {
-		System.out.println("- redirect");
+		if(dbg) p("- redirect");
 
 		if(code == 301) // moved permanently
 		    newURI = (String)conn.getHeaderField("location");
 
 		redirect = get(conn.getHeaderField("location"));
+		changed = true;
 	    } else if(code==304) {
 		// 304 Not Modified -- just use the already cached version
-		System.out.println("- unchanged");
+		if(dbg) p("- unchanged");
+		changed = false;
 	    } else {
 		throw new HTTPException(code, conn.getResponseMessage());
 	    }
@@ -193,7 +201,9 @@ public class HTTPClient {
 	    // The server was asked for the newest version of the resource
 	    // and has replied -- store current time as the "last read" date
 	    Date now = new Date();
-	    CopyUtil.writeString(""+now, out("lastRead"));
+	    CopyUtil.writeString(DateParser.getIsoDate(now), out("lastRead"));
+
+	    return changed;
 	}
 
 	public String getURI() {
@@ -211,7 +221,7 @@ public class HTTPClient {
 	}
 
 	public Date lastRead() throws IOException {
-	    return new Date(CopyUtil.readString(in("lastRead")));
+	    return DateParser.parse(CopyUtil.readString(in("lastRead")));
 	}
 
 	public String getNewURI() {
@@ -298,6 +308,8 @@ public class HTTPClient {
     }
 
     public static void main(String[] args) throws IOException {
+	dbg = true;
+	
 	String uri = args[0];
 	HTTPClient http = new HTTPClient();
 
