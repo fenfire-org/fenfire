@@ -33,7 +33,7 @@ dry_run = (len(sys.argv) > 1 and sys.argv[1] == '--dry-run')
 TO       = 'Fenfire commit messages <fencommits@lists.jyu.fi>'
 REPLY_TO = 'Fenfire developers list <fenfire-dev@nongnu.org>'
 
-projects = [ 'libvob', 'callgl', 'fenfire', 'storm', 'alph', 'depends', 'ff', 'navidoc', '!private' ] # '!' signals to look in ~befallen/darcs/
+projects = [ 'libvob', 'callgl', 'fenfire', 'storm', 'alph', 'depends', 'ff', 'navidoc', 'project', '!private' ] # '!' signals to look in ~befallen/darcs/
 LOCK = 'send_darcs_diffs/lock'
 
 if not os.path.exists('send_darcs_diffs'):
