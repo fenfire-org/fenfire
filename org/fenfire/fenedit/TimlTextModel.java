@@ -38,7 +38,7 @@ import java.util.*;
 public class TimlTextModel extends TextModel.AbstractTextModel {
 
     public TimlTextModel(Model stringModel, Model fontModel) {
-	super(stringModel, fontModel);
+	super(stringModel, fontModel, true);
     }
 
     protected Object clone(Object[] params) {
