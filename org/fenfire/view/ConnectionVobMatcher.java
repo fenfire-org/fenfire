@@ -181,6 +181,23 @@ private static final String rcsid = "$Id: ConnectionVobMatcher.java,v 1.1 2003/0
 	throw new NoSuchElementException();
     }
 
+    public boolean hasLink(int from, int dir, Object childKey,
+			    Object linkKey) {
+	if(dir > 0) {
+	    for(int i=0; i<size; i++)
+		if(cs1[i] == from && linkkey[i].equals(linkKey)
+		   && getKey(cs2[i]).equals(childKey))
+		    return true;
+	} else {
+	    for(int i=0; i<size; i++)
+		if(cs2[i] == from && linkkey[i].equals(linkKey)
+		   && getKey(cs1[i]).equals(childKey))
+		    return true;
+	}
+
+	return false;
+    }
+
     /** Iterate through the links in a given direction with a given link key.
      *  For example:
      *  <pre>
