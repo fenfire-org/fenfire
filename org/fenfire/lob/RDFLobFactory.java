@@ -148,6 +148,19 @@ public class RDFLobFactory {
 	return new TextModel.Concat(list);
     }
 
+    public TextModel textModel(Object[] _parts) {
+	ListModel parts = new ListModel.Simple();
+
+	for(int i=0; i<_parts.length; i++) {
+	    if(_parts[i] instanceof String)
+		parts.add(textModel((String)_parts[i], false));
+	    else
+		parts.add((TextModel)_parts[i]);
+	}
+
+	return new TextModel.Concat(parts);
+    }
+
     public Label label(Object node, Object property) {
 	return new Label(textModel(node, property));
     }

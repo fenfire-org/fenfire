@@ -80,26 +80,27 @@ public class FenFeed extends LobLob {
 	
 	Color col = Color.black;
 	Model font = new ObjectModel(new LobFont("Serif", 0, 20, col));
-	Model boldFont = new ObjectModel(new LobFont("Serif", 
-						     java.awt.Font.BOLD, 
-						     20, col));
+	Model boldFont = 
+	    new ObjectModel(new LobFont("Serif", java.awt.Font.BOLD, 20, col));
 
-	final RDFLobFactory rlob = new RDFLobFactory(gm, font);
-
-	SetModel channels = rlob.setModel(CHANNEL, RDF.type, -1);
+	RDFLobFactory rlob = new RDFLobFactory(gm, font);
 	Comparator cmp = new PropertyComparator(gm, DATE);
 
-	Model selectedChannel = new ObjectModel();
-	if(!channels.isEmpty())
-	    selectedChannel.set(channels.iterator().next());
+
+	SetModel channels = rlob.setModel(CHANNEL, RDF.type, -1);
+
+	final Model selectedChannel = new ObjectModel();
+	final Model selectedItem = new ObjectModel();
 
 	ListModel items = rlob.containerModel(selectedChannel, ITEMS, 1);
 
-	final Model selectedItem = new ObjectModel();
 
 	selectedItem.addObs(new Obs() { public void chg() {
 	    g.add(conf, READ, selectedItem.get());
 	}});
+
+	if(!channels.isEmpty())
+	    selectedChannel.set(channels.iterator().next());
 
 	if(!items.isEmpty())
 	    selectedItem.set(items.iterator().next());
@@ -130,20 +131,17 @@ public class FenFeed extends LobLob {
 	}
 
 
-	ListModel texts = new ListModel.Simple();
-	texts.add(rlob.textModel("Title: ", false));
-	texts.add(rlob.textsModel(selectedItem, TITLE, null));
-	texts.add(rlob.textModel("\nDate: ", false));
-	texts.add(rlob.textsModel(selectedItem, DC_DATE, null));
-	texts.add(rlob.textModel("\nCreator: ", false));
-	texts.add(rlob.textsModel(selectedItem, DC_CREATOR, null));
-	texts.add(rlob.textModel("\nSubject: ", false));
-	texts.add(rlob.textsModel(selectedItem, DC_SUBJECT, null));
-	texts.add(rlob.textModel("\n\n", false));
-	texts.add(rlob.textModel(selectedItem, ITEM_TEXT));
-
-	TextArea textArea = new TextArea(new TextModel.Concat(texts), 
-					 new ObjectModel("body"));
+	TextArea textArea = new TextArea(); {
+	    textArea.setKey("body");
+	    textArea.setText(rlob.textModel(new Object[] {
+		"Title: ", rlob.textsModel(selectedItem, TITLE, null), "\n",
+		"Date: ",  rlob.textsModel(selectedItem, DC_DATE, null), "\n",
+		"Creator: ",rlob.textsModel(selectedItem,DC_CREATOR,null),"\n",
+		"Subject: ",rlob.textsModel(selectedItem,DC_SUBJECT,null),"\n",
+		"\n",
+	    rlob.textModel(selectedItem, ITEM_TEXT),
+	    }));
+	}
 
 
 	Box hbox = new Box(X); {
