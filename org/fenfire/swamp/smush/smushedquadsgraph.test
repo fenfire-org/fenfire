@@ -64,7 +64,7 @@ def testSmushing():
     
     assert find.X11(prop, v[0]) == [n[0]]
     assert find._11X(n[0], prop2) == [v[1], v[2]]
-    assert find._11X(n[1], prop2) == [v[1], v[2]]
+    assert find._11X(n[1], prop2) == []
 
     g.rm_11AA(n[0], prop)
 
