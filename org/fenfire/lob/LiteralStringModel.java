@@ -55,7 +55,7 @@ public class LiteralStringModel extends AbstractModel.AbstractObjectModel {
     public void set(Object value) {
 	String s = (String)value;
 	if(s != null)
-	    literal.set(new PlainLiteral(s)); // XXX datatype/langtag support
+	    literal.set(Nodes.editLiteral((Literal) literal.get(), s));
 	else
 	    literal.set(null);
     }

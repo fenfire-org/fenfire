@@ -53,6 +53,11 @@ public class NodeTextModel extends AbstractModel.AbstractObjectModel {
 
     private Object cache;
 
+    // XXX these are buggy on Kaffe 1.0.6
+    private String preferredLang = Locale.getDefault().getLanguage();
+    private String preferredCountry = Locale.getDefault().getCountry()
+	                                                 .toLowerCase();
+
     public NodeTextModel(Graph graph, Model node, NamespaceMap nmap, 
 			 Set textProperties, Object defaultProperty) {
 	this.graph = graph;
@@ -101,7 +106,52 @@ public class NodeTextModel extends AbstractModel.AbstractObjectModel {
 	return null;
     }
 
-    String fallback() {
+    /** Finds the first literal among the best present for a given node 
+        and predicate. */
+    protected Literal getLiteral(Object n, Object p) {
+	//  4 right lang, right country
+	//  3 right lang
+	//  2 without lang
+	//  1 wrong lang
+	
+	//  0 typed literal
+	// -1 null
+	Object best = null;
+	int bestval = -1, val;
+	Iterator i = graph.findN_11X_Iter(n, p, this);
+	while (i.hasNext()) {
+	    Object o = i.next();
+	    if (! (o instanceof Literal))
+		continue;
+	    
+	    if (! (o instanceof PlainLiteral))
+		val = 0;
+	    else {
+		String lang = ((PlainLiteral) o).getLang();
+		if (lang == null)
+		    val = 2;
+		else if (lang.toLowerCase().startsWith(preferredLang)) {
+		    val = 3;
+		    if (lang.substring(lang.indexOf('-')+1).toLowerCase()
+			.equals(preferredCountry))
+			val = 4;
+		} else val = 1;
+	    }
+	    if (val > bestval) {
+		bestval = val;
+		best = o;
+	    }
+	}
+	return (Literal) best;
+    }
+
+    /** Provides a fallback text representation for the cases when we didn't
+     *  find text content for the node.
+     *  @return empty string for anon:, bnode: and urn:urn-5: URIs,
+     *          email address or telephone number for mailto: and tel: URIs,
+     *          otherwise a URI, abbreviated if it starts with a namespace.
+     */
+    protected String fallback() {
 	String s = Nodes.toString(node.get());
 		
 	if(s.startsWith("anon:") || s.startsWith("bnode:") || s.startsWith("urn:urn-5:"))
@@ -122,8 +172,7 @@ public class NodeTextModel extends AbstractModel.AbstractObjectModel {
 	    if(p == null) 
 		cache = fallback();
 	    else {
-		Iterator i = graph.findN_11X_Iter(n, p, this);
-		cache = ((Literal)i.next()).getString();
+		cache = getLiteral(n, p).getString();
 	    }
 	}
 	return cache;
@@ -132,11 +181,13 @@ public class NodeTextModel extends AbstractModel.AbstractObjectModel {
     public void set(Object value) {
 	Object n = node.get(), p = getProperty();
 	String s = (String)value;
+	Literal l = null;
 
-	if(p != null) 
-	    graph.rm_11A(n, p);
-	else
+	if(p != null) {
+	    l = getLiteral(n, p);
+	    graph.rm_111(n, p, l);
+	} else
 	    p = defaultProperty;
-	graph.add(n, p, new PlainLiteral(s));
+	graph.add(n, p, Nodes.editLiteral(l, s));
     }
 }

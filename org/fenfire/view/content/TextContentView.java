@@ -86,7 +86,7 @@ public class TextContentView implements ContentViewSettings.ContentView {
 	    if(!(n instanceof Literal)) return;
 
 	    Literal literal = (Literal)n;
-	    Literal nlit = new PlainLiteral((String)o);
+	    Literal nlit = Nodes.editLiteral(literal, (String)o);
 
 	    Object node = cursor.getRotation().getRotationNode();
 	    Object prop = cursor.getRotation().getRotationProperty();

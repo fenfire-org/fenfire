@@ -88,4 +88,28 @@ public class Nodes {
      * when serializing a space.
      */
     //	public static void appendToString(Object res, StringBuffer buf);
+
+    /** Simulates editing a literal. As literals are immutable, a new
+     *  literal is created with new content, but otherwise it should
+     *  be equal to the old one. If the old one is null, a new 
+     *  plain literal is created without language.
+     *
+     *  @param literal a literal that acts as model for the result
+     *  @param content new content for the result
+     *  @return a new literal with the given content
+     */
+    public static Literal editLiteral(Literal literal, String content) {
+	if (literal == null || literal instanceof PlainLiteral) {
+	    String lang = null;
+	    if (literal != null)
+		lang = ((PlainLiteral) literal).getLang();
+	    return new PlainLiteral(content, lang);
+	} else if (literal instanceof TypedLiteral) {
+	    return new TypedLiteral(content, 
+				    ((TypedLiteral) literal).getType());
+	} else {
+	    throw new Error("No subclasses of Literal except "+
+			    "PlainLiteral and TypedLiteral are supported");
+	}
+    }
 }
