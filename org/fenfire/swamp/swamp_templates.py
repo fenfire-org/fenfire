@@ -26,9 +26,22 @@ class Spec: pass
 spec = Spec()
 spec.Graph = "Graph"
 spec.ConstGraph = "ConstGraph"
-spec.find_patterns = ("11X","1X1","X11", "1XA", "XAA", "X1A")
-spec.rm_patterns = ("111", "11A", "A11", "1AA")
+#spec.find_patterns = ("11X","1X1","X11", "AX1", "1XA", "XAA", "X1A")
+#spec.rm_patterns = ("111", "11A", "A11", "1AA", "A1A", "AA1")
 spec.one = "111"
+
+
+# use all possible patterns
+spec.find_patterns = []
+spec.rm_patterns = []
+for a in "1A":
+    for b in "1A":
+        spec.find_patterns.extend(['X'+a+b, a+'X'+b, a+b+'X'])
+        for c in "1A": spec.rm_patterns.append(a+b+c)
+
+print spec.find_patterns
+print spec.rm_patterns
+    
 
 quad_spec = Spec()
 quad_spec.Graph = "QuadsGraph"
@@ -40,7 +53,7 @@ quad_spec.find_patterns = [p+'A' for p in spec.find_patterns] + \
                           ["111X", "AAAX"]
 
 quad_spec.rm_patterns = [p+'A' for p in spec.rm_patterns] + \
-                        [p+'1' for p in spec.rm_patterns] + ["AAA1"]
+                        [p+'1' for p in spec.rm_patterns]
 
 spec.constGraphTemplate = """
 package org.fenfire.swamp;
@@ -626,6 +639,28 @@ public class %s extends AbstractGraph {
         return graph.contains(subj,pred,obj, context, o); }
     public void add(Object subject, Object predicate, Object object) {
         graph.add(subject, predicate, object, context);     }
+
+    %s
+}
+"""
+
+
+smushedGraphTemplate = """
+package org.fenfire.swamp.smush;
+import org.nongnu.navidoc.util.Obs;
+import org.fenfire.swamp.*;
+import org.fenfire.swamp.impl.*;
+import java.util.Iterator;
+
+public abstract class SmushedQuadsGraph_Gen extends AbstractQuadsGraph {
+    protected QuadsGraph unsmushed = new HashQuadsGraph();
+    protected QuadsGraph smushed = new HashQuadsGraph();
+
+    protected abstract Object get(Object node);
+
+    public boolean contains(Object s, Object p, Object o, Object c, Obs obs) {
+        return smushed.contains(get(s), get(p), get(o), c, obs);
+    }
 
     %s
 }

@@ -218,12 +218,13 @@ def delegateGraph(spec):
 
     for p in spec.find_patterns:
         s += 'public Object find1_%s(%s) {\n' % (p, arguments(p, ['Obs obs']))
-        s += '    return find1_%s(%s);\n' % (p, callArgs(p, ['obs']))
+        s += '    return graph.find1_%s(%s);\n' % (p, callArgs(p, ['obs']))
         s += '}\n'
         
         s += 'public Iterator findN_%s_Iter(%s) {\n' % \
                                                 (p, arguments(p, ['Obs obs']))
-        s += '    return findN_%s_Iter(%s);\n' % (p, callArgs(p, ['obs']))
+        s += '    return graph.findN_%s_Iter(%s);\n' % \
+                                                (p, callArgs(p, ['obs']))
         s += '}\n'
 
 
@@ -267,11 +268,28 @@ def simpleHashGraph(spec):
 
     s += 'public void rm_%s(%s) {\n' % (spec.one, arguments(spec.one))
     s += '    checkNode(subj); checkNode(pred); checkNodeOrLiteral(obj);\n'
+    s += '    Iterator iter;\n'
 
     for p in spec.find_patterns:
+        s += '\n'
+        
         toremove = p.index('X')
-        s += '    getSet_%s(%s).remove(%s);\n' % (p, callArgs(p),
-                                                  ARGS[toremove])
+        if 'A' not in p:
+            s += '        getSet_%s(%s).remove(%s);\n' % (p, callArgs(p),
+                                                          ARGS[toremove])
+        else:
+            a = p.index('A')
+            q = [x for x in p]
+            q[toremove] = '1'
+            q[a] = 'X'
+            q = ''.join(q)
+
+            s += '    iter = findN_%s_Iter(%s);\n' % (q, callArgs(q))
+            s += '    if(!iter.hasNext() ||\n'
+            s += '       (iter.next().equals(%s) && !iter.hasNext()))\n' % \
+                                                                    (ARGS[a])
+            s += '        getSet_%s(%s).remove(%s);\n' % (p, callArgs(p),
+                                                          ARGS[toremove])
 
     s += '    \n'
     s += '    observer.triggerObs(-1, subj, pred, obj);\n'
@@ -323,11 +341,28 @@ def hashGraph(spec):
 
     s += 'public void rm_%s(%s) {\n' % (spec.one, arguments(spec.one))
     s += '    checkNode(subj); checkNode(pred); checkNodeOrLiteral(obj);\n'
+    s += '    Iterator iter;\n'
 
     for p in spec.find_patterns:
+        s += '\n'
+        
         toremove = p.index('X')
-        s += '    map_%s.rm(%s, %s);\n' % (p, callIndexArgs(p),
-                                           ARGS[toremove])
+        if 'A' not in p:
+            s += '    map_%s.rm(%s, %s);\n' % (p, callIndexArgs(p),
+                                               ARGS[toremove])
+        else:
+            a = p.index('A')
+            q = [x for x in p]
+            q[toremove] = '1'
+            q[a] = 'X'
+            q = ''.join(q)
+
+            s += '    iter = findN_%s_Iter(%s);\n' % (q, callArgs(q))
+            s += '    if(!iter.hasNext() ||\n'
+            s += '       (iter.next().equals(%s) && !iter.hasNext()))\n' % \
+                                                                    (ARGS[a])
+            s += '        map_%s.rm(%s, %s);\n' % (p, callIndexArgs(p),
+                                                  ARGS[toremove])
 
     s += '    \n'
     s += '    observer.triggerObs(-1, subj, pred, obj);\n'
@@ -385,6 +420,53 @@ def quadAdapterGraph(name, findAll):
 
     return quadAdapterTemplate % (name, name, s)
 
+def smushedGraph():
+    s = ""
+
+    def arg(i):
+        if ARGS[i] == 'context': return ARGS[i]
+        else:                    return 'get(%s)' % ARGS[i]
+
+    def smushArgs(p):
+        args = [arg(i) for i in range(len(p)) if p[i]=='1']
+        return ', '.join(args+['obs'])
+
+
+    for p in quad_spec.find_patterns:
+        s += 'public Object find1_%s(%s) {\n' % (p, arguments(p, ['Obs obs']))
+        s += '    return smushed.find1_%s(%s);\n' % (p, smushArgs(p))
+        s += '}\n'
+        
+        s += 'public Iterator findN_%s_Iter(%s) {\n' % \
+                                                (p, arguments(p, ['Obs obs']))
+        s += '    return smushed.findN_%s_Iter(%s);\n' % (p, smushArgs(p))
+        s += '}\n'
+
+    for p in quad_spec.rm_patterns:
+
+        if p == quad_spec.one: continue
+        
+        anys = [i for i in range(len(p)) if p[i]=='A']
+        
+        s += 'public void rm_%s(%s) {\n' % (p, arguments(p))
+        s += '    while(true) {\n'
+        s += '        Iterator i;\n'
+
+        for i in anys:
+            q = quad_spec.one[0:i] + 'X' + p[i+1:]
+            
+            s += '        i = unsmushed.findN_%s_Iter(%s);\n' % (q,callArgs(q))
+            s += '        if(!i.hasNext()) return;\n'
+            s += '        Object %s = i.next();\n' % ARGS[i]
+
+        s += '\n'
+	s += '        rm_%s(%s);\n' % (quad_spec.one, callArgs(quad_spec.one))
+        s += '    }\n'
+        s += '}\n'
+
+
+    return smushedGraphTemplate % s
+
 
 
 
@@ -421,3 +503,5 @@ writeFamily(quad_spec)
 
 for (name, findAll) in [("AllQuadsGraph", 1), ("OneQuadGraph", 0)]:
     write('impl/'+name+'.java', quadAdapterGraph(name, findAll))
+
+write('smush/SmushedQuadsGraph_Gen.java', smushedGraph())

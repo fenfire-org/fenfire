@@ -8,22 +8,22 @@
     public class HashQuadsGraph extends AbstractQuadsGraph {
 	private StdObserver observer = new StdObserver();
 
-        PairMap map_11XA = new PairMap();
-public Object find1_11XA(Object subj, Object pred, Obs obs) {
+        PairMap map_X11A = new PairMap();
+public Object find1_X11A(Object pred, Object obj, Obs obs) {
     if(obs != null)
-        observer.addObs(subj, pred, observer.WILDCARD, observer.WILDCARD, obs);
+        observer.addObs(observer.WILDCARD, pred, obj, observer.WILDCARD, obs);
 
     try {
-        return map_11XA.get(subj, pred, null);
+        return map_X11A.get(pred, obj, null);
     } catch(PairMap.NotUniqueException _) {
-        throw new NotUniqueError(subj, pred, null, null);
+        throw new NotUniqueError(null, pred, obj, null);
     }
 }
-public Iterator findN_11XA_Iter(Object subj, Object pred, Obs obs){
+public Iterator findN_X11A_Iter(Object pred, Object obj, Obs obs){
     if(obs != null)
-        observer.addObs(subj, pred, observer.WILDCARD, observer.WILDCARD, obs);
+        observer.addObs(observer.WILDCARD, pred, obj, observer.WILDCARD, obs);
 
-    return map_11XA.getIter(subj, pred, null);
+    return map_X11A.getIter(pred, obj, null);
 }
 PairMap map_1X1A = new PairMap();
 public Object find1_1X1A(Object subj, Object obj, Obs obs) {
@@ -42,56 +42,22 @@ public Iterator findN_1X1A_Iter(Object subj, Object obj, Obs obs){
 
     return map_1X1A.getIter(subj, obj, null);
 }
-PairMap map_X11A = new PairMap();
-public Object find1_X11A(Object pred, Object obj, Obs obs) {
+PairMap map_11XA = new PairMap();
+public Object find1_11XA(Object subj, Object pred, Obs obs) {
     if(obs != null)
-        observer.addObs(observer.WILDCARD, pred, obj, observer.WILDCARD, obs);
+        observer.addObs(subj, pred, observer.WILDCARD, observer.WILDCARD, obs);
 
     try {
-        return map_X11A.get(pred, obj, null);
+        return map_11XA.get(subj, pred, null);
     } catch(PairMap.NotUniqueException _) {
-        throw new NotUniqueError(null, pred, obj, null);
+        throw new NotUniqueError(subj, pred, null, null);
     }
 }
-public Iterator findN_X11A_Iter(Object pred, Object obj, Obs obs){
+public Iterator findN_11XA_Iter(Object subj, Object pred, Obs obs){
     if(obs != null)
-        observer.addObs(observer.WILDCARD, pred, obj, observer.WILDCARD, obs);
+        observer.addObs(subj, pred, observer.WILDCARD, observer.WILDCARD, obs);
 
-    return map_X11A.getIter(pred, obj, null);
-}
-PairMap map_1XAA = new PairMap();
-public Object find1_1XAA(Object subj, Obs obs) {
-    if(obs != null)
-        observer.addObs(subj, observer.WILDCARD, observer.WILDCARD, observer.WILDCARD, obs);
-
-    try {
-        return map_1XAA.get(subj, null, null);
-    } catch(PairMap.NotUniqueException _) {
-        throw new NotUniqueError(subj, null, null, null);
-    }
-}
-public Iterator findN_1XAA_Iter(Object subj, Obs obs){
-    if(obs != null)
-        observer.addObs(subj, observer.WILDCARD, observer.WILDCARD, observer.WILDCARD, obs);
-
-    return map_1XAA.getIter(subj, null, null);
-}
-PairMap map_XAAA = new PairMap();
-public Object find1_XAAA(Obs obs) {
-    if(obs != null)
-        observer.addObs(observer.WILDCARD, observer.WILDCARD, observer.WILDCARD, observer.WILDCARD, obs);
-
-    try {
-        return map_XAAA.get(null, null, null);
-    } catch(PairMap.NotUniqueException _) {
-        throw new NotUniqueError(null, null, null, null);
-    }
-}
-public Iterator findN_XAAA_Iter(Obs obs){
-    if(obs != null)
-        observer.addObs(observer.WILDCARD, observer.WILDCARD, observer.WILDCARD, observer.WILDCARD, obs);
-
-    return map_XAAA.getIter(null, null, null);
+    return map_11XA.getIter(subj, pred, null);
 }
 PairMap map_X1AA = new PairMap();
 public Object find1_X1AA(Object pred, Obs obs) {
@@ -110,39 +76,141 @@ public Iterator findN_X1AA_Iter(Object pred, Obs obs){
 
     return map_X1AA.getIter(pred, null, null);
 }
-PairMap map_11X1 = new PairMap();
-public Object find1_11X1(Object subj, Object pred, Object context, Obs obs) {
+PairMap map_1XAA = new PairMap();
+public Object find1_1XAA(Object subj, Obs obs) {
     if(obs != null)
-        observer.addObs(subj, pred, observer.WILDCARD, context, obs);
+        observer.addObs(subj, observer.WILDCARD, observer.WILDCARD, observer.WILDCARD, obs);
 
     try {
-        return map_11X1.get(subj, pred, context);
+        return map_1XAA.get(subj, null, null);
     } catch(PairMap.NotUniqueException _) {
-        throw new NotUniqueError(subj, pred, null, context);
+        throw new NotUniqueError(subj, null, null, null);
     }
 }
-public Iterator findN_11X1_Iter(Object subj, Object pred, Object context, Obs obs){
+public Iterator findN_1XAA_Iter(Object subj, Obs obs){
     if(obs != null)
-        observer.addObs(subj, pred, observer.WILDCARD, context, obs);
+        observer.addObs(subj, observer.WILDCARD, observer.WILDCARD, observer.WILDCARD, obs);
 
-    return map_11X1.getIter(subj, pred, context);
+    return map_1XAA.getIter(subj, null, null);
 }
-PairMap map_1X11 = new PairMap();
-public Object find1_1X11(Object subj, Object obj, Object context, Obs obs) {
+PairMap map_1AXA = new PairMap();
+public Object find1_1AXA(Object subj, Obs obs) {
     if(obs != null)
-        observer.addObs(subj, observer.WILDCARD, obj, context, obs);
+        observer.addObs(subj, observer.WILDCARD, observer.WILDCARD, observer.WILDCARD, obs);
 
     try {
-        return map_1X11.get(subj, obj, context);
+        return map_1AXA.get(subj, null, null);
     } catch(PairMap.NotUniqueException _) {
-        throw new NotUniqueError(subj, null, obj, context);
+        throw new NotUniqueError(subj, null, null, null);
     }
 }
-public Iterator findN_1X11_Iter(Object subj, Object obj, Object context, Obs obs){
+public Iterator findN_1AXA_Iter(Object subj, Obs obs){
     if(obs != null)
-        observer.addObs(subj, observer.WILDCARD, obj, context, obs);
+        observer.addObs(subj, observer.WILDCARD, observer.WILDCARD, observer.WILDCARD, obs);
 
-    return map_1X11.getIter(subj, obj, context);
+    return map_1AXA.getIter(subj, null, null);
+}
+PairMap map_XA1A = new PairMap();
+public Object find1_XA1A(Object obj, Obs obs) {
+    if(obs != null)
+        observer.addObs(observer.WILDCARD, observer.WILDCARD, obj, observer.WILDCARD, obs);
+
+    try {
+        return map_XA1A.get(obj, null, null);
+    } catch(PairMap.NotUniqueException _) {
+        throw new NotUniqueError(null, null, obj, null);
+    }
+}
+public Iterator findN_XA1A_Iter(Object obj, Obs obs){
+    if(obs != null)
+        observer.addObs(observer.WILDCARD, observer.WILDCARD, obj, observer.WILDCARD, obs);
+
+    return map_XA1A.getIter(obj, null, null);
+}
+PairMap map_AX1A = new PairMap();
+public Object find1_AX1A(Object obj, Obs obs) {
+    if(obs != null)
+        observer.addObs(observer.WILDCARD, observer.WILDCARD, obj, observer.WILDCARD, obs);
+
+    try {
+        return map_AX1A.get(obj, null, null);
+    } catch(PairMap.NotUniqueException _) {
+        throw new NotUniqueError(null, null, obj, null);
+    }
+}
+public Iterator findN_AX1A_Iter(Object obj, Obs obs){
+    if(obs != null)
+        observer.addObs(observer.WILDCARD, observer.WILDCARD, obj, observer.WILDCARD, obs);
+
+    return map_AX1A.getIter(obj, null, null);
+}
+PairMap map_A1XA = new PairMap();
+public Object find1_A1XA(Object pred, Obs obs) {
+    if(obs != null)
+        observer.addObs(observer.WILDCARD, pred, observer.WILDCARD, observer.WILDCARD, obs);
+
+    try {
+        return map_A1XA.get(pred, null, null);
+    } catch(PairMap.NotUniqueException _) {
+        throw new NotUniqueError(null, pred, null, null);
+    }
+}
+public Iterator findN_A1XA_Iter(Object pred, Obs obs){
+    if(obs != null)
+        observer.addObs(observer.WILDCARD, pred, observer.WILDCARD, observer.WILDCARD, obs);
+
+    return map_A1XA.getIter(pred, null, null);
+}
+PairMap map_XAAA = new PairMap();
+public Object find1_XAAA(Obs obs) {
+    if(obs != null)
+        observer.addObs(observer.WILDCARD, observer.WILDCARD, observer.WILDCARD, observer.WILDCARD, obs);
+
+    try {
+        return map_XAAA.get(null, null, null);
+    } catch(PairMap.NotUniqueException _) {
+        throw new NotUniqueError(null, null, null, null);
+    }
+}
+public Iterator findN_XAAA_Iter(Obs obs){
+    if(obs != null)
+        observer.addObs(observer.WILDCARD, observer.WILDCARD, observer.WILDCARD, observer.WILDCARD, obs);
+
+    return map_XAAA.getIter(null, null, null);
+}
+PairMap map_AXAA = new PairMap();
+public Object find1_AXAA(Obs obs) {
+    if(obs != null)
+        observer.addObs(observer.WILDCARD, observer.WILDCARD, observer.WILDCARD, observer.WILDCARD, obs);
+
+    try {
+        return map_AXAA.get(null, null, null);
+    } catch(PairMap.NotUniqueException _) {
+        throw new NotUniqueError(null, null, null, null);
+    }
+}
+public Iterator findN_AXAA_Iter(Obs obs){
+    if(obs != null)
+        observer.addObs(observer.WILDCARD, observer.WILDCARD, observer.WILDCARD, observer.WILDCARD, obs);
+
+    return map_AXAA.getIter(null, null, null);
+}
+PairMap map_AAXA = new PairMap();
+public Object find1_AAXA(Obs obs) {
+    if(obs != null)
+        observer.addObs(observer.WILDCARD, observer.WILDCARD, observer.WILDCARD, observer.WILDCARD, obs);
+
+    try {
+        return map_AAXA.get(null, null, null);
+    } catch(PairMap.NotUniqueException _) {
+        throw new NotUniqueError(null, null, null, null);
+    }
+}
+public Iterator findN_AAXA_Iter(Obs obs){
+    if(obs != null)
+        observer.addObs(observer.WILDCARD, observer.WILDCARD, observer.WILDCARD, observer.WILDCARD, obs);
+
+    return map_AAXA.getIter(null, null, null);
 }
 PairMap map_X111 = new PairMap();
 public Object find1_X111(Object pred, Object obj, Object context, Obs obs) {
@@ -161,6 +229,57 @@ public Iterator findN_X111_Iter(Object pred, Object obj, Object context, Obs obs
 
     return map_X111.getIter(pred, obj, context);
 }
+PairMap map_1X11 = new PairMap();
+public Object find1_1X11(Object subj, Object obj, Object context, Obs obs) {
+    if(obs != null)
+        observer.addObs(subj, observer.WILDCARD, obj, context, obs);
+
+    try {
+        return map_1X11.get(subj, obj, context);
+    } catch(PairMap.NotUniqueException _) {
+        throw new NotUniqueError(subj, null, obj, context);
+    }
+}
+public Iterator findN_1X11_Iter(Object subj, Object obj, Object context, Obs obs){
+    if(obs != null)
+        observer.addObs(subj, observer.WILDCARD, obj, context, obs);
+
+    return map_1X11.getIter(subj, obj, context);
+}
+PairMap map_11X1 = new PairMap();
+public Object find1_11X1(Object subj, Object pred, Object context, Obs obs) {
+    if(obs != null)
+        observer.addObs(subj, pred, observer.WILDCARD, context, obs);
+
+    try {
+        return map_11X1.get(subj, pred, context);
+    } catch(PairMap.NotUniqueException _) {
+        throw new NotUniqueError(subj, pred, null, context);
+    }
+}
+public Iterator findN_11X1_Iter(Object subj, Object pred, Object context, Obs obs){
+    if(obs != null)
+        observer.addObs(subj, pred, observer.WILDCARD, context, obs);
+
+    return map_11X1.getIter(subj, pred, context);
+}
+PairMap map_X1A1 = new PairMap();
+public Object find1_X1A1(Object pred, Object context, Obs obs) {
+    if(obs != null)
+        observer.addObs(observer.WILDCARD, pred, observer.WILDCARD, context, obs);
+
+    try {
+        return map_X1A1.get(pred, context, null);
+    } catch(PairMap.NotUniqueException _) {
+        throw new NotUniqueError(null, pred, null, context);
+    }
+}
+public Iterator findN_X1A1_Iter(Object pred, Object context, Obs obs){
+    if(obs != null)
+        observer.addObs(observer.WILDCARD, pred, observer.WILDCARD, context, obs);
+
+    return map_X1A1.getIter(pred, context, null);
+}
 PairMap map_1XA1 = new PairMap();
 public Object find1_1XA1(Object subj, Object context, Obs obs) {
     if(obs != null)
@@ -177,6 +296,74 @@ public Iterator findN_1XA1_Iter(Object subj, Object context, Obs obs){
         observer.addObs(subj, observer.WILDCARD, observer.WILDCARD, context, obs);
 
     return map_1XA1.getIter(subj, context, null);
+}
+PairMap map_1AX1 = new PairMap();
+public Object find1_1AX1(Object subj, Object context, Obs obs) {
+    if(obs != null)
+        observer.addObs(subj, observer.WILDCARD, observer.WILDCARD, context, obs);
+
+    try {
+        return map_1AX1.get(subj, context, null);
+    } catch(PairMap.NotUniqueException _) {
+        throw new NotUniqueError(subj, null, null, context);
+    }
+}
+public Iterator findN_1AX1_Iter(Object subj, Object context, Obs obs){
+    if(obs != null)
+        observer.addObs(subj, observer.WILDCARD, observer.WILDCARD, context, obs);
+
+    return map_1AX1.getIter(subj, context, null);
+}
+PairMap map_XA11 = new PairMap();
+public Object find1_XA11(Object obj, Object context, Obs obs) {
+    if(obs != null)
+        observer.addObs(observer.WILDCARD, observer.WILDCARD, obj, context, obs);
+
+    try {
+        return map_XA11.get(obj, context, null);
+    } catch(PairMap.NotUniqueException _) {
+        throw new NotUniqueError(null, null, obj, context);
+    }
+}
+public Iterator findN_XA11_Iter(Object obj, Object context, Obs obs){
+    if(obs != null)
+        observer.addObs(observer.WILDCARD, observer.WILDCARD, obj, context, obs);
+
+    return map_XA11.getIter(obj, context, null);
+}
+PairMap map_AX11 = new PairMap();
+public Object find1_AX11(Object obj, Object context, Obs obs) {
+    if(obs != null)
+        observer.addObs(observer.WILDCARD, observer.WILDCARD, obj, context, obs);
+
+    try {
+        return map_AX11.get(obj, context, null);
+    } catch(PairMap.NotUniqueException _) {
+        throw new NotUniqueError(null, null, obj, context);
+    }
+}
+public Iterator findN_AX11_Iter(Object obj, Object context, Obs obs){
+    if(obs != null)
+        observer.addObs(observer.WILDCARD, observer.WILDCARD, obj, context, obs);
+
+    return map_AX11.getIter(obj, context, null);
+}
+PairMap map_A1X1 = new PairMap();
+public Object find1_A1X1(Object pred, Object context, Obs obs) {
+    if(obs != null)
+        observer.addObs(observer.WILDCARD, pred, observer.WILDCARD, context, obs);
+
+    try {
+        return map_A1X1.get(pred, context, null);
+    } catch(PairMap.NotUniqueException _) {
+        throw new NotUniqueError(null, pred, null, context);
+    }
+}
+public Iterator findN_A1X1_Iter(Object pred, Object context, Obs obs){
+    if(obs != null)
+        observer.addObs(observer.WILDCARD, pred, observer.WILDCARD, context, obs);
+
+    return map_A1X1.getIter(pred, context, null);
 }
 PairMap map_XAA1 = new PairMap();
 public Object find1_XAA1(Object context, Obs obs) {
@@ -195,22 +382,39 @@ public Iterator findN_XAA1_Iter(Object context, Obs obs){
 
     return map_XAA1.getIter(context, null, null);
 }
-PairMap map_X1A1 = new PairMap();
-public Object find1_X1A1(Object pred, Object context, Obs obs) {
+PairMap map_AXA1 = new PairMap();
+public Object find1_AXA1(Object context, Obs obs) {
     if(obs != null)
-        observer.addObs(observer.WILDCARD, pred, observer.WILDCARD, context, obs);
+        observer.addObs(observer.WILDCARD, observer.WILDCARD, observer.WILDCARD, context, obs);
 
     try {
-        return map_X1A1.get(pred, context, null);
+        return map_AXA1.get(context, null, null);
     } catch(PairMap.NotUniqueException _) {
-        throw new NotUniqueError(null, pred, null, context);
+        throw new NotUniqueError(null, null, null, context);
     }
 }
-public Iterator findN_X1A1_Iter(Object pred, Object context, Obs obs){
+public Iterator findN_AXA1_Iter(Object context, Obs obs){
     if(obs != null)
-        observer.addObs(observer.WILDCARD, pred, observer.WILDCARD, context, obs);
+        observer.addObs(observer.WILDCARD, observer.WILDCARD, observer.WILDCARD, context, obs);
 
-    return map_X1A1.getIter(pred, context, null);
+    return map_AXA1.getIter(context, null, null);
+}
+PairMap map_AAX1 = new PairMap();
+public Object find1_AAX1(Object context, Obs obs) {
+    if(obs != null)
+        observer.addObs(observer.WILDCARD, observer.WILDCARD, observer.WILDCARD, context, obs);
+
+    try {
+        return map_AAX1.get(context, null, null);
+    } catch(PairMap.NotUniqueException _) {
+        throw new NotUniqueError(null, null, null, context);
+    }
+}
+public Iterator findN_AAX1_Iter(Object context, Obs obs){
+    if(obs != null)
+        observer.addObs(observer.WILDCARD, observer.WILDCARD, observer.WILDCARD, context, obs);
+
+    return map_AAX1.getIter(context, null, null);
 }
 PairMap map_111X = new PairMap();
 public Object find1_111X(Object subj, Object pred, Object obj, Obs obs) {
@@ -248,37 +452,154 @@ public Iterator findN_AAAX_Iter(Obs obs){
 }
 public void rm_1111(Object subj, Object pred, Object obj, Object context) {
     checkNode(subj); checkNode(pred); checkNodeOrLiteral(obj);
-    map_11XA.rm(subj, pred, null, obj);
-    map_1X1A.rm(subj, obj, null, pred);
-    map_X11A.rm(pred, obj, null, subj);
-    map_1XAA.rm(subj, null, null, pred);
-    map_XAAA.rm(null, null, null, subj);
-    map_X1AA.rm(pred, null, null, subj);
-    map_11X1.rm(subj, pred, context, obj);
-    map_1X11.rm(subj, obj, context, pred);
+    Iterator iter;
+
+    iter = findN_111X_Iter(subj, pred, obj);
+    if(!iter.hasNext() ||
+       (iter.next().equals(context) && !iter.hasNext()))
+        map_X11A.rm(pred, obj, null, subj);
+
+    iter = findN_111X_Iter(subj, pred, obj);
+    if(!iter.hasNext() ||
+       (iter.next().equals(context) && !iter.hasNext()))
+        map_1X1A.rm(subj, obj, null, pred);
+
+    iter = findN_111X_Iter(subj, pred, obj);
+    if(!iter.hasNext() ||
+       (iter.next().equals(context) && !iter.hasNext()))
+        map_11XA.rm(subj, pred, null, obj);
+
+    iter = findN_11XA_Iter(subj, pred);
+    if(!iter.hasNext() ||
+       (iter.next().equals(obj) && !iter.hasNext()))
+        map_X1AA.rm(pred, null, null, subj);
+
+    iter = findN_11XA_Iter(subj, pred);
+    if(!iter.hasNext() ||
+       (iter.next().equals(obj) && !iter.hasNext()))
+        map_1XAA.rm(subj, null, null, pred);
+
+    iter = findN_1X1A_Iter(subj, obj);
+    if(!iter.hasNext() ||
+       (iter.next().equals(pred) && !iter.hasNext()))
+        map_1AXA.rm(subj, null, null, obj);
+
+    iter = findN_1X1A_Iter(subj, obj);
+    if(!iter.hasNext() ||
+       (iter.next().equals(pred) && !iter.hasNext()))
+        map_XA1A.rm(obj, null, null, subj);
+
+    iter = findN_X11A_Iter(pred, obj);
+    if(!iter.hasNext() ||
+       (iter.next().equals(subj) && !iter.hasNext()))
+        map_AX1A.rm(obj, null, null, pred);
+
+    iter = findN_X11A_Iter(pred, obj);
+    if(!iter.hasNext() ||
+       (iter.next().equals(subj) && !iter.hasNext()))
+        map_A1XA.rm(pred, null, null, obj);
+
+    iter = findN_1XAA_Iter(subj);
+    if(!iter.hasNext() ||
+       (iter.next().equals(pred) && !iter.hasNext()))
+        map_XAAA.rm(null, null, null, subj);
+
+    iter = findN_X1AA_Iter(pred);
+    if(!iter.hasNext() ||
+       (iter.next().equals(subj) && !iter.hasNext()))
+        map_AXAA.rm(null, null, null, pred);
+
+    iter = findN_XA1A_Iter(obj);
+    if(!iter.hasNext() ||
+       (iter.next().equals(subj) && !iter.hasNext()))
+        map_AAXA.rm(null, null, null, obj);
+
     map_X111.rm(pred, obj, context, subj);
-    map_1XA1.rm(subj, context, null, pred);
-    map_XAA1.rm(context, null, null, subj);
-    map_X1A1.rm(pred, context, null, subj);
+
+    map_1X11.rm(subj, obj, context, pred);
+
+    map_11X1.rm(subj, pred, context, obj);
+
+    iter = findN_11X1_Iter(subj, pred, context);
+    if(!iter.hasNext() ||
+       (iter.next().equals(obj) && !iter.hasNext()))
+        map_X1A1.rm(pred, context, null, subj);
+
+    iter = findN_11X1_Iter(subj, pred, context);
+    if(!iter.hasNext() ||
+       (iter.next().equals(obj) && !iter.hasNext()))
+        map_1XA1.rm(subj, context, null, pred);
+
+    iter = findN_1X11_Iter(subj, obj, context);
+    if(!iter.hasNext() ||
+       (iter.next().equals(pred) && !iter.hasNext()))
+        map_1AX1.rm(subj, context, null, obj);
+
+    iter = findN_1X11_Iter(subj, obj, context);
+    if(!iter.hasNext() ||
+       (iter.next().equals(pred) && !iter.hasNext()))
+        map_XA11.rm(obj, context, null, subj);
+
+    iter = findN_X111_Iter(pred, obj, context);
+    if(!iter.hasNext() ||
+       (iter.next().equals(subj) && !iter.hasNext()))
+        map_AX11.rm(obj, context, null, pred);
+
+    iter = findN_X111_Iter(pred, obj, context);
+    if(!iter.hasNext() ||
+       (iter.next().equals(subj) && !iter.hasNext()))
+        map_A1X1.rm(pred, context, null, obj);
+
+    iter = findN_1XA1_Iter(subj, context);
+    if(!iter.hasNext() ||
+       (iter.next().equals(pred) && !iter.hasNext()))
+        map_XAA1.rm(context, null, null, subj);
+
+    iter = findN_X1A1_Iter(pred, context);
+    if(!iter.hasNext() ||
+       (iter.next().equals(subj) && !iter.hasNext()))
+        map_AXA1.rm(context, null, null, pred);
+
+    iter = findN_XA11_Iter(obj, context);
+    if(!iter.hasNext() ||
+       (iter.next().equals(subj) && !iter.hasNext()))
+        map_AAX1.rm(context, null, null, obj);
+
     map_111X.rm(subj, pred, obj, context);
-    map_AAAX.rm(null, null, null, context);
+
+    iter = findN_XAA1_Iter(context);
+    if(!iter.hasNext() ||
+       (iter.next().equals(subj) && !iter.hasNext()))
+        map_AAAX.rm(null, null, null, context);
     
     observer.triggerObs(-1, subj, pred, obj);
 }
 public void add(Object subj, Object pred, Object obj, Object context) {
     checkNode(subj); checkNode(pred); checkNodeOrLiteral(obj);
-    map_11XA.add(subj, pred, null, obj);
-    map_1X1A.add(subj, obj, null, pred);
     map_X11A.add(pred, obj, null, subj);
-    map_1XAA.add(subj, null, null, pred);
-    map_XAAA.add(null, null, null, subj);
+    map_1X1A.add(subj, obj, null, pred);
+    map_11XA.add(subj, pred, null, obj);
     map_X1AA.add(pred, null, null, subj);
-    map_11X1.add(subj, pred, context, obj);
-    map_1X11.add(subj, obj, context, pred);
+    map_1XAA.add(subj, null, null, pred);
+    map_1AXA.add(subj, null, null, obj);
+    map_XA1A.add(obj, null, null, subj);
+    map_AX1A.add(obj, null, null, pred);
+    map_A1XA.add(pred, null, null, obj);
+    map_XAAA.add(null, null, null, subj);
+    map_AXAA.add(null, null, null, pred);
+    map_AAXA.add(null, null, null, obj);
     map_X111.add(pred, obj, context, subj);
-    map_1XA1.add(subj, context, null, pred);
-    map_XAA1.add(context, null, null, subj);
+    map_1X11.add(subj, obj, context, pred);
+    map_11X1.add(subj, pred, context, obj);
     map_X1A1.add(pred, context, null, subj);
+    map_1XA1.add(subj, context, null, pred);
+    map_1AX1.add(subj, context, null, obj);
+    map_XA11.add(obj, context, null, subj);
+    map_AX11.add(obj, context, null, pred);
+    map_A1X1.add(pred, context, null, obj);
+    map_XAA1.add(context, null, null, subj);
+    map_AXA1.add(context, null, null, pred);
+    map_AAX1.add(context, null, null, obj);
     map_111X.add(subj, pred, obj, context);
     map_AAAX.add(null, null, null, context);
     

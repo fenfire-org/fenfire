@@ -92,6 +92,21 @@ def test_Graph_Triples():
                                             node[o])
 
 
+def test_Graph_TwoTriples():
+    """Put two similar triples, remove one, assert other's there"""
+
+    node = _node
+
+    graph.add(node[0], node[1], node[2])
+    graph.add(node[0], node[1], node[3])
+
+    assert iterContains(graph.findN_1XA_Iter(node[0]), node[1])
+
+    graph.rm_111(node[0], node[1], node[2])
+
+    assert iterContains(graph.findN_1XA_Iter(node[0]), node[1])
+
+
 def test_Graph_ManyTriples():
     triples = []
 

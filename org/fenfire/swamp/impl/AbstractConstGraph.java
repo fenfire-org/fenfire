@@ -17,11 +17,11 @@ abstract public class AbstractConstGraph implements ConstGraph {
 	return contains(e0, e1, e2, null);
     }
 
-    public Object find1_11X(Object subj, Object pred) {
-    return find1_11X(subj, pred, null);
+    public Object find1_X11(Object pred, Object obj) {
+    return find1_X11(pred, obj, null);
 }
-public Iterator findN_11X_Iter(Object subj, Object pred) {
-    return findN_11X_Iter(subj, pred, null);
+public Iterator findN_X11_Iter(Object pred, Object obj) {
+    return findN_X11_Iter(pred, obj, null);
 }
 public Object find1_1X1(Object subj, Object obj) {
     return find1_1X1(subj, obj, null);
@@ -29,11 +29,17 @@ public Object find1_1X1(Object subj, Object obj) {
 public Iterator findN_1X1_Iter(Object subj, Object obj) {
     return findN_1X1_Iter(subj, obj, null);
 }
-public Object find1_X11(Object pred, Object obj) {
-    return find1_X11(pred, obj, null);
+public Object find1_11X(Object subj, Object pred) {
+    return find1_11X(subj, pred, null);
 }
-public Iterator findN_X11_Iter(Object pred, Object obj) {
-    return findN_X11_Iter(pred, obj, null);
+public Iterator findN_11X_Iter(Object subj, Object pred) {
+    return findN_11X_Iter(subj, pred, null);
+}
+public Object find1_X1A(Object pred) {
+    return find1_X1A(pred, null);
+}
+public Iterator findN_X1A_Iter(Object pred) {
+    return findN_X1A_Iter(pred, null);
 }
 public Object find1_1XA(Object subj) {
     return find1_1XA(subj, null);
@@ -41,17 +47,47 @@ public Object find1_1XA(Object subj) {
 public Iterator findN_1XA_Iter(Object subj) {
     return findN_1XA_Iter(subj, null);
 }
+public Object find1_1AX(Object subj) {
+    return find1_1AX(subj, null);
+}
+public Iterator findN_1AX_Iter(Object subj) {
+    return findN_1AX_Iter(subj, null);
+}
+public Object find1_XA1(Object obj) {
+    return find1_XA1(obj, null);
+}
+public Iterator findN_XA1_Iter(Object obj) {
+    return findN_XA1_Iter(obj, null);
+}
+public Object find1_AX1(Object obj) {
+    return find1_AX1(obj, null);
+}
+public Iterator findN_AX1_Iter(Object obj) {
+    return findN_AX1_Iter(obj, null);
+}
+public Object find1_A1X(Object pred) {
+    return find1_A1X(pred, null);
+}
+public Iterator findN_A1X_Iter(Object pred) {
+    return findN_A1X_Iter(pred, null);
+}
 public Object find1_XAA() {
     return find1_XAA(null);
 }
 public Iterator findN_XAA_Iter() {
     return findN_XAA_Iter(null);
 }
-public Object find1_X1A(Object pred) {
-    return find1_X1A(pred, null);
+public Object find1_AXA() {
+    return find1_AXA(null);
 }
-public Iterator findN_X1A_Iter(Object pred) {
-    return findN_X1A_Iter(pred, null);
+public Iterator findN_AXA_Iter() {
+    return findN_AXA_Iter(null);
+}
+public Object find1_AAX() {
+    return find1_AAX(null);
+}
+public Iterator findN_AAX_Iter() {
+    return findN_AAX_Iter(null);
 }
 
 }

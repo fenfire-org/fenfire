@@ -88,6 +88,7 @@ public class Graphs {
 	try {
 	    parser.parse(in, baseURI);
 	} catch(ParseException e) {
+	    e.printStackTrace();
 	    throw new IOException(""+e);
 	} catch(StatementHandlerException e) {
 	    throw new IOException(""+e);

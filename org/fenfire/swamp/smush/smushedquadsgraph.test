@@ -1,0 +1,79 @@
+#-*-python-*-
+# 
+# Copyright (c) 2004, Benja Fallenstein
+# This file is part of Fenfire.
+# 
+# Fenfire is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# Fenfire is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+# Public License for more details.
+# 
+# You should have received a copy of the GNU General
+# Public License along with Fenfire; if not, write to the Free
+# Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA  02111-1307  USA
+# 
+
+from __future__ import nested_scopes
+
+
+from org.fenfire.swamp import Nodes
+from org.fenfire.swamp.smush import SmushedQuadsGraph
+
+
+class Finder:
+    def __init__(self, g): self.g = g
+    def __getattr__(self, pattern):
+        if pattern[0] == '_': pattern = pattern[1:]
+        method = getattr(self.g, 'findN_%sA_Iter' % pattern)
+
+        def find(*args):
+            l = []
+            i = method(*args)
+            while i.hasNext(): l.append(i.next())
+            l.sort()
+            return l
+        
+        return find
+        
+
+prop = Nodes.get("http://xmlns.com/foaf/0.1/homepage")
+prop2 = Nodes.get("foo:not-an-ifp")
+
+def testSmushing():
+    g = SmushedQuadsGraph()
+
+    find = Finder(g)
+
+    c,d = Nodes.N(), Nodes.N()
+
+    n = [Nodes.get('node:%s' % i) for i in range(10)]
+    v = [Nodes.get('value:%s' % i) for i in range(10)]
+
+    g.add(n[0], prop,  v[0], c)
+    g.add(n[0], prop2, v[1], c)
+    g.add(n[1], prop,  v[0], c)
+    g.add(n[1], prop2, v[2], c)
+
+    #print find.X11(prop, v[0])
+    
+    assert find.X11(prop, v[0]) == [n[0]]
+    assert find._11X(n[0], prop2) == [v[1], v[2]]
+    assert find._11X(n[1], prop2) == [v[1], v[2]]
+
+    g.rm_11AA(n[0], prop)
+
+    #print find.X11(prop, v[0])
+
+    assert find.X11(prop, v[0]) == [n[1]]
+    assert find._11X(n[0], prop2) == [v[1]]
+    assert find._11X(n[1], prop2) == [v[2]]
+
+    
+    
+    

@@ -49,12 +49,12 @@ public void rm_11AA(Object subj, Object pred) {
         rm_1111(subj, pred, obj, context);
     }
 }
-public void rm_A11A(Object pred, Object obj) {
+public void rm_1A1A(Object subj, Object obj) {
     while(true) {
         Iterator i;
-        i = findN_X11A_Iter(pred, obj);
+        i = findN_1X1A_Iter(subj, obj);
         if(!i.hasNext()) return;
-        Object subj = i.next();
+        Object pred = i.next();
         i = findN_111X_Iter(subj, pred, obj);
         if(!i.hasNext()) return;
         Object context = i.next();
@@ -78,9 +78,96 @@ public void rm_1AAA(Object subj) {
         rm_1111(subj, pred, obj, context);
     }
 }
+public void rm_A11A(Object pred, Object obj) {
+    while(true) {
+        Iterator i;
+        i = findN_X11A_Iter(pred, obj);
+        if(!i.hasNext()) return;
+        Object subj = i.next();
+        i = findN_111X_Iter(subj, pred, obj);
+        if(!i.hasNext()) return;
+        Object context = i.next();
+
+        rm_1111(subj, pred, obj, context);
+    }
+}
+public void rm_A1AA(Object pred) {
+    while(true) {
+        Iterator i;
+        i = findN_X1AA_Iter(pred);
+        if(!i.hasNext()) return;
+        Object subj = i.next();
+        i = findN_11XA_Iter(subj, pred);
+        if(!i.hasNext()) return;
+        Object obj = i.next();
+        i = findN_111X_Iter(subj, pred, obj);
+        if(!i.hasNext()) return;
+        Object context = i.next();
+
+        rm_1111(subj, pred, obj, context);
+    }
+}
+public void rm_AA1A(Object obj) {
+    while(true) {
+        Iterator i;
+        i = findN_XA1A_Iter(obj);
+        if(!i.hasNext()) return;
+        Object subj = i.next();
+        i = findN_1X1A_Iter(subj, obj);
+        if(!i.hasNext()) return;
+        Object pred = i.next();
+        i = findN_111X_Iter(subj, pred, obj);
+        if(!i.hasNext()) return;
+        Object context = i.next();
+
+        rm_1111(subj, pred, obj, context);
+    }
+}
+public void rm_AAAA() {
+    while(true) {
+        Iterator i;
+        i = findN_XAAA_Iter();
+        if(!i.hasNext()) return;
+        Object subj = i.next();
+        i = findN_1XAA_Iter(subj);
+        if(!i.hasNext()) return;
+        Object pred = i.next();
+        i = findN_11XA_Iter(subj, pred);
+        if(!i.hasNext()) return;
+        Object obj = i.next();
+        i = findN_111X_Iter(subj, pred, obj);
+        if(!i.hasNext()) return;
+        Object context = i.next();
+
+        rm_1111(subj, pred, obj, context);
+    }
+}
 public void rm_11A1(Object subj, Object pred, Object context) {
     while(true) {
         Iterator i;
+        i = findN_11X1_Iter(subj, pred, context);
+        if(!i.hasNext()) return;
+        Object obj = i.next();
+
+        rm_1111(subj, pred, obj, context);
+    }
+}
+public void rm_1A11(Object subj, Object obj, Object context) {
+    while(true) {
+        Iterator i;
+        i = findN_1X11_Iter(subj, obj, context);
+        if(!i.hasNext()) return;
+        Object pred = i.next();
+
+        rm_1111(subj, pred, obj, context);
+    }
+}
+public void rm_1AA1(Object subj, Object context) {
+    while(true) {
+        Iterator i;
+        i = findN_1XA1_Iter(subj, context);
+        if(!i.hasNext()) return;
+        Object pred = i.next();
         i = findN_11X1_Iter(subj, pred, context);
         if(!i.hasNext()) return;
         Object obj = i.next();
@@ -98,15 +185,28 @@ public void rm_A111(Object pred, Object obj, Object context) {
         rm_1111(subj, pred, obj, context);
     }
 }
-public void rm_1AA1(Object subj, Object context) {
+public void rm_A1A1(Object pred, Object context) {
     while(true) {
         Iterator i;
-        i = findN_1XA1_Iter(subj, context);
+        i = findN_X1A1_Iter(pred, context);
         if(!i.hasNext()) return;
-        Object pred = i.next();
+        Object subj = i.next();
         i = findN_11X1_Iter(subj, pred, context);
         if(!i.hasNext()) return;
         Object obj = i.next();
+
+        rm_1111(subj, pred, obj, context);
+    }
+}
+public void rm_AA11(Object obj, Object context) {
+    while(true) {
+        Iterator i;
+        i = findN_XA11_Iter(obj, context);
+        if(!i.hasNext()) return;
+        Object subj = i.next();
+        i = findN_1X11_Iter(subj, obj, context);
+        if(!i.hasNext()) return;
+        Object pred = i.next();
 
         rm_1111(subj, pred, obj, context);
     }

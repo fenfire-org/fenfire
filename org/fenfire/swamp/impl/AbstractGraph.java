@@ -49,6 +49,29 @@ abstract public class AbstractGraph extends AbstractConstGraph implements Graph 
         rm_111(subj, pred, obj);
     }
 }
+public void rm_1A1(Object subj, Object obj) {
+    while(true) {
+        Iterator i;
+        i = findN_1X1_Iter(subj, obj);
+        if(!i.hasNext()) return;
+        Object pred = i.next();
+
+        rm_111(subj, pred, obj);
+    }
+}
+public void rm_1AA(Object subj) {
+    while(true) {
+        Iterator i;
+        i = findN_1XA_Iter(subj);
+        if(!i.hasNext()) return;
+        Object pred = i.next();
+        i = findN_11X_Iter(subj, pred);
+        if(!i.hasNext()) return;
+        Object obj = i.next();
+
+        rm_111(subj, pred, obj);
+    }
+}
 public void rm_A11(Object pred, Object obj) {
     while(true) {
         Iterator i;
@@ -59,9 +82,38 @@ public void rm_A11(Object pred, Object obj) {
         rm_111(subj, pred, obj);
     }
 }
-public void rm_1AA(Object subj) {
+public void rm_A1A(Object pred) {
     while(true) {
         Iterator i;
+        i = findN_X1A_Iter(pred);
+        if(!i.hasNext()) return;
+        Object subj = i.next();
+        i = findN_11X_Iter(subj, pred);
+        if(!i.hasNext()) return;
+        Object obj = i.next();
+
+        rm_111(subj, pred, obj);
+    }
+}
+public void rm_AA1(Object obj) {
+    while(true) {
+        Iterator i;
+        i = findN_XA1_Iter(obj);
+        if(!i.hasNext()) return;
+        Object subj = i.next();
+        i = findN_1X1_Iter(subj, obj);
+        if(!i.hasNext()) return;
+        Object pred = i.next();
+
+        rm_111(subj, pred, obj);
+    }
+}
+public void rm_AAA() {
+    while(true) {
+        Iterator i;
+        i = findN_XAA_Iter();
+        if(!i.hasNext()) return;
+        Object subj = i.next();
         i = findN_1XA_Iter(subj);
         if(!i.hasNext()) return;
         Object pred = i.next();

@@ -29,6 +29,7 @@ package org.fenfire.fenfeed;
 import org.fenfire.fenfeed.http.*;
 import org.fenfire.swamp.*;
 import org.fenfire.swamp.impl.*;
+import org.fenfire.swamp.smush.*;
 import java.io.*;
 import java.util.*;
 
@@ -90,7 +91,7 @@ public class Aggregator implements HTTPUpdater.UpdateListener {
 
     public static void main(String[] args) throws Exception {
 	HTTPContext context = new HTTPContext();
-	QuadsGraph graph = new HashQuadsGraph();
+	QuadsGraph graph = new SmushedQuadsGraph();
 
 	Set subscriptions = new HashSet();
 
@@ -108,10 +109,7 @@ public class Aggregator implements HTTPUpdater.UpdateListener {
 	if(start) {
 	    agg.start();
 	} else {
-	    QuadsGraph qg = new HashQuadsGraph();
-	    org.fenfire.swamp.smush.Smusher.smush(graph, qg);
-	    
-	    Graph g = new org.fenfire.swamp.impl.AllQuadsGraph(qg, "foo");
+	    Graph g = new AllQuadsGraph(graph, "foo");
 	    StringWriter w = new StringWriter();
 	    Graphs.writeTurtle(g, agg.namespaces, w);
 	    System.out.println(w.toString());

@@ -35,16 +35,16 @@ public class StdObservedConstGraph implements ConstGraph {
 	throw new Error("DoubleObs");
     }
 
-    public Object find1_11X(Object subj, Object pred) {
-    return constgraph.find1_11X(subj, pred, obs);
+    public Object find1_X11(Object pred, Object obj) {
+    return constgraph.find1_X11(pred, obj, obs);
 }
-public Object find1_11X(Object subj, Object pred, Obs obs) {
+public Object find1_X11(Object pred, Object obj, Obs obs) {
     throw new Error("DoubleObs");
 }
-public Iterator findN_11X_Iter(Object subj, Object pred) {
-    return constgraph.findN_11X_Iter(subj, pred, obs);
+public Iterator findN_X11_Iter(Object pred, Object obj) {
+    return constgraph.findN_X11_Iter(pred, obj, obs);
 }
-public Iterator findN_11X_Iter(Object subj, Object pred, Obs obs) {
+public Iterator findN_X11_Iter(Object pred, Object obj, Obs obs) {
     throw new Error("DoubleObs");
 }
 public Object find1_1X1(Object subj, Object obj) {
@@ -59,16 +59,28 @@ public Iterator findN_1X1_Iter(Object subj, Object obj) {
 public Iterator findN_1X1_Iter(Object subj, Object obj, Obs obs) {
     throw new Error("DoubleObs");
 }
-public Object find1_X11(Object pred, Object obj) {
-    return constgraph.find1_X11(pred, obj, obs);
+public Object find1_11X(Object subj, Object pred) {
+    return constgraph.find1_11X(subj, pred, obs);
 }
-public Object find1_X11(Object pred, Object obj, Obs obs) {
+public Object find1_11X(Object subj, Object pred, Obs obs) {
     throw new Error("DoubleObs");
 }
-public Iterator findN_X11_Iter(Object pred, Object obj) {
-    return constgraph.findN_X11_Iter(pred, obj, obs);
+public Iterator findN_11X_Iter(Object subj, Object pred) {
+    return constgraph.findN_11X_Iter(subj, pred, obs);
 }
-public Iterator findN_X11_Iter(Object pred, Object obj, Obs obs) {
+public Iterator findN_11X_Iter(Object subj, Object pred, Obs obs) {
+    throw new Error("DoubleObs");
+}
+public Object find1_X1A(Object pred) {
+    return constgraph.find1_X1A(pred, obs);
+}
+public Object find1_X1A(Object pred, Obs obs) {
+    throw new Error("DoubleObs");
+}
+public Iterator findN_X1A_Iter(Object pred) {
+    return constgraph.findN_X1A_Iter(pred, obs);
+}
+public Iterator findN_X1A_Iter(Object pred, Obs obs) {
     throw new Error("DoubleObs");
 }
 public Object find1_1XA(Object subj) {
@@ -83,6 +95,54 @@ public Iterator findN_1XA_Iter(Object subj) {
 public Iterator findN_1XA_Iter(Object subj, Obs obs) {
     throw new Error("DoubleObs");
 }
+public Object find1_1AX(Object subj) {
+    return constgraph.find1_1AX(subj, obs);
+}
+public Object find1_1AX(Object subj, Obs obs) {
+    throw new Error("DoubleObs");
+}
+public Iterator findN_1AX_Iter(Object subj) {
+    return constgraph.findN_1AX_Iter(subj, obs);
+}
+public Iterator findN_1AX_Iter(Object subj, Obs obs) {
+    throw new Error("DoubleObs");
+}
+public Object find1_XA1(Object obj) {
+    return constgraph.find1_XA1(obj, obs);
+}
+public Object find1_XA1(Object obj, Obs obs) {
+    throw new Error("DoubleObs");
+}
+public Iterator findN_XA1_Iter(Object obj) {
+    return constgraph.findN_XA1_Iter(obj, obs);
+}
+public Iterator findN_XA1_Iter(Object obj, Obs obs) {
+    throw new Error("DoubleObs");
+}
+public Object find1_AX1(Object obj) {
+    return constgraph.find1_AX1(obj, obs);
+}
+public Object find1_AX1(Object obj, Obs obs) {
+    throw new Error("DoubleObs");
+}
+public Iterator findN_AX1_Iter(Object obj) {
+    return constgraph.findN_AX1_Iter(obj, obs);
+}
+public Iterator findN_AX1_Iter(Object obj, Obs obs) {
+    throw new Error("DoubleObs");
+}
+public Object find1_A1X(Object pred) {
+    return constgraph.find1_A1X(pred, obs);
+}
+public Object find1_A1X(Object pred, Obs obs) {
+    throw new Error("DoubleObs");
+}
+public Iterator findN_A1X_Iter(Object pred) {
+    return constgraph.findN_A1X_Iter(pred, obs);
+}
+public Iterator findN_A1X_Iter(Object pred, Obs obs) {
+    throw new Error("DoubleObs");
+}
 public Object find1_XAA() {
     return constgraph.find1_XAA(obs);
 }
@@ -95,16 +155,28 @@ public Iterator findN_XAA_Iter() {
 public Iterator findN_XAA_Iter(Obs obs) {
     throw new Error("DoubleObs");
 }
-public Object find1_X1A(Object pred) {
-    return constgraph.find1_X1A(pred, obs);
+public Object find1_AXA() {
+    return constgraph.find1_AXA(obs);
 }
-public Object find1_X1A(Object pred, Obs obs) {
+public Object find1_AXA(Obs obs) {
     throw new Error("DoubleObs");
 }
-public Iterator findN_X1A_Iter(Object pred) {
-    return constgraph.findN_X1A_Iter(pred, obs);
+public Iterator findN_AXA_Iter() {
+    return constgraph.findN_AXA_Iter(obs);
 }
-public Iterator findN_X1A_Iter(Object pred, Obs obs) {
+public Iterator findN_AXA_Iter(Obs obs) {
+    throw new Error("DoubleObs");
+}
+public Object find1_AAX() {
+    return constgraph.find1_AAX(obs);
+}
+public Object find1_AAX(Obs obs) {
+    throw new Error("DoubleObs");
+}
+public Iterator findN_AAX_Iter() {
+    return constgraph.findN_AAX_Iter(obs);
+}
+public Iterator findN_AAX_Iter(Obs obs) {
     throw new Error("DoubleObs");
 }
 

@@ -25,11 +25,23 @@ public class StdObservedQuadsGraph extends StdObservedQuadsConstGraph
 public void rm_11AA(Object subj, Object pred) {
     graph.rm_11AA(subj, pred);
 }
-public void rm_A11A(Object pred, Object obj) {
-    graph.rm_A11A(pred, obj);
+public void rm_1A1A(Object subj, Object obj) {
+    graph.rm_1A1A(subj, obj);
 }
 public void rm_1AAA(Object subj) {
     graph.rm_1AAA(subj);
+}
+public void rm_A11A(Object pred, Object obj) {
+    graph.rm_A11A(pred, obj);
+}
+public void rm_A1AA(Object pred) {
+    graph.rm_A1AA(pred);
+}
+public void rm_AA1A(Object obj) {
+    graph.rm_AA1A(obj);
+}
+public void rm_AAAA() {
+    graph.rm_AAAA();
 }
 public void rm_1111(Object subj, Object pred, Object obj, Object context) {
     graph.rm_1111(subj, pred, obj, context);
@@ -37,11 +49,20 @@ public void rm_1111(Object subj, Object pred, Object obj, Object context) {
 public void rm_11A1(Object subj, Object pred, Object context) {
     graph.rm_11A1(subj, pred, context);
 }
-public void rm_A111(Object pred, Object obj, Object context) {
-    graph.rm_A111(pred, obj, context);
+public void rm_1A11(Object subj, Object obj, Object context) {
+    graph.rm_1A11(subj, obj, context);
 }
 public void rm_1AA1(Object subj, Object context) {
     graph.rm_1AA1(subj, context);
+}
+public void rm_A111(Object pred, Object obj, Object context) {
+    graph.rm_A111(pred, obj, context);
+}
+public void rm_A1A1(Object pred, Object context) {
+    graph.rm_A1A1(pred, context);
+}
+public void rm_AA11(Object obj, Object context) {
+    graph.rm_AA11(obj, context);
 }
 public void rm_AAA1(Object context) {
     graph.rm_AAA1(context);

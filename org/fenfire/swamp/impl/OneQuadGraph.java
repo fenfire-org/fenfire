@@ -22,11 +22,11 @@ public class OneQuadGraph extends AbstractGraph {
     public void add(Object subject, Object predicate, Object object) {
         graph.add(subject, predicate, object, context);     }
 
-    public Object find1_11X(Object subj, Object pred, Obs obs) {
-    return graph.find1_11X1(subj, pred, context, obs);
+    public Object find1_X11(Object pred, Object obj, Obs obs) {
+    return graph.find1_X111(pred, obj, context, obs);
 }
-public Iterator findN_11X_Iter(Object subj, Object pred, Obs obs){
-    return graph.findN_11X1_Iter(subj, pred, context, obs);
+public Iterator findN_X11_Iter(Object pred, Object obj, Obs obs){
+    return graph.findN_X111_Iter(pred, obj, context, obs);
 }
 public Object find1_1X1(Object subj, Object obj, Obs obs) {
     return graph.find1_1X11(subj, obj, context, obs);
@@ -34,11 +34,17 @@ public Object find1_1X1(Object subj, Object obj, Obs obs) {
 public Iterator findN_1X1_Iter(Object subj, Object obj, Obs obs){
     return graph.findN_1X11_Iter(subj, obj, context, obs);
 }
-public Object find1_X11(Object pred, Object obj, Obs obs) {
-    return graph.find1_X111(pred, obj, context, obs);
+public Object find1_11X(Object subj, Object pred, Obs obs) {
+    return graph.find1_11X1(subj, pred, context, obs);
 }
-public Iterator findN_X11_Iter(Object pred, Object obj, Obs obs){
-    return graph.findN_X111_Iter(pred, obj, context, obs);
+public Iterator findN_11X_Iter(Object subj, Object pred, Obs obs){
+    return graph.findN_11X1_Iter(subj, pred, context, obs);
+}
+public Object find1_X1A(Object pred, Obs obs) {
+    return graph.find1_X1A1(pred, context, obs);
+}
+public Iterator findN_X1A_Iter(Object pred, Obs obs){
+    return graph.findN_X1A1_Iter(pred, context, obs);
 }
 public Object find1_1XA(Object subj, Obs obs) {
     return graph.find1_1XA1(subj, context, obs);
@@ -46,17 +52,47 @@ public Object find1_1XA(Object subj, Obs obs) {
 public Iterator findN_1XA_Iter(Object subj, Obs obs){
     return graph.findN_1XA1_Iter(subj, context, obs);
 }
+public Object find1_1AX(Object subj, Obs obs) {
+    return graph.find1_1AX1(subj, context, obs);
+}
+public Iterator findN_1AX_Iter(Object subj, Obs obs){
+    return graph.findN_1AX1_Iter(subj, context, obs);
+}
+public Object find1_XA1(Object obj, Obs obs) {
+    return graph.find1_XA11(obj, context, obs);
+}
+public Iterator findN_XA1_Iter(Object obj, Obs obs){
+    return graph.findN_XA11_Iter(obj, context, obs);
+}
+public Object find1_AX1(Object obj, Obs obs) {
+    return graph.find1_AX11(obj, context, obs);
+}
+public Iterator findN_AX1_Iter(Object obj, Obs obs){
+    return graph.findN_AX11_Iter(obj, context, obs);
+}
+public Object find1_A1X(Object pred, Obs obs) {
+    return graph.find1_A1X1(pred, context, obs);
+}
+public Iterator findN_A1X_Iter(Object pred, Obs obs){
+    return graph.findN_A1X1_Iter(pred, context, obs);
+}
 public Object find1_XAA(Obs obs) {
     return graph.find1_XAA1(context, obs);
 }
 public Iterator findN_XAA_Iter(Obs obs){
     return graph.findN_XAA1_Iter(context, obs);
 }
-public Object find1_X1A(Object pred, Obs obs) {
-    return graph.find1_X1A1(pred, context, obs);
+public Object find1_AXA(Obs obs) {
+    return graph.find1_AXA1(context, obs);
 }
-public Iterator findN_X1A_Iter(Object pred, Obs obs){
-    return graph.findN_X1A1_Iter(pred, context, obs);
+public Iterator findN_AXA_Iter(Obs obs){
+    return graph.findN_AXA1_Iter(context, obs);
+}
+public Object find1_AAX(Obs obs) {
+    return graph.find1_AAX1(context, obs);
+}
+public Iterator findN_AAX_Iter(Obs obs){
+    return graph.findN_AAX1_Iter(context, obs);
 }
 public void rm_111(Object subject, Object predicate, 
                    Object object) {

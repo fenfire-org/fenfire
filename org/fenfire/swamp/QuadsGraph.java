@@ -14,12 +14,19 @@ public interface QuadsGraph extends QuadsConstGraph {
 
     void rm_111A(Object subj, Object pred, Object obj);
 void rm_11AA(Object subj, Object pred);
-void rm_A11A(Object pred, Object obj);
+void rm_1A1A(Object subj, Object obj);
 void rm_1AAA(Object subj);
+void rm_A11A(Object pred, Object obj);
+void rm_A1AA(Object pred);
+void rm_AA1A(Object obj);
+void rm_AAAA();
 void rm_1111(Object subj, Object pred, Object obj, Object context);
 void rm_11A1(Object subj, Object pred, Object context);
-void rm_A111(Object pred, Object obj, Object context);
+void rm_1A11(Object subj, Object obj, Object context);
 void rm_1AA1(Object subj, Object context);
+void rm_A111(Object pred, Object obj, Object context);
+void rm_A1A1(Object pred, Object context);
+void rm_AA11(Object obj, Object context);
 void rm_AAA1(Object context);
 
 }

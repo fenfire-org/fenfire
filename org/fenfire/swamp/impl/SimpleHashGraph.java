@@ -23,25 +23,25 @@
             }
         }
 
-        Map map_11X = new HashMap();
-public Object find1_11X(Object subj, Object pred, Obs obs) {
-    Iterator i = findN_11X_Iter(subj, pred, obs);
+        Map map_X11 = new HashMap();
+public Object find1_X11(Object pred, Object obj, Obs obs) {
+    Iterator i = findN_X11_Iter(pred, obj, obs);
     if(!i.hasNext()) return null;
     Object result = i.next();
     if(i.hasNext())
-        throw new NotUniqueError(subj, pred, null);
+        throw new NotUniqueError(null, pred, obj);
     return result;
 }
-public Iterator findN_11X_Iter(Object subj, Object pred, Obs obs){
+public Iterator findN_X11_Iter(Object pred, Object obj, Obs obs){
     if(obs != null)
-        observer.addObs(subj, pred, observer.WILDCARD, obs);
+        observer.addObs(observer.WILDCARD, pred, obj, obs);
 
-    Set s = getSet_11X(subj, pred);
+    Set s = getSet_X11(pred, obj);
     return s.iterator();
 }
-public Set getSet_11X(Object subj, Object pred) {
-    Map m = map_11X;
-    Key key = new Key(subj, pred);
+public Set getSet_X11(Object pred, Object obj) {
+    Map m = map_X11;
+    Key key = new Key(pred, obj);
     if(!m.containsKey(key)) m.put(key, new HashSet());
     return (Set)m.get(key);
 }
@@ -67,69 +67,25 @@ public Set getSet_1X1(Object subj, Object obj) {
     if(!m.containsKey(key)) m.put(key, new HashSet());
     return (Set)m.get(key);
 }
-Map map_X11 = new HashMap();
-public Object find1_X11(Object pred, Object obj, Obs obs) {
-    Iterator i = findN_X11_Iter(pred, obj, obs);
+Map map_11X = new HashMap();
+public Object find1_11X(Object subj, Object pred, Obs obs) {
+    Iterator i = findN_11X_Iter(subj, pred, obs);
     if(!i.hasNext()) return null;
     Object result = i.next();
     if(i.hasNext())
-        throw new NotUniqueError(null, pred, obj);
+        throw new NotUniqueError(subj, pred, null);
     return result;
 }
-public Iterator findN_X11_Iter(Object pred, Object obj, Obs obs){
+public Iterator findN_11X_Iter(Object subj, Object pred, Obs obs){
     if(obs != null)
-        observer.addObs(observer.WILDCARD, pred, obj, obs);
+        observer.addObs(subj, pred, observer.WILDCARD, obs);
 
-    Set s = getSet_X11(pred, obj);
+    Set s = getSet_11X(subj, pred);
     return s.iterator();
 }
-public Set getSet_X11(Object pred, Object obj) {
-    Map m = map_X11;
-    Key key = new Key(pred, obj);
-    if(!m.containsKey(key)) m.put(key, new HashSet());
-    return (Set)m.get(key);
-}
-Map map_1XA = new HashMap();
-public Object find1_1XA(Object subj, Obs obs) {
-    Iterator i = findN_1XA_Iter(subj, obs);
-    if(!i.hasNext()) return null;
-    Object result = i.next();
-    if(i.hasNext())
-        throw new NotUniqueError(subj, null, null);
-    return result;
-}
-public Iterator findN_1XA_Iter(Object subj, Obs obs){
-    if(obs != null)
-        observer.addObs(subj, observer.WILDCARD, observer.WILDCARD, obs);
-
-    Set s = getSet_1XA(subj);
-    return s.iterator();
-}
-public Set getSet_1XA(Object subj) {
-    Map m = map_1XA;
-    Key key = new Key(subj, "ANY");
-    if(!m.containsKey(key)) m.put(key, new HashSet());
-    return (Set)m.get(key);
-}
-Map map_XAA = new HashMap();
-public Object find1_XAA(Obs obs) {
-    Iterator i = findN_XAA_Iter(obs);
-    if(!i.hasNext()) return null;
-    Object result = i.next();
-    if(i.hasNext())
-        throw new NotUniqueError(null, null, null);
-    return result;
-}
-public Iterator findN_XAA_Iter(Obs obs){
-    if(obs != null)
-        observer.addObs(observer.WILDCARD, observer.WILDCARD, observer.WILDCARD, obs);
-
-    Set s = getSet_XAA();
-    return s.iterator();
-}
-public Set getSet_XAA() {
-    Map m = map_XAA;
-    Key key = new Key("ANY", "ANY");
+public Set getSet_11X(Object subj, Object pred) {
+    Map m = map_11X;
+    Key key = new Key(subj, pred);
     if(!m.containsKey(key)) m.put(key, new HashSet());
     return (Set)m.get(key);
 }
@@ -155,25 +111,253 @@ public Set getSet_X1A(Object pred) {
     if(!m.containsKey(key)) m.put(key, new HashSet());
     return (Set)m.get(key);
 }
+Map map_1XA = new HashMap();
+public Object find1_1XA(Object subj, Obs obs) {
+    Iterator i = findN_1XA_Iter(subj, obs);
+    if(!i.hasNext()) return null;
+    Object result = i.next();
+    if(i.hasNext())
+        throw new NotUniqueError(subj, null, null);
+    return result;
+}
+public Iterator findN_1XA_Iter(Object subj, Obs obs){
+    if(obs != null)
+        observer.addObs(subj, observer.WILDCARD, observer.WILDCARD, obs);
+
+    Set s = getSet_1XA(subj);
+    return s.iterator();
+}
+public Set getSet_1XA(Object subj) {
+    Map m = map_1XA;
+    Key key = new Key(subj, "ANY");
+    if(!m.containsKey(key)) m.put(key, new HashSet());
+    return (Set)m.get(key);
+}
+Map map_1AX = new HashMap();
+public Object find1_1AX(Object subj, Obs obs) {
+    Iterator i = findN_1AX_Iter(subj, obs);
+    if(!i.hasNext()) return null;
+    Object result = i.next();
+    if(i.hasNext())
+        throw new NotUniqueError(subj, null, null);
+    return result;
+}
+public Iterator findN_1AX_Iter(Object subj, Obs obs){
+    if(obs != null)
+        observer.addObs(subj, observer.WILDCARD, observer.WILDCARD, obs);
+
+    Set s = getSet_1AX(subj);
+    return s.iterator();
+}
+public Set getSet_1AX(Object subj) {
+    Map m = map_1AX;
+    Key key = new Key(subj, "ANY");
+    if(!m.containsKey(key)) m.put(key, new HashSet());
+    return (Set)m.get(key);
+}
+Map map_XA1 = new HashMap();
+public Object find1_XA1(Object obj, Obs obs) {
+    Iterator i = findN_XA1_Iter(obj, obs);
+    if(!i.hasNext()) return null;
+    Object result = i.next();
+    if(i.hasNext())
+        throw new NotUniqueError(null, null, obj);
+    return result;
+}
+public Iterator findN_XA1_Iter(Object obj, Obs obs){
+    if(obs != null)
+        observer.addObs(observer.WILDCARD, observer.WILDCARD, obj, obs);
+
+    Set s = getSet_XA1(obj);
+    return s.iterator();
+}
+public Set getSet_XA1(Object obj) {
+    Map m = map_XA1;
+    Key key = new Key(obj, "ANY");
+    if(!m.containsKey(key)) m.put(key, new HashSet());
+    return (Set)m.get(key);
+}
+Map map_AX1 = new HashMap();
+public Object find1_AX1(Object obj, Obs obs) {
+    Iterator i = findN_AX1_Iter(obj, obs);
+    if(!i.hasNext()) return null;
+    Object result = i.next();
+    if(i.hasNext())
+        throw new NotUniqueError(null, null, obj);
+    return result;
+}
+public Iterator findN_AX1_Iter(Object obj, Obs obs){
+    if(obs != null)
+        observer.addObs(observer.WILDCARD, observer.WILDCARD, obj, obs);
+
+    Set s = getSet_AX1(obj);
+    return s.iterator();
+}
+public Set getSet_AX1(Object obj) {
+    Map m = map_AX1;
+    Key key = new Key(obj, "ANY");
+    if(!m.containsKey(key)) m.put(key, new HashSet());
+    return (Set)m.get(key);
+}
+Map map_A1X = new HashMap();
+public Object find1_A1X(Object pred, Obs obs) {
+    Iterator i = findN_A1X_Iter(pred, obs);
+    if(!i.hasNext()) return null;
+    Object result = i.next();
+    if(i.hasNext())
+        throw new NotUniqueError(null, pred, null);
+    return result;
+}
+public Iterator findN_A1X_Iter(Object pred, Obs obs){
+    if(obs != null)
+        observer.addObs(observer.WILDCARD, pred, observer.WILDCARD, obs);
+
+    Set s = getSet_A1X(pred);
+    return s.iterator();
+}
+public Set getSet_A1X(Object pred) {
+    Map m = map_A1X;
+    Key key = new Key(pred, "ANY");
+    if(!m.containsKey(key)) m.put(key, new HashSet());
+    return (Set)m.get(key);
+}
+Map map_XAA = new HashMap();
+public Object find1_XAA(Obs obs) {
+    Iterator i = findN_XAA_Iter(obs);
+    if(!i.hasNext()) return null;
+    Object result = i.next();
+    if(i.hasNext())
+        throw new NotUniqueError(null, null, null);
+    return result;
+}
+public Iterator findN_XAA_Iter(Obs obs){
+    if(obs != null)
+        observer.addObs(observer.WILDCARD, observer.WILDCARD, observer.WILDCARD, obs);
+
+    Set s = getSet_XAA();
+    return s.iterator();
+}
+public Set getSet_XAA() {
+    Map m = map_XAA;
+    Key key = new Key("ANY", "ANY");
+    if(!m.containsKey(key)) m.put(key, new HashSet());
+    return (Set)m.get(key);
+}
+Map map_AXA = new HashMap();
+public Object find1_AXA(Obs obs) {
+    Iterator i = findN_AXA_Iter(obs);
+    if(!i.hasNext()) return null;
+    Object result = i.next();
+    if(i.hasNext())
+        throw new NotUniqueError(null, null, null);
+    return result;
+}
+public Iterator findN_AXA_Iter(Obs obs){
+    if(obs != null)
+        observer.addObs(observer.WILDCARD, observer.WILDCARD, observer.WILDCARD, obs);
+
+    Set s = getSet_AXA();
+    return s.iterator();
+}
+public Set getSet_AXA() {
+    Map m = map_AXA;
+    Key key = new Key("ANY", "ANY");
+    if(!m.containsKey(key)) m.put(key, new HashSet());
+    return (Set)m.get(key);
+}
+Map map_AAX = new HashMap();
+public Object find1_AAX(Obs obs) {
+    Iterator i = findN_AAX_Iter(obs);
+    if(!i.hasNext()) return null;
+    Object result = i.next();
+    if(i.hasNext())
+        throw new NotUniqueError(null, null, null);
+    return result;
+}
+public Iterator findN_AAX_Iter(Obs obs){
+    if(obs != null)
+        observer.addObs(observer.WILDCARD, observer.WILDCARD, observer.WILDCARD, obs);
+
+    Set s = getSet_AAX();
+    return s.iterator();
+}
+public Set getSet_AAX() {
+    Map m = map_AAX;
+    Key key = new Key("ANY", "ANY");
+    if(!m.containsKey(key)) m.put(key, new HashSet());
+    return (Set)m.get(key);
+}
 public void rm_111(Object subj, Object pred, Object obj) {
     checkNode(subj); checkNode(pred); checkNodeOrLiteral(obj);
-    getSet_11X(subj, pred).remove(obj);
-    getSet_1X1(subj, obj).remove(pred);
-    getSet_X11(pred, obj).remove(subj);
-    getSet_1XA(subj).remove(pred);
-    getSet_XAA().remove(subj);
-    getSet_X1A(pred).remove(subj);
+    Iterator iter;
+
+        getSet_X11(pred, obj).remove(subj);
+
+        getSet_1X1(subj, obj).remove(pred);
+
+        getSet_11X(subj, pred).remove(obj);
+
+    iter = findN_11X_Iter(subj, pred);
+    if(!iter.hasNext() ||
+       (iter.next().equals(obj) && !iter.hasNext()))
+        getSet_X1A(pred).remove(subj);
+
+    iter = findN_11X_Iter(subj, pred);
+    if(!iter.hasNext() ||
+       (iter.next().equals(obj) && !iter.hasNext()))
+        getSet_1XA(subj).remove(pred);
+
+    iter = findN_1X1_Iter(subj, obj);
+    if(!iter.hasNext() ||
+       (iter.next().equals(pred) && !iter.hasNext()))
+        getSet_1AX(subj).remove(obj);
+
+    iter = findN_1X1_Iter(subj, obj);
+    if(!iter.hasNext() ||
+       (iter.next().equals(pred) && !iter.hasNext()))
+        getSet_XA1(obj).remove(subj);
+
+    iter = findN_X11_Iter(pred, obj);
+    if(!iter.hasNext() ||
+       (iter.next().equals(subj) && !iter.hasNext()))
+        getSet_AX1(obj).remove(pred);
+
+    iter = findN_X11_Iter(pred, obj);
+    if(!iter.hasNext() ||
+       (iter.next().equals(subj) && !iter.hasNext()))
+        getSet_A1X(pred).remove(obj);
+
+    iter = findN_1XA_Iter(subj);
+    if(!iter.hasNext() ||
+       (iter.next().equals(pred) && !iter.hasNext()))
+        getSet_XAA().remove(subj);
+
+    iter = findN_X1A_Iter(pred);
+    if(!iter.hasNext() ||
+       (iter.next().equals(subj) && !iter.hasNext()))
+        getSet_AXA().remove(pred);
+
+    iter = findN_XA1_Iter(obj);
+    if(!iter.hasNext() ||
+       (iter.next().equals(subj) && !iter.hasNext()))
+        getSet_AAX().remove(obj);
     
     observer.triggerObs(-1, subj, pred, obj);
 }
 public void add(Object subj, Object pred, Object obj) {
     checkNode(subj); checkNode(pred); checkNodeOrLiteral(obj);
-    getSet_11X(subj, pred).add(obj);
-    getSet_1X1(subj, obj).add(pred);
     getSet_X11(pred, obj).add(subj);
-    getSet_1XA(subj).add(pred);
-    getSet_XAA().add(subj);
+    getSet_1X1(subj, obj).add(pred);
+    getSet_11X(subj, pred).add(obj);
     getSet_X1A(pred).add(subj);
+    getSet_1XA(subj).add(pred);
+    getSet_1AX(subj).add(obj);
+    getSet_XA1(obj).add(subj);
+    getSet_AX1(obj).add(pred);
+    getSet_A1X(pred).add(obj);
+    getSet_XAA().add(subj);
+    getSet_AXA().add(pred);
+    getSet_AAX().add(obj);
     
     observer.triggerObs(1, subj, pred, obj);
 }

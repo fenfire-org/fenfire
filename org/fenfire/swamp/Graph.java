@@ -16,7 +16,11 @@ public interface Graph extends ConstGraph {
 
     void rm_111(Object subj, Object pred, Object obj);
 void rm_11A(Object subj, Object pred);
-void rm_A11(Object pred, Object obj);
+void rm_1A1(Object subj, Object obj);
 void rm_1AA(Object subj);
+void rm_A11(Object pred, Object obj);
+void rm_A1A(Object pred);
+void rm_AA1(Object obj);
+void rm_AAA();
 
 }

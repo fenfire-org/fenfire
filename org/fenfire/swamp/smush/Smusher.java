@@ -27,6 +27,7 @@ Smusher.java
 package org.fenfire.swamp.smush;
 import org.fenfire.swamp.*;
 import org.fenfire.swamp.impl.AllQuadsGraph;
+import org.nongnu.navidoc.util.Obs;
 import java.util.*;
 
 public class Smusher {
@@ -89,6 +90,7 @@ public class Smusher {
 	// The set of nodes that have IFPs
 	Set nodes = new HashSet();
 
+	// IFP -> (object -> set of subjects)
 	Map byIFP = new HashMap();
 
 	for(int i=0; i<IFPs.length; i++) {
@@ -114,6 +116,8 @@ public class Smusher {
 	    }
 	}
 
+	// node -> set of nodes representing that resource
+	// all nodes in the set will map to the same Set object
 	Map nodeSets = new HashMap();
 
 	Comparator nodeComparator = new NodeComparator();
@@ -121,6 +125,7 @@ public class Smusher {
 	for(Iterator i=nodes.iterator(); i.hasNext();) {
 	    Object node = i.next();
 
+	    // the set of nodes representing the same resource as this node
 	    Set equivNodes = (Set)nodeSets.get(node);
 	    if(equivNodes == null) {
 		equivNodes = new TreeSet(nodeComparator);
@@ -158,7 +163,8 @@ public class Smusher {
     }
 
 
-    private static class NodeComparator implements Comparator { 
+
+    public static final class NodeComparator implements Comparator { 
 	public int compare(Object m, Object n) {
 	    return Nodes.toString(m).compareTo(Nodes.toString(n));
 

@@ -28,11 +28,23 @@ public class StdObservedGraph extends StdObservedConstGraph implements Graph {
 public void rm_11A(Object subj, Object pred) {
     graph.rm_11A(subj, pred);
 }
-public void rm_A11(Object pred, Object obj) {
-    graph.rm_A11(pred, obj);
+public void rm_1A1(Object subj, Object obj) {
+    graph.rm_1A1(subj, obj);
 }
 public void rm_1AA(Object subj) {
     graph.rm_1AA(subj);
+}
+public void rm_A11(Object pred, Object obj) {
+    graph.rm_A11(pred, obj);
+}
+public void rm_A1A(Object pred) {
+    graph.rm_A1A(pred);
+}
+public void rm_AA1(Object obj) {
+    graph.rm_AA1(obj);
+}
+public void rm_AAA() {
+    graph.rm_AAA();
 }
 
 
