@@ -305,6 +305,7 @@ public class FenFiction extends LobLob {
 
 	try {
 	    gf = new GraphFile.Turtle(new File("fenfiction.turtle"),
+				      new org.fenfire.swamp.impl.HashGraph(),
 				      new org.fenfire.swamp.impl.HashGraph());
 	} catch(IOException e) {
 	    throw new Error(e);

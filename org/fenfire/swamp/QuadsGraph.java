@@ -14,6 +14,7 @@ public interface QuadsGraph extends QuadsConstGraph {
     void rm_1111(Object e0,Object e1,Object e2,Object e3);
     void rm_11AA(Object e0,Object e1);
     void rm_AAA1(Object e3);
+    void rm_111A(Object e0,Object e1,Object e2);
     
 
     void add(Object subject, Object predicate, Object object, Object quart) ;

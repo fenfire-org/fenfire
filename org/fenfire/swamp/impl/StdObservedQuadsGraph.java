@@ -32,6 +32,9 @@ public class StdObservedQuadsGraph extends StdObservedQuadsConstGraph
     public void rm_AAA1(Object e3){
 	  graph.rm_AAA1(e3);
     }
+    public void rm_111A(Object e0,Object e1,Object e2){
+	  graph.rm_111A(e0,e1,e2);
+    }
     
 
     public void add(Object subject, Object predicate, Object object, Object quad) {

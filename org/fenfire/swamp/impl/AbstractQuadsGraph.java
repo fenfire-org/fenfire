@@ -66,6 +66,20 @@ abstract public class AbstractQuadsGraph extends AbstractQuadsConstGraph impleme
     }
 
 
+    public void rm_111A(Object e0, Object e1, Object e2) {
+	List l = new ArrayList();
+
+	Iterator i = findN_111X_Iter(e0, e1, e2);
+	while(i.hasNext()) {
+	    l.add(i.next());
+	}
+
+	for(int j=0; j<l.size(); j++) {
+	    rm_1111(e0, e1, e2, l.get(j));
+	}
+    }
+
+
     public void rm_AAA1(Object e0) {
 	Iterator i = findN_XAA1_Iter(e0);
 	Map m = new HashMap();

@@ -166,8 +166,10 @@ public class RDFNotebook extends LobLob {
 	defaultGraph.add(note1, DATE, newDateLiteral());
 	defaultGraph.add(note1, TEXT, new PlainLiteral(""));
 
+	Graph graph = new org.fenfire.swamp.impl.HashGraph();
+
 	final File file = new File("rdf_notebook_graph.turtle");
-	final GraphFile gf = new GraphFile.Turtle(file, defaultGraph);
+	final GraphFile gf = new GraphFile.Turtle(file, graph, defaultGraph);
 
 	LobMain m = new LobMain(new Color(1, 1, .8f)) {
 		protected Lob createLob() { return new RDFNotebook(gf); }

@@ -41,20 +41,25 @@ public interface GraphFile {
 	protected Map namespaces;
 	protected File file;
 	
-	public Turtle(File file) throws IOException {
-	    this(file, null);
+	/*
+	public Turtle(File file, Graph graph) {
+	    this(file, graph, null);
 	}
+	*/
 
-	public Turtle(File file, Graph defaultGraph) throws IOException {
+	public Turtle(File file, Graph graph, Graph defaultGraph) 
+	    throws IOException {
+
 	    this.file = file;
+	    this.graph = graph;
 	    this.namespaces = new HashMap();
 
 	    if(file.exists()) {
-		graph = Graphs.readTurtle(file, namespaces);
+		graph.addAll(Graphs.readTurtle(file, namespaces));
 	    } else if(defaultGraph == null) {
 		throw new FileNotFoundException(""+file);
 	    } else {
-		graph = defaultGraph;
+		graph.addAll(defaultGraph);
 	    }
 	}
 

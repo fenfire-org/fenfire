@@ -61,6 +61,7 @@ for pattern in (
 #	"A111", 
 #	"1AAA",
 	"AAA1",
+        "111A", # and this one!
 	):
     graph.append({
 	"Type": "rm", 
@@ -664,6 +665,15 @@ public abstract class GraphToQuadsGraph extends AbstractGraph {
 
     public GraphToQuadsGraph(QuadsGraph graph) {
 	this.graph = graph;
+    }
+
+    public static class Simple extends GraphToQuadsGraph {
+        protected Object quad;
+        public Simple(QuadsGraph graph, Object quad) {
+            super(graph);
+            this.quad = quad;
+        }
+        protected Object getQuad() { return quad; }
     }
     
     abstract protected Object getQuad();

@@ -1,6 +1,7 @@
 # 
 # Copyright (c) 2004, Benja Fallenstein
 # Portions Copyright (c) 2003, Tuomas J. Lukka
+# Portions Copyright (c) 2004, Matti J. Katila
 # 
 # This file is part of Fenfire.
 # 
@@ -51,8 +52,17 @@ quad_spec.find_patterns = [
         "X1AA", "X1A1",
 ]
 
-quad_spec.rm_patterns = [p+'A' for p in spec.rm_patterns] + \
-                        [p+'1' for p in spec.rm_patterns]
+quad_spec.rm_patterns = [
+	"1111",  # Only these three removes at first...
+	"11AA", 
+#	"A111", 
+#	"1AAA",
+	"AAA1",
+        "111A", # and this one!
+]
+
+#quad_spec.rm_patterns = [p+'A' for p in spec.rm_patterns] + \
+#                        [p+'1' for p in spec.rm_patterns]
 
 
 def arguments(p):
@@ -73,6 +83,10 @@ def callArguments2(p):
 def callArgumentsObs(p):
     n = len([x for x in p if x=='1'])
     return ', '.join(['e%s' % i for i in range(n)]+["obs"])
+
+def callArgumentsQuadObs(p):
+    n = len([x for x in p if x=='1'])
+    return ', '.join(['e%s' % i for i in range(n)]+["context", "obs"])
 
 def callArgumentsNulls(p):
     n = len([x for x in p if x=='1'])
@@ -257,6 +271,43 @@ def hashGraph(spec):
     return spec.hashGraphTemplate % s
 
 
+def quadAdapterGraph(name, findAll):
+    # findAll: whether to find triples from all subgraphs
+    # or only from the one we add triples to
+
+    if findAll:
+        c = 'A'
+        callArg = callArgumentsObs
+    else:
+        c = '1'
+        callArg = callArgumentsQuadObs
+
+    s = ""
+
+    for p in spec.find_patterns:
+        s += 'public Object find1_%s(%s) {\n' % (p, argumentsObs(p))
+        s += '    return graph.find1_%s%s(%s);\n' % (p, c, callArg(p))
+        s += '}\n'
+        
+        s += 'public Iterator findN_%s_Iter(%s){\n' % (p, argumentsObs(p))
+        s += '    return graph.findN_%s%s_Iter(%s);\n' % (p, c, callArg(p))
+        s += '}\n'
+
+    s += 'public void rm_111(Object subject, Object predicate, \n'
+    s += '                   Object object) {\n'
+
+    if(findAll):
+        s += 'graph.rm_111A(subject, predicate, object);\n'
+    else:
+        s += 'graph.rm_1111(subject, predicate, object, context);\n'
+
+    s += '}\n'
+
+    return quadAdapterTemplate % (name, name, s)
+
+
+    
+
 spec.simpleHashGraphTemplate = """
     package org.fenfire.swamp.impl;
     import org.nongnu.navidoc.util.Obs;
@@ -435,6 +486,50 @@ quad_spec.hashGraphTemplate = """
     }
 """
 
+quadAdapterTemplate = """
+package org.fenfire.swamp.impl;
+import org.nongnu.navidoc.util.Obs;
+import org.fenfire.swamp.*;
+import java.util.Iterator;
+
+public class %s extends AbstractGraph {
+    protected QuadsGraph graph;
+    protected Object context;
+
+    public %s(QuadsGraph graph, Object context) {
+	this.graph = graph;
+        this.context = context;
+    }
+
+    public Obs getObserver() { return graph.getObserver(); }
+    public boolean contains(Object e0, Object e1, Object e2) {
+        return graph.contains(e0,e1,e2, context); }
+    public boolean contains(Object e0, Object e1, Object e2, Obs o) {
+        return graph.contains(e0,e1,e2, context, o); }
+    public void set1_11X(Object subject, Object predicate, Object object) {
+        graph.set1_11XA(subject, predicate, object);
+        graph.add(subject, predicate, object, context);
+    }
+    public void add(Object subject, Object predicate, Object object) {
+        graph.add(subject, predicate, object, context);     }
+
+    public void addAll(Graph g) {
+       for (Iterator i=g.findN_XAA_Iter(); i.hasNext();) {
+           Object subj = i.next();
+           for (Iterator j=g.findN_1XA_Iter(subj); j.hasNext();) {
+               Object pred = j.next();
+               for (Iterator k=g.findN_11X_Iter(subj,pred); k.hasNext();){
+                   Object obj = k.next();
+                   graph.add(subj, pred, obj, context);
+               }
+           }
+       }
+    }
+
+    %s
+}
+"""
+
 
 base = 'org/fenfire/swamp/'
 
@@ -458,3 +553,6 @@ def writeFamily(spec):
 
 writeFamily(spec)
 writeFamily(quad_spec)
+
+for (name, findAll) in [("AllQuadsGraph", 1), ("OneQuadGraph", 0)]:
+    write('impl/'+name+'.java', quadAdapterGraph(name, findAll))
