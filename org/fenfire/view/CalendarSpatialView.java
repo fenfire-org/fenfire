@@ -87,7 +87,7 @@ public class CalendarSpatialView implements SpatialViewSettings.SpatialView {
     }	
 
     protected CalendarCursor getCalendarCursor(Cursor c) {
-	Object pos = c.getSpatialCursor().getSpatialPosition();
+	Object pos = c.getSpatialCursor();
 	if (pos instanceof CalendarCursor) {
 	    return (CalendarCursor)pos;
 	} else {

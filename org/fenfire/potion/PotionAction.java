@@ -26,6 +26,7 @@ PotionAction.java
  * Written by Benja Fallenstein
  */
 package org.fenfire.potion;
+import org.fenfire.Cursor;
 import org.fenfire.swamp.*;
 import org.nongnu.libvob.layout.*;
 import java.util.*;
@@ -33,14 +34,14 @@ import java.util.*;
 public class PotionAction extends AbstractAction {
 
     protected Graph graph;
-    protected Model cursor;
+    protected Cursor cursor;
     protected Model currentCommand;
 
     protected CommandExpression command;
     protected FunctionExpression function;
 
     public PotionAction(CommandExpression command, FunctionExpression function,
-			Graph graph, Model cursor, Model currentCommand) {
+			Graph graph, Cursor cursor, Model currentCommand) {
 	this.command = command;
 	this.function = function;
 
@@ -54,8 +55,7 @@ public class PotionAction extends AbstractAction {
 
 	Map context = new HashMap();
 	context.put("graph", graph);
-	context.put("cursorModel", cursor);
-	context.put("cursor", cursor.get());
+	context.put("cursor", cursor);
 
 	if(c == null) {
 	    if(command == null) return;

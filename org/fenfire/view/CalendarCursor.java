@@ -33,7 +33,7 @@ import java.util.Date;
 /** Cursor for Calendar spatial view.
  *  Used as a value for org.fenfire.Cursor.SpatialCursor.spatialPosition.
  */
-public class CalendarCursor implements Cursor.SpatialPosition {
+public class CalendarCursor {
     private final TypedLiteral [] shownDays;
 
     // may be accursed if any..

@@ -30,28 +30,34 @@ import org.fenfire.Cursor;
 /** Spatial position for canvas spatial view.
  *  Used as a value for org.fenfire.Cursor.SpatialCursor.spatialPosition.
  */
-public class CanvasCursor implements Cursor.SpatialPosition {
+public class CanvasCursor {
+
+    private final Object canvas;
+
     private final float panX;
     private final float panY;
     private final float zoom;
 
-    public CanvasCursor(float panX, float panY, float zoom) { 
+    public CanvasCursor(Object canvas, float panX, float panY, float zoom) { 
+	this.canvas = canvas;
 	this.panX = panX;
 	this.panY = panY;
 	this.zoom = zoom;
     }
 
+    public Object getCanvas() { return canvas; }
     public float getPanX() { return panX; }
     public float getPanY() { return panY; }
     public float getZoom() { return zoom; }
 
     public int hashCode() {
-	return (int)(23480*panX + 21348*panY + 8942*zoom);
+	return (int)(canvas.hashCode() + 23480*panX + 21348*panY + 8942*zoom);
     }
 	
     public boolean equals(Object o) {
 	if (!(o instanceof CanvasCursor)) return false;
 	CanvasCursor c = (CanvasCursor)o;
-	return panX == c.panX && panY == c.panY && zoom == c.zoom;
+	return panX == c.panX && panY == c.panY && zoom == c.zoom &&
+	    canvas.equals(c.canvas);
     }
 }

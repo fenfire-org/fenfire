@@ -61,8 +61,8 @@ public class Potions {
 
 		// hmmm... it's not too nice to have this here, but how else
 		// could we make it work?
-		Model cursor = (Model)context.get("cursorModel");
-		cursor.set(new Cursor(node));
+		Cursor cursor = (Cursor)context.get("cursor");
+		cursor.setNode(node);
 
 		return node;
 	    }

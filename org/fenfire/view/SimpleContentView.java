@@ -26,6 +26,7 @@ SimpleContentView.java
  * Written by Benja Fallenstein
  */
 package org.fenfire.view;
+import org.fenfire.Cursor;
 import org.fenfire.swamp.*;
 import org.fenfire.util.*;
 import org.nongnu.libvob.layout.*;
@@ -38,13 +39,15 @@ public class SimpleContentView implements ContentViewSettings.ContentView {
     private Map propCache = new org.nongnu.navidoc.util.WeakValueMap();
 
     private Graph graph;
+    private Cursor cursor;
     private NamespaceMap nmap;
     private Set textProperties;
     private Object defaultProperty;
 
-    public SimpleContentView(Graph graph, NamespaceMap nmap, 
+    public SimpleContentView(Graph graph, Cursor cursor, NamespaceMap nmap, 
 			     Set textProperties, Object defaultProperty) {
 	this.graph = graph;
+	this.cursor = cursor;
 	this.nmap = nmap;
 	this.textProperties = textProperties;
 	this.defaultProperty = defaultProperty;
@@ -129,23 +132,27 @@ public class SimpleContentView implements ContentViewSettings.ContentView {
     private Lob makeLob(Object node, boolean isPropertyLob) {
 	Model str;
 
+	Model nodeModel = new ObjectModel(node);
+
 	if(node instanceof Literal)
 	    str = new ObjectModel(((Literal)node).getString());
 	else
-	    str = Models.cache(new ContentModel(new ObjectModel(node)));
+	    str = Models.cache(new ContentModel(nodeModel));
 
 	Lob l;
 
 	if(!isPropertyLob) {
 	    TextModel text = 
 		new TextModel.StringTextModel(str, Theme.getFont());
-	    Model cursor = new IntModel(-1);
+
+	    Model tc = cursor.textCursor;
 
 	    Sequence seq = new Box(Lob.X, text);
-	    seq = new TextCursorLob(seq, cursor);
+	    seq = new TextCursorLob(seq, tc, 
+				    cursor.node.equalsModel(nodeModel));
 	    
-	    Model positionModel = seq.positionModel(Lob.X, cursor); 
-	    l = new TextEditController(seq, text, cursor, new IntModel(1));
+	    Model positionModel = seq.positionModel(Lob.X, tc); 
+	    l = new TextEditController(seq, text, tc, new IntModel(1));
 	    l = new ViewportLob(Lob.X, l, positionModel, new FloatModel(.5f));
 	} else {
 	    l = new Label(str);
