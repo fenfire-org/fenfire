@@ -30,6 +30,7 @@ import org.fenfire.Cursor;
 import org.fenfire.swamp.*;
 import org.fenfire.vocab.*;
 import org.fenfire.lob.*;
+import org.fenfire.util.RDFUtil;
 import org.nongnu.libvob.lob.*;
 import org.nongnu.libvob.*;
 import org.nongnu.libvob.util.*;
@@ -68,11 +69,6 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 	return Collections.singleton(TYPE);
     }
 
-    /*
-    public boolean showBig() {
-	return true;
-    }
-
     protected CanvasCursor getCanvasCursor(Cursor c) {
 	Object pos = c.getSpatialCursor();
 
@@ -85,62 +81,32 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
     }
 
     protected CanvasCursor makeCanvasCursor(Object n) {
-	Lob l = getContentLob(n);
-
 	Object canvas = graph.find1_X11(CANVAS2D.contains, n);
+
+	float x = RDFUtil.getFloat(graph, n, CANVAS2D.x);
+	float y = RDFUtil.getFloat(graph, n, CANVAS2D.x);
 	
-	Model xm = getModel(n, CANVAS2D.x), ym = getModel(n, CANVAS2D.y);
-	
-	float x = xm.getFloat() + l.getNatSize(Lob.X)/2;
-	float y = ym.getFloat() + l.getNatSize(Lob.Y)/2;
-	
+	Lob l = getContentLob(n);
+	SizeRequest r = l.getSizeRequest();
+
+	x += r.natW/2;
+	y += r.natH/2;
+
 	return new CanvasCursor(canvas, x, y, 1);
     }
 
 
-    private Model getModel(Object node, Object prop) {
-	Model m = new ObjectModel(node);
-	m = new PropValueModel(new ObjectModel(graph), m, prop, 1);
-	m = new LiteralStringModel(m);
-	m = Models.parseFloat(m);
-	return m;
-    }
-    */
-
-    /**
-     *  Cache of the mainview lob during dragging.
-     *  The problem was that we can't re-create the mainview during
-     *  dragging / when starting to drag, because then 
-     *  the DragControllers are re-created and the new controllers' 
-     *  isDragging is set to 'false'... :-o
-     *
-     *  So I hacked it so that the drag listeners set the mainview cache.
-     *  It's ugly.
-     */
-    Lob mainviewCache;
-    
     public Lob getMainviewLob(Cursor cursor) {
-	return null;
-	/*
-	if(mainviewCache != null) {
-	    Lob result = mainviewCache;
-	    mainviewCache = null;
-	    return result;
-	}
-
 	Object node = cursor.getNode();
-	Object canvas = getCanvasCursor(cursor).getCanvas();
+	CanvasCursor cc = getCanvasCursor(cursor);
 
-	Lob canvasContent = getCanvasContent(canvas, cursor);
+	Lob l = getCanvasContent(cc.getCanvas(), cursor);
 
-	final Model panX = new Adapter(cursor, 0);
-	final Model panY = new Adapter(cursor, 1);
-	final Model zoom = new Adapter(cursor, 2);
+	l = Lobs.translate(l, -cc.getPanX(), -cc.getPanY());
+	l = Lobs.scale(l, cc.getZoom());
+	l = Lobs.align(l, .5f, .5f);
 
-	final Model theLob = new ObjectModel();
-	
-	final PanZoomLob pzl = new PanZoomLob(canvasContent, panX.getFloat(), panY.getFloat(), zoom.getFloat());
-
+	/*
 	Lob l = new DragController(pzl, 3, new org.nongnu.libvob.mouse.RelativeAdapter() {
 		public void startDrag(int x, int y) {
 		    super.startDrag(x, y);
@@ -178,21 +144,27 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 		    winAnim.rerender();
 		}
 	    }); 
-
-	l = new DepthChangeLob(l, -10);
-	l = addBackground(l, canvas, true);
-	l = new DepthChangeLob(l, 10);
-
-	l = new SpatialContextLob(l, (Model)canvasContent.getTemplateParameter("cs"));
-	l = new Margin(l, 40);
-
-	theLob.set(l);
-	return l;
 	*/
+
+	/*
+	l = new DepthChangeLob(l, -10);
+	*/
+	l = addBackground(l, cc.getCanvas(), true);
+	/*
+	l = new DepthChangeLob(l, 10);
+	*/
+
+	l = SpatialContextLob.newInstance(l);
+	l = Lobs.margin(l, 40);
+
+	return l;
     }
 
     public Lob getBuoyLob(Object node) {
-	return null;
+	Lob l = Lobs.nullLob();
+	l = BuoyConnectorLob.newInstance(l, node);
+	l = SpatialContextLob.newInstance(l);
+	return l;
 	/*
 	if(buoyCache.get(node) != null) return (Lob)buoyCache.get(node);
 
@@ -217,32 +189,29 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 	*/
     }
 
-    /*
     protected Lob getContentLob(Object node) {
 	return contentViewSettings.getLob(node);
     }
-    */
+
 
     /**
      *  'cursor' may be null.
      */
-    /*
     protected Lob getCanvasContent(final Object canvas, final Cursor cursor) {
 	
-	Tray tray = new Tray(false);
-	
-	Model cs = Parameter.model("cs", new IntModel());
+	Lob tray = Lobs.tray(false);
 	
 	for(Iterator i=graph.findN_11X_Iter(canvas, CANVAS2D.contains); 
 	    i.hasNext();) {
 	    
-	    final Object n = i.next();
-	    final Lob label = getContentLob(n);
-	    Lob l = new BuoyConnectorLob(label, n, cs);
+	    Object n = i.next();
+	    Lob label = getContentLob(n);
+	    Lob l = BuoyConnectorLob.newInstance(label, n);
 
-	    final Model x = getModel(n, CANVAS2D.x);
-	    final Model y = getModel(n, CANVAS2D.y);
+	    float x = RDFUtil.getFloat(graph, n, CANVAS2D.x);
+	    float y = RDFUtil.getFloat(graph, n, CANVAS2D.y);
 
+	    /*
 	    if(cursor != null)
 		l = new ClickController(l, 1, new AbstractAction() {
 			public void run() {
@@ -266,18 +235,21 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 			    m.setNextFocus(m.getLink(context, 1, n, "structure point"));
 			}
 		    });
+	    */
 
-	    l = new TranslationLob(l, x, y);
+	    l = Lobs.translate(l, x, y);
 	    tray.add(l);
 	}
 	
-	return new RequestChangeLob(tray, 100, 100, 100, 100, 100, 100);
+	return Lobs.request(tray, 100, 100, 100, 100, 100, 100);
     }
 
     protected Lob addBackground(Lob content, Object canvas, boolean fade) {
-	final Model bgcolor = new UniqueColorModel(new ObjectModel(canvas),.75f,1f);
-	Lob l = new Frame(content, bgcolor, new ObjectModel(Color.black),
-			  2, 0, false, false, true);
+	Color bgcolor = UniqueColors.getColor(canvas, .75f, 1f);
+
+	Lob l = Lobs.frame(content, bgcolor, Color.black, 2, 0, true);
+
+	/*
 	if(fade) l = new AbstractMonoLob(l) { 
 		public void render(VobScene scene, int into, int matchingParent,
 				   float w, float h, float d,
@@ -289,66 +261,8 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 		    throw new Error("not impl");
 		}
 	    };
+	*/
+
 	return l;
     }
-
-
-    protected class Adapter extends AbstractModel.AbstractFloatModel {
-	protected Cursor cursor;
-
-	protected int type;
-
-	protected float cache;
-	protected boolean current;
-	
-	public Adapter(Cursor cursor, int type) {
-	    this.cursor = cursor;
-	    this.type = type;
-	    cursor.spatialCursor.addObs(this);
-	}
-
-	public void chg() {
-	    current = false;
-	    super.chg();
-	}
-
-	private CanvasCursor getCanvasCursor() {
-	    Object pos = cursor.getSpatialCursor();
-	    if(pos instanceof CanvasCursor)
-		return (CanvasCursor)pos;
-
-	    return makeCanvasCursor(cursor.getNode());
-	}
-	
-	public float getFloat() {
-	    if(!current) {
-		CanvasCursor c = getCanvasCursor();
-
-		if(c == null) cache = (type==2) ? 1 : 0;
-		else if(type == 0) cache = c.getPanX();
-		else if(type == 1) cache = c.getPanY();
-		else if(type == 2) cache = c.getZoom();
-		else throw new IllegalArgumentException("adapter type "+type);
-
-		current = true;
-	    }
-	    return cache;
-	}
-
-	public void setFloat(float value) {
-	    if(current && value == cache) return;
-	    
-	    CanvasCursor c = getCanvasCursor();
-	    
-	    Object canvas = c.getCanvas();
-	    float panX = c.getPanX(), panY = c.getPanY(), zoom = c.getZoom();
-	    if(type == 0) panX = value;
-	    else if(type == 1) panY = value;
-	    else if(type == 2) zoom = value;
-	    else throw new IllegalArgumentException("adapter type "+type);
-
-	    cursor.setSpatialCursor(new CanvasCursor(canvas, panX, panY, zoom));
-	}
-    }
-    */
 }
