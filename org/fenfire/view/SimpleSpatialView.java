@@ -37,6 +37,8 @@ import java.util.*;
 
 public class SimpleSpatialView implements ViewSettings.SpatialView {
 
+    private Map cache = new org.nongnu.navidoc.util.WeakValueMap();
+
     public Set getTypes() {
 	return Collections.singleton(ViewSettings.ALL);
     }
@@ -67,11 +69,13 @@ public class SimpleSpatialView implements ViewSettings.SpatialView {
 
     public Lob getLob(Cursor c) {
 	Object node = c.getNode();
+	if(cache.get(node) != null) return (Lob)cache.get(node);
 
 	Lob l = new Label(Nodes.toString(node));
 	l = new ThemeFrame(l);
 	l = new RequestChangeLob(Lob.X, l, Float.NaN, Float.NaN, 100);
 	l = new FooLob(l, node);
+	cache.put(node, l);
 	return l;
     }
 }
