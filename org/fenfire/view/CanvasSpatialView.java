@@ -125,8 +125,8 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 	Lob l = (Lob) coordlobs.get(c);
 	if (l == null) {
 	    if (!(c instanceof Cursor.CanvasCursor)) {
-		c = new Cursor.CanvasCursor(c.getNode(), null);
-		p("throw new Error(\"it should be!\");");
+		Object canvas = graph.findN_X11_Iter(CANVAS2D.contains, c.getNode()).next();
+		c = new Cursor.CanvasCursor(canvas, c.getNode());
 	    }
 	    Cursor.CanvasCursor ca = (Cursor.CanvasCursor)c;
 	    
