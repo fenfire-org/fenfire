@@ -28,6 +28,7 @@ Graphs.java
 package org.fenfire.swamp;
 import org.fenfire.swamp.impl.*;
 import org.nongnu.storm.util.URN5Namespace;
+import org.fenfire.util.NamespaceMap;
 import com.hp.hpl.mesa.rdf.jena.model.*;
 import com.hp.hpl.mesa.rdf.jena.model.Statement;
 import com.hp.hpl.mesa.rdf.jena.model.Resource;
@@ -187,6 +188,27 @@ public class Graphs {
     }
 
 
+    /** Writes a given node in Turtle's resource format.
+     *  @param w    the writer to use
+     *  @param nmap defined namespaces
+     *  @param pre  some text to be written before the node
+     *  @param res  the node to be written
+     *  @param post some text to be written after the node
+     *  @throws IOException if writing fails
+     */
+    protected static void writeNode(Writer w, NamespaceMap nmap, 
+				 String pre, Object res, String post) 
+	throws IOException {
+	w.write(pre);
+	String uri = Nodes.toString(res);
+	String abbrev = nmap.getAbbrev(uri);
+	if (abbrev == uri) { // if the uri wasn't abbreviated
+	    w.write('<');
+	    w.write(uri);
+	    w.write('>');
+	} else w.write(abbrev);
+	w.write(post);
+    }
 
     public static void writeTurtle(ConstGraph g, Map namespaces,
 				   File f) throws IOException {
@@ -196,16 +218,15 @@ public class Graphs {
 
     public static void writeTurtle(ConstGraph g, Map namespaces,
 				   Writer w) throws IOException {
-	// XXX use namespaces!!!
+	// XXX should get a NamespaceMap instead of a Map
+	// order of namespaces is not the same as originally, but random
+	NamespaceMap nmap = new NamespaceMap();
+	nmap.putAll(namespaces);
 
-	// create our own unchanging copy
-	Map nmap = new HashMap(namespaces);
-	// get the namespaces in stable order
-	SortedSet nset = new TreeSet(nmap.keySet());
-	Iterator n = nset.iterator();
+	Iterator n = nmap.uriIterator();
 	while(n.hasNext()) {
-	    String prefix = (String) n.next();
-	    w.write("@prefix "+prefix+": <"+nmap.get(prefix)+">.\n");
+	    String uri = (String) n.next();
+	    w.write("@prefix "+nmap.getAbbrev(uri)+" <"+uri+">.\n");
 	}
 	w.write("\n");
 
@@ -215,9 +236,7 @@ public class Graphs {
 	    Iterator j = g.findN_1XA_Iter(subj);
 	    if(!j.hasNext()) throw new Error();
 
-	    w.write("<");
-	    w.write(Nodes.toString(subj));
-	    w.write(">\n");
+	    writeNode(w, nmap, "", subj, "\n");
 
 	    while(j.hasNext()) {
 		Object pred = j.next();
@@ -225,9 +244,7 @@ public class Graphs {
 		Iterator k = g.findN_11X_Iter(subj,pred);
 		if(!k.hasNext()) throw new Error();
 
-		w.write("  <");
-		w.write(Nodes.toString(pred));
-		w.write(">\n");
+		writeNode(w, nmap, "  ", pred, "\n");
 
 		while(k.hasNext()) {
 		    Object obj = k.next();
@@ -256,14 +273,10 @@ public class Graphs {
 			    }
 			} else if(obj instanceof TypedLiteral) {
 			    TypedLiteral l = (TypedLiteral)obj;
-			    w.write("^^<");
-			    w.write(Nodes.toString(l.getType()));
-			    w.write(">");
+			    writeNode(w, nmap, "^^", l.getType(), "");
 			}
 		    } else {
-			w.write("    <");
-			w.write(Nodes.toString(obj));
-			w.write(">");
+			writeNode(w, nmap, "    ", obj, "");
 		    }
 			
 		    if(k.hasNext())

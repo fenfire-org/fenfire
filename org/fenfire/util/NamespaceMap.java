@@ -42,6 +42,18 @@ public class NamespaceMap extends ObsSet.AbstractObservable {
 	for(int i=0; i<n; i++) m.put(names[i], uris[i]);
 	return m;
     }
+    
+    /** Gives an iterator over the URIs that have an abbreviation. 
+     *  @return an iterator that gives one URI string at a time
+     */
+    public Iterator uriIterator() {
+	return new Iterator() {
+		int i = 0;
+		public boolean hasNext() { return i < n; }
+		public Object next() { return uris[i++]; }
+		public void remove() { throw new Error("Not implemented"); }
+	    };
+    }
 
     /** Add a shortname -> namespace mapping.
      *  @param name The short name of the namespace, e.g. "rdfs".
