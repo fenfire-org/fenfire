@@ -39,6 +39,7 @@ import org.nongnu.navidoc.util.Obs;
 import java.util.*;
 
 public class CanvasSpatialView implements ViewSettings.SpatialView {
+    static private void p(String s) { System.out.println("CanvasSpatialView:: "+s); }
 
     private Graph graph;
 
@@ -60,6 +61,11 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
     public boolean showBig() {
 	return true;
     }
+
+    public Cursor createViewSpecificCursor(Cursor c) {
+	return new Cursor.CanvasCursor(c.getNode(), null);
+    }
+
 
     private Model getModel(Object node, Object prop) {
 	Model m = new ObjectModel(node);
@@ -99,12 +105,90 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 	Model middle = new FloatModel(.5f);
 
 	Lob l = tray;
+	/*
 	l = new ViewportLob(Lob.X, l, x.plus(nl.getNatSize(Lob.X)/2f), middle);
 	l = new ViewportLob(Lob.Y, l, y.plus(nl.getNatSize(Lob.Y)/2f), middle);
 	l = new ThemeFrame(l);
+	*/
 	l = new RequestChangeLob(l, 100, 100, 100, 100, 100, 100);
+	l = getCoordinateLob(l, c);
 	l = new SpatialContextLob(l, cs);
 	cache.put(node, l);
 	return l;
     }
+
+
+
+    protected Map coordlobs = new org.nongnu.navidoc.util.WeakValueMap();
+    public Lob getCoordinateLob(Lob content, Cursor c) {
+	Lob l = (Lob) coordlobs.get(c);
+	if (l == null) {
+	    if (!(c instanceof Cursor.CanvasCursor)) {
+		c = new Cursor.CanvasCursor(c.getNode(), null);
+		p("throw new Error(\"it should be!\");");
+	    }
+	    Cursor.CanvasCursor ca = (Cursor.CanvasCursor)c;
+	    
+	    final Model panX = ca.getPanX();
+	    final Model panY = ca.getPanY();
+	    final Model zoom = ca.getZoom();
+
+	    l = content;
+	    l = new PanZoomLob(l, panX, panY, zoom);
+	    l = new DragController(l, 3, new org.nongnu.libvob.mouse.RelativeAdapter() {
+		    public void changedRelative(float dx, float dy) {
+			zoom.setFloat(zoom.getFloat() + dy/100);
+			rerender();
+		    }
+		});
+	    l = new DragController(l, 1, new org.nongnu.libvob.mouse.RelativeAdapter() {
+		    public void changedRelative(float dx, float dy) {
+			panX.setFloat(panX.getFloat() - dx/zoom.getFloat());
+			panY.setFloat(panY.getFloat() - dy/zoom.getFloat());
+			rerender();
+		    }
+		}); 
+	    l = new UniqueColorLob(l, c.getNode());
+	    l = new ClipLob(l);
+
+	    coordlobs.put(c, l);
+	}
+	return l;
+    }
+
+    WindowAnimation winAnim = null;
+    private void rerender() {
+	if (winAnim != null) {
+	    winAnim.switchVS();
+	}
+    }
+    
+
+    private class UniqueColorLob extends AbstractMonoLob {
+	Object k;
+	java.awt.Color color;
+	UniqueColorLob(Lob content, Object node) {
+	    super(content);
+	    k = node;
+
+	    java.util.Random r = new Random(k.hashCode());
+	    float R = 1 - r.nextFloat() * 0.2f,
+		G = 1 - r.nextFloat() * 0.2f,
+		B = 1 -r.nextFloat() * 0.2f;
+	    this.color = new java.awt.Color(R,G,B); 
+	}
+	public Object clone(Object[] params) {
+	    return new UniqueColorLob((Lob)params[0], k);
+	}
+	public void render(VobScene scene, int into, int matchingParent,
+		       float w, float h, float d,
+		       boolean visible) {
+	    winAnim = scene.anim;
+	    scene.put(new org.nongnu.libvob.vobs.RectBgVob(color),
+		      scene.coords.translate(scene.coords.box(into, w,h), 0,0, 1));
+	    super.content.render(scene, into, matchingParent, w,h,d,visible);
+	}
+    }
+
+
 }
