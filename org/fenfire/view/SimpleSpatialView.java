@@ -71,9 +71,10 @@ public class SimpleSpatialView implements ViewSettings.SpatialView {
 	Object node = c.getNode();
 	if(cache.get(node) != null) return (Lob)cache.get(node);
 
-	Lob l = new Label(Nodes.toString(node));
+	String s = Nodes.toString(node);
+	Lob l = new Label(s.substring(s.length()-5));
 	l = new ThemeFrame(l);
-	l = new RequestChangeLob(Lob.X, l, Float.NaN, Float.NaN, 100);
+	l = new RequestChangeLob(Lob.X, l, Float.NaN, 100, 100);
 	l = new FooLob(l, node);
 	cache.put(node, l);
 	return l;
