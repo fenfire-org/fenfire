@@ -24,7 +24,7 @@ Demo.java
  * Written by Benja Fallenstein
  */
 package org.fenfire.gnowsis;
-import org.gnowsis.client.Client;
+import org.gnowsis.miniclient.Client;
 import org.fenfire.swamp.*;
 import java.io.*;
 
