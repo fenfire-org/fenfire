@@ -177,10 +177,9 @@ public class ImageSpatialView implements SpatialViewSettings.SpatialView {
      *  'cursor' may not be null.
      */
     protected Lob getImageContent(final Object node) {
-
 	try {
-	    Lob l = new Image(new java.io.File("../libvob/testdata/libvob.png"));
-	    
+	    //Lob l = new Image(new java.io.File("../libvob/testdata/libvob.png"));
+	    Lob l = new Label("picture");
 	    Model cs = Parameter.model("cs", new IntModel());
 	    
 	    l = new BuoyConnectorLob(l, node, cs);
