@@ -46,9 +46,6 @@ public class RDFNotebook extends LobLob {
 	TITLE = Nodes.get("http://fenfire.org/2004/10/20/RDFNotebook/title"),
 	TEXT = Nodes.get("http://fenfire.org/2004/10/20/RDFNotebook/text");
 
-    protected Model font = 
-	new ObjectModel(new LobFont("Serif", 0, 16, Color.black));
-
 
     private static Literal newDateLiteral() {
 	Date d = new Date();
@@ -60,7 +57,8 @@ public class RDFNotebook extends LobLob {
     public RDFNotebook(final GraphFile file) {
 	Model graphModel = new ObjectModel(file.getGraph());
 
-	RDFLobFactory rlob = new RDFLobFactory(graphModel, font);
+	RDFLobFactory rlob = 
+	    new RDFLobFactory(graphModel, Theme.getTextFont());
 	Comparator dateCmp = new PropertyComparator(graphModel, DATE);
 
 	SetModel notes = rlob.setModel(NOTE, RDF.type, -1);

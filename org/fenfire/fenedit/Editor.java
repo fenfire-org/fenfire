@@ -147,15 +147,12 @@ public class Editor extends LobLob {
     }
 
     public Editor() {
-	    LobFont font = new LobFont("Serif", 0, 16, java.awt.Color.black);
-	    Model fontModel = new ObjectModel(font);
-	    
 	    tstringModel = new ObjectModel(TString.newFake(""));
-	    textModel = new TimlTextModel(tstringModel, fontModel);
+	    textModel = new TimlTextModel(tstringModel, Theme.getTextFont());
 
 	    Model searchTStringModel = new ObjectModel(TString.newFake(""));
 	    TextModel searchTextModel = new TimlTextModel(searchTStringModel,
-							  fontModel);
+							  Theme.getTextFont());
 
 	    float inf = Float.POSITIVE_INFINITY;
 	    

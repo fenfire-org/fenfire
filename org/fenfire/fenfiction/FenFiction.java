@@ -160,7 +160,7 @@ public class FenFiction extends LobLob {
 
 	    headingFont = 
 		new ObjectModel(new LobFont("SansSerif", java.awt.Font.BOLD, 
-					    20, Color.black));
+					    30, Color.black));
 	}
 	
 	public boolean accepts(Object state) {
