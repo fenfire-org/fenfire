@@ -64,7 +64,26 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
     }
 
     public Cursor createViewSpecificCursor(Cursor c) {
-	return new Cursor.CanvasCursor(c.getNode(), null);
+	if (c instanceof CanvasCursor) {
+	    return c;
+	} else {
+	    Object n = c.getNode();
+	    Iterator canvases = graph.findN_X11_Iter(CANVAS2D.contains, n);
+	    
+	    if(!canvases.hasNext()) return null;
+
+	    Object canvas = canvases.next();
+
+	    String s = Nodes.toString(n);
+	    Lob l = new Label(s.substring(s.length()-5));
+
+	    Model xm = getModel(n, CANVAS2D.x), ym = getModel(n, CANVAS2D.y);
+
+	    float x = xm.getFloat() + l.getNatSize(Lob.X)/2;
+	    float y = ym.getFloat() + l.getNatSize(Lob.Y)/2;
+	    
+	    return new CanvasCursor(canvas, c.getNode(), x, y, 1);
+	}
     }
 
 
@@ -119,20 +138,66 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
     }
 
 
+    protected class Adapter extends AbstractModel.AbstractFloatModel {
+	protected Model cursor;
+	protected int type;
+
+	protected float cache;
+	protected boolean current;
+	
+	public Adapter(Model cursor, int type) {
+	    this.cursor = cursor; this.type = type;
+	    cursor.addObs(this);
+	}
+
+	public void chg() {
+	    current = false;
+	    super.chg();
+	}
+	
+	public float getFloat() {
+	    if(!current) {
+		CanvasCursor c = 
+		    (CanvasCursor)createViewSpecificCursor((Cursor)cursor.get());
+		if(c == null) cache = 0;
+		else if(type == 0) cache = c.getPanX();
+		else if(type == 1) cache = c.getPanY();
+		else if(type == 2) cache = c.getZoom();
+		else throw new IllegalArgumentException("adapter type "+type);
+
+		current = true;
+	    }
+	    return cache;
+	}
+
+	public void setFloat(float value) {
+	    if(current && value == cache) return;
+	    CanvasCursor c = 
+		(CanvasCursor)createViewSpecificCursor((Cursor)cursor.get());
+
+	    if(c == null) return;
+	    
+	    float panX = c.getPanX(), panY = c.getPanY(), zoom = c.getZoom();
+	    if(type == 0) panX = value;
+	    else if(type == 1) panY = value;
+	    else if(type == 2) zoom = value;
+	    else throw new IllegalArgumentException("adapter type "+type);
+
+	    cursor.set(new CanvasCursor(c.getCanvas(), c.getNode(),
+					panX, panY, zoom));
+	}
+    }
+
 
     protected Map coordlobs = new org.nongnu.navidoc.util.WeakValueMap();
     public Lob getCoordinateLob(Lob content, Cursor c) {
 	Lob l = (Lob) coordlobs.get(c);
 	if (l == null) {
-	    if (!(c instanceof Cursor.CanvasCursor)) {
-		Object canvas = graph.findN_X11_Iter(CANVAS2D.contains, c.getNode()).next();
-		c = new Cursor.CanvasCursor(canvas, c.getNode());
-	    }
-	    Cursor.CanvasCursor ca = (Cursor.CanvasCursor)c;
+	    CanvasCursor ca = (CanvasCursor)createViewSpecificCursor(c);
 	    
-	    final Model panX = ca.getPanX();
-	    final Model panY = ca.getPanY();
-	    final Model zoom = ca.getZoom();
+	    final Model panX = new FloatModel(ca.getPanX());
+	    final Model panY = new FloatModel(ca.getPanY());
+	    final Model zoom = new FloatModel(ca.getZoom());
 
 	    l = content;
 	    l = new PanZoomLob(l, panX, panY, zoom);
@@ -172,6 +237,7 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 
 	UniqueColorModel(Model key) {
 	    this.key = key;
+	    key.addObs(this);
 	}
 	
 	protected Replaceable[] getParams() {
@@ -185,6 +251,7 @@ public class CanvasSpatialView implements ViewSettings.SpatialView {
 
 	public void chg() {
 	    color = null;
+	    super.chg();
 	}
 
 	public Object get() {
