@@ -27,6 +27,7 @@ SimpleContentView.java
  */
 package org.fenfire.view;
 import org.fenfire.Cursor;
+import org.fenfire.lob.*;
 import org.fenfire.swamp.*;
 import org.fenfire.util.*;
 import org.nongnu.libvob.layout.*;
@@ -71,64 +72,6 @@ public class SimpleContentView implements ContentViewSettings.ContentView {
 	return l;
     }
 
-    private class ContentModel extends AbstractModel.AbstractObjectModel {
-	Model node;
-
-	ContentModel(Model node) {
-	    this.node = node;
-	    node.addObs(this);
-	}
-
-	Object getProperty() {
-	    Object n = node.get();
-
-	    LOOP: 
-	    for(Iterator i=textProperties.iterator(); i.hasNext();) {
-		Object prop = i.next();
-		Iterator j = graph.findN_11X_Iter(n, prop, this);
-		while(j.hasNext()) {
-		    Object value = j.next();
-		    if(value instanceof Literal)
-			return prop;
-		}
-	    }
-
-	    return null;
-	}
-
-	String fallback() {
-	    String s = Nodes.toString(node.get());
-		
-	    if(s.startsWith("anon:") || s.startsWith("urn:urn-5:"))
-		s = s.substring(s.lastIndexOf(":"));
-	    else if(s.startsWith("mailto:")) 
-		s = s.substring("mailto:".length());
-	    else if(s.startsWith("tel:")) 
-		s = s.substring("tel:".length());
-	    else if(nmap != null)
-		s = nmap.getAbbrev(s);
-
-	    return s;
-	}
-
-	public Object get() {
-	    Object n = node.get(), p = getProperty();
-	    if(p == null) return fallback();
-	    return ((Literal)graph.find1_11X(n, p, this)).getString();
-	}
-
-	public void set(Object value) {
-	    Object n = node.get(), p = getProperty();
-	    String s = (String)value;
-
-	    if(p != null) 
-		graph.rm_11A(n, p);
-	    else
-		p = defaultProperty;
-	    graph.add(n, p, new PlainLiteral(s));
-	}
-    }
-
     private Lob makeLob(Object node, boolean isPropertyLob) {
 	Model str;
 
@@ -137,7 +80,9 @@ public class SimpleContentView implements ContentViewSettings.ContentView {
 	if(node instanceof Literal)
 	    str = new ObjectModel(((Literal)node).getString());
 	else
-	    str = Models.cache(new ContentModel(nodeModel));
+	    str = Models.cache(new NodeTextModel(graph, nodeModel, nmap,
+						 textProperties,
+						 defaultProperty));
 
 	Lob l;
 
