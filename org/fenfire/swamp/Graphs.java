@@ -27,6 +27,7 @@ Graphs.java
  */
 package org.fenfire.swamp;
 import org.fenfire.swamp.impl.*;
+import org.nongnu.storm.util.URN5Namespace;
 import com.hp.hpl.mesa.rdf.jena.model.*;
 import com.hp.hpl.mesa.rdf.jena.model.Statement;
 import com.hp.hpl.mesa.rdf.jena.model.Resource;
@@ -42,11 +43,11 @@ public class Graphs {
 
 
 
-    protected static Object node(Value node) { 
+    protected static Object node(String bnodeBase, Value node) { 
 	if(node instanceof URI)
 	    return Nodes.get(((URI)node).getURI());
 	else if(node instanceof BNode)
-	    return Nodes.get("bnode:"+((BNode)node).getID());
+	    return Nodes.get("bnode:"+bnodeBase+((BNode)node).getID());
 	else if(node instanceof org.openrdf.model.Literal) {
 	    org.openrdf.model.Literal l = (org.openrdf.model.Literal)node;
 	    if(l.getDatatype() != null)
@@ -69,10 +70,14 @@ public class Graphs {
 		}
 	    });
 
+	// bnode base string:
+	final String bb = URN5Namespace.generateRandomChars()+":";
+
 	parser.setStatementHandler(new StatementHandler() {
 		public void handleStatement(org.openrdf.model.Resource subject,
 					    URI predicate, Value object) {
-		    graph.add(node(subject), node(predicate), node(object));
+		    graph.add(node(bb, subject), node(bb, predicate), 
+			      node(bb, object));
 		}
 	    });
     }
@@ -98,26 +103,6 @@ public class Graphs {
 	    throw new IOException(""+e);
 	} catch(StatementHandlerException e) {
 	    throw new IOException(""+e);
-	}
-    }
-
-
-
-    public static void read(InputStream in, String contentType,
-			    String baseURI, Graph graph, Map namespaces)
-	throws IOException {
-	
-	int i = contentType.indexOf(';');
-	if(i >= 0) contentType = contentType.substring(0, i);
-	contentType = contentType.trim().toLowerCase();
-
-	if(contentType.equals("application/turtle")) {
-	    readTurtle(in, baseURI, graph, namespaces);
-	} else if(contentType.equals("application/rdf+xml")) {
-	    readXML(in, baseURI, graph, namespaces);
-	} else {
-	    throw new UnsupportedOperationException("Reading content type "+
-						    contentType);
 	}
     }
 
