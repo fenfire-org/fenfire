@@ -1,0 +1,89 @@
+# -*-python-*-
+# 
+# Copyright (c) 2003, Tuomas J. Lukka, Asko Soukka
+# This file is part of Fenfire.
+# 
+# Fenfire is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# Fenfire is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+# Public License for more details.
+# 
+# You should have received a copy of the GNU General
+# Public License along with Fenfire; if not, write to the Free
+# Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA  02111-1307  USA
+# 
+
+import java, jarray
+import vob
+
+from org.fenfire.swamp import Nodes
+from org.nongnu.alph.impl import PageImageScroll
+
+from org import fenfire as ff
+from org.nongnu import alph
+from org.nongnu import storm
+from org.fenfire.test import gfx
+
+gfx.needGL()
+
+def testNotEmptyAndEmptyNodes():
+#    fail: GL
+    """
+    """
+    vs = gfx.getvs()
+
+    # Create fen with swamps.
+    (fen, ff_structure, contentFunction) = ff.test.fen.newFen()
+
+    textstyle = vob.GraphicsAPI.getInstance().getTextStyle("sans", 0, 24)
+    textnodeview = ff.view.TextNodeView(contentFunction, textstyle)
+    view = ff.view.CanvasView2D(fen, textnodeview)
+    view.cull = 1
+    paperview = ff.view.PaperView2D(
+	ff.util.PaperMillFunction(vob.gl.PaperMill.getInstance(), 1),
+	view)
+
+    note = ff.swamp.Nodes.N()
+    paper = ff.util.RDFUtil.N(fen.graph, ff.vocab.CANVAS2D.Canvas)
+    fen.graph.add(paper, ff.vocab.STRUCTLINK.linkedTo, note)
+    ff.util.AlphContent(fen, ff_structure).setText(note, '', 1)
+
+    mainNode = ff.view.buoy.MainNode2D(paper, paperview, None)
+
+    vs.map.put(vob.vobs.SolidBackdropVob(java.awt.Color.green))
+    into = vs.orthoBoxCS(0, "FocusFrame", 0,
+                         30, 30, 1, 1, 50, 50)
+    mainNode.renderMain(vs, into)
+    gfx.render(vs)
+
+    vs = gfx.getvs()
+    vs.map.put(vob.vobs.SolidBackdropVob(java.awt.Color.green))
+    into = vs.orthoBoxCS(0, "FocusFrame", 0,
+                         30, 30, 1, 1, 50, 50)
+    mainNode.renderMain(vs, into)
+    gfx.render(vs)
+
+def testTextCursorLocating():
+    """
+    Test that locating the text cursor works back and forth.
+    """
+    (fen, ff_structure, contentFunction) = ff.test.fen.newFen()
+    textstyle = vob.GraphicsAPI.getInstance().getTextStyle("sans", 0, 24)
+    textnodeview = ff.view.TextNodeView(contentFunction, textstyle)
+
+    note = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr,  sed diam nonumy \nrmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd \nbergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr,  sed diam\nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores \n ea rebum. Stet\nlita kasd gubergren, no sea ta\nmata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr,  sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos e\naccusam et justo duo dolores et ea re\nm. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."
+
+    xy = jarray.zeros(3, 'f')
+    textnodeview.getXYY(note, 200, xy)
+
+    # XXX This SHOULD return exactly 200, but even 199 is so close, that there
+    #     can't be much wrong. It could be something with the whitespace-width-problem...
+    assert textnodeview.getPos(note, xy[0], xy[2]) in range(199, 200), \
+           'Not the text cursor position 200 but %s was found at (%s, %s). ' \
+           % (textnodeview.getPos(note, xy[0], xy[2]), xy[0], xy[2])

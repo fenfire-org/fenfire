@@ -1,0 +1,106 @@
+-----------------------
+InBCT 2.1 Plan for 2004
+-----------------------
+
+In 2004, we plan to go further on the most important accomplishments
+of the year 2003, which included
+
+- FenPDF is in actual real-life use by our research group for managing
+  the academic literature related to our research. 
+
+- We have developed the LEGO + optomechanical mouse custom controllers paradigm
+  for easy and cheap construction of custom computer controllers
+
+- We have developed functional programming -related methods to speed up
+  view generation: if a certain part of a view only used RDF nodes that have
+  not changed between frames, that part can be reused automatically
+  since the functional programming paradigm gives guarantees about
+  the result not depending on anything else.
+
+- We have developed methods for enhancing the readability of freely 
+  rotatable/scalable/deformable text rendered using graphics accelerators
+
+- The first Storm blocks have gone through a P2P network between machines
+
+- The completion of Navidoc, a UML - Javadoc documentation unification tool for HTML.
+
+- We have developed the Fenfire Loom, a focus+context RDF browser
+
+- The first published article about unique background textures
+
+    - unique background textures are in use in FenPDF and have shown themselves
+      to be *extremely* useful there, demonstrating that we were asking
+      the right questions very far away from the mainstream.
+
+
+
+In 2004, we plan to (more information about any of these topics
+can be requested by emailing Tuomas Lukka)
+
+- Make our work accessible for the financiers by 
+
+    - documenting our architectures and code in detail, to make
+      it easier for people from outside our project to "get into" the code
+      (Navidoc is essential for this)
+
+    - creating internal technical reports about subjects that the financiers
+      express specific interest in
+
+    - publishing scientific articles about several parts of our work that have 
+      matured enough, for example:
+
+	- FenPDF, the literature comprehension tool, the first real user-level
+	  product of this project
+
+	- Alph, the xanalogical referential fluid media implementation which
+	  includes important innovations related to realistic implementations
+	  of RFM 
+
+	- Libvob, the UI development system we use
+
+	- The Functional programming view approach
+
+	- Irregular viewport edges
+
+- Start testing shrinking of the FenPDF user interface to mobile-sized screens
+  (specifically requested by Nokia in beginning of 2003, causing us
+  to create the framework for custom controllers)
+
+- Further develop FenPDF-like interfaces to be applicable to e.g. photographs, 
+  sounds, SMS messages (another request from Nokia).
+
+- Develop Loom to combine with FenPDF and other applitudes to get the full
+  hyperstructure functionality
+
+- Develop UI mapping techniques: now that we have a *real* FenPDF bidirectionally
+  linked structure, there are several ideas in user interfaces that we can test,
+  such as creating a multi-focus view which shows the routes between the foci
+  in the graph. This is one of the core areas of new innovations that our
+  approach enables, since we're doing things differently from the mainstream:
+  on a Web/Filesystem -based system, such views would not make nearly as
+  much sense.
+
+- Research the uniqueness of the unique background textures further.
+  The first article used a rather ad hoc distribution for the textures,
+  we have ideas about how to make the uniqueness more well-founded by using
+  user experiments.
+
+- Develop libvob vobscene recursion, enabling even more interesting functional
+  programming -related techniques in views. This technique is useful
+  for retaining fast interactions even with complex views without
+  too much resource consumption.
+
+- Storm-based transparent collaboration: two people meeting in a coffee shop
+  and working together on the same document, both with their own computers,
+  transparently synchronizing through a *local* network, with no servers
+  involved, later synching the results to the whole working group.
+  Requires:
+
+    - Further development of Storm
+
+    - RDF vocabulary-based modular change merging
+
+    - UI techniques for understanding changes to documents in FenPDF
+
+
+

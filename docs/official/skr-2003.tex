@@ -1,0 +1,155 @@
+\documentclass{article}
+\usepackage[finnish]{babel}
+\usepackage[utf8]{inputenc}
+%\usepackage{times}
+\usepackage{authordate1-4}
+
+\def\citename#1{#1}
+
+\def\bibtitle{Viitteet}
+\begin{document}
+
+
+\title{Työsuunnitelma: Fenfire-järjestelmän jatkokehitys}
+\author{Tuomas Lukka}
+\date{}
+
+\maketitle
+
+\section{Taustaa}
+
+Olemme kehittäneet Fenfire-järjestelmää Jyväskylän Yliopistossa,
+ensin tietotekniikan laitoksella ja sittemmin Agora Centerissä
+vuoden -99 syksystä alkaen\footnote{
+Tavara\-merkki\-syistä nimi on muuttunut matkan varrella: projekti aloitettiin 
+nimellä GZigZag \cite{lukka99cybertext}, 
+sai vuonna -02
+väliaikaisesti nimen Gzz ja keväästä -03 alkaen lopullisen uuden
+nimen Fenfire} \cite{lukka99cybertext}.
+Fenfire-projektin tavoitteena on suunnitella tietokoneen 
+käyttö\-jär\-jes\-tel\-mä ja käyttöliittymät kokonaisvaltaisesti uusiksi,
+ottaen paremmin huo\-mioon ihmisen psykologia sekä käyttöliittymissä
+että esim.\ luotettavuudessa \cite{fallenstein03storm}.
+
+Projekti koostuu keskeisestä, yhteisestä pitkän tähtäimen
+visiosta siitä, millaista tietokoneen käytön tulisi olla,
+pohjautuen esimerkiksi
+Bushin \shortcite{as-we-may-think}, Engelbartin \shortcite{engelbart63conceptual-framework-augmenting-mans-intellect}
+ja Nelsonin \shortcite{as-we-will-think} unelmiin tietokoneiden käyttäjilleen tarjoamista
+mahdollisuuksista.
+Tästä visiosta kumpuaa selkeitä
+lyhyen tähtäimen tavoitteita jotka ovat mielenkiintoisia 
+sekä tutkimuksellisesti että teknisesti koska ne poikkeavat voimakkaasti
+valtavirrasta.
+
+
+
+\section{Nykytilanne}
+
+Syksyllä -03 valmistui
+Fenfire-järjestelmän ensimmäinen konkreettinen osaprototyyppi, FenPDF, 
+joka on suunnattu akateemisille tutkijoille joiden täytyy pystyä käsittelemään
+alojensa valtavaa, koko ajan kasvavaa kirjallisuutta (josta suuri osa on saatavissa
+verkosta PDF-tiedostoina, siksi nimi). 
+Prototyyppi antaa mahdollisuuden
+rakentaa selkeä struktuuri artikkeleista antamalla käyttäjälle
+mahdollisuus tehdä transkluusioita \cite{ted-xanalogical-structure-needed}
+PDF-tiedostoista, eli kopioida artikkelista palanen johonkin toiseen yhteyteen
+kuitenkin siten, että yhteys alkuperäiseen kokonaiseen artikkeliin säilyy kaksisuuntaisesti.
+Näin on mahdollista kopioida kaikki työstettävänä olevan artikkelin viitteiden
+relevantit kappaleet yhteen paikkaan; kopioista voi suoraan lukea ja muistaa, 
+mikä oli viitteen tärkein sanoma. Toisaalta myöhemmin luettaessa yhtä viitteistä
+linkki työstettyyn artikkeliin on olemassa; on helppoa päästä käsiksi
+muihin asiaan liittyneisiin artikkeleihin. 
+
+FenPDF on tutkimusryhmämme
+sisäisessä tuotantokäytössä ja on koettu erittäin hyödylliseksi 
+alaamme liittyvän laajan kirjallisuuden hallitsemiseksi.
+
+FenPDF sisältää useita erit\-täin radikaaleja käyttöliittymäratkaisuja,
+esim.\ \cite{lukka02fillets,kujala03paper},
+jotka näyttävät toimivan yhteen erin\-omaisesti ja luovat yhdessä
+kokonaan uudenlaisen ym\-pä\-ris\-tön tietokoneen käyt\-tä\-mi\-seen.
+Useita tärkeitä innovaatioita ei vielä ole julkaistu, esimerkiksi sitä 
+miten linkit eivät korvaa koko ikkunan sisältöä käyttäjää hämäten vaan
+linkatut asiat kelluvat marginaalissa ja koko linkkisiirtymä on käyttäjän
+näkökulmasta sulava ja helposti käännettävä.
+
+Projektin pitkä\-jän\-tei\-syy\-den
+vuoksi
+projektin julkaisutoiminta on vasta käyn\-nistymässä. 
+Tähän mennessä projekti on tuottanut neljä konferenssiartikkelia,
+joista kaksi erittäin korkeatasoisessa ACM Hypertext -konferenssissa.
+Useat kehittelemistämme ideoista alkavat vasta nyt olla kypsiä julkaistavaksi
+journal-artik\-keleissa, koska ideat todella poikkeavat paljon valtavirrasta
+ja niiden kehittelyyn on siksi mennyt paljon aikaa.
+
+
+\section{Tavoitteet}
+
+Tämän osaprojektin tavoitteena on 
+sekä viimeistellä FenPDF-työkalua julkista levitystä varten
+että kehittää edelleen Fenfiren keskeisiä
+ajatuksia ja aloittaa seuraavia osaprojekteja. Yksi tärkeä tutkimuskysymys
+on, miten muut tietomallit (esim.\ sähköposti) saadaan nivoutumaan FenPDF:ään
+saumattomasti.
+
+Lisäksi FenPDF:n radikaalit käyttöliittymäratkaisut ja etenkin niitten toi\-mi\-vuus
+ovat avanneet uusia perustutkimuksellisia kysymyksiä - alustavat 
+käyttäjä\-testit FenPDF:llä ovat osoittaneet, että näissä uusissa 
+ratkaisuissa on selvästi jotakin erityislaatuista, ja on odotettavissa, että tarkempi selvitys 
+käytettävyys\-tut\-ki\-muk\-sel\-la voi johtaa huomattaviin uusiin tuloksiin.
+Näissä kysymyksissä
+tutkimusryhmämme on aloittanut yhteistyön prof.~Pertti Saariluoman kanssa
+
+
+\section{Merkitys}
+
+FenPDF-ohjelmiston kehityksen avaamat perustutkimukselliset kysymykset
+ovat erit\-täin mielenkiintoisia koska ne tuovat uusia näkökulmia
+havaintopsykologisiin kysymyksiin, esimerkiksi värien näkemiseen.
+
+
+Tietokoneiden käyttöliittymät ovat muuttuneet viimeisen 20 vuoden ku\-lu\-es\-sa
+vain hyvin vähän, vaikka koneiden teho on kasvanut rä\-jäh\-dys\-mäi\-ses\-ti.
+Nykyiset järjestelmät vaativat ihmisiä tekemään ja ajattelemaan asioita
+tietyllä tavalla, lokeroiden käyttäjälle tärkeän tiedon epäluonnollisesti.
+Jotta tietotekniikasta voitaisiin tehdä ihmisille oikeasti hyödyllinen
+apuväline eikä pelkkä monimutkainen kirjoituskone, on välttämätöntä tutkia juuri näitä asioita.
+
+Tutkimustyön sivutuotteina syntyvät ohjelmistot ovat vapaasti levitettäviä
+ja niiden tarkoitus on hyödyttää kaikkia tietokoneen käyttäjiä.
+
+
+\section{Toteuttamissuunnitelma}
+
+Tutkimus toteutetaan Jyväskylän Yliopiston Agora Centerissä.
+
+
+\section{Kustannusarvio ja rahoitussuunnitelma}
+
+(sivukustannukset pyöristetty lähimpään 50 euroon)
+
+\begin{tabular}{l|l|r|r}
+Kohde & Tarkennus &  & Summa\\
+\hline
+Henk.koht apuraha & & & 4000 \\
+Aputyövoima & & & 12000 \\
+& Benjamin Fallenstein, osa-aikainen palkka 10kk & 10250 \\
+& Sivukustannukset 17\%        & 1750 \\
+Laitteet                & & & 2000 \\
+& Kannettava tietokone & 1500 \\
+& Ohjaimia, Java-kännykkä, ... & 500 & \\
+\hline
+Yhteensä & & & 20000 \\
+\hline
+\multicolumn{3}{l}{Rahoitus Suomen kulttuurirahastolta tähän projektiin}
+    & $-20000$ \\
+\end{tabular}
+
+
+
+\bibliographystyle{authordate1}
+\bibliography{gzigzag}
+
+\end{document}

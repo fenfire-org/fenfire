@@ -1,0 +1,154 @@
+# 
+# Copyright (c) 2003, Tuukka Hastrup
+# This file is part of Fenfire.
+# 
+# Fenfire is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# Fenfire is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+# Public License for more details.
+# 
+# You should have received a copy of the GNU General
+# Public License along with Fenfire; if not, write to the Free
+# Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA  02111-1307  USA
+# 
+
+
+import org.fenfire as ff
+from org.fenfire.util.lava import Traversals
+
+def testFindShortestPath():
+    def equalSeq(a, b): # sorry, can't compare with ==
+        for i in range(max(len(a),len(b))):
+            if a[i] != b[i]: return 0
+        return 1
+
+    findShortestPath = Traversals.findShortestPath
+    (fen, ff_structure, contentFunction) = ff.test.fen.newFen()
+    cg = fen.constgraph
+    p = ff.swamp.Nodes.N()
+
+    a = ff.swamp.Nodes.N()
+    b = ff.swamp.Nodes.N()
+    c = ff.swamp.Nodes.N()
+    d = ff.swamp.Nodes.N()
+
+    assert equalSeq(findShortestPath(a, p, a, cg), []) # empty path to itself
+    assert findShortestPath(a, p, b, cg) == None       # no path at all
+
+    fen.graph.add(a,p,b)
+
+    assert equalSeq(findShortestPath(a, p, b, cg), [b]) # simple neighbour
+    assert equalSeq(findShortestPath(b, p, a, cg), [a]) # other direction
+
+    fen.graph.add(a,p,c)
+
+    assert equalSeq(findShortestPath(b, p, c, cg), [a,c])
+
+    fen.graph.add(c,p,d) # long path
+    fen.graph.add(a,p,d) # add shortcut
+
+    assert equalSeq(findShortestPath(b, p, d, cg), [a,d]) # test shortcut use
+
+def testIsConnected():
+    (fen, ff_structure, contentFunction) = ff.test.fen.newFen()
+    p = ff.swamp.Nodes.N()
+
+    a = ff.swamp.Nodes.N()
+    b = ff.swamp.Nodes.N()
+    c = ff.swamp.Nodes.N()
+    d = ff.swamp.Nodes.N()
+
+    fake1a = ff.swamp.Nodes.N()
+    fake2a = ff.swamp.Nodes.N()
+    fake3a = ff.swamp.Nodes.N()
+
+    fake1d = ff.swamp.Nodes.N()
+    fake2d = ff.swamp.Nodes.N()
+    fake3d = ff.swamp.Nodes.N()
+
+    assert Traversals.isConnected(a, p, a, fen.constgraph) # Reflexive
+    assert not Traversals.isConnected(a, p, b, fen.constgraph)
+    
+    fen.graph.add(a,p,b)
+
+    assert Traversals.isConnected(a, p, b, fen.constgraph)
+    assert Traversals.isConnected(b, p, a, fen.constgraph) # Symmetric
+
+    fen.graph.add(c,p,d)
+
+    assert not Traversals.isConnected(a, p, d, fen.constgraph)
+
+    fen.graph.add(c,p,b) # different direction -> directed graph not connected
+
+    assert Traversals.isConnected(a, p, d, fen.constgraph) # Transitive
+    assert Traversals.isConnected(d, p, a, fen.constgraph)
+
+    fen.graph.add(fake1a,p,a)
+    fen.graph.add(a,p,fake2a)
+    fen.graph.add(a,p,fake3a)
+
+    assert Traversals.isConnected(a, p, d, fen.constgraph)
+    assert Traversals.isConnected(d, p, a, fen.constgraph)
+
+    fen.graph.add(fake1d,p,d)
+    fen.graph.add(d,p,fake2d)
+    fen.graph.add(d,p,fake3d)
+
+    assert Traversals.isConnected(a, p, d, fen.constgraph)
+    assert Traversals.isConnected(d, p, a, fen.constgraph)
+
+
+def testFindComponents():
+    def getNodes(fen):
+        return fen.constgraph.findN_XAA_Iter() # not realistic!
+
+    (fen, ff_structure, contentFunction) = ff.test.fen.newFen()
+    p = ff.swamp.Nodes.N()
+    q = ff.swamp.Nodes.N()
+
+    a = ff.swamp.Nodes.N()
+    b = ff.swamp.Nodes.N()
+    c = ff.swamp.Nodes.N()
+    d = ff.swamp.Nodes.N()
+
+    # Introduce the nodes into graph
+    fen.graph.add(a,q,b)
+    fen.graph.add(c,q,d)
+
+    # no XAA problem in getNodes if all nodes are subjects
+    fen.graph.add(b,q,c)
+    fen.graph.add(d,q,a)
+
+    reps, lrep = Traversals.findComponents(getNodes(fen), p, fen.constgraph)
+    for x in a, b, c, d:          # all single nodes are components
+        assert reps.contains(x)
+    assert lrep in [a, b, c, d]   # one of the components is largest
+
+    fen.graph.add(a,p,b)
+
+    reps, lrep = Traversals.findComponents(getNodes(fen), p, fen.constgraph)
+    assert reps.contains(a) != reps.contains(b) # Either is representative
+    assert lrep in [a, b]                       # [a, b] is largest component
+
+    fen.graph.add(a,p,c)
+
+    reps, lrep = Traversals.findComponents(getNodes(fen), p, fen.constgraph)
+    assert reps.contains(a)     # a has higher degree than b or c
+    assert not reps.contains(b)
+    assert not reps.contains(c)
+    assert lrep == a            # a is in the largest component
+
+    fen.graph.add(c,p,b)
+    fen.graph.add(d,p,b)
+
+    reps, lrep = Traversals.findComponents(getNodes(fen), p, fen.constgraph)
+    assert reps.contains(b)         # b has highest degree
+    for x in a, c, d:
+        assert not reps.contains(x)
+	

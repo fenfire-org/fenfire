@@ -1,0 +1,76 @@
+# 
+# Copyright (c) 2004, Matti J. Katila
+# This file is part of Fenfire.
+# 
+# Fenfire is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# Fenfire is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+# Public License for more details.
+# 
+# You should have received a copy of the GNU General
+# Public License along with Fenfire; if not, write to the Free
+# Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA  02111-1307  USA
+# 
+
+
+from threading import Lock
+
+def waitOperation(lock):
+    lock.acquire()
+    lock.release()
+
+def testBrowsing():
+    t = """
+    Test that browsing is done.
+
+    Basically asserts iff:
+    1) focus pan is not changed.
+    2) miss mouse events should not affect
+    3) another foci works
+    """
+    # 1
+    main = fenPDF.views.getBuoyManager().getActiveBuoyManager().getMainNode()
+    x,y = main.getFocus().getPanX(), main.getFocus().getPanY()
+
+    lock = Lock()
+    print t
+
+    logger.recorderFunction('org/fenfire/fenpdf/actions/tests/browseCanvas.testData',
+                            scene, lock, recorderParameter)
+    waitRecorder(lock)
+    assert x != main.getFocus().getPanX()
+    assert y != main.getFocus().getPanY()
+    
+
+    # 2
+    main = fenPDF.views.getBuoyManager().getActiveBuoyManager().getMainNode()
+    x,y = main.getFocus().getPanX(), main.getFocus().getPanY()
+
+    logger.recorderFunction('org/fenfire/fenpdf/actions/tests/browseCanvasMiss.testData',
+                            scene, lock, recorderParameter)
+    waitRecorder(lock)
+    assert x == main.getFocus().getPanX()
+    assert y == main.getFocus().getPanY()
+
+    # 3
+    main = fenPDF.views.getBuoyManager().getActiveBuoyManager().getMainNode()
+
+    logger.recorderFunction('org/fenfire/fenpdf/actions/tests/browseActivateAnotherCanvas.testData',
+                            scene, lock, recorderParameter)
+    waitRecorder(lock)
+    main2 = fenPDF.views.getBuoyManager().getActiveBuoyManager().getMainNode()
+    assert main != main2
+    main = main2
+    x,y = main.getFocus().getPanX(), main.getFocus().getPanY()
+
+    logger.recorderFunction('org/fenfire/fenpdf/actions/tests/browseAnotherCanvas.testData',
+                            scene, lock, recorderParameter)
+    waitRecorder(lock)
+    assert x != main.getFocus().getPanX()
+    assert y != main.getFocus().getPanY()

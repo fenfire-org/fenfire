@@ -1,0 +1,27 @@
+graduaiheita
+------------
+
+- "paperin eri aspektion optimointi" 
+	   - värit
+
+- paperin toteutus GeforceFX:llä
+
+- tekstin selvennys (texture shading)
+
+- pehmeät muodot käyttöliittymissä
+
+- lego-ohjaimet
+
+- röpelöiset muodot käyttöliittymissä
+
+- libvobin suorituskykyanalyysi
+
+- character indices in texture
+
+- generic Quake-style viw using libvob
+
+- recursive vobscenes
+
+- stormin koekäyttö
+
+- libpaper puhtaalla javalla

@@ -1,0 +1,167 @@
+====================
+Fenfire MindMap Demo
+====================
+
+:Authors: Matti Katila, Asko Soukka
+
+Executing:
+	make rundemo DEMO="org/fenfire/demo/mm.py"
+
+This demo is meant to be a simple note taking tool built in the spirit
+of mindmap technique.
+
+-----------------------
+Command line parameters
+-----------------------
+	
+``--fenmm.pool="myFenfire"``
+	Storm pool directory.
+
+``--fenmm.file="myFenfire/mindmap.rdf"``
+	RDF file.
+
+``--cc.device="/dev/input/mouse0"``
+	Custom controller device.
+
+------------------
+Used abbreviations
+------------------
+
+RMB
+	RightMouseButton
+
+LMB
+	LeftMouseButton
+
+-----
+Mouse
+-----
+
+RMB click
+	Changes the state, which determines what the LMB click does.
+
+	  - selecting state; blue background; arrow cursor
+          - linking state; green background; pointing hand cursor
+
+LMB click
+	Selecting state
+		Selects the accursed node. If there is no center node
+                or the accursed node is linked into the structure, it
+		will also become the center node. The accursed node is
+		editable at once and text cursor should be automaticly
+                transferred below the clicking point.
+
+		The accursed node is has brighter background than
+	        the others. The centered node has a red fillet
+                below it.
+
+		Click outside the nodes removes focus from the
+                currently accursed node.
+
+	Linking state
+		Links the center node and the clicked node or
+		removes the existing link between the center
+                node and the clicked node.
+
+LMB drag
+	Moves the linked structure on the screen.
+
+RMB drag up or down
+	Zooms the linked structure. When a new center node is selected,
+	the zooming will return to default.
+
+--------
+Keyboard
+--------
+
+Escape or Tab
+	Removes the focus from the currently accursed node and sets no
+        new accursed node.
+
+	NOTE: Escape would be semantically better than Tab, but
+	Tab is still faster to use while typing.
+
+Typing
+	If there is no accursed node, typing would create a new node
+        into the floating buffer.
+
+Ctrl-2
+	Toggle 2D filleting. May be faster to render.
+
+Ctrl-3
+	Toggle 3D filleting.
+
+Ctrl-S
+	Save the structure.
+
+Ctrl-R
+	Reload the demo.
+
+Ctrl-Q
+	Save the structure and quit.
+
+Alt-Q (Ctrl-Shift-Q on my keyboard)
+	Quit without saving.	
+
+-------------------------------------
+Editing the text in the accursed node
+-------------------------------------
+
+Typing
+	Enters text.
+
+Backspace
+	Removes a character before the text cursor.
+
+Arrows
+	Moves the text cursor.
+
+Home or Ctrl-A
+	Moves the text cursor into the beginning of the line. 
+
+End or Ctrl-E
+	Moves the text cursor to the end of the line. 
+
+Ctrl-Home
+	Moves the text cursor into the beginning of the text.
+
+Ctrl-End
+	Moves the text cursor to the end of the text.
+
+Ctrl-C or Ctrl-K
+	Copy the content of the node into the clipboard.
+
+Ctrl-V or Ctrl-Y
+	Paste the content of the clipbard (just after the cursor).
+
+Ctrl-D
+	Deletes the accursed node. All nodes connected to it will
+        remain on the floating buffer.
+
+Ctrl-B
+	Adds current node onto floating buffer. 
+
+        NOTE: Use with care. After this a two or more
+	instances appear to the screen and because their
+        coordinate systems are currently matched as the
+        same, interpolation may be fuzzy.        
+
+-----------------
+Custom Controller
+-----------------
+
+Ctrl-0 (not 'o', but zero)
+	Calibration.
+
+	Press the first time to start calibration.
+	Move all axes through their extreme positions
+	and give the second press to finish.
+
+Axe-1
+	Width and size of the fillets.
+
+Axe-2
+	Length of the fillets.
+
+Axe-3 (wheel)
+	Rotating the map.

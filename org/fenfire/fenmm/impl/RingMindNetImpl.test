@@ -1,0 +1,36 @@
+
+import org.fenfire as ff
+from org.fenfire.fenmm.impl import MindNetImpl as Net
+
+def setUp():
+    global fen, cg,p, a,b,c,d,e,f
+    (fen, ff_structure, contentFunction) = ff.test.fen.newFen()
+    cg = fen.constgraph
+    p = ff.vocab.STRUCTLINK.linkedTo
+
+    a = ff.swamp.Nodes.N()
+    b = ff.swamp.Nodes.N()
+    c = ff.swamp.Nodes.N()
+    d = ff.swamp.Nodes.N()
+    e = ff.swamp.Nodes.N()
+    f = ff.swamp.Nodes.N()
+
+
+def testEasy():
+    global fen, cg,a,b,c,d,e,f
+    net = Net(cg)
+    fen.graph.add(a,p,b)
+    fen.graph.add(a,p,c)
+    fen.graph.add(a,p,d)
+    fen.graph.add(d,p,e)
+    fen.graph.add(e,p,f)
+    fen.graph.add(b,p,c)
+
+    net.constructNet(a)
+    
+    assert net.maxDepth() == 5
+
+    i = net.iterateAllNodes()
+    while i.hasNext(): print i.next()
+
+    

@@ -1,0 +1,83 @@
+InBCT 2.1
+
+Information Management and Sharing
+Team Leader: Dr. Tuomas Lukka, Agora Center
+
+General Description
+
+We investigate hyperstructure and flexible user interfaces
+together as a solution to the information flood. A free software
+framework to base further research on gradually forms from our production
+quality subsystems.
+
+Goals
+
+- interactive hyperstructure: the user can connect any two items which
+  will then be near each other in hyperspace, easily visible and
+  accessible from one to the other.
+
+- novel interfaces taking advantage of modern graphics capabilities
+  as well as new types of controllers, all built from commodity parts
+
+- ad hoc teamwork: non-centralized P2P version control of structured
+  data. Two or more persons can form a small team to change an object
+  and subsequently submit those changes for consideration by a larger
+  group. The software will manage all versioning. 
+
+Results
+
+Software: 
+- Storm: distributed storage framework
+- fillets: a perceptually motivated improvement to graph drawing (see report) 
+- identity visualization using procedural textures
+- irregular viewport edges distinguishable from document edges
+- prototype for browsing and collaborative annotation of PDF documents
+- Loom: Focus&Context RDF data browser
+
+Plan
+
+- individually usable, clearly separated subsystems
+- collaborative hyperstructure authoring in Loom
+- usability tests for several subtopics 
+- unconventional controlling devices (e.g. game controllers)
+- true P2P networking using Storm 
+
+Topic Map
+
+- object/document identity in user interfaces 
+- P2P ad hoc networking for teamwork support 
+- interactive creation of hyperstructure 
+- bi-directional linking 
+- Xanalogical hypertext 
+- document management
+
+Research Reports
+
+Published:
+  - Fillets: Cues for Connections in Focus+Context Views of Graph-like Diagrams
+  - Freenet-like GUIDs for implementing xanalogical hypertext
+
+Submitted for peer review:
+  - Buoys, break lines, and unique backgrounds: techniques for
+    non-disruptive bidirectional spatial links
+  - Storm: Supporting data mobility through location-independent
+    identifiers
+  - Bridging Javadoc and design documentation via UML diagram image maps
+
+In preparation:
+  - procedural textures 
+  - explanation of the urn-5 namespace registered to our group 
+  - irregular edge shapes for visual clarity
+
+
+InBCT 2.1
+
+Uudet tiedonhallintamenetelmät 
+
+Tutkimme hyperrakenteen ja joustavien käyttöliittymien yhdistelmää
+ratkaisuksi informaatiotulvaan. Käyttövalmiista osajärjestelmistämme
+kasvaa tutkimusta tukeva vapaaohjelmistokehys. Tavoitteena on, että 
+järjestelmässä erilaiset tiedot ovat yhdisteltävissä ja
+versionhallinta tukee tilapäistäkin ryhmätyöskentelyä.
+
+Vastuuhenkilö: FT Tuomas Lukka, Agora Center

@@ -1,0 +1,134 @@
+# -*-python-*-
+# 
+# Copyright (c) 2003, Tuomas J. Lukka
+# This file is part of Fenfire.
+# 
+# Fenfire is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# Fenfire is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+# Public License for more details.
+# 
+# You should have received a copy of the GNU General
+# Public License along with Fenfire; if not, write to the Free
+# Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA  02111-1307  USA
+# 
+
+
+import org
+from org import fenfire as ff
+from org.nongnu import alph, storm
+
+import java
+
+def setUp():
+    global graph, ffinstance, spanMaker, \
+       enfiladeMaker, enf1, enf2, node1, node2, sp1, sp3
+
+    graph = ff.swamp.impl.HashGraph()
+
+    ffinstance = ff.structure.Ff.create(graph, 
+		alph.impl.StormAlph(
+		    storm.impl.TransientPool(
+			java.util.HashSet())))
+    
+    spanMaker = alph.impl.URN5SpanMaker()
+    enfiladeMaker = alph.impl.Enfilade1DImpl.Enfilade1DImplMaker()
+
+    sp1 = spanMaker.makeTextSpan("Foo")
+    sp2 = spanMaker.makeTextSpan("nip")
+    sp3 = spanMaker.makeTextSpan("Bar")
+    sp4 = spanMaker.makeTextSpan("zip")
+
+    enf1 = enfiladeMaker.makeEnfilade(sp1).plus(sp3)
+    enf2 = enfiladeMaker.makeEnfilade(sp2).plus(sp4)
+
+    ns = storm.util.URN5Namespace()
+    node1 = ff.swamp.Nodes.get(ns.generateId())
+    node2 = ff.swamp.Nodes.get(ns.generateId())
+
+def testPutGet():
+    ffinstance.setContent(node1, enf1)
+    assert ffinstance.getContent(node1).equals(enf1)
+    assert ffinstance.getContent(node2).length() == 0
+
+    ffinstance.setContent(node1, enf2)
+    assert ffinstance.getContent(node1).equals(enf2)
+    assert ffinstance.getContent(node2).length() == 0
+
+#def testWhat():
+#    snc.set(node1, enf1)
+#    fen.model.getWriter("RDF/XML-ABBREV").write(fen.model,
+#	java.io.OutputStreamWriter(java.lang.System.out), None)
+
+def testInsert():
+    """ Test all enfilade insert cases.
+    """
+    # insert at index 0
+    ffinstance.setContent(node1, enf1)
+    ffinstance.insert(node1, 0, enf2)
+    assert ffinstance.getContent(node1) == \
+           enf2.plus(enf1)
+
+    # insert at index length
+    ffinstance.setContent(node1, enf1)
+    len = enf1.length()
+    ffinstance.insert(node1, len, enf2)
+    assert ffinstance.getContent(node1) == \
+           enf1.plus(enf2)
+
+    # insert at index length +1
+    ffinstance.setContent(node1, enf1)
+    len = enf1.length() + 1
+    test = 0
+    try:
+        ffinstance.insert(node1, len, enf2)
+    except:
+        test = 1
+    assert test == 1
+    assert ffinstance.getContent(node1) == enf1
+
+    # insert at index -1
+    ffinstance.setContent(node1, enf1)
+    test = 0
+    try:
+        ffinstance.insert(node1, -1, enf2)
+    except:
+        test = 1
+    assert test == 1
+    assert ffinstance.getContent(node1) == enf1
+
+
+def testDeleteRegion():
+    """ Test region deleting of enfilade
+    """
+    ffinstance.setContent(node1, enf1)
+
+    # begin > end
+    test = 0
+    try:
+        ffinstance.deleteRegion(node1, 2,1)
+    except:
+        test = 1
+    assert test == 1
+
+    # delete from beginning
+    ffinstance.setContent(node1, enf1)
+    len = enf1.length()
+    enf = ffinstance.deleteRegion(node1, 0, len)
+    assert enf == enf1
+    enf = ffinstance.getContent(node1)
+    assert enf.length() == 0
+    
+    # delete "Foo"
+    ffinstance.setContent(node1, enf1)
+    enf = ffinstance.deleteRegion(node1, 0, 3)
+    assert enf == enfiladeMaker.makeEnfilade(sp1)
+    assert ffinstance.getContent(node1) == \
+           enfiladeMaker.makeEnfilade(sp3)
+    

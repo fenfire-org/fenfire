@@ -1,0 +1,181 @@
+# -*-python-*-
+# 
+# Copyright (c) 2003, Tuomas J. Lukka
+# 
+# This file is part of Gzz.
+# 
+# Gzz is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# Gzz is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+# Public License for more details.
+# 
+# You should have received a copy of the GNU General
+# Public License along with Gzz; if not, write to the Free
+# Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA  02111-1307  USA
+# 
+# 
+
+
+from __future__ import nested_scopes
+import sys
+import traceback
+import jarray
+
+import java, org
+
+from org import fenfire as ff
+import vob
+from org.nongnu import alph
+from org.nongnu import storm
+
+ff.test.gfx.needGL()
+
+from org.nongnu.libvob.gl import GL, GLRen, GLCache
+
+from org.fenfire.test import gfx
+
+dbg = 0
+
+def setUp():
+    global sc, enfMaker
+
+    pool = org.nongnu.storm.impl.TransientPool(java.util.HashSet())
+    myalph = alph.impl.StormAlph(pool)
+    sc = myalph.addFile(java.io.File('../alph/testdata/test1.pdf'), 'application/pdf')
+    assert sc.getBlockId().getURI() == "vnd-storm-hash:application/pdf,6qrwyxinrkbr6znvopuo2rnqc7jjfpqg.ettfngwwbh4ore2hljm4soyipujr42gc7becvgq"
+    enfMaker = alph.impl.Enfilade1DImpl.Enfilade1DImplMaker()
+
+
+def excinfo():
+    global exc
+    typ, val, tra = sys.exc_info()
+    print (repr((typ, val)))
+    # print str(val)
+    exc = str(val) + "\n".join(traceback.format_list(traceback.extract_tb(tra)))
+    if dbg:
+	print "EXCEPTION:", exc
+
+def checkColors(x, y):
+    try:
+	# Check that the green rectangle is there
+	gfx.checkAvgColor(x+30,y+40,20,20, (0, 255, 0), delta=60)
+	# Check that the red rectangle is there
+	gfx.checkAvgColor(x+65,y+40,20,20, (255, 0, 0), delta=60)
+	# Check that the black rectangle is there
+	gfx.checkAvgColor(x+30, y+80, 60, 2, (0, 0, 0))
+
+	# Check that the blue rectangle is there on the second page
+	gfx.checkAvgColor(x+150, y+40, 40, 40, (0, 0, 255), delta=60)
+
+	# Check that the border is yellow
+	gfx.checkAvgColor(x-2, y-2, 1, 160, (255, 255, 0))
+	gfx.checkAvgColor(x-2, y-2, 250, 1, (255, 255, 0))
+	gfx.checkAvgColor(x+260, y-2, 1, 160, (255, 255, 0))
+	gfx.checkAvgColor(x-2, y+200, 250, 1, (255, 255, 0))
+    except:
+	excinfo()
+	return 0
+    return 1
+
+
+def testTestSpan():
+    """Test that we really have the pagespan images.
+
+    If not, all other tests in this file will fail too.
+    """
+    assert sc.getCurrent().length() == 2
+    s = sc.getCurrent().getPage(1).getSize()
+    assert s.width == 595
+    assert s.height == 842
+
+def assertApprox(delta, a, b):
+    assert abs(a-b) < delta, (delta, a, b)
+
+def testSize():
+
+    z = jarray.zeros(2, "f")
+
+    l = ff.view.PageSpanLayout(
+	    enfMaker.makeEnfilade(sc.getCurrent()),
+	    ff.spanimages.SpanImageFactory.getDefaultInstance())
+
+    assertApprox(1, l.getWidth(), 2 * 595 * 75 / 72.)
+    assertApprox(1, l.getHeight(), 842 * 75 / 72.)
+
+def testSimply():
+    """Test that the view renders something
+
+    """
+
+    passed = 0
+
+    for i in range(0, 50):
+	for j in range(0, 20):
+	    vob.AbstractUpdateManager.tickIdle()
+
+	vs = gfx.getvs()
+	vs.map.put(vob.vobs.SolidBackdropVob(java.awt.Color.yellow))
+	gfx.render(vs)
+	gfx.checkAvgColor(160,150,50,50, (255, 255, 0), delta=5)
+	
+
+	scale = .20833
+
+	scaled = vs.orthoCS(0, "X", 0, 150, 150, scale, scale)
+
+	layout = ff.view.PageSpanLayout(
+	    enfMaker.makeEnfilade(sc.getCurrent()),
+	    ff.spanimages.SpanImageFactory.getDefaultInstance())
+	layout.place(vs, scaled)
+
+	gfx.render(vs)
+
+	if checkColors(150, 150): 
+	    if dbg:
+		print "PASS!"
+	    passed = 1
+	    break
+
+	java.lang.Thread.sleep(400)
+
+    assert passed
+
+    # # Now that the images are loaded, check span offsets
+    # vs = getvs()
+    # vs.map.put(SolidBackdropVob(Color.yellow))
+    # scaled = vs.orthoCS(0, "X", 0, 200, 150, .2, .2)
+    # v.placeCentered(enfMaker.makeEnfilade(sc.getCurrent()), vs, scaled, 
+	    # sc.getCurrent().subSpan(1), 1, 100000)
+    # render(vs)
+    # if not checkColors(int(200 - 1.5 * 612 / 5.0), 
+			    # int(150 - .5 * 792 / 5.0)):
+	# fail(exc)
+
+def testSelection():
+    """Test that getting selection returns a good enf.
+    """
+    pageSpanLayout = ff.view.PageSpanLayout(
+	enfMaker.makeEnfilade(sc.getCurrent()),
+	ff.spanimages.SpanImageFactory.getDefaultInstance())
+    w = pageSpanLayout.getWidth()
+    h = pageSpanLayout.getHeight()
+
+    enf = pageSpanLayout.getSelection(0, 0, w, h)
+    assert enf.length() == 2, (enf, enf.length())
+    enf = pageSpanLayout.getSelection(0, 0, 10, 10)
+    assert enf.length() == 1, (enf, enf.length())
+    enf = pageSpanLayout.getSelection(400, 400, 100, 100)
+    assert enf.length() == 1, (enf, enf.length())
+
+
+
+
+
+
+# : vim: set syntax=python :

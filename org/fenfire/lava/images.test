@@ -1,0 +1,76 @@
+# -*-Python-*- 
+#
+# Copyright (c) 2004, Matti J. Katila and Benja Fallenstein
+# This file is part of Fenfire.
+# 
+# Fenfire is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# Fenfire is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+# Public License for more details.
+# 
+# You should have received a copy of the GNU General
+# Public License along with Fenfire; if not, write to the Free
+# Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA  02111-1307  USA
+# 
+
+import java
+from org import fenfire as ff
+from org.nongnu import libvob
+from vob.putil import mipzipmaker
+from org.fenfire.test import gfx
+
+MIPZIP = "testdata/test.mipzip.tmp"
+
+def testDrawImage():
+    """
+    Draw an image and check some pixels.
+    """
+
+    try:
+        # 1 mipzip the image
+        mipzipmaker.makeMipzip("testdata/test.png", MIPZIP)
+
+        # 2 create a vob from it
+        singleimage = ff.spanimages.gl.SingleImage(None, 0, MIPZIP, -1, -1)
+        poolmanager = ff.spanimages.gl.PoolManager.getInstance()
+        vob = poolmanager.makeVob(singleimage, None, [0]*6, 0, 0, 0,0,0,0)
+
+        for scale in [1, .5324, 3.4144]:
+            vs = gfx.getvs()
+            vs.map.put(libvob.vobs.SolidBackdropVob(java.awt.Color.yellow))
+            gfx.render(vs)
+            gfx.checkAvgColor(160,150,50,50, (255, 255, 0), delta=5)
+        
+            # 3 show it on the screen
+            width, height = 100, 100
+
+            cs = vs.coords.ortho(0, 0, 0, 0, scale, scale)
+            vs.map.put(vob, cs)
+            gfx.render(vs)
+
+            # 4 test pixels
+
+            #red should be in up/left
+            gfx.checkAvgColor(width/4.*scale, height/4.*scale,
+                              width/4.*scale, height/4.*scale,
+                              (255, 0, 0), delta=5)
+
+            # green should be in down/left
+            gfx.checkAvgColor(width/4.*scale, 3*height/4.*scale,
+                              width/4.*scale, height/4.*scale,
+                              (0, 255, 0), delta=5)
+
+            # blue should be the whole right side
+            gfx.checkAvgColor(3*width/4.*scale, 2*height/4.*scale,
+                              width/4.*scale, height/4.*scale,
+                              (0, 0, 255), delta=5)
+            
+
+    finally:
+        java.io.File(MIPZIP).delete()

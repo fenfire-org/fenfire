@@ -1,0 +1,56 @@
+# 
+# Copyright (c) 2003, Matti J. Katila
+# This file is part of Fenfire.
+# 
+# Fenfire is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# Fenfire is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+# Public License for more details.
+# 
+# You should have received a copy of the GNU General
+# Public License along with Fenfire; if not, write to the Free
+# Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA  02111-1307  USA
+# 
+
+
+import os, string, re
+
+allowedFiles = [
+    'org/fenfire/demo/mm.py',
+    'org/fenfire/fenpdf/BUGS',
+    ]
+
+def testAnimationIsCalledOnlyRigthPlace():
+    """ This test greps the source files and looks after
+    special method call 'AbstractUpdateManager.chg()'
+    which should be done trough
+    the api which is added in near future.
+
+    fail: *
+    """
+    
+    str = 'grep -sr AbstractUpdateManager\.chg org/ | grep -v \{arch\} > animation.test.log' 
+    #print str
+    os.system(str)
+    buf = open('animation.test.log').read()
+    lines = string.split(buf, '\n')
+
+    for i in range(len(lines)):
+        lines[i] = string.split(lines[i], ':')
+    #for i in lines: print i
+
+    for i in range(len(lines)):
+        if not lines[i][0] in allowedFiles:
+            raise 'The following code: \''+ lines[i][1]+ '\' '\
+                  'was found from file: \''+ lines[i][0]+ '\' '\
+                  'an it\'s *NOT* allowed operation!'
+    
+    os.system('rm animation.test.log')
+        
+    

@@ -1,0 +1,72 @@
+# 
+# Copyright (c) 2003, Tuomas J. Lukka
+# This file is part of Fenfire.
+# 
+# Fenfire is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# Fenfire is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+# Public License for more details.
+# 
+# You should have received a copy of the GNU General
+# Public License along with Fenfire; if not, write to the Free
+# Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA  02111-1307  USA
+# 
+
+
+from org import fenfire as ff
+from org.fenfire.swamp import Nodes
+from org.fenfire.structure import Canvas2D
+
+import jarray
+
+def seteq(iterator, set):
+    """Test that the given iterator and set contain the
+    same elements.
+    """
+    l = []
+    while iterator.hasNext(): l.append(iterator.next())
+    for i in l:
+	assert (i in set), (l, set, i)
+    for i in set:
+	assert (i in l), ("2", l, set, i)
+
+def testCanvas2D():
+    graph = ff.swamp.impl.HashGraph()
+    canvas2d = Canvas2D.create(graph)
+
+    # 10 test uris
+    uri = [Nodes.get("http://asdf.org/%d"%d) for d in range(0,10)]
+
+    assert not canvas2d.isCanvas(uri[0])
+    canvas2d.makeIntoCanvas(uri[0])
+    assert canvas2d.isCanvas(uri[0])
+
+    seteq(canvas2d.getNodesOn(uri[0]), [])
+    canvas2d.placeOnCanvas(uri[0], uri[1], 100, 200)
+    canvas2d.placeOnCanvas(uri[0], uri[2], 0.5, 0.25)
+    canvas2d.placeOnCanvas(uri[0], uri[3], 0.7, 0.25)
+    seteq(canvas2d.getNodesOn(uri[0]), [uri[1], uri[2], uri[3]])
+
+    tmp = jarray.zeros(2, 'f')
+    canvas2d.getCoordinates(uri[1], tmp)
+    assert tmp[0] == 100
+    assert tmp[1] == 200
+    canvas2d.getCoordinates(uri[2], tmp)
+    assert tmp[0] == 0.5
+    assert tmp[1] == 0.25
+
+    canvas2d.setCoordinates(uri[2], 1, 2)
+    canvas2d.getCoordinates(uri[2], tmp)
+    assert tmp[0] == 1
+    assert tmp[1] == 2
+
+    canvas2d.removeNode(uri[2])
+    seteq(canvas2d.getNodesOn(uri[0]), [uri[1], uri[3]])
+    canvas2d.deleteCanvas(uri[0])
+    seteq(canvas2d.getNodesOn(uri[0]), [])

@@ -1,0 +1,107 @@
+# 
+# Copyright (c) 2003, Matti J. Katila
+# This file is part of Fenfire.
+# 
+# Fenfire is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# Fenfire is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+# Public License for more details.
+# 
+# You should have received a copy of the GNU General
+# Public License along with Fenfire; if not, write to the Free
+# Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA  02111-1307  USA
+# 
+
+# -*-python-*-
+
+import  org.fenfire as ff
+from org.fenfire.modules.pp.lava import RSTActionsImpl
+from org.fenfire.vocab import CANVAS2D, RDF
+from org.fenfire.vocab.lava import RST
+from org.nongnu import alph
+from org.nongnu import storm
+import java
+
+def setUp():
+    global fen, act
+
+    pool = storm.impl.TransientPool(java.util.HashSet())
+    myalph = alph.impl.StormAlph(pool)
+
+    fen = ff.Fen()
+    fen.constgraph = fen.graph = ff.swamp.impl.HashGraph()
+    fen.txt = ff.impl.SimpleNodeContent(fen, myalph);
+    fen.txtfunc = fen.txt.getNodeFunction()
+    fen.enfiladeOverlap = fen.txt.getTransclusionIndex()
+
+    act = RSTActionsImpl(fen)
+
+def testNewCanvas():
+    """
+    fail: *
+    """
+    canv = act.newRSTCanvas()
+    iter = fen.graph.findN_11X_Iter(canv, RDF.type)
+
+    obj = iter.next()
+    assert obj == RST.Canvas or obj == CANVAS2D.Canvas
+    obj = iter.next()
+    assert obj == RST.Canvas or obj == CANVAS2D.Canvas
+    assert iter.hasNext() == 0
+
+
+
+def testNewParagraph():
+    """
+    fail: *
+    """
+    canv = act.newRSTCanvas()
+
+    parag1 = act.newParagraph(canv, 200, 12,12)
+    parag2 = act.newParagraph(canv, 200, -12,-12)
+
+    iter = fen.graph.findN_11X_Iter(canv, RST.beginParagraph)
+    obj = iter.next()
+    assert obj == parag1 or obj == parag2
+    obj = iter.next()
+    assert obj == parag1 or obj == parag2
+    assert iter.hasNext() == 0
+
+    assert RST.Paragraph == fen.graph.find1_11X(parag1, RDF.type)
+    assert RST.Paragraph == fen.graph.find1_11X(parag2, RDF.type)
+
+    # XXX coords
+    
+def testNewSentence():
+    """
+    fail: *
+    """
+    canv = act.newRSTCanvas()
+    parag = act.newParagraph(canv, 200, 12,12)
+
+    sent1 = act.newSentence(parag, 0)  # 1
+    sent2 = act.newSentence(parag, 0)  # 2, 1
+    assert sent1 == fen.graph.find1_11X(sent2, RST.nextSentence)
+    sent3 = act.newSentence(parag, 1)  # 2, 3, 1
+
+    assert sent3 == fen.graph.find1_11X(sent2, RST.nextSentence)
+    assert sent1 == fen.graph.find1_11X(sent3, RST.nextSentence)
+
+
+def testNodeInsert():
+    """
+    fail: *
+    """
+    canv = act.newRSTCanvas()
+    parag = act.newParagraph(canv, 200, 12,12)
+    sent = act.newSentence(parag, 0)
+    foo = 'test'
+    node = act.insertNode(sent, foo, 0)
+
+    assert foo == fen.graph.find1_11X(canv, CANVAS2D.contains)

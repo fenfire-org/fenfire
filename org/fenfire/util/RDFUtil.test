@@ -1,0 +1,56 @@
+# -*-python-*-
+# 
+# Copyright (c) 2003, Matti J. Katila
+# This file is part of Fenfire.
+# 
+# Fenfire is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# Fenfire is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+# Public License for more details.
+# 
+# You should have received a copy of the GNU General
+# Public License along with Fenfire; if not, write to the Free
+# Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA  02111-1307  USA
+# 
+
+
+from org import fenfire as ff
+from org.fenfire.vocab import RDF
+from org.fenfire.util import URN5Namespace, Pair, RDFUtil
+from org.nongnu.libvob.buoy import BuoyViewNodeType,\
+     BuoyLinkListener
+from org.nongnu.alph import impl
+
+from org.fenfire.test.gfx import getvs
+
+from org.nongnu import alph, storm
+import java
+
+# from java.util import Iterator
+
+
+
+def setUp():
+    global fen, act
+    (fen, ff_structure, contentFunction) = ff.test.fen.newFen()
+
+def testNewObjWithType():
+    type = ff.swamp.Nodes.get('This is a test type')
+
+    obj = RDFUtil.N(fen.graph, type)
+
+    assert type == fen.constgraph.find1_11X(obj, RDF.type)
+    assert obj == fen.constgraph.find1_X11(RDF.type, type)
+
+    it = fen.constgraph.findN_11X_Iter(obj, RDF.type)
+    assert 1 == it.hasNext()
+    assert type == it.next()
+    assert 0 == it.hasNext()
+
+    assert 1 == RDFUtil.isNodeType(fen.graph, obj, type)

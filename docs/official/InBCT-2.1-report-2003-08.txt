@@ -1,0 +1,161 @@
+    InBCT:n raportointi annetaan TEKESille taas nyt elokuussa.
+
+    Tarvitsemme pe 15.8.2003 mennessä osahankkeilta raportit (sähköisessä muodossa) ajalta
+    1.1.2003 -31.7.2003 seuraavasti (ja riitävän laajasti):
+
+    *****************************************
+
+    Osahankken numero ja nimi:
+
+2.1 - Uudet tiedonhallintamenetelmet (fenfire) Fenfire
+
+
+    Osahankkeen tiimin vetäjät (titteleineen):
+
+FT Tuomas Lukka
+
+
+    Osahankkeen tutkijat ja muut toimijat (titteleineen):
+
+ Jatko-opiskelijat:
+
+FM Janne Kujala
+FM Hermanni Hyytiälä
+
+ Perusopiskelijat:
+
+Tuukka Hastrup
+Matti Katila
+Asko Soukka
+
+ Ulkomainen yhteistyökumppani, saapuu Suomeen syksyllä pysyvämmin:
+
+Benjamin Fallenstein
+
+
+    Osahankkeen päätulokset, saavutukset, tavoitteiden pääsemiset yms. pääaktiviteetit  ko
+    ajanjaksolla:
+
+Ajanjaksolla tapahtui suuri muutos projektissamme, sillä Ted
+Nelson päätti olla lisensoimatta patenttiaan käytettäväksi vapaissa
+ohjelmistoissa. Siirryimme siksi käyttämään ZigZag-rakenteen sijaan
+RDF-graafeja. Samalla erottelimme koodimme seitsemään aliprojektiin,
+mikä toivottavasti auttaa ohjelmistomme soveltamista yrityksissä.
+
+Pääsaavutukset:
+
+- Storm-prototyyppi onnistui välittämään tietoa P2P-verkon yli.
+  Toinen julkaisu stormista: short paper HyperText '03 -konferenssissa
+
+- Uniikit taustatekstuurit -aliprojektissa saatiin aikaan monissa
+  eri ympäristöissä toimiva versio, sekä ensimmäinen julkaisu.
+
+    - Kaksi erilaista tapaa parantaa tekstin luettavuutta taustan päällä
+      huomattavasti käyttäen hyväksi moderneja näytönohjaimia.
+      Tästä juuri lähetetty keksintöilmoitus.
+
+- Navidoc -UML-työkalumme on otettu käyttöön projektissamme ja siitä
+  on julkaistu posteri HyperText '03 -konferenssissa. Työkalu
+  mahdollistaa projektin design- ja javadoc-dokumentaation
+  hyperlinkkaamisen UML-diagrammien kautta.
+
+- LEGO-ohjaimet: kehitimme uuden tavan rakentaa prototyyppiohjaimia
+  LEGO-palikoista sekä optomekaanisista hiiristä vähällä vaivalla ja
+  vähäisillä kustannuksilla, ilman sähkömekaanista erityisosaamista. 
+  Julkaistu posterina IV'03 -konferenssissa.
+
+- Swamp RDF-API: erittäin nopea RDF-tietokanta sovellustemme pohjalle.
+  API on suunniteltu siten, että se on mahdollista optimoida törmäämättä
+  rajoituksiin (iteraattorit tms).
+
+- FenPDF -prototyyppi: aikaisemmin kehittämiemme käyttöliittymien
+  siirto RDF-alustalle.
+
+- Kuvien vuorovaikutteinen lataus. Tämä on olennainen osa ensimmäistä
+  prototyyppiämme akateemista työtä varten: prototyypissä voidaan 
+  itse rakentaa rakenne tieteellisten artikkelien välille.
+  Kuvat ladataan katsomalla, paljonko niistä oikeasti piirrettiin näytölle.
+  Tässä siis kukin dokumentin sivu on 2048x2048 -tekstuuri tai suurempi.
+
+
+
+
+    Menikö edellinen kohta suunnitelmien mukaisesti:
+
+Ei täysin (ks. alla).  Tavoitteenamme oli pystyä alkamaan käyttää prototyyppiämme
+itse jo keväällä.
+
+    Syitä siihen miksi saavutettiin enemmän tai vähemmän kuin alkuperäisessä suunitelma
+    oli tarkoitus:
+
+Ted Nelsonin päätös olla lisensoimatta ZigZag-rakennettaan vapaissa
+ohjelmistoissa käytettäväksi yllätti meidät.  Tämä asia oli kuitenkin
+jo aiemmin luokiteltu potentiaaliseksi riskiksi, ja toiminnan suunnan
+muuttaminen ja jatkaminen sujui jopa yllättävän hyvin, mutta vaati silti
+suurta panosta työntekijöiltämme.
+
+Tämän vuoksi vaikuttaa, että pääsemme itse käyttämään systeemiämme vasta 
+syksyllä.
+
+
+    Mitä muita hankkeita tai hankeideoita on syntynyt osahankkeen tutkimustoiminnassa:
+
+Meillä on huomattava määrä uusia, mielenkiintoisia
+käyttöliittymäkonsepteja joita nyt ryhdymme tutkimaan yksi kerrallaan
+tarkemmin käyttäjäkokeilla yhteistyössä psykologien kanssa.  
+
+
+    Osahankkeen yhteistyökumppanit: yritysten nimet ja yhteistyökumppanit ko yrityksessä:
+
+Nokia
+Sonera (perheportaaliprojektin kautta)
+
+    Onko osahankkeen tutkimustoiminta ollut hyödynnettävissä yrityksissä, miten ja miltä
+    osin, jollei niin mitä pitäisi tehdä jotta voitaisiin hyödyntää:
+
+Yllä kuvattu lisenssiongelma vei paljon aikaamme, joten emme pystyneet
+olemaan riittävästi vuorovaikutuksessa yritysten kanssa.
+
+Olemme kuitenkin suuntaamassa hankettamme mm. Nokialta tulleen palautteen
+mukaiseksi: erityinen pyyntö oli tutkia käyttöliittymiemme toimintaa
+pienellä näytöllä sekä erilaisten ohjainten mukaan ottoa.  
+
+Nämä kaksi ongelmaa liittyvät mielestämme toisiinsa läheisesti
+ja tulee ratkaista yhdessä: hyvä ohjainkokonaisuus helpottaa
+pienen näytön käyttöä.
+
+Ohjainten tutkimiselle olemme kevään aikana luoneet edellytyksiä,
+keksimällä tavan rakentaa ja kytkeä uudenlaisia ohjaimia tietokoneeseen.
+Tämä työ synnytti yhden keksintöilmoituksen, jota Nokia ei kuitenkaan
+halunnut patentoida.
+
+Syksyllä suoritettavan tosielämän testauksen jälkeen pystymme helpommin
+kertomaan yrityksille, mitä osia systeemistämme kannattaisi erityisesti
+tarkastella.
+
+Mm. tekstin luettavuuden parannusmenetelmien testitulokset olisivat suoraan 
+sovellettavissa.
+
+    Millainen näkemys teillä  on  syyskauden tulevasta tutkimustoiminnasta osahankkeessa
+    (mihin suuntaan olette menossa, laajentuuko tutkimustoiminta yms.):
+
+Tärkein tavoite on saada ensimmäinen versio prototyypistämme omaan käyttöömme.
+Tavoitteeme on, että seuraavan artikkelin taustamateriaalit organisoimme
+sillä ja saamme siten kokemusta käyttöliittymiemme todellisesta suorituskyvystä.
+
+Ensimmäisen prototyypin jälkeen laajennamme käyttämäämme osaa systeemistä hiljalleen.
+
+Käyttöliittymäteknologioiden luonti ja testaus jatkuvat aktiivisesti.
+
+
+    Muut kommentit, ehdotukset yms:
+
+Keksintöilmoitusten käsittely tulisi jotenkin virtaviivaistaa: annettuamme
+ilmoituksen nokialle meihin otettiin yhteyttä huomattavan ajan päästä; 
+Nokian todettua ettei halua patentoida keksintöä meille ei annettu mitään
+muuta palautetta, on siis vaikea tietää millaisista keksinnöistä siellä haluttaisiin
+kuulla.
+
+
+
+

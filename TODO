@@ -1,0 +1,41 @@
+Tasks for fenfire generally
+
+    mudyc:
+        - text editing
+            - show text in one line lob/editor?
+            - editor buoy?
+        - setParamsCS for lobs.
+        - buoy stuff and canvases for both awt and gl
+        - fenmm	
+           - particles
+           - static
+        - storm and webdav
+        - pool managing
+         -> different pools for user
+          -> rdf storer  
+               - global rdf graph where
+                   - each triple is stored as ref to active 
+                     storm-ptr or such
+                   - import/export graphs from this global storage
+                   - store graphs to storm
+           -> rdf graph for user 
+               - every created triple belongs to active graph  
+            -> user definable bindings
+             -> window sizing
+
+        - fenfire background :)
+           - fix alpha channel for logo
+        - start themeability
+        - storm chat ;)
+        - storm mails :d
+        - manager plugin for demo stuff - mouse pointer vob etc.
+        - applet for family album stuff
+
+    Tjl
+	- support for Alph
+	    - API for node <-> content enfilade
+	    - serialization into node?
+
+    Anybody:
+	- draw UML diagrams similar to Gzz "Core APIs"
+

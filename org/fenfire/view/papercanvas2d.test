@@ -1,0 +1,109 @@
+# -*-python-*-
+# 
+# Copyright (c) 2003, Tuomas J. Lukka
+# This file is part of Fenfire.
+# 
+# Fenfire is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# Fenfire is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+# Public License for more details.
+# 
+# You should have received a copy of the GNU General
+# Public License along with Fenfire; if not, write to the Free
+# Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA  02111-1307  USA
+# 
+
+
+import java
+import vob
+
+from org import fenfire as ff
+from org.nongnu import alph
+from org.nongnu import storm
+
+from org.fenfire.vocab import CANVAS2D
+
+ff.test.gfx.needGL()
+
+
+from org.fenfire.test.gfx import *
+
+def testRenderClick():
+    """Test that rendering a canvas works right and
+    that we get a click.
+    """
+
+    ################ Create the fen, set up data
+
+    (fen, ff_structure, contentFunction) = ff.test.fen.newFen()
+    con = ff.util.AlphContent(fen, ff_structure)
+    canvas2d = ff.structure.Canvas2D.create(fen.graph)
+
+    nodec = ff.util.RDFUtil.N(fen.graph, CANVAS2D.Canvas)
+    canvas2d.makeIntoCanvas(nodec)
+
+    node1 = ff.swamp.Nodes.N()
+    node2 = ff.swamp.Nodes.N()
+    con.setText(node1, "XXX", 0)
+    con.setText(node2, "YYY", 0)
+    canvas2d.placeOnCanvas(nodec, node1, 200,100)
+    canvas2d.placeOnCanvas(nodec, node2, 200,500)
+
+    ################ Create the view structure
+    vs = getvs()
+
+    textnodeview = ff.view.TextNodeView(
+	contentFunction, 
+	vs.gfxapi.getTextStyle("Sans", 0, 50),
+	1)
+
+    canvasView2D = ff.view.CanvasView2D(fen, textnodeview)
+
+    paperView2D = ff.view.PaperView2D(
+	ff.functional.ConstantFunction(
+	    vob.gl.SpecialPapers.solidPaper(Color.yellow)
+	    ),
+	canvasView2D)
+    paperView2D.paperScaling = 1
+
+    irregu2D = ff.view.IrregularViewportView2D(paperView2D)
+
+    view2D = paperView2D
+    # view2D = canvasView2D
+
+    ################ Finally, create the vobscene
+    vs.put(SolidBackdropVob(Color.red))
+
+    box2screen = vs.orthoBoxCS(0, "b2s", 0, 100, 100, 1, 1, 300, 300)
+    box2plane = vs.orthoBoxCS(0, "b2p", 0, 0, 0, 2, 2, 300, 300)
+    
+    view2D.render(vs, nodec, box2screen, box2screen, box2plane)
+
+    render(vs)
+
+    ################ Check rendering
+
+    # Check the yellow frame location
+    checkAvgColor(50, 50, 10, 10, (255, 0, 0), 2)
+    checkAvgColor(150, 150, 10, 10, (255, 255, 0), 2)
+    checkAvgColor(450, 450, 10, 10, (255, 0, 0), 2)
+
+    # Check the texts
+    checkAvgColor(100+100, 100+40, 10, 9, (255, 255, 0), 2)
+    checkNotAvgColor(100+100, 100+50, 10, 9, (255, 255, 0), 10)
+    checkAvgColor(100+100, 100+240, 10, 9, (255, 255, 0), 2)
+    checkNotAvgColor(100+100, 100+250, 10, 9, (255, 255, 0), 10)
+
+    ############## Check mouse clicks
+
+    assert -1 == canvasView2D.getNodeCS(vs, 120, 120, nodec, 
+                                        box2screen, box2screen, box2plane, None)
+    assert node1 == canvasView2D.getNode(vs,
+        canvasView2D.getNodeCS(vs, 100+105, 100+55, nodec, 
+                               box2screen, box2screen, box2plane, None))

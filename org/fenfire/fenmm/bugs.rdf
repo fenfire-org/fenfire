@@ -1,0 +1,105 @@
+<rdf:RDF
+  xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'
+  xmlns:NS0='http://fenfire.org/rdf-v/2003/05/ff#'
+  xmlns:NS1='http://fenfire.org/rdf-v/2003/05/structlink#'
+ >
+  <rdf:Description rdf:about='urn:urn-5:P1kYr7f1HKgW73PhgrrqYX0sN9hp:_3'>
+    <rdf:type rdf:resource='http://fenfire.org/EXPERIMENTAL/rdf-v/2003/06/mindstruct#Data'/>
+    <NS0:content>&lt;alph&gt;&lt;uts b=&quot;urn:urn-5:7VYJkphNElULMewOACVCEwHqblz8:1&quot; o=&quot;31&quot; t=&quot;known bugs&quot;/&gt;&lt;/alph&gt;</NS0:content>
+    <NS1:linkedTo rdf:resource='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_8'/>
+    <NS1:linkedTo rdf:resource='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_14'/>
+    <NS1:linkedTo rdf:resource='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_7'/>
+  </rdf:Description>
+  <rdf:Description rdf:about='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_13'>
+    <rdf:type rdf:resource='http://fenfire.org/EXPERIMENTAL/rdf-v/2003/06/mindstruct#Data'/>
+    <NS0:content>&lt;alph&gt;&lt;uts b=&quot;urn:urn-5:pp7WEaKtrkn2jbJT8KGONI5U0nNT:1&quot; o=&quot;349&quot; t=&quot;maybe leave focus to None&quot;/&gt;&lt;/alph&gt;</NS0:content>
+  </rdf:Description>
+  <rdf:Description rdf:about='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_2'>
+    <rdf:type rdf:resource='http://fenfire.org/EXPERIMENTAL/rdf-v/2003/06/mindstruct#Data'/>
+    <NS0:content>&lt;alph&gt;&lt;uts b=&quot;urn:urn-5:pp7WEaKtrkn2jbJT8KGONI5U0nNT:1&quot; o=&quot;35&quot; t=&quot;whether last component is deleted&quot;/&gt;&lt;/alph&gt;</NS0:content>
+  </rdf:Description>
+  <rdf:Description rdf:about='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_15'>
+    <rdf:type rdf:resource='http://fenfire.org/EXPERIMENTAL/rdf-v/2003/06/mindstruct#Data'/>
+    <NS0:content>&lt;alph&gt;&lt;uts b=&quot;urn:urn-5:pp7WEaKtrkn2jbJT8KGONI5U0nNT:1&quot; o=&quot;414&quot; t=&quot;find among type MINDSTRUCT.data&quot;/&gt;&lt;/alph&gt;</NS0:content>
+  </rdf:Description>
+  <rdf:Description rdf:about='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_8'>
+    <rdf:type rdf:resource='http://fenfire.org/EXPERIMENTAL/rdf-v/2003/06/mindstruct#Data'/>
+    <NS0:content>&lt;alph&gt;&lt;uts b=&quot;urn:urn-5:pp7WEaKtrkn2jbJT8KGONI5U0nNT:1&quot; o=&quot;210&quot; t=&quot;node deletion weirdly defined&quot;/&gt;&lt;/alph&gt;</NS0:content>
+    <NS1:linkedTo rdf:resource='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_13'/>
+    <NS1:linkedTo rdf:resource='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_11'/>
+    <NS1:linkedTo rdf:resource='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_12'/>
+    <NS1:linkedTo rdf:resource='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_10'/>
+    <NS1:linkedTo rdf:resource='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_9'/>
+  </rdf:Description>
+  <rdf:Description rdf:about='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_7'>
+    <rdf:type rdf:resource='http://fenfire.org/EXPERIMENTAL/rdf-v/2003/06/mindstruct#Data'/>
+    <NS0:content>&lt;alph&gt;&lt;uts b=&quot;urn:urn-5:pp7WEaKtrkn2jbJT8KGONI5U0nNT:1&quot; o=&quot;177&quot; t=&quot;crash if no components at startup&quot;/&gt;&lt;/alph&gt;</NS0:content>
+  </rdf:Description>
+  <rdf:Description rdf:about='urn:urn-5:P1kYr7f1HKgW73PhgrrqYX0sN9hp:_2'>
+    <rdf:type rdf:resource='http://fenfire.org/EXPERIMENTAL/rdf-v/2003/06/mindstruct#Data'/>
+    <NS0:content>&lt;alph&gt;&lt;uts b=&quot;urn:urn-5:7VYJkphNElULMewOACVCEwHqblz8:1&quot; o=&quot;14&quot; t=&quot;remember to check&quot;/&gt;&lt;/alph&gt;</NS0:content>
+    <NS1:linkedTo rdf:resource='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_6'/>
+    <NS1:linkedTo rdf:resource='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_4'/>
+    <NS1:linkedTo rdf:resource='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_2'/>
+    <NS1:linkedTo rdf:resource='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_1'/>
+    <NS1:linkedTo rdf:resource='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_5'/>
+    <NS1:linkedTo rdf:resource='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_3'/>
+  </rdf:Description>
+  <rdf:Description rdf:about='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_12'>
+    <rdf:type rdf:resource='http://fenfire.org/EXPERIMENTAL/rdf-v/2003/06/mindstruct#Data'/>
+    <NS0:content>&lt;alph&gt;&lt;uts b=&quot;urn:urn-5:pp7WEaKtrkn2jbJT8KGONI5U0nNT:1&quot; o=&quot;323&quot; t=&quot;maybe focus neighbour node&quot;/&gt;&lt;/alph&gt;</NS0:content>
+  </rdf:Description>
+  <rdf:Description rdf:about='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_3'>
+    <rdf:type rdf:resource='http://fenfire.org/EXPERIMENTAL/rdf-v/2003/06/mindstruct#Data'/>
+    <NS0:content>&lt;alph&gt;&lt;uts b=&quot;urn:urn-5:pp7WEaKtrkn2jbJT8KGONI5U0nNT:1&quot; o=&quot;68&quot; t=&quot;whether focused node is deleted&quot;/&gt;&lt;/alph&gt;</NS0:content>
+  </rdf:Description>
+  <rdf:Description rdf:about='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_16'>
+    <rdf:type rdf:resource='http://fenfire.org/EXPERIMENTAL/rdf-v/2003/06/mindstruct#Data'/>
+    <NS0:content>&lt;alph&gt;&lt;uts b=&quot;urn:urn-5:pp7WEaKtrkn2jbJT8KGONI5U0nNT:1&quot; o=&quot;445&quot; t=&quot;*and* among connected with STRUCTLINK.linkedTo&quot;/&gt;&lt;/alph&gt;</NS0:content>
+  </rdf:Description>
+  <rdf:Description rdf:about='urn:urn-5:P1kYr7f1HKgW73PhgrrqYX0sN9hp:_1'>
+    <rdf:type rdf:resource='http://fenfire.org/EXPERIMENTAL/rdf-v/2003/06/mindstruct#Data'/>
+    <NS0:content>&lt;alph&gt;&lt;uts b=&quot;urn:urn-5:7VYJkphNElULMewOACVCEwHqblz8:1&quot; o=&quot;4&quot; t=&quot;FenMM bugs&quot;/&gt;&lt;/alph&gt;</NS0:content>
+    <NS1:linkedTo rdf:resource='urn:urn-5:P1kYr7f1HKgW73PhgrrqYX0sN9hp:_3'/>
+    <NS1:linkedTo rdf:resource='urn:urn-5:P1kYr7f1HKgW73PhgrrqYX0sN9hp:_2'/>
+    <NS1:linkedTo rdf:resource='urn:urn-5:P1kYr7f1HKgW73PhgrrqYX0sN9hp:_4'/>
+  </rdf:Description>
+  <rdf:Description rdf:about='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_6'>
+    <rdf:type rdf:resource='http://fenfire.org/EXPERIMENTAL/rdf-v/2003/06/mindstruct#Data'/>
+    <NS0:content>&lt;alph&gt;&lt;uts b=&quot;urn:urn-5:pp7WEaKtrkn2jbJT8KGONI5U0nNT:1&quot; o=&quot;151&quot; t=&quot;actions if no focused node&quot;/&gt;&lt;/alph&gt;</NS0:content>
+  </rdf:Description>
+  <rdf:Description rdf:about='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_11'>
+    <rdf:type rdf:resource='http://fenfire.org/EXPERIMENTAL/rdf-v/2003/06/mindstruct#Data'/>
+    <NS0:content>&lt;alph&gt;&lt;uts b=&quot;urn:urn-5:pp7WEaKtrkn2jbJT8KGONI5U0nNT:1&quot; o=&quot;291&quot; t=&quot;maybe remove from component list&quot;/&gt;&lt;/alph&gt;</NS0:content>
+  </rdf:Description>
+  <rdf:Description rdf:about='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_4'>
+    <rdf:type rdf:resource='http://fenfire.org/EXPERIMENTAL/rdf-v/2003/06/mindstruct#Data'/>
+    <NS0:content>&lt;alph&gt;&lt;uts b=&quot;urn:urn-5:pp7WEaKtrkn2jbJT8KGONI5U0nNT:1&quot; o=&quot;99&quot; t=&quot;view if only 0 or 1 component&quot;/&gt;&lt;/alph&gt;</NS0:content>
+  </rdf:Description>
+  <rdf:Description rdf:about='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_14'>
+    <rdf:type rdf:resource='http://fenfire.org/EXPERIMENTAL/rdf-v/2003/06/mindstruct#Data'/>
+    <NS0:content>&lt;alph&gt;&lt;uts b=&quot;urn:urn-5:pp7WEaKtrkn2jbJT8KGONI5U0nNT:1&quot; o=&quot;374&quot; t=&quot;nodes not connected not found in startup&quot;/&gt;&lt;/alph&gt;</NS0:content>
+    <NS1:linkedTo rdf:resource='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_15'/>
+    <NS1:linkedTo rdf:resource='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_16'/>
+  </rdf:Description>
+  <rdf:Description rdf:about='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_1'>
+    <rdf:type rdf:resource='http://fenfire.org/EXPERIMENTAL/rdf-v/2003/06/mindstruct#Data'/>
+    <NS0:content>&lt;alph&gt;&lt;uts b=&quot;urn:urn-5:pp7WEaKtrkn2jbJT8KGONI5U0nNT:1&quot; o=&quot;0&quot; t=&quot;whether we start with no components&quot;/&gt;&lt;/alph&gt;</NS0:content>
+  </rdf:Description>
+  <rdf:Description rdf:about='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_10'>
+    <rdf:type rdf:resource='http://fenfire.org/EXPERIMENTAL/rdf-v/2003/06/mindstruct#Data'/>
+    <NS0:content>&lt;alph&gt;&lt;uts b=&quot;urn:urn-5:pp7WEaKtrkn2jbJT8KGONI5U0nNT:1&quot; o=&quot;263&quot; t=&quot;maybe remove MINDSTRUCT.data&quot;/&gt;&lt;/alph&gt;</NS0:content>
+  </rdf:Description>
+  <rdf:Description rdf:about='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_5'>
+    <rdf:type rdf:resource='http://fenfire.org/EXPERIMENTAL/rdf-v/2003/06/mindstruct#Data'/>
+    <NS0:content>&lt;alph&gt;&lt;uts b=&quot;urn:urn-5:pp7WEaKtrkn2jbJT8KGONI5U0nNT:1&quot; o=&quot;128&quot; t=&quot;view if no focused node&quot;/&gt;&lt;/alph&gt;</NS0:content>
+  </rdf:Description>
+  <rdf:Description rdf:about='urn:urn-5:Zxmk14gZMG4vIsht-2IALC7UIjvU:_9'>
+    <rdf:type rdf:resource='http://fenfire.org/EXPERIMENTAL/rdf-v/2003/06/mindstruct#Data'/>
+    <NS0:content>&lt;alph&gt;&lt;uts b=&quot;urn:urn-5:pp7WEaKtrkn2jbJT8KGONI5U0nNT:1&quot; o=&quot;239&quot; t=&quot;maybe remove connections&quot;/&gt;&lt;/alph&gt;</NS0:content>
+  </rdf:Description>
+  <rdf:Description rdf:about='urn:urn-5:P1kYr7f1HKgW73PhgrrqYX0sN9hp:_4'>
+    <rdf:type rdf:resource='http://fenfire.org/EXPERIMENTAL/rdf-v/2003/06/mindstruct#Data'/>
+    <NS0:content>&lt;alph&gt;&lt;uts b=&quot;urn:urn-5:7VYJkphNElULMewOACVCEwHqblz8:1&quot; o=&quot;41&quot; t=&quot;bug &amp;quot;reports&amp;quot;&quot;/&gt;&lt;/alph&gt;</NS0:content>
+  </rdf:Description>
+</rdf:RDF>

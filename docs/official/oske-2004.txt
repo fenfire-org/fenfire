@@ -1,0 +1,286 @@
+======================
+FENFIREN SOVELLUTUKSET
+======================
+ 
+Osaamiskeskushankkeen luonne
+----------------------------
+
+.. Koulutusprojektit, toimintaympäristön kehittäminen, selvitykset,
+   suuremman projektikokonaisuuden valmistelu, yritysryhmäprojektit.
+
+Fenfire-teknologioista osa alkaa olla kypsää siirrettäväksi 
+yritysten käyttöön tosielämässä.
+
+Tässä hankkeessa on tarkoitus
+kehittää toimintaympäristöä yhteistyötä varten
+ja etsiä yritysyhteistyökumppaneita sekä verkostoitua Jyväskylän seudulla
+suurempaa sisällönhallintaprojektia varten.
+
+
+Lähtökohta
+----------
+
+Tavoitealueet
+"""""""""""""
+
+Hanke liittyy vahvimmin seuraaviin osaamiskeskuksen tavoitealueisiin: 
+
+Tutkimus- ja yritystoiminnan yhteistyön edistäminen, ja yritysten toimintaedellytysten parantaminen
+    Tässä projektissa tarkoituksena on nimenomaan etsiä sopivia yrityksiä
+    kokeilemaan teknologiaamme käytännössä, ja saada aikaan selkeää
+    vuorovaikutusta. Kohdeyrityksinä olisivat esimerkiksi lehtien
+    toimitukset ja muut, paljon dokumentteja käsittelevät tahot.
+
+Mahdollinen uuden liiketoiminnan käynnistyminen
+    Kiinnostus akateemisissa piireissä FenPDF-prototyyppiämme kohtaan
+    on saanut meidät uskomaan teknologiamme mahdollisuuksiin, ja 
+    osaamisen kaupallistaminen myös oman yritystoiminnan kanssa
+    on yksi mahdollisuus jota selvitämme.
+
+Strategisten tutkimusalueiden vahvistaminen 
+    Fenfire-projekti on ollut käynnissä Jyväskylän alueella jo 4 vuotta
+    (ensin nimellä GZigZag, sittemmin Gzz ja nyt, lopullisena nimenä
+    keväästä -03 alkaen Fenfire). Fenfire-projektissa on tehty useita
+    teknologisia innovaatioita jotka parantavat tietokoneiden käytettävyyttä.
+    Osa innovaatioista on jo kypsiä kaupalliseenkin soveltamiseen, kun taas
+    osa vaatii vielä lisätutkimusta.
+
+Agora
+"""""
+
+Hankkeen toteuttamisedellytykset ovat monitieteisessä Agora Centerissä
+poikkeuksellisen hyvät:
+Jyväskylän yliopiston Agora on eri alojen toimijoita kokoava verkosto
+sekä poikkitieteellinen tutkimusympäristö, jossa tutkimus, opetus ja
+yritykset toimivat yhdessä. Agoran yritystoimintaa, tutkimusta ja
+koulutusta yhdistävä toiminta-ympäristö on ainutlaatuinen koko
+maailmassa.
+
+Agora Center on ihmislähtöisen tieto- ja viestintäteknologian sekä
+poikkitieteellisen, ihmisen kehitystä ja oppimista koskevan
+huippututkimuksen keskus Jyväskylän yliopistossa.
+
+Agora Centerissä kootaan kansainvälisesti verkottuneen tutkimustyön
+tulokset ja voimavarat uusien innovatiivisten, aidosti ihmislähtöisten
+tuotekonseptien ja toimintamallien kehittämisen tueksi. Agora Center
+toimii poikkitieteellisellä alueella, joissa tutkimusongelmien ja
+kehittämistehtävien mielekäs asettaminen ja ratkaiseminen edellyttävät
+usean eri tieteenalan tietopohjaa. Niin tutkimus- kuin
+kehityshankkeetkin toteutetaan yhteistyöhankkeina yliopiston eri
+tieteenalojen, elinkeinoelämän, julkisen sektorin ja muiden
+toimijoiden kanssa.  Monitieteiset hankkeet kokoavat huipputasoisen,
+kansainvälisesti verkottuneen tutkimustyön tuloksia ja voimavaroja
+uusien innovatiivisten tuotekonseptien ja toimintamallien kehittämisen
+tueksi. Visionääristä, uutta luovaa toimintaympäristöä pyritään
+edelleen kehittämään panostamalla monipuoliseen yhteistyöhön,
+kansainvälisyyteen, tutkijoiden monitieteiseen koulutukseen sekä
+rahoituksen etsimiseen huomioiden toisaalta uudet nousevat alueet,
+toisaalta pitkäjänteisen tutkimustyön vaatimukset.
+
+Keskeistä Agora Centerin tutkimustyössä on, että tutkimusprosessi
+perustuu laajan partneriverkoston kanssa käytävään vuoropuheluun,
+jossa saadaan palautetta tutkimuksesta ja sen sovellettavuudesta, ja
+jossa toisaalta nousee eri tahojen kannalta merkittäviä
+kysymyksenasetteluja tutkimuksen kohteeksi.  Tavoitteena on aktiivinen
+osallistuminen tulevaisuuden tietoyhteiskunnan
+kehittämiseen. Painopisteenä on ihminen tulevaisuuden
+tietoyhteiskunnassa.
+
+Taustaa Fenfirestä
+""""""""""""""""""
+
+.. Jatka sitten tarkemmalla selvityksellä nimenomaan teidän spesifillä aiheella,
+   eli seuraava ohjeen asia, jossa kannattaa korostaa kansainvälistä tilannetta ja
+   yhteyksiä:
+   Tutkimuksen/teknologian tämänhetkinen tilanne ja taso projektin aihealueella
+   hakijan osalta, kotimaassa ja kansainvälisesti. Selvitys suoritetuista
+   esitutkimuksista.
+
+Fenfire-projekti alkoi vuonna 1999 tavoitteenaan toteuttaa Ted Nelsonin
+mielenkiintoisia, mainstream-tietotekniikassa käyttämättä jääneitä ideoita
+modernissa ympäristössä. Näistä tärkeimpänä tämän projektin yhteydessä
+mainittakoon Xanaloginen media, eli "referential fluid media". 
+Tässä mediatyypissä oleellisinta on, että normaaleilla "leikkaa-liimaa"
+operaatiolla siirretty/kopioitu osa *muistaa* alkuperänsä; 
+asiat pysyvät kytkeytyneinä ja on helppo hakea, "missä muualla tätä tekstiä
+on".  Lisäksi eri versioiden vertailu vierekkäin on helppoa, koska
+voidaan heti nähdä mitkä kohdat tekstistä on siirretty minnekin.
+Näemme nämä ominaisuudet äärimmäisen hyödyllisinä esim. lehtien
+toimituksille, joissa joudutaan käsittelemään suuria määriä informaatiota,
+jota usein myös joudutaan kopioimaan (esim. taustatietoja uusiin artikkeleihin).
+Xanaloginen media muodostaa tiedosta *rakenteen* ilman, että käyttäjän
+vaaditaan itse tekevän ristiviittauksia.
+
+Asia on kansainvälisesti relevantti; Nelsonin työn soveltamista tutkitaan 
+myös esim. Sunless Sea -projektissa (http://www.sunless-sea.net), mutta
+meillä on kaksi oleellista asiaan liittyvää innovaatiota jotka auttavat tosisovelluksissa
+huomattavasti:
+
+- kevyt, hajautettu transkludoitava teksti / muu data: huomattavasti aikaisempia helpommin
+  muihin ohjelmistoihin integroitavissa oleva malli, joka kuitenkin sallii
+  suuren osan Xanalogisen referentiaalisen median hyödyistä. Vältämme
+  keskusservereiden käytön sekä 
+
+- transkludoitavat PDF-tiedostot: voidaan kopioida palanen PDF-dokumentista johonkin kontekstiin
+  ja kopiointi synnyttää kaksisuuntaisen, kestävän linkin. Helppo rakentaa
+  esim. kirjallisuusviitteistä tavaraa.
+
+
+Ryhmämme on tehnyt myös muita omia innovaatioita asiaan liittyen, mm:
+
+- uniikit taustatekstuurit: monipuolisesti linkattujen dokumenttien 
+  selailu helpottuu kun dokumenttien
+  taustatekstuurit antavat käyttäjälle huomaamattomia vihjeitä hänen paikastaan
+  (tämä on havaittu FenPDF:n käytössä *ERITTÄIN* hyödylliseksi)
+
+- FenPDF -käyttöliittymä: yksinkertainen käyttöliittymä tiedon spatiaaliseen 
+  ja strukturaaliseen organisointiin. Dokumenttiin / tasoon liittyvät muut dokumentit *kelluvat*
+  näytön laidoilla, josta ne voi helposti poimia keskelle näyttöä; paluu
+  edelliseen paikkaan on vaivatonta.
+
+- lisäksi tiedon varastointiin liittyviä pysyvyysasioita: Storm jne
+
+
+Yllä kuvatut Fenfire-teknologiat alkavat nyt olla kypsiä tosimaailman sovelluksiin: 
+FenPDF-prototyyppi
+on tutkimusryhmämme sisäisessä käytössä akateemisen kirjallisuuden ymmärtämiseen,
+ja on käytössä havaittu erittäin toimivaksi. Olemme julkaisseet tutkimuksista ACM:n
+hypertekstikonferenssissa ja IEEE:n Information Visualization -konferenssissa.
+
+
+
+Tavoite
+-------
+
+.. Tulos, johon projektissa pyritään (tuote, menetelmä, malli,
+   ohjelma, prototyyppi tms. ja sen ominaisuudet). Projektin tekniset
+   tavoitteet ja niihin liittyvät uudet teknologiset mahdollisuudet ja
+   ratkaisut sekä syntyvä kilpailuetu. Kuvausta voi selventää
+   piirroksilla ja kaavioilla. Mitä on valmiina projektin päätyttyä ja
+   miten edetään sen jälkeen?
+
+Se, että FenPDF-prototyyppi on nyt ryhmämme sisäisessä todellisessa käytössä
+(ja useat muut tutkijat ovat osoittaneet huomattavaa kiinnostusta sen
+käyttöönottoon omassa työssään), on saanut meidät huomaamaan, että 
+tutkimusprojektimme on tulossa selkeästi uuteen vaiheeseen: on aika
+aloittaa soveltaminen käytäntöön, yritysten tarpeisiin. 
+
+Ei ole alkuunkaan selvää,
+mitkä osat todellisuudessa otettaisiin ensimmäiseksi tosikäyttöön; 
+tässä hankkeessa kyse on selvityksestä jossa koitamme tutustua
+relevanttien alojen yrityksiin ja selvittää mahdollisuuksia testata ja ottaa
+käyttöön teknologioitamme.  Tämän lisäksi selvitämme alalla olevia muita ohjelmistoja
+mahdollisuuksia teknologioidemme integrointiin niihen tai kilpailukykyä niitä vastaan.
+
+Lisäksi tavoitteena on edelleen kehittää Fenfire-teknologian vielä kypsymättömiä
+osia soveltuvammiksi tosimaailmaan.
+
+Toimenpiteet
+------------
+
+.. Kehitystyön eri vaiheet ja tehtävät.
+
+Ensimmäinen toimenpide on yrittää saada teknologioistamme aikaan hyvin selkeä
+kuvaus käytettäväksi yritysesittelyissä. 
+
+Seuraava toimenpide on ilman muuta Jyväskylän seudun sisällönhallintateknologiaa
+käyttävien yritysten löytäminen ja suhteiden luominen. Tavoitteena on saada
+selkeä kuva ja tuottaa sisäinen selvitys teknologioittemme mahdollisista hyödyntäjistä,
+heidän nykyisistä järjestelmistään ja käyttötavoista sekä toiveista.
+
+Potentiaalisia tapoja yrittää saadan teknologiamme käyttöön on useita, ja tarkoituksena
+on sekä arvioida, mikä näistä (tai muista, esiin tulevista vaihtoehdoista) olisi
+järkevin, että aloittaa jokin näistä jo ensi vuoden aikana:
+
+- Fenfire-teknologioiden integrointi OpenOfficeen, joka on vapaa Microsoft Officen
+  korvaava ohjelmistopaketti, tai johonkin muuhun vastaavaan valmiiseen
+  työkaluun - tämä loisi yrityksille *ilmaisen* ohjelmistokokonaisuuden
+
+- Integrointi teknologiamme yrityksissä jo oleviin
+  ratkaisuihin
+
+- Teknologioidemme tarjoaminen yritysten sisällönhallintaratkaisujen
+  valmistajille
+
+- Kokonaisratkaisun kehittäminen jollekin yritykselle; tämä olisi edellisiä
+  huomattavasti suurempi projekti, joka todennäköisesti vaatisi uuden 
+  yrityksen perustamisen tai alan yhteistyökumppanin etsinnän
+
+
+Aikataulu
+---------
+
+.. Projektin eri vaiheiden suoritusajankohdat ja järjestys aikajanojen
+   tai toimintaverkon muotoon laadittuna.
+
+Tarkkaa aikataulua on vaikea luoda juuri projektin vaatiman joustavuuden
+takia: kaikki riippuu yritysyhteistyöstä. Alustavasti voidaan sanoa seuraavat:
+
+Touko-kesäkuu 2004: Selkeä kuvaus yritysesittelyjä varten; 
+tuotosten hiominen sopivaan muotoon.
+
+Lokakuu 2004: Sisäinen selvitys mahdollisista hyödyntäjistä. 
+
+Projektin resurssointi
+----------------------
+
+.. Vastuullisen projektipäällikön nimi, koulutus ja asema
+   yrityksessä. Projektiryhmän avainhenkilöt ja tehtävien
+   vastuunjako. Selvitys yhteistyöstä muiden yritysten,
+   tutkimuslaitosten, korkeakoulujen ja yliopistojen kanssa.
+
+Projektipäällikkönä toimii FT Tuomas Lukka, joka on tällä hetkellä
+erikoistutkijana Agora Centerissä. Projektin avainhenkilöt ovat Benjamin Fallenstein
+(Saksasta vieraileva tutkijamme), Janne Kujala ja Tuukka Hastrup.
+
+Fenfire-projekti tekee yhteistyötä Oulun yliopiston tietojenkäsittelytieteiden
+kanssa, esim. sikäläinen tutkija, Toni Alatalo, on ottanut FenPDF-prototyypin
+kokeiluun.
+
+.. Hyödyntämissuunnitelma
+   ----------------------
+
+.. Kuvataan projektin tulosten hyödyntäminen uuden liiketoiminnan
+   kehittämisessä, uusien yritysten käynnistämisessä jne.
+
+.. Tämän projektin tarkoituksena on kartoittaa osaamisemme ja teknologioittemme
+   hyödyntämismahdollisuuksia todellisen
+
+Riskit
+------
+
+.. Projektin potentiaaliset ongelmat ja riskit. 
+
+
+.. Myös Riskit -kohta kannattaa miettiä, koska rahoittaja on siihen
+   eksplisiittisesti ohjannut.
+   Mutta EI luetella vain riskejä, vaan myös miten niihin on ennalta varauduttu.
+   Tästä ehkä voisi puhua silloin kahdelta lisää.
+
+Projektissa suurimmat riskit ovat:
+
+- Organisaatioissa yleisesti käytössä olevat monoliittiset kaupalliset 
+  tuotteet, joihin uusia ideoita on vaikea
+  integroida, esim. Microsoft Office
+
+    - suurin riski, koska teknologiamme on odottamatonta ja saattaa
+      vaatia isojakin muutoksia.
+
+    - tällaisissa tapauksissa vaihtoehtoja on kolme: 1) yrittää
+      tarjota teknologiaamme tuotteen valmistajalle, 2) tehdä
+      kilpaileva tuote, tai 3) yrittää kiertää ongelma ("kludge").
+
+- Teknologian saaminen ymmärrettävään muotoon
+
+    - Teknologiamme (sekä Nelsonin että itse kehittämämme) ovat varsin
+      kaukana valtavirrasta joten saattaa olla vaikeaa saada yritysten
+      edustajia ymmärtämään niistä saatavia etuja. Tämän takia
+      projektisuunnitelmassa on huomattavassa osassa tuotosten
+      hiominen ja sopivien esitysten tekeminen teknologioista.
+
+- Oikeiden kontaktien löytäminen
+
+
+
+
+

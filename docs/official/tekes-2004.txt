@@ -1,0 +1,179 @@
+Tutkimussuunnitelma: Fenfire-teknolohioihin pohjautuva Ad Hoc -kollaboraatio 
+============================================================================
+
+Tiivistelmä
+-----------
+
+Fenfire-projektin yhteydessä kehitetyt teknologiat mahdollistavat
+uudenlaisen lähestymistavan vapaamuotoisempaan
+tietokonepohjaiseen yhteistyöhön.
+Tämän projektin tavoitteena on toteuttaa konkreettinen 
+prototyyppi tästä visiosta.
+
+
+Taustaa
+-------
+
+1) Storm
+
+Storm on projektissamme kehitetty uudenlainen tiedon varastointimalli
+[Fallenstein et al. 2003].
+Muuttuvien hakemistojen ja tiedostojen sijaan stormin peruskäsitteenä 
+on *blokki*: muuttumaton bittijono, jolla on ikuinen tunniste 
+(kryptografinen hash-funktio).
+
+Tiedon tunnisteen käyttäminen sen löytämiseen (content
+addressing) tekee tietoverkossa toimimisen helpommaksi: 
+sen sijaan että samannimisestä tekstitiedostosta on usealla
+eri tietokoneella erilaisia, hieman muokattuja versioita
+samalla nimellä, voidaan olla varmoja että tietyllä id:llä
+tiedon hakeminen tuottaa aina täsmälleen saman tiedoston.
+
+Tämän perusmallin päälle, pelkästään pysyviä blokkeja käyttäen,
+on rakennettu stormin merkittävin
+innovaatio: pointterit, eli "tiedoston" tai muun tieto-olion
+versioiden seuraaminen.
+
+Tämä malli tekee tarpeettomaksi useissa ryhmätyö- tai
+versionhallintasovelluksissa vaaditun keskusserverin, koska
+kaikki ryhmän jäsenet voivat digitaalisin allekirjoituksin
+tietää, mikä "autoritatiivinen" versio jostakin tiedostosta on.
+
+2) Alph - identifioitu teksti 
+
+Alph on ryhmämme rakentama toteutus Xanalogisesta mediamallista[Nelson 1999].
+Tärkeimpiä Alphin sisältämiä innovaatioita Nelsonin esittämän
+perusmallin pohjalta ei ole vielä
+virallisesti julkaistu, osa ensimmäisistä löytyy
+artikkelista [Lukka ja Fallenstein 2002].
+
+...
+
+Yksi tapa ymmärtää tätä tekstimallia on ajatella tietokoneilla
+varastoitavaa ääntä, kuvaa ja videota. Vuosien varrella tietokoneiden
+kapasiteetin kasvaessa äänen sample ratea ja kanavien
+määrää, kuvien resoluutiota ja värien määrää ja videokuvien kokoa
+ja taajuutta on kasvatettu huomattavasti, koska näin on saatu
+varastoitua kyseiset mediat *paremmin*. Teksti on nykyään
+lähestulkoon samanlaista kuin 20 vuotta sitten (siis nimenomaan
+leipäteksti, ei esim. kaavakkeet tai taulukot, joissa XML:n kanssa
+on edistytty huomattavasti). Identifioitu teksti (kuten TIML:ssä)
+lisää "tekstin resoluutiota", ja antaa mahdollisuuksia joita
+ei aiemmin ollut, varastoimalla enemmän tietoa tekstistä.
+
+
+3) Muut
+
+Libvob, FenPDF, Textcloud
+
+Esimerkkiskenaario
+------------------
+
+1) Perusskenaario
+
+Kaksi (tai enemmän) ihmistä istuu kahvilassa (tai kokoushuoneessa
+tai netin välityksellä eri paikoissa tms), molemmilla 
+on mukanaan omat kannettavat tietokoneet (joko perinteinen sylikone 
+tai esim. Nokia Communicator, tai jokin yhdistelmä).  Tavoitteena
+työskennellä yhdessä jonkin dokumentin tai ohjelman tms laajahkon
+kokonaisuuden parissa.  
+
+Kokemustemme (hieman hankalammasta kontekstista, käyttäen keskitettyä
+versionhallintajärjestelmää) mukaan luonnollisin työtapa on hyvin 
+joustava: välillä
+katsotaan joitakin kohtia yhdessä nopeasti, kysytään toiselta, välillä
+kumpikin keskittyy erikseen johonkin kohtaan.  Välillä toinen poistuu
+paikalta, ja joku muu ehkä liittyy joukkoon.
+
+Tärkeintä on työtilanteen joustavuus: kaikki aika, joka joudutaan käyttämään
+
+- tietokoneiden konfigurointiin
+
+- verkkoyhteyteen serverille
+
+- versioiden yhdistämiseen
+
+on pois yhteistyöstä. Jos tämä työmalli saataisiin toimimaan
+yksinkertaisesti, seurauksena voisi olla huomattava tuottavuuden kasvu.
+
+2) Nykytilanne
+
+Nykytyövälineillä useimmiten joudutaan joko työskentelemään vain
+toisella koneella tai, jos yhteys koneiden välillä toimii, jakamaan
+dokumentti selkeästi osiin joita kukin voi työstää. Olemassaolevat
+versionhallintajärjestelmät (CVS, Arch, ...) ovat jäykkiä ja vaativat
+ihmisten tekevän itse eksplisiittisesti versioiden välisen
+yhdistämisen.  Toisentyyppiset ryhmätyöjärjestelmät taas vaativat,
+että molemmat katsovat koko ajan samaa kohtaa dokumentista,
+eivätkä anna molempien keskittyä eri asioihin välillä.
+
+3) Miten Fenfire-teknologiat tekevät tämän skenaarion helpommaksi?
+
+Tärkeimmät olemassaolevat Fenfire-teknologiat tässä skenaariossa ovat 
+Storm ja Alph.
+
+Stormin pysyvä blokkimalli helpottaa suuresti *luotettavien* työkalujen
+ohjelmointia yllä mainittua skenaariota varten. Kun tiedon identiteetti
+ei riipu sen sijainnista, tieto on helppo siirtää laitteiden välillä
+ja versioiden välisten erojen seuraaminen helpottuu, koska kunkin
+version historia tallennetaan.
+
+Alph taas on erinomainen pohja työkaluille, joilla versioiden 
+konfliktoivia muutoksia
+sovitetaan yhteen. Transcludable Fluid Media -malli antaa 
+mahdollisuuden jäljittää
+dokumentin sisällä tapahtuneet uudelleenjärjestelyt (toisin 
+kuin esim. normaalit
+versioerojennäyttötyökalut, joissa palasen tekstiä siirto mallinnetaan
+poistoksi ja lisäykseksi).
+
+Kumpikaan teknologia ei vielä ratkaise kuvattua skenaariota 
+täysin, mutta molemmat tekevät
+ratkaisun omalta osaltaan huomattavasti helpommiksi; 
+teknologiat on alunperin
+*suunniteltu* juuri tällaisia skenaarioita silmälläpitäen.
+
+
+Projektin tavoitteet
+--------------------
+
+Projektin lähtökohtana on yllä esitetty esimerkkiskenaario, joka vastaa
+näkemyksiämme ryhmätyöteknologian tarpeista.
+
+Projektin päätavoitteena on rakentaa pohjatason Fenfire-teknologioiden
+(Storm, Alph, Libvob, FenPDF, Textcloud) päälle joustavasti toimiva
+ryhmätyöskentelyprototyyppi. Prototyyppin rakentamiseen sisältyvät 
+seuraavat tutkimusongelmat:
+
+- RDF-tiedostoijen eri versioiden välisten muutosten esittäminen
+  ja yhdisteleminen ja konfliktien esittäminen RDF:ssä sekä 
+  käyttöliittymissä
+
+- Storm-pointterien käyttö mergessä
+
+- Yhteistyön mahdollistavan kehyksen tuominen selkeästi ilmi käyttäjille
+  ilman, että se häiritsee työtä
+
+
+
+
+Viitteet
+--------
+
+[Fallenstein et al. 2003] 
+Benjamin Fallenstein, Tuomas J. Lukka, Hermanni Hyytiälä and Toni Alatalo:
+Storm: Supporting Data Mobility Through Location-indepedent 
+Identifiers. 
+*Proc. Hypertext 2003*
+
+[Lukka ja Fallenstein 2002] 
+Tuomas J. Lukka and Benja Fallenstein: 
+Freenet-like GUIDs for implementing xanalogical hypertext. 
+*Proc. Hypertext 2002*, pp. 194-195.
+
+[Nelson 1999]
+Theodor Holm Nelson:
+Xanalogical structure, needed now more than ever: parallel documents,
+deep links to content, deep versioning, and deep re-use.
+*ACM Computing Surveys*, 31(4es)
+

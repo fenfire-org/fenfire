@@ -1,0 +1,75 @@
+Värit (ryhmä 1)
+===============
+
+- motivaatio: värien valinta ainutkertaisia taustatekstuureja varten
+- yksinkertaistus: väriparien muistettavuus (tekstuureissa on useampia värejä)
+- tavoite: selvitetään väripareille jakauma, jonka otokset väriparit
+  ovat mahdollisimman hyvin muistettavia ja toisistaan erottuvia
+
+- XXX: shakkilauta- vai center/surround-tyyppiset stimulukset?
+
+Mätsäys
+-------
+
+- selvitetään miltä värit näyttävät eri konteksteissa
+- koehnkilö säätää väriparin toista väriä, kunnes se näyttää
+  samalta kuin referenssiparin vastaava väri
+- tulos: kuvaus väripareilta perseptuaalisille väripareille
+- ysittäisten värien perseptuaaliseen skaalaus jää tuntemattomaksi
+
+Thresholdi
+----------
+
+- mitataan kuinka suuri ero (perturbaatio) kussakin väriparissa on
+  havaittavissa ja kuinka tämä kynnysetäisyys muuttuu kun väriparin 
+  värejä muutetaan ja kun perturbaation suuntaa muutetaan
+
+???
+---
+
+
+Tekstin renderöinti (ryhmät 2 ja 3)
+===================================
+
+- teksturoidut taustat voivat haitata tekstin luettavuutta
+- tekstin pienennysfiltterin artifaktit voivat haitata luettavuutta
+- taustan vaikutusta voi vähentää blurraamalla tai vaalentamalla 
+  taustaa huomaamattomasti tekstin ympärillä
+
+- mitataan vaalennuksen ja blurrauksen vaikutus luettavuuteen
+- mitataan kuinka havaittavia vaalennus ja blurraus ovat ja mikä
+  on parannuksen havaittavuuden suhde mitattuun suorituskykyyn
+- mitataan pienennysfiltterin vaikutus luettavuuteen
+
+Tekstin parametrit
+------------------
+
+- freetype/trilinear/supersampled
+- fontti, fontin koko
+- rotaatio
+
+Taustan parametrit
+------------------
+
+- blurraus (etäisyys, blurraussäde)
+- vaalennus (etäisyys, vaalennus)
+- tekstuuri: valkea, tasavärinen, ruudukko, raidoitus, etc.
+
+Menetelmä
+---------
+
+- 20 trialia peräkkäin (tottuminen) kullakin taustavaihtoehdolla
+- taustat satunnaisessa järjestyksessä
+- 9 kh
+
+Diskriminaatio (ryhmä 2)
+------------------------
+
+- kirjaimen hakeminen sanasta tai kirjainmatriisista
+
+
+Lukeminen (ryhmä 3)
+-------------------
+
+- lyhyiden tekstien lukeminen
+

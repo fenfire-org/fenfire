@@ -1,0 +1,195 @@
+User-visible bugs in FenPDF 1.0
+===============================
+
+FATAL
+-----
+
+- "PLANE IS NOT A CONTAINER"!
+    - gets blue screen, nothing happens
+    - [mudyc] This is because someone has deleted the canvas and there 
+      still are no good way to do after this operation. Until 2003-08-20 patch 
+      of mouse menu this could happend. report if it still does it.
+
+- Text texture bug is fixed by tjl:
+
+    - Menu seems to clobber fonts?
+    - Sometimes, some characters-- particular capitals, "P" and "B" are known--
+      disappear. After that point, these characters will not be shown on any
+      canvas until FenPDF is restarted.
+    - Sometimes (usually some time after the previous bug), some characters
+      will start to show as black squares, overlapping slightly onto the
+      next character. Again, this will not undo itself until you restart 
+      FenPDF.
+
+- Instability. 
+    - Have seen it crash in renderImpl.
+    - invalid coordsys inv?
+    - too many clicks -> throws an error.
+   
+- I got a BLACK paper from papermill?!?!?!?!
+
+    - no, shows sometimes as a different paper, but then overwritten
+      as black. What's going on with these texture ids?
+
+    - if you zoom in or out, parts of the page may lighten up,
+      so it looks like a flashlight effect illuminating part of
+      a dark area
+
+IMPORTANT:
+
+- Backspace doesn't regenerate vob scene (or it doesn't show)
+    - [mudyc] At least code does regenerate the VS.
+
+- Text cursor often isn't exactly in the right position on x-axis;
+  apparently, character widths are miscalculated somewhere
+    - [mudyc] someone who has made linebreaker should fix this.
+
+- startup takes far too long.  [slightly mitigated already 
+  by tjl, fixing irregu generation.]
+
+- [mudyc] fixed to follow the specification:
+
+    - Clicking on a node selects it; left-dragging over a selected
+      node moves that node, which makes it really difficult to
+      read a piece of an article transcluded to a canvas: when
+      zooming in enough that it's readable, it often fills out
+      the whole irregu frame, and you cannot easily pan without
+      being afraid you'll move the node...
+
+      The solution is to follow the spec: moving nodes
+      and transclusions is ``ctrl + click + drag``.
+
+- [mudyc] Added typechecking, so fixed.
+    - Typing on an PDF apparently creates a non-shown text node;
+      in the RST output this'll result in something insane,
+      along the lines of::
+
+    <rdf:Description rdf:about='org.nongnu.alph.impl.PageImageScroll@ecfba14e'>
+       <canvas2d:contains rdf:resource='urn:urn-5:gJ-BQIjjChv8QusiMTtiIDaYh+sC:_10'/>
+    </rdf:Description>
+
+- [mudyc] fixed
+    - sometimes "not a canvas view"
+    [ architecture-wise: what the hell is AbstractMainNode2D
+      doing, checking members' derived types?
+      We need to think about what View2D needs to do.
+      getChildView2D is **NOT** a good solution.
+      ]
+    [mudyc] this is always seen if not a canvas view, i.e. pdf/ps.
+      This can be avoid by overloading the method in fisheyeMainNode2d 
+      to return null, but as tjl mentioned, something else is needed. 
+
+- menu needs sometimes to be clicked several times
+
+    - need proper grab framework
+
+    - [mudyc] 2003-08-21 might be a problem that 
+      AbstractUpdateManager.chg() isn't called. 
+      Try to press i.e., 'ctrl' and see if this
+      animates the animation. Also I think I fixed this already.
+      Reports please.
+
+- tmpimg generation and mipzip making needs to be in a separate thread
+
+- .dsc info needs to be cached
+
+- [mudyc] fixed
+    - When creating new text node, the line cursor shown is *above*
+      where text will actually be shown -- the lower end of the
+      line cursor is where the upper end of the text will be.
+
+
+ANNOYANCE
+---------
+
+- deleting a canvas does nothing...
+
+- Context menu of treetime things has "Unlink buoy," which
+  doesn't make sense -- remove
+
+- timings need adjustment
+
+- Structlink connecting not done in the right way by spec
+
+- [mudyc] fixed partially
+   - selection not removed at first other click
+
+- no click&drag of selected area to transclude
+
+- [mudyc] fixed
+    - in pdf nodes, transclusions connected to center always,
+      not real transclusion center
+
+- in transclusion nodes, text fairly unreadable
+    
+    - do we need xu links!?
+	- might be appropriate, or structlink with 
+	  enfilade on other end?
+
+- pdf fisheye dragging not right by coordinate system
+
+- need way to move to same node on other focus
+
+- multiple transclusions from a doc as a way of shortening
+  doesn't work nicely with current interface - buoys need
+  to be combined and buoys used several times magnified a little more
+
+- "crosshair" cursor too large and in wrong place!
+
+- mouse wheel scrolls too slowly
+    - [mudyc] added more speed, reports please.
+ 
+- irregu breaks with very large zoom
+
+- selection on a PDF (for transcluding) is lost when a canvas (in the 
+  other focus) is clicked *the second time*. 
+  annoying when the selection/marking is first made, and then the 
+  proper place for it on a canvas searched for.
+  this is intended, as moving will be implemented by dragging, when
+  clicking can be used for deselecting. but if multiple drags are
+  needed, will this be a problem still? (perhaps not as drag!=click?)
+
+
+WISHLIST
+--------
+
+- importing PDFs from URLs; a helper application/script for mozilla 
+  that opens PDFs in FenPDF would be nice
+
+- contrast / brightness adjustment for PDFs - some are much lighter than
+  others.
+
+- when importing a directory, ability to transclude first pages of all imported docs to 
+  a canvas. Would make easier - did it manually with HT02, not fun.
+
+- more than two foci, some push/pop/foo arrangement.
+
+- cloning a focus
+
+- flat PDF-viewing (fisheye coompletely off) and negative fisheheye
+  with more magnification in the periphery (cf. book)
+
+- when saving and later restarting, would be nice to get back to the 
+  same state, i.e. same focus with same parameters (e.g. fisheye).
+  a discussed solution is to have an object that can do what createMainNode
+  does and gives fisheye when appropriate
+
+ALREADY FIXED, BUT SYMPTOM OF DEEPER ARCHITECTURAL PROBLEM
+----------------------------------------------------------
+
+- unlink buoy doesn't work for transclusions!
+    [ architecture-wise we should separate the bindings
+      and actions as modularly as possible to help 
+      people build different things out of the parts.
+      Multiplexing actions by buoy type is one important thing.
+      ]
+
+BEHAVIOUR ON UNSUPPORTED PLATFORMS  
+----------------------------------
+
+- on antont@oulu.fi's workstation (tolp42.oulu.fi) fenpdfdemo crashes, 
+  might well be the non-supported (currently unknown) gfx card.
+  full output & glxinfo in http://an.org/fenfire/tolp42-error.txt   
+  which revealed that software rendering was used (might be the cause too)
+  .. does not necessarily need to be fixed, just documented when released.
+

@@ -1,0 +1,204 @@
+# -*-python-*-
+# 
+# Copyright (c) 2003, Tuomas J. Lukka
+#               2004, Matti J. Katila, Benja Fallenstein
+# 
+# This file is part of Gzz.
+# 
+# Gzz is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# Gzz is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+# Public License for more details.
+# 
+# You should have received a copy of the GNU General
+# Public License along with Gzz; if not, write to the Free
+# Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA  02111-1307  USA
+# 
+# 
+
+
+from __future__ import nested_scopes
+import sys
+import traceback
+
+import org
+from org import fenfire
+fenfire.test.gfx.needGL()
+
+import java
+
+
+import vob
+from org.nongnu import alph
+from org.nongnu import storm
+
+vob.view.FisheyeState.dbg = 1
+
+from org.nongnu.libvob.gl import GL, GLRen, GLCache
+
+from org.fenfire.test import gfx
+
+import sys
+
+
+import vob.paper
+import vob.paper.papermill
+
+from org.fenfire.spanimages import gl as spim
+
+
+dbg = 1
+
+def setUp():
+    global sc_page, sc_img
+
+    pool = org.nongnu.storm.impl.TransientPool(java.util.HashSet())
+    myalph = alph.impl.StormAlph(pool)
+    sc_page = myalph.addFile(java.io.File('../alph/testdata/test1.pdf'), 'application/pdf')
+    assert sc_page.getBlockId().getURI() == "vnd-storm-hash:application/pdf,6qrwyxinrkbr6znvopuo2rnqc7jjfpqg.ettfngwwbh4ore2hljm4soyipujr42gc7becvgq"
+
+    sc_img = myalph.addFile(java.io.File("testdata/test.png"), 'image/png')
+    #print sc_img.getBlockId().getURI()
+    assert sc_img.getBlockId().getURI() == 'vnd-storm-hash:image/png,pbqrtu42fqpm2zgceea7kzukwiaej5hi.6ikqbro4lk7yf6yrhlw6xutvcpc45u2qodebmzy'
+
+
+def testTestSpan():
+    """Test that we really have the pagespan images.
+
+    If not, all other tests in this file will fail too.
+    """
+    if dbg:
+	print "len",sc_page.getCurrent().length()
+    assert sc_page.getCurrent().length() == 2
+    sz =  sc_page.getPage(0).getSize()
+    assert sz.width == 595
+    assert sz.height == 842
+
+
+def check(spanImageFactory, blank, isPDF):
+
+    if isPDF:
+        span = sc_page.getCurrent().getPage(0)
+    else:
+        span = sc_img.getCurrent()
+
+    spanImageVob = spanImageFactory.f(span)
+
+    if isPDF:
+        assert 615 < spanImageVob.getWidth() < 625
+        assert 870 < spanImageVob.getHeight() < 880
+
+    vs = gfx.getvs()
+    vs.map.put(vob.vobs.SolidBackdropVob(java.awt.Color.yellow))
+
+    pcs = vs.orthoCS(0, "A", 0, 50, 50, 400.0 / spanImageVob.getWidth(), 
+					400.0 / spanImageVob.getHeight())
+
+    vs.map.put(spanImageVob, pcs)
+
+    for i in range(0, 50):
+	for j in range(0, 20):
+	    # Have to do by hand - no abstractupdatemanager loop
+	    vob.AbstractUpdateManager.tickIdle()
+	gfx.render(vs)
+
+	# check the rendered image's color
+        if isPDF:
+            if checkPDFColors(): 
+                if blank:
+                    checkBlank()
+                else:
+                    checkNonBlank()
+                return
+        else:
+            if checkImageColors():
+                return
+
+	java.lang.Thread.sleep(1000)
+
+    
+
+    assert 0==1, "didn't get the image " + exc
+
+
+def excinfo():
+    global exc
+    typ, val, tra = sys.exc_info()
+    if dbg:
+	print (repr((typ, val)))
+	print str(val)
+    exc = "\n".join(traceback.format_list(traceback.extract_tb(tra)))
+
+def checkPDFColors():
+    try:
+	# Check that the green rectangle is there
+	gfx.checkAvgColor(160,150,50,50, (0, 180, 0), delta=80)
+	# Check that the red rectangle is there
+	gfx.checkAvgColor(260,150,50,50, (180, 0, 0), delta=80)
+	# Check that the black rectangle is there
+	gfx.checkAvgColor(150,225,20,50, (0, 0, 0))
+	gfx.checkAvgColor(330,225,20,50, (0, 0, 0))
+
+	# Check that the border is yellow
+	gfx.checkAvgColor(45, 0, 2, 500, (255, 255, 0))
+	gfx.checkAvgColor(453, 0, 2, 500, (255, 255, 0))
+    except:
+	excinfo()
+	return 0
+    return 1
+
+def checkImageColors():
+    try:
+        # X-offset of image = Y-offset of image = 50
+        # Zoom factor = 4
+
+	# Check that the red rectangle is there
+	gfx.checkAvgColor(50+30*4,50+30*4,20*4,20*4, (255, 0, 0), delta=80)
+	# Check that the green rectangle is there
+	gfx.checkAvgColor(50+30*4,50+70*4,20*4,20*4, (0, 255, 0), delta=80)
+	# Check that the blue rectangle is there
+	gfx.checkAvgColor(50+70*4,50+30*4,20*4,60*4, (0, 0, 255), delta=80)
+
+	# Check that the border is yellow
+	gfx.checkAvgColor(45, 0, 2, 500, (255, 255, 0))
+	gfx.checkAvgColor(453, 0, 2, 500, (255, 255, 0))
+    except:
+	excinfo()
+	return 0
+    return 1
+
+def checkNonBlank():
+    gfx.checkNotAvgColor(100, 100, 3, 20, (255, 255, 255))
+
+def checkBlank():
+    gfx.checkAvgColor(100, 100, 3, 20, (255, 255, 255))
+
+
+
+def testPlainPaperPDF():
+    """Test that plain paper renders right.
+
+    """
+    # The defaults are such that 
+    spanImageFactory = spim.DefaultSpanImageFactory(
+        spim.PageScrollBlockImager(),
+        spim.PlainPaperMaker()
+        )
+    
+    check(spanImageFactory, 1, 1)
+
+def testPNG():
+    spanImageFactory = spim.DefaultSpanImageFactory(
+	    spim.ImageScrollBlockImager(),
+	    spim.PlainPaperMaker()
+	)
+    check(spanImageFactory, 1, 0)
+
+
+# : vim: set syntax=python :

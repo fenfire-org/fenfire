@@ -1,0 +1,123 @@
+# -*-python-*-
+# 
+# Copyright (c) 2003, Matti Katila and Benja Fallenstein
+# This file is part of Fenfire.
+# 
+# Fenfire is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# Fenfire is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+# Public License for more details.
+# 
+# You should have received a copy of the GNU General
+# Public License along with Fenfire; if not, write to the Free
+# Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA  02111-1307  USA
+# 
+
+
+
+import org.fenfire as ff
+import org.fenfire.swamp as swamp
+import java
+import com.hp.hpl.mesa.rdf.jena as jena
+import os
+
+file = 'org.fenfire.swamp.writer.testFileSaveAndLoad.test.data'
+
+dbg = 0
+
+def testFileSaveAndLoadSimple():
+    """ Test file saving and loading with simple resource names.
+
+    Makes resources as aesy as 'foo:a0', 'foo:a1' and such
+    """
+
+    g = swamp.impl.HashGraph()
+    n = swamp.Nodes()
+
+    for i in range(0,10):
+        g.add(n.get('foo:a'+str(i)), n.get('foo:b'+str(i)), n.get('foo:c'+str(i)))
+
+    #### Save
+    m = swamp.writer.write(g, file)
+
+    #### Load
+    m = jena.mem.ModelMem()
+    m = m.read(java.io.FileReader(file), None)
+    g = swamp.Graphs.toGraph(m)
+    
+    iter = g.findN_XAA_Iter()
+    for i in range(0,10):
+        assert iter.hasNext()
+        assert iter.next() != None
+    
+    #### clean
+    os.system('rm '+file)
+
+
+def testFileSaveAndLoadUrn5():
+    """ Test file saving and loading using real urn-5 resources.
+    """
+    
+    g = swamp.impl.HashGraph()
+    n = swamp.Nodes()
+    for i in range(0,10):
+        g.add(n.N(), n.N(), n.N() )
+
+    #### Save
+    swamp.writer.write(g, file)
+
+    if dbg:
+	print open(file).read()
+
+    #### Load
+    m = jena.mem.ModelMem()
+    m = m.read(java.io.FileReader(file), None)
+    g = swamp.Graphs.toGraph(m)
+    
+    iter = g.findN_XAA_Iter()
+    for i in range(0,10):
+        if dbg: print "<%s>" % i
+        assert iter.hasNext()
+        assert iter.next() != None
+    
+    #### clean
+    os.system('rm '+file)
+
+
+def testRealContentSaveLoad():
+    (fen, ff_structure, contentFunction) = ff.test.fen.newFen()
+    g = fen.graph
+    cont = ff.util.AlphContent(fen, ff_structure)
+
+    prop = ff.swamp.Nodes.get('http://example.org/someprop')
+
+    node = ff.swamp.Nodes.N()
+    cont.setText(node, 'test <&"> test', 0)
+    g.add(node, prop, ff.swamp.PlainLiteral('test <&"> test 2'))
+
+    #### Save
+    swamp.writer.write(g, file)
+
+    if dbg:
+	print open(file).read()
+
+    #### Load
+    m = jena.mem.ModelMem()
+    m = m.read(java.io.FileReader(file), None)
+    readGraph = ff.swamp.Graphs.toGraph(m)
+    (fen, ff_structure, contentFunction) = ff.test.fen.newFen(readGraph)
+    cont = ff.util.AlphContent(fen, ff_structure)
+    
+    assert 'test <&"> test' == cont.getText(node)
+    assert 'test <&"> test 2' == \
+           readGraph.find1_11X(node, prop).getTextString()
+    
+    #### clean
+    os.system('rm '+file)
+

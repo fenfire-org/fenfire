@@ -1,0 +1,58 @@
+# -*-python-*-
+# 
+# Copyright (c) 2003, Tuomas J. Lukka, Asko Soukka
+# This file is part of Fenfire.
+# 
+# Fenfire is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# Fenfire is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+# Public License for more details.
+# 
+# You should have received a copy of the GNU General
+# Public License along with Fenfire; if not, write to the Free
+# Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA  02111-1307  USA
+# 
+
+import java
+import os
+import vob
+
+from org import fenfire as ff
+
+def testTextCursorMovement():
+    """
+    Test that the text cursor is moved correctly.
+    """
+    (fen, ff_structure, contentFunction) = ff.test.fen.newFen()
+    textstyle = vob.GraphicsAPI.getInstance().getTextStyle("sans", 0, 24)
+    textnodeview = ff.view.TextNodeView(contentFunction, textstyle)
+
+    note = "Lorem ipsum\ndolor sit amet, consetetur sadipscing elitr,  sed diam nonumy\nrmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd \nbergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr,  sed diam\nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores\n ea rebum. Stet\nlita kasd gubergren, no sea ta\nmata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr,  sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos e\naccusam et justo duo dolores et ea re\nm. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."
+
+    node = ff.swamp.Nodes.N()
+    ff.util.AlphContent(fen, ff_structure).setText(node, note, 1)
+
+    p = textnodeview.f(fen.graph, node)
+
+    c = ff.fenmm.MMTextCursor(textstyle)
+    c.setTextPlaceable(p)
+
+    assert c.moveLeft() == 0, wrongOffset(c)
+    assert c.moveRight() == 1, wrongOffset(c)
+    assert c.moveRight() == 2, wrongOffset(c)
+    assert c.moveLeft() == 1, wrongOffset(c)
+    assert c.moveEndLine() == note.find("\n"), wrongOffset(c)
+    assert c.moveBeginLine() == 0, wrongOffset(c)
+    assert c.moveDown() == 12, wrongOffset(c)
+    assert c.moveUp() == 0, wrongOffset(c)
+    assert c.moveEnd() == len(note), wrongOffset(c)
+    assert c.moveBegin() == 0, wrongOffset(c)
+
+def wrongOffset(c):
+    return 'The wrong text cursor offset: %s' % (c.getOffset())

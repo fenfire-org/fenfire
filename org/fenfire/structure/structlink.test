@@ -1,0 +1,121 @@
+# -*-python-*- 
+#
+# Copyright (c) 2003, Tuomas J. Lukka
+# This file is part of Fenfire.
+# 
+# Fenfire is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# Fenfire is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+# Public License for more details.
+# 
+# You should have received a copy of the GNU General
+# Public License along with Fenfire; if not, write to the Free
+# Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA  02111-1307  USA
+# 
+
+
+from org import fenfire as ff
+from org.fenfire.swamp import Nodes
+from org.fenfire.structure import StructLink
+
+def seteq(iterator, set):
+    """Test that the given iterator and set contain the
+    same elements.
+    """
+    l = []
+    while iterator.hasNext(): l.append(iterator.next())
+    for i in l:
+	assert (i in set), (l, set, i)
+    for i in set:
+	assert (i in l), ("2", l, set, i)
+
+def testAssocs():
+    graph = ff.swamp.impl.HashGraph()
+    structLink = StructLink.create(graph)
+
+    # 10 test uris
+    uri = [Nodes.get("http://asdf.org/%d"%d) for d in range(0,10)]
+
+    seteq(structLink.getLinks(uri[0], 1), [])
+    seteq(structLink.getLinks(uri[0], -1), [])
+
+    # Can't link to itself
+    structLink.link(uri[0], uri[0])
+    seteq(structLink.getLinks(uri[0], 1), [])
+    seteq(structLink.getLinks(uri[0], -1), [])
+
+    structLink.link(uri[0], uri[1])
+    seteq(structLink.getLinks(uri[0], 1), [uri[1]])
+    seteq(structLink.getLinks(uri[0], -1), [])
+    seteq(structLink.getLinks(uri[1], 1), [])
+    seteq(structLink.getLinks(uri[1], -1), [uri[0]])
+
+
+    structLink.detach(uri[1], uri[0])
+    seteq(structLink.getLinks(uri[0], 1), [uri[1]])
+    seteq(structLink.getLinks(uri[0], -1), [])
+    seteq(structLink.getLinks(uri[1], 1), [])
+    seteq(structLink.getLinks(uri[1], -1), [uri[0]])
+
+
+    structLink.detach(uri[0], uri[1])
+    seteq(structLink.getLinks(uri[0], 1), [])
+    seteq(structLink.getLinks(uri[0], -1), [])
+    seteq(structLink.getLinks(uri[1], 1), [])
+    seteq(structLink.getLinks(uri[1], -1), [])
+
+    structLink.link(uri[0], uri[1])
+    structLink.link(uri[0], uri[2])
+    structLink.link(uri[3], uri[0])
+    structLink.link(uri[4], uri[0])
+    seteq(structLink.getLinks(uri[0], 1), [uri[1], uri[2]])
+    seteq(structLink.getLinks(uri[0], -1), [uri[3], uri[4]])
+
+    structLink.detach(uri[0])
+    seteq(structLink.getLinks(uri[0], 1), [])
+    seteq(structLink.getLinks(uri[0], -1), [])
+
+def testAssocNegative():
+    graph = ff.swamp.impl.HashGraph()
+    structLink = StructLink.create(graph)
+
+    a = ff.swamp.Nodes.N()
+    b = ff.swamp.Nodes.N()
+
+    # positive direction
+    structLink.link(a, 1, b)
+    assert structLink.isLinked(a) == 1 and structLink.isLinked(b) == 1
+    structLink.detach(a, 1, b)
+    assert structLink.isLinked(a) == 0 and structLink.isLinked(b) == 0
+
+    # negative direction
+    structLink.link(a, -1, b)
+    assert structLink.isLinked(a) == 1 and structLink.isLinked(b) == 1
+    structLink.detach(a, -1, b)
+    assert structLink.isLinked(a) == 0 and structLink.isLinked(b) == 0
+
+def testAssocNegative():
+    graph = ff.swamp.impl.HashGraph()
+    structLink = StructLink.create(graph)
+
+    a = ff.swamp.Nodes.N()
+    b = ff.swamp.Nodes.N()
+
+    # positive direction
+    structLink.link(a, 1, b)
+    assert structLink.isLinked(a) == 1 and structLink.isLinked(b) == 1
+    structLink.detach(a, 1, b)
+    assert structLink.isLinked(a) == 0 and structLink.isLinked(b) == 0
+
+    # negative direction
+    structLink.link(a, -1, b)
+    assert structLink.isLinked(a) == 1 and structLink.isLinked(b) == 1
+    structLink.detach(a, -1, b)
+    assert structLink.isLinked(a) == 0 and structLink.isLinked(b) == 0
+

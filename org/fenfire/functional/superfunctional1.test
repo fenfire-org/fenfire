@@ -1,0 +1,239 @@
+# 
+# Copyright (c) 2003, Tuomas J. Lukka
+# This file is part of Fenfire.
+# 
+# Fenfire is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# Fenfire is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+# Public License for more details.
+# 
+# You should have received a copy of the GNU General
+# Public License along with Fenfire; if not, write to the Free
+# Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA  02111-1307  USA
+# 
+
+
+from org import fenfire as ff
+import vob
+from org.fenfire.functional.functionaltest import *
+
+from vob.util.faildefs import *
+
+def seteq(set0, set):
+    """Test that the given iterator and set contain the
+    same elements.
+    """
+    l = []
+    iterator = set0.iterator()
+    while iterator.hasNext(): l.append(iterator.next())
+    for i in l:
+	assert (i in set), (l, set, i)
+    for i in set:
+	assert (i in l), ("2", l, set, i)
+
+
+def setUp():
+    f = ff.functional.SuperFunctional1(None, None)
+
+    setUpFunctionalTest(f)
+
+def testIsCaching():
+    functional = ff.functional.SuperFunctional1(None, None)
+
+    functional.cache("A", 100, 0)
+
+    for node1 in createFunc1(functional):
+	f = node1.getCallableFunction()
+	FunctionalTest.G0.counter = 0
+	FunctionalTest.G1.counter = 0
+
+	assert f.f("A") == "AXXXYYY"
+	assert f.f("B") == "BXXXYYY"
+	assert f.f("A") == "AXXXYYY"
+	assert f.f("C") == "CXXXYYY"
+	assert f.f("B") == "BXXXYYY"
+
+	assert FunctionalTest.G0.counter == 3, FunctionalTest.G0.counter
+	assert FunctionalTest.G1.counter == 5, FunctionalTest.G1.counter
+	
+
+def testSuperlazy1():
+    background = vob.util.ExplicitBackground()
+    functional = ff.functional.SuperFunctional1(None, background)
+
+    functional.cache("A", 100, 1)
+
+    for node1 in createFunc1(functional):
+	f = node1.getCallableFunction()
+	FunctionalTest.G0.counter = 0
+	FunctionalTest.G1.counter = 0
+
+	failUnlessEqual( f.f("A") , "nullYYY")
+	failUnlessEqual( f.f("B") , "nullYYY")
+	failUnlessEqual( f.f("A") , "nullYYY")
+	failUnlessEqual( f.f("C") , "nullYYY")
+	failUnlessEqual( f.f("B") , "nullYYY")
+
+	assert FunctionalTest.G0.counter == 0, FunctionalTest.G0.counter
+	assert FunctionalTest.G1.counter == 5, FunctionalTest.G1.counter
+     
+	for i in range(0, 5): background.performOneTask()
+
+	failUnlessEqual( f.f("A") , "AXXXYYY")
+	failUnlessEqual( f.f("B") , "BXXXYYY")
+	failUnlessEqual( f.f("A") , "AXXXYYY")
+	failUnlessEqual( f.f("C") , "CXXXYYY")
+	failUnlessEqual( f.f("B") , "BXXXYYY")
+
+	assert FunctionalTest.G0.counter == 3, FunctionalTest.G0.counter
+	assert FunctionalTest.G1.counter == 10, FunctionalTest.G1.counter
+
+
+def testSuperlazy1_placeholder_error():
+    background = vob.util.ExplicitBackground()
+    functional = ff.functional.SuperFunctional1(None, background)
+
+    functional.cache("A", 100, 1)
+
+    for node1 in createFunc1_error_ph(functional):
+	f = node1.getCallableFunction()
+	FunctionalTest.G0.counter = 0
+	FunctionalTest.G1.counter = 0
+
+	failUnlessEqual( f.f("A") , "FOOYYY")
+	failUnlessEqual( f.f("B") , "FOOYYY")
+	failUnlessEqual( f.f("A") , "FOOYYY")
+	failUnlessEqual( f.f("E") , "FOOYYY")
+	failUnlessEqual( f.f("B") , "FOOYYY")
+
+	assert FunctionalTest.G0.counter == 0, FunctionalTest.G0.counter
+	assert FunctionalTest.G1.counter == 5, FunctionalTest.G1.counter
+     
+	for i in range(0, 5): background.performOneTask()
+
+	failUnlessEqual( f.f("A") , "AXXXYYY")
+	failUnlessEqual( f.f("B") , "BXXXYYY")
+	failUnlessEqual( f.f("A") , "AXXXYYY")
+	failUnlessEqual( f.f("E") , "ERRORYYY")
+	failUnlessEqual( f.f("B") , "BXXXYYY")
+	failUnlessEqual( f.f("E") , "ERRORYYY")
+	failUnlessEqual( f.f("E") , "ERRORYYY")
+
+	assert FunctionalTest.G0.counter == 3, FunctionalTest.G0.counter
+	assert FunctionalTest.G1.counter == 12, FunctionalTest.G1.counter
+
+
+def testSuperlazy1_lowercache():
+    background = vob.util.ExplicitBackground()
+    functional = ff.functional.SuperFunctional1(None, background)
+
+    functional.cache("A", 100, 1)
+    functional.cache("B", 100, 0)
+
+    for node1 in createFunc1(functional):
+	f = node1.getCallableFunction()
+	FunctionalTest.G0.counter = 0
+	FunctionalTest.G1.counter = 0
+
+	failUnlessEqual( f.f("A") , "nullYYY")
+	failUnlessEqual( f.f("B") , "nullYYY")
+	failUnlessEqual( f.f("A") , "nullYYY")
+	failUnlessEqual( f.f("C") , "nullYYY")
+	failUnlessEqual( f.f("B") , "nullYYY")
+
+	assert FunctionalTest.G0.counter == 0, FunctionalTest.G0.counter
+	assert FunctionalTest.G1.counter == 3, FunctionalTest.G1.counter
+     
+	for i in range(0, 5): background.performOneTask()
+
+	failUnlessEqual( f.f("A") , "AXXXYYY")
+	failUnlessEqual( f.f("B") , "BXXXYYY")
+	failUnlessEqual( f.f("A") , "AXXXYYY")
+	failUnlessEqual( f.f("C") , "CXXXYYY")
+	failUnlessEqual( f.f("B") , "BXXXYYY")
+
+	assert FunctionalTest.G0.counter == 3, FunctionalTest.G0.counter
+	assert FunctionalTest.G1.counter == 6, FunctionalTest.G1.counter
+
+def testSuperlazy2_graphtwid():
+    background = vob.util.ExplicitBackground()
+    graph = ff.swamp.impl.HashGraph()
+    functional = ff.functional.SuperFunctional1(graph, background)
+
+    functional.cache("A", 100, 1)
+    nodes = [ff.swamp.Nodes.N() for i in range(0,4)]
+    node = functional.createFunctionInstance(
+	    "A",
+	    ff.functional.FunctionalTest.TripleSet_Node,
+	    [ nodes[1] ]
+	    )
+    f = node.getCallableFunction()
+
+    failUnlessEqual( f.f(nodes[0]) , None)
+    failUnlessEqual( f.f(nodes[2]) , None)
+    failUnlessEqual( f.f(nodes[0]) , None)
+
+    background.performOneTask()
+    # The latest one has to be the one to move
+    failUnlessEqual( f.f(nodes[2]) , None)
+    seteq( f.f(nodes[0]) , [] )
+
+    graph.add(nodes[0], nodes[1], nodes[3])
+    failUnlessEqual( f.f(nodes[0]) , None)
+    failUnlessEqual( f.f(nodes[2]) , None)
+
+    background.performOneTask()
+    seteq( f.f(nodes[2]) , [] )
+    failUnlessEqual( f.f(nodes[0]) , None)
+
+    background.performOneTask()
+    seteq( f.f(nodes[0]) , [nodes[3]] )
+
+
+def testSuperlazy3_doublecache_chg():
+    """Test that a double cache works right.
+
+    There used to be a bug where the entries in the smaller cache
+    didn't chg() to the lower cache correctly.
+    """
+    background = vob.util.ExplicitBackground()
+    graph = ff.swamp.impl.HashGraph()
+    functional = ff.functional.SuperFunctional1(graph, background)
+
+    # Two normal caches
+    functional.cache("A", 2, 0)
+    functional.cache("B", 100, 0)
+
+    nodes = [ff.swamp.Nodes.N() for i in range(0,10)]
+
+    node = functional.createFunctionInstance(
+	    "A",
+	    ff.functional.FunctionalTest.TripleSet_Node,
+	    [ nodes[1] ]
+	    )
+    node = functional.createFunctionInstance(
+	    "B",
+	    ff.functional.FunctionalTest.Identity_Node,
+	    [ node ]
+	    )
+    f = node.getCallableFunction()
+
+    # The latest one has to be the one to move
+    for i in range(2, 7):
+	seteq( f.f(nodes[i]) , [] )
+
+    for i in range(2, 7):
+	graph.add(nodes[i], nodes[1], nodes[0])
+
+    for i in range(2, 7):
+	seteq( f.f(nodes[i]) , [nodes[0]] )
+
+
+
+# vim: set syntax=python :

@@ -1,0 +1,43 @@
+# 
+# Copyright (c) 2003, Tuomas J. Lukka
+# This file is part of Fenfire.
+# 
+# Fenfire is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# Fenfire is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+# Public License for more details.
+# 
+# You should have received a copy of the GNU General
+# Public License along with Fenfire; if not, write to the Free
+# Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA  02111-1307  USA
+# 
+
+
+import java
+import vob
+
+from org import fenfire as ff
+from org.nongnu import alph
+from org.nongnu import storm
+from org.fenfire.test import gfx
+
+gfx.needGL()
+
+def testSomething():
+    vs = gfx.getvs()
+
+    vs.map.put(vob.vobs.SolidBackdropVob(java.awt.Color.black))
+    v2d = ff.view.PaperView2D(
+	ff.util.PaperMillFunction(vob.gl.PaperMill.getInstance(), 1))
+    b2s = vs.orthoCS(0, "A", 0, 100, 100, 100, 100)
+    v2d.render(vs, "A", 0, b2s, 0)
+
+    gfx.render(vs)
+    gfx.checkNotAvgColor(150,150,10,10, (0, 0, 0), delta=50)
+
