@@ -180,8 +180,6 @@ public final class SmushedQuadsGraph extends SmushedQuadsGraph_Gen {
 
 	    remove(g2.canonicalNode);
 	    putAll(g2.subjects);
-	    
-	    if(dbg) p("All =============== CLEAN-o! ================= for "+g2.canonicalNode);
 
 	    for(Iterator i = smushListeners.iterator(); i.hasNext();) {
 		((SmushListener)i.next()).smushed(g2.canonicalNode, 
@@ -196,11 +194,6 @@ public final class SmushedQuadsGraph extends SmushedQuadsGraph_Gen {
 
 	if(dbg) p("rm ? "+pred);
 
-	if(pred.equals(MBOX) && Nodes.isNode(obj)) {
-	    pred = SHA1SUM;
-	    obj = new PlainLiteral(get_sha1_hex(Nodes.toString(obj)));
-	}
-
 	if(!ifps.contains(pred)) return;
 
 	if(dbg) p("rm...");
@@ -214,6 +207,10 @@ public final class SmushedQuadsGraph extends SmushedQuadsGraph_Gen {
 
 	Group g = (Group)groupsBySubject.get(subj);
 	Pair po = getPair(pred, obj);
+
+	if(pred.equals(MBOX) && Nodes.isNode(obj)) {
+	    po = getPair(SHA1SUM, new PlainLiteral(get_sha1_hex(Nodes.toString(obj))));
+	}
 
 	if(!unsmushed.findN_X11A_Iter(pred, obj).hasNext()) {
 	    // the PO was only connected to this one subject

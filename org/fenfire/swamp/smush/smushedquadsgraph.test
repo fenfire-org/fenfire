@@ -131,6 +131,3 @@ def testMbox():
 
     assert find._11X(n[1], mbox) == find._11X(n[1], sha1) == \
            find._11X(n[1], prop) == []
-
-
-        
