@@ -90,8 +90,8 @@ public class NodeTextModel extends AbstractModel.AbstractObjectModel {
     String fallback() {
 	String s = Nodes.toString(node.get());
 		
-	if(s.startsWith("anon:") || s.startsWith("urn:urn-5:"))
-	    s = s.substring(s.lastIndexOf(":"));
+	if(s.startsWith("anon:") || s.startsWith("bnode:") || s.startsWith("urn:urn-5:"))
+	    s = "";
 	else if(s.startsWith("mailto:")) 
 	    s = s.substring("mailto:".length());
 	else if(s.startsWith("tel:")) 

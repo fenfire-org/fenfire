@@ -79,4 +79,48 @@ public interface GraphFile {
 	    }
 	}
     }
+
+    class XML implements GraphFile {
+	protected Graph graph;
+	protected Map namespaces;
+	protected File file;
+	
+	/*
+	public XML(File file, Graph graph) {
+	    this(file, graph, null);
+	}
+	*/
+
+	public XML(File file, Graph graph, Graph defaultGraph) 
+	    throws IOException {
+
+	    this.file = file;
+	    this.graph = graph;
+	    this.namespaces = new HashMap();
+
+	    if(file.exists()) {
+		Graphs.readXML(file, graph, namespaces);
+	    } else if(defaultGraph == null) {
+		throw new FileNotFoundException(""+file);
+	    } else {
+		graph.addAll(defaultGraph);
+	    }
+	}
+
+	public Graph getGraph() {
+	    return graph;
+	}
+
+	public Map getNamespaces() {
+	    return namespaces;
+	}
+
+	public void save() {
+	    try {
+		Graphs.writeXML(graph, /*namespaces,*/ file);
+	    } catch(java.io.IOException e) {
+		throw new Error(e);
+	    }
+	}
+    }
 }
