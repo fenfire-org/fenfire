@@ -115,13 +115,14 @@ public final class SmushedQuadsGraph extends SmushedQuadsGraph_Gen {
 
 	//if(dbg) p("A ---- "+subj+" "+pred+" "+obj+" "+context+" ------ "+get(subj)+" "+get(pred)+" "+get(obj));
 
+	if(pred.equals(MBOX) && Nodes.isNode(obj)) {
+	    Object c2 = Nodes.get("mbox-inference:"+context);
+	    Object o2 = new PlainLiteral(get_sha1_hex(Nodes.toString(obj)));
+	    add(subj, SHA1SUM, o2, c2);
+	}
+
 	unsmushed.add(subj, pred, obj, context);
 	smushed.add(get(subj), get(pred), get(obj), context);
-
-	if(pred.equals(MBOX) && Nodes.isNode(obj)) {
-	    pred = SHA1SUM;
-	    obj = new PlainLiteral(get_sha1_hex(Nodes.toString(obj)));
-	}
 
 	if(!ifps.contains(pred)) return;
 
@@ -189,6 +190,12 @@ public final class SmushedQuadsGraph extends SmushedQuadsGraph_Gen {
     }
 
     public void rm_1111(Object subj, Object pred, Object obj, Object context) {
+	if(pred.equals(MBOX) && Nodes.isNode(obj)) {
+	    Object c2 = Nodes.get("mbox-inference:"+context);
+	    Object o2 = new PlainLiteral(get_sha1_hex(Nodes.toString(obj)));
+	    rm_1111(subj, SHA1SUM, o2, c2);
+	}
+
 	unsmushed.rm_1111(subj, pred, obj, context);
 	smushed.rm_1111(get(subj), get(pred), get(obj), context);
 
@@ -207,10 +214,6 @@ public final class SmushedQuadsGraph extends SmushedQuadsGraph_Gen {
 
 	Group g = (Group)groupsBySubject.get(subj);
 	Pair po = getPair(pred, obj);
-
-	if(pred.equals(MBOX) && Nodes.isNode(obj)) {
-	    po = getPair(SHA1SUM, new PlainLiteral(get_sha1_hex(Nodes.toString(obj))));
-	}
 
 	if(!unsmushed.findN_X11A_Iter(pred, obj).hasNext()) {
 	    // the PO was only connected to this one subject
