@@ -38,18 +38,18 @@ import java.util.*;
  *  or other text property, but it's in a namespace, e.g. Dublin Core,
  *  NodeTextModel will return a namespaced name like "dc:date".
  *  <p>
- *  This class has a set() method implemented, i.e., it can also be used
- *  to <em>change</em> a node's content. The set() method will use
- *  the text property that is currently used to show the node,
- *  or 'defaultProperty' if the node isn't currently connected to any literal
- *  on any of the text properties.
+ *  This class has a set() method implemented, i.e., it can also be
+ *  used to <em>change</em> a node's content. The set() method will
+ *  use the text triple that is currently used to show the node, or a
+ *  new one along 'defaultProperty' if the node isn't currently
+ *  connected to any literal on any of the text properties.
  */
 public class NodeTextModel extends AbstractModel.AbstractObjectModel {
     private Model node;
     private Graph graph;
     private NamespaceMap nmap;
-    private Set textProperties;
-    private Object defaultProperty;
+    private SortedSet textProperties; // the properties we look for, in order
+    private Object defaultProperty; // used if text is added to textless node
 
     private Object cache;
 
@@ -58,8 +58,11 @@ public class NodeTextModel extends AbstractModel.AbstractObjectModel {
 	this.graph = graph;
 	this.node = node;
 	this.nmap = nmap;
-	this.textProperties = textProperties;
+	this.textProperties = new TreeSet(textProperties);
 	this.defaultProperty = defaultProperty;
+
+	// defaultProperty is expected to be in textProperties
+	this.textProperties.add(defaultProperty);
 
 	node.addObs(this);
 	nmap.addObs(this);
@@ -77,11 +80,14 @@ public class NodeTextModel extends AbstractModel.AbstractObjectModel {
 	cache = null;
 	super.chg();
     }
-    
-    Object getProperty() {
+
+    /** Finds the first text property that has a literal object present.
+     *  @return the property to be used for node text,
+     *          or null if there isn't a suitable one
+     */
+    protected Object getProperty() {
 	Object n = node.get();
 	
-	LOOP: 
 	for(Iterator i=textProperties.iterator(); i.hasNext();) {
 	    Object prop = i.next();
 	    Iterator j = graph.findN_11X_Iter(n, prop, this);
