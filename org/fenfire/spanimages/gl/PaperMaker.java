@@ -29,7 +29,7 @@ import java.io.File;
 import org.nongnu.libvob.gl.*;
 import org.nongnu.libvob.memory.*;
 import org.fenfire.functional.PureFunction;
-import org.fenfire.util.Pair;
+import org.nongnu.storm.util.Pair;
 
 /** A function that, given a singleimage and a texgen, 
  * return a org.nongnu.libvob.gl.Paper.

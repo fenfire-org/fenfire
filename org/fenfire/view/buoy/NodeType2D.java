@@ -28,7 +28,6 @@ package org.fenfire.view.buoy;
 import org.fenfire.view.View2D;
 import org.fenfire.view.CanvasView2D;
 import org.fenfire.view.NodedView2D;
-import org.fenfire.util.Pair;
 import org.fenfire.util.Triple;
 import org.nongnu.libvob.*;
 import org.nongnu.libvob.impl.DefaultVobMatcher;

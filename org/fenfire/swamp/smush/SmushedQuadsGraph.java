@@ -50,7 +50,7 @@ public final class SmushedQuadsGraph extends SmushedQuadsGraph_Gen {
     private Set smushListeners = new HashSet();
 
 
-    private class Pair extends org.fenfire.util.Pair {
+    private class Pair extends org.nongnu.storm.util.Pair {
 	Pair(Object p, Object o) { super(p, o); }
 
 	Object p() { return first; }

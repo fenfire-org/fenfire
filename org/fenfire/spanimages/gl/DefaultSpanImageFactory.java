@@ -26,7 +26,7 @@ DefaultSpanImageFactory.java
 
 package org.fenfire.spanimages.gl;
 import org.fenfire.spanimages.*;
-import org.fenfire.util.Pair;
+import org.nongnu.storm.util.Pair;
 import org.fenfire.functional.PureFunction;
 import org.fenfire.functional.Function;
 import org.nongnu.alph.*;

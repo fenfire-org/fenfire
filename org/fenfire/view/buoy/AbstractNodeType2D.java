@@ -26,7 +26,6 @@ AbstractNodeType2D.java
 
 package org.fenfire.view.buoy;
 import org.fenfire.view.View2D;
-import org.fenfire.util.Pair;
 import org.fenfire.util.Triple;
 import org.nongnu.libvob.*;
 import org.nongnu.libvob.impl.DefaultVobMatcher;

@@ -29,7 +29,6 @@ package org.fenfire.fenmm;
 import org.fenfire.swamp.ConstGraph;
 import org.fenfire.vocab.STRUCTLINK;
 import org.nongnu.libvob.VobScene;
-import org.fenfire.util.Pair;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;

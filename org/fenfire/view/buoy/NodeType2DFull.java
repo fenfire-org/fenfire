@@ -26,7 +26,6 @@ NodeType2DFull.java
 
 package org.fenfire.view.buoy;
 import org.fenfire.view.View2D;
-import org.fenfire.util.Pair;
 import org.nongnu.libvob.*;
 import org.nongnu.libvob.impl.DefaultVobMatcher;
 import org.nongnu.libvob.buoy.*;

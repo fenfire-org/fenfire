@@ -36,6 +36,8 @@ import org.nongnu.libvob.*;
 import org.nongnu.libvob.buoy.*;
 import org.nongnu.libvob.impl.DefaultVobMatcher;
 
+import org.nongnu.storm.util.Pair;
+
 import java.util.Iterator;
 
 /** Make the kinds of links familiar from PP structure.
