@@ -87,9 +87,9 @@ class Bot(irc.IRCClient):
         try:
             def send_commit(msg):
                 self.notice(self.factory.channel, msg)
+                time.sleep(LINE_DELAY)
             for p in projects:
                 project(p, send_commit)
-            time.sleep(LINE_DELAY)
         except:
             print_exc()
 
