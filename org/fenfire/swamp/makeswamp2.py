@@ -65,7 +65,7 @@ quad_spec.rm_patterns = [
 #                        [p+'1' for p in spec.rm_patterns]
 
 
-ARG = ['subj', 'pred', 'obj', 'context']
+ARGS = ['subj', 'pred', 'obj', 'context']
 
 
 def arguments(p, additionalArgs=[]):
@@ -84,9 +84,9 @@ def arguments(p, additionalArgs=[]):
     """
     
     n = [i for i in range(len(p)) if p[i]=='1']
-    return ', '.join(['Object %s' % ARG[i] for i in n]+additionalArgs)
+    return ', '.join(['Object %s' % ARGS[i] for i in n]+additionalArgs)
 
-def callArgs(p, additionalArgs=[], null=None, fill=None):
+def callArgs(p, additionalArgs=[]):
     """
     Return the arguments list for calling a function
     with a particular pattern.
@@ -99,50 +99,57 @@ def callArgs(p, additionalArgs=[], null=None, fill=None):
 
         Example:
             callArgs('1X1A', ['obs']) == 'subj, obj, obs'
+    """
 
-    In addition to the basic way, specifying the pattern and optionally
-    the additional arguments, there are two additional ways to use
-    this function.
+    args = [ARGS[i] for i in range(len(p)) if p[i]=='1']
+    return ', '.join(args+additionalArgs)
 
-    First, if you set 'null' to a string, it will be used in the place
+
+def callTupleArgs(p, wildcard='null', additionalArgs=[]):
+    """
+    Like callArgs, but a wildcard will be used in the place
     of omitted parameters. Examples:
 
-        callArgs('111', null='null') == 'subj, pred, obj'
-        callArgs('1X1A', null='null') == 'subj, null, obj, null'
-        callArgs('11X', null='WILDCARD') == 'subj, pred, WILDCARD'
+        callTupleArgs('111', null='null') == 'subj, pred, obj'
+        callTupleArgs('1X1A', null='null') == 'subj, null, obj, null'
+        callTupleArgs('11X', null='WILDCARD') == 'subj, pred, WILDCARD'
 
     This is used to call methods that take a whole triple/quad.
 
-    Second, if you set 'fill' to a string, the argument list
-    will be padded with copies of 'fill' to have length (len(p)-1). Examples:
+    wildcard -- the wildcard to use, defaults to 'null'
+    additionalArgs -- List of additional arguments the function should have,
+                      as in callArgs().
+    """
 
-        callArgs('11X', fill='null') == 'subj, pred'
-        callArgs('1XA', fill='null') == 'subj, null'
-        callArgs('AX1', fill='null') == 'obj, null'
-        callArgs('AX1A', fill='null') == 'obj, null, null'
+    def choose(cond, v1, v2):
+        if cond: return v1
+        else: return v2
+
+    args = [choose(p[i]=='1', ARGS[i], wildcard) for i in range(len(p))]
+    return ', '.join(args+additionalArgs)
+
+def callIndexArgs(p, wildcard='null', additionalArgs=[]):
+    """
+    Like callArgs, but pads the argument list with a wildcard
+    to have length (len(p)-1). Examples:
+
+        callIndexArgs('11X') == 'subj, pred'
+        callIndexArgs('1XA') == 'subj, null'
+        callIndexArgs('AX1') == 'obj, null'
+        callIndexArgs('AX1A', 'WILD') == 'obj, WILD, WILD'
 
     This is used to call methods in the indices that take a fixed-length
     'key' of length (len(p)-1).
 
-    The 'null' and 'fill' parameters cannot be specified both.
+    wildcard -- the wildcard to use, defaults to 'null'
+    additionalArgs -- List of additional arguments the function should have,
+                      as in callArgs().
     """
-
-    if null!=None and fill!=None:
-        raise Error('Either null or fill can be specified, but not both')
     
-    args = []
-    for i in range(len(p)):
-        if p[i] == '1':
-            args.append(ARG[i])
-        elif null != None:
-            args.append(null)
-        else:
-            pass
-
-    if fill != None:
-        args += [fill] * (len(p)-len(args)-1)
-
+    args = [ARGS[i] for i in range(len(p)) if p[i]=='1']
+    args += [wildcard] * (len(p)-len(args)-1)
     return ', '.join(args+additionalArgs)
+
 
 
 
@@ -196,7 +203,7 @@ def simpleHashGraph(spec):
         s += '    Object result = i.next();\n'
         s += '    if(i.hasNext())\n'
         s += '        throw new NotUniqueError(%s);\n' % \
-                                                callArgs(p, null='null')
+                                                callTupleArgs(p)
         s += '    return result;\n'
         s += '}\n'
         
@@ -204,7 +211,7 @@ def simpleHashGraph(spec):
                                                (p, arguments(p, ['Obs obs']))
         s += '    if(obs != null)\n'
         s += '        observer.addObs(%s);\n' % \
-                               callArgs(p, ['obs'], null='observer.WILDCARD')
+                               callTupleArgs(p, 'observer.WILDCARD', ['obs'])
         s += '\n'
         s += '    Set s = getSet_%s(%s);\n' % (p, callArgs(p))
         s += '    return s.iterator();\n'
@@ -212,7 +219,7 @@ def simpleHashGraph(spec):
 
         s += 'public Set getSet_%s(%s) {\n' % (p, arguments(p))
         s += '    Map m = map_%s;\n' % p
-        s += '    Key key = new Key(%s);\n' % callArgs(p, fill='"ANY"')
+        s += '    Key key = new Key(%s);\n' % callIndexArgs(p, '"ANY"')
         s += '    if(!m.containsKey(key)) m.put(key, new HashSet());\n'
         s += '    return (Set)m.get(key);\n'
         s += '}\n'
@@ -224,7 +231,7 @@ def simpleHashGraph(spec):
     for p in spec.find_patterns:
         toremove = p.index('X')
         s += '    getSet_%s(%s).remove(%s);\n' % (p, callArgs(p),
-                                                  ARG[toremove])
+                                                  ARGS[toremove])
 
     s += '    \n'
     s += '    observer.triggerObs(-1, subj, pred, obj);\n'
@@ -236,7 +243,7 @@ def simpleHashGraph(spec):
 
     for p in spec.find_patterns:
         toremove = p.index('X')
-        s += '    getSet_%s(%s).add(%s);\n' % (p, callArgs(p), ARG[toremove])
+        s += '    getSet_%s(%s).add(%s);\n' % (p, callArgs(p), ARGS[toremove])
 
     s += '    \n'
     s += '    observer.triggerObs(1, subj, pred, obj);\n'
@@ -255,13 +262,12 @@ def hashGraph(spec):
         s += 'public Object find1_%s(%s) {\n' % (p, arguments(p, ['Obs obs']))
         s += '    if(obs != null)\n'
         s += '        observer.addObs(%s);\n' % \
-                                callArgs(p, ['obs'], null='observer.WILDCARD')
+                                callTupleArgs(p, 'observer.WILDCARD', ['obs'])
         s += '\n'
         s += '    try {\n'
-        s += '        return map_%s.get(%s);\n' % (p, callArgs(p, fill='null'))
+        s += '        return map_%s.get(%s);\n' % (p, callIndexArgs(p))
         s += '    } catch(PairMap.NotUniqueException _) {\n'
-        s += '        throw new NotUniqueError(%s);\n' % \
-                                                  callArgs(p, null='null')
+        s += '        throw new NotUniqueError(%s);\n' % callTupleArgs(p)
         s += '    }\n'
         s += '}\n'
         
@@ -269,9 +275,9 @@ def hashGraph(spec):
                                                 (p, arguments(p, ['Obs obs']))
         s += '    if(obs != null)\n'
         s += '        observer.addObs(%s);\n' % \
-                                callArgs(p, ['obs'], null='observer.WILDCARD')
+                                callTupleArgs(p, 'observer.WILDCARD', ['obs'])
         s += '\n'
-        s += '    return map_%s.getIter(%s);\n' % (p, callArgs(p, fill='null'))
+        s += '    return map_%s.getIter(%s);\n' % (p, callIndexArgs(p))
         s += '}\n'
 
 
@@ -280,8 +286,8 @@ def hashGraph(spec):
 
     for p in spec.find_patterns:
         toremove = p.index('X')
-        s += '    map_%s.rm(%s, %s);\n' % (p, callArgs(p, fill='null'),
-                                           ARG[toremove])
+        s += '    map_%s.rm(%s, %s);\n' % (p, callIndexArgs(p),
+                                           ARGS[toremove])
 
     s += '    \n'
     s += '    observer.triggerObs(-1, subj, pred, obj);\n'
@@ -293,8 +299,8 @@ def hashGraph(spec):
 
     for p in spec.find_patterns:
         toremove = p.index('X')
-        s += '    map_%s.add(%s, %s);\n' % (p, callArgs(p, fill='null'),
-                                            ARG[toremove])
+        s += '    map_%s.add(%s, %s);\n' % (p, callIndexArgs(p),
+                                            ARGS[toremove])
 
     s += '    \n'
     s += '    observer.triggerObs(1, subj, pred, obj);\n'
@@ -310,21 +316,21 @@ def quadAdapterGraph(name, findAll):
 
     if findAll:
         c = 'A'
-        callArg = lambda p: callArgs(p, ['obs'])
+        myCallArgs = lambda p: callArgs(p, ['obs'])
     else:
         c = '1'
-        callArg = lambda p: callArgs(p, ['context', 'obs'])
+        myCallArgs = lambda p: callArgs(p, ['context', 'obs'])
 
     s = ""
 
     for p in spec.find_patterns:
         s += 'public Object find1_%s(%s) {\n' % (p, arguments(p, ['Obs obs']))
-        s += '    return graph.find1_%s%s(%s);\n' % (p, c, callArg(p))
+        s += '    return graph.find1_%s%s(%s);\n' % (p, c, myCallArgs(p))
         s += '}\n'
         
         s += 'public Iterator findN_%s_Iter(%s){\n' % \
                                                 (p, arguments(p, ['Obs obs']))
-        s += '    return graph.findN_%s%s_Iter(%s);\n' % (p, c, callArg(p))
+        s += '    return graph.findN_%s%s_Iter(%s);\n' % (p, c, myCallArgs(p))
         s += '}\n'
 
     s += 'public void rm_111(Object subject, Object predicate, \n'
@@ -423,16 +429,6 @@ quad_spec.simpleHashGraphTemplate = """
 	    if(o != null) observer.addObs(subj, pred, obj, o);
             return getSet_11X1(subj, pred, context).contains(obj);
 	}
-
-        protected void checkNode(Object node) {
-            if(!Nodes.isNode(node))
-                throw new IllegalArgumentException("Not a node: "+node);
-        }
-
-        protected void checkNodeOrLiteral(Object node) {
-            if(!Nodes.isNode(node) && !(node instanceof Literal))
-                throw new IllegalArgumentException("Not a node or literal: "+node);
-        }
     }
 """
 
@@ -451,16 +447,6 @@ quad_spec.hashGraphTemplate = """
 	    if(o != null) observer.addObs(subj, pred, obj, o);
             return map_11X1.contains(subj, pred, context, obj);
 	}
-
-        protected void checkNode(Object node) {
-            if(!Nodes.isNode(node))
-                throw new IllegalArgumentException("Not a node: "+node);
-        }
-
-        protected void checkNodeOrLiteral(Object node) {
-            if(!Nodes.isNode(node) && !(node instanceof Literal))
-                throw new IllegalArgumentException("Not a node or literal: "+node);
-        }
     }
 """
 

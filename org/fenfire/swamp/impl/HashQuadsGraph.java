@@ -290,14 +290,4 @@ public void add(Object subj, Object pred, Object obj, Object context) {
 	    if(o != null) observer.addObs(subj, pred, obj, o);
             return map_11X1.contains(subj, pred, context, obj);
 	}
-
-        protected void checkNode(Object node) {
-            if(!Nodes.isNode(node))
-                throw new IllegalArgumentException("Not a node: "+node);
-        }
-
-        protected void checkNodeOrLiteral(Object node) {
-            if(!Nodes.isNode(node) && !(node instanceof Literal))
-                throw new IllegalArgumentException("Not a node or literal: "+node);
-        }
     }

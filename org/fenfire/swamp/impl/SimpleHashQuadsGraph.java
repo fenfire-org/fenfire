@@ -375,14 +375,4 @@ public void add(Object subj, Object pred, Object obj, Object context) {
 	    if(o != null) observer.addObs(subj, pred, obj, o);
             return getSet_11X1(subj, pred, context).contains(obj);
 	}
-
-        protected void checkNode(Object node) {
-            if(!Nodes.isNode(node))
-                throw new IllegalArgumentException("Not a node: "+node);
-        }
-
-        protected void checkNodeOrLiteral(Object node) {
-            if(!Nodes.isNode(node) && !(node instanceof Literal))
-                throw new IllegalArgumentException("Not a node or literal: "+node);
-        }
     }

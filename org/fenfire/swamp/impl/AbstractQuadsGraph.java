@@ -42,6 +42,16 @@ abstract public class AbstractQuadsGraph extends AbstractQuadsConstGraph impleme
 	return new StdObservedQuadsGraph(this, o);
     }
 
+    protected void checkNode(Object node) {
+	if(!Nodes.isNode(node))
+	    throw new IllegalArgumentException("Not a node: "+node);
+    }
+    
+    protected void checkNodeOrLiteral(Object node) {
+	if(!Nodes.isNode(node) && !(node instanceof Literal))
+	    throw new IllegalArgumentException("Not a node or literal: "+node);
+    }
+
     public void rm_11AA(Object e0,Object e1) {
 	Iterator i = findN_11XA_Iter(e0, e1);
 	Map m = new HashMap();
