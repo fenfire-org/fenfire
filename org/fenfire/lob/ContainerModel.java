@@ -63,8 +63,10 @@ public class ContainerModel extends ListModel.AbstractListModel {
 	Graph g = (Graph)graph.get();
 	Object c = container.get();
 
+	if(c == null) return 0;
+
 	int n = 0;
-	while(g.find1_11X(c, prop(n+1)) != null) n++;
+	while(g.find1_11X(c, prop(n+1), this) != null) n++;
 	return n;
     }
 
@@ -72,7 +74,9 @@ public class ContainerModel extends ListModel.AbstractListModel {
 	Graph g = (Graph)graph.get();
 	Object c = container.get();
 
-	return g.find1_11X(c, prop(i+1));
+	if(c == null) throw new NullPointerException("container is null");
+
+	return g.find1_11X(c, prop(i+1), this);
     }
 
     public Object set(int i, Object value) {
@@ -82,6 +86,8 @@ public class ContainerModel extends ListModel.AbstractListModel {
 	Object c = container.get();
 
 	Object o = get(i);
+
+	if(c == null) throw new NullPointerException("container is null");
 
 	g.rm_11A(c, prop(i+1));
 	g.add(c, prop(i+1), value);
@@ -95,6 +101,8 @@ public class ContainerModel extends ListModel.AbstractListModel {
 	Graph g = (Graph)graph.get();
 	Object c = container.get();
 
+	if(c == null) throw new NullPointerException("container is null");
+
 	g.add(c, prop(size()+1), value);
 	return true;
     }
@@ -102,6 +110,8 @@ public class ContainerModel extends ListModel.AbstractListModel {
     public Object remove(int i) {
 	Graph g = (Graph)graph.get();
 	Object c = container.get();
+
+	if(c == null) throw new NullPointerException("container is null");
 
 	Object o = get(i);
 
