@@ -44,8 +44,6 @@ import java.util.*;
 public class PropertyView {
     private static void p(String s) { System.out.println("PropertyView:: "+s); }
 
-    private Map propCache = new org.nongnu.navidoc.util.WeakValueMap();
-
     private Graph graph;
     private Cursor cursor;
     private NamespaceMap nmap;
@@ -73,13 +71,6 @@ public class PropertyView {
     }
 
     public Lob getPropertyLob(Object node) {
-	if(propCache.get(node) != null) return (Lob)propCache.get(node);
-	Lob l = makeLob(node);
-	propCache.put(node, l);
-	return l;
-    }
-
-    private Lob makeLob(Object node) {
 	Color color = UniqueColors.getColor(node, minPropBrightness,
 					    maxPropBrightness);
 	return Lobs.hbox(Lobs.text(Components.font(color),
