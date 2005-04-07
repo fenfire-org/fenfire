@@ -46,9 +46,6 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
     private ContentViewSettings contentViewSettings;
     private WindowAnimation winAnim;
 
-    private Map canvasCache = new org.nongnu.navidoc.util.WeakValueMap();
-    private Map buoyCache = new org.nongnu.navidoc.util.WeakValueMap();
-
     public CanvasSpatialView(Graph graph, 
 			     ContentViewSettings contentViewSettings,
 			     WindowAnimation winAnim) {
