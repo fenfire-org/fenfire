@@ -115,6 +115,13 @@ private static final String rcsid = "$Id: ConnectionVobMatcher.java,v 1.1 2003/0
     public void link(int parent, int dir, int child,
 		     Object linkKey, int linkCS) {
 	if(dbg) p("link: "+cs1+" "+linkkey+" "+cs2);
+
+	if(csKey[parent] == null)
+	    throw new IllegalArgumentException("link 'parent' cs has not been added to vob matcher: "+parent);
+
+	if(csKey[child] == null)
+	    throw new IllegalArgumentException("link 'child' cs has not been added to vob matcher: "+parent);
+
 	ensureSize(size+1);
 
 	ensureMaxCS(parent);
