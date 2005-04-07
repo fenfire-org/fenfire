@@ -103,7 +103,7 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 
 	Lob l = getCanvasContent(cc.getCanvas(), cursor);
 
-	l = Lobs.translate(l, -cc.getPanX(), -cc.getPanY());
+	l = Lobs.translate(l, -cc.getPanX(), -cc.getPanY(), false);
 	l = Lobs.scale(l, cc.getZoom());
 	l = Lobs.align(l, .5f, .5f);
 
@@ -192,6 +192,10 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 	    
 	    Object n = i.next();
 	    Lob label = getContentLob(n);
+
+	    if(label.getLayoutableAxis() == Axis.X)
+		label = label.layoutOneAxis(100); // hmm, arbitrary value
+
 	    Lob l = BuoyConnectorLob.newInstance(label, n);
 
 	    float x = RDFUtil.getFloat(graph, n, CANVAS2D.x);
