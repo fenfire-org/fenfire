@@ -174,7 +174,7 @@ private static final String rcsid = "$Id: ConnectionVobMatcher.java,v 1.1 2003/0
     public int getLinkIndex(int from, int dir, Object childKey,
 			    Object linkKey) {
 	int result = getLinkIndexNE(from, dir, childKey, linkKey);
-	if(result < 0) throw NoSuchElementException();
+	if(result < 0) throw new NoSuchElementException();
 	return result;
     }
 
