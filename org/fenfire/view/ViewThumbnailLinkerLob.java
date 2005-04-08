@@ -1,5 +1,5 @@
 /*
-SpatialContextLob.java
+ViewThumbnailLinkerLob.java
  *    
  *    Copyright (c) 2005, Benja Fallenstein and Matti Katila
  *
@@ -30,42 +30,65 @@ import org.nongnu.libvob.fn.*;
 import org.nongnu.libvob.lob.*;
 import org.nongnu.libvob.*;
 import javolution.realtime.*;
+import javolution.util.FastList;
 import java.util.*;
 
-public class SpatialContextLob extends AbstractDelegateLob {
+public class ViewThumbnailLinkerLob extends AbstractDelegateLob {
     
-    private static LocalContext.Variable lcs = new LocalContext.Variable(null);
+    private static LocalContext.Variable 
+	linkerLob = new LocalContext.Variable(null);
 
-    protected Object key;
+    public static void connectToFocus(int cs) {
+	ViewThumbnailLinkerLob l = 
+	    (ViewThumbnailLinkerLob)linkerLob.getValue();
 
-    public static int getSpatialContextCS() {
-	FastInt fi = (FastInt)lcs.getValue();
-	if(fi == null)
-	    throw new IllegalStateException("no spatial context");
-	return fi.intValue();
+	if(l != null) {
+	    FastInt i = FastInt.newInstance(cs);
+	    i.preserve();
+	    l.contexts.add(i);
+	}
     }
 
-    private SpatialContextLob() {}
+    protected FastList contexts = new FastList();
 
-    public static SpatialContextLob newInstance(Lob content, Object key) {
-	SpatialContextLob l = (SpatialContextLob)FACTORY.object();
+    private ViewThumbnailLinkerLob() {}
+
+    public static ViewThumbnailLinkerLob newInstance(Lob content) {
+	ViewThumbnailLinkerLob l = (ViewThumbnailLinkerLob)FACTORY.object();
 	l.delegate = content;
-	l.key = key;
 	return l;
     }
 
     public Lob wrap(Lob lob) {
-	return newInstance(lob, key);
+	return newInstance(lob);
     }
 
     public void render(VobScene scene, int into, int matchingParent,
 		       float d, boolean visible) {
-	scene.matcher.add(matchingParent, into, key);
+	ConnectionVobMatcher matcher = (ConnectionVobMatcher)scene.matcher;
 
 	LocalContext.enter();
 	try {
-	    lcs.setValue(FastInt.newInstance(into));
+	    linkerLob.setValue(this);
+
+	    contexts.clear();
+
+	    // this must set the focus and may add contexts:
 	    super.render(scene, into, matchingParent, d, visible);
+
+	    int focus = matcher.getFocus();
+	    
+	    if(focus < 0)
+		throw new Error("focus not set by ViewThumbnailLinkerLob's child");
+
+	    for(Iterator iter = contexts.fastIterator(); iter.hasNext();) {
+		FastInt i = (FastInt)iter.next();
+
+		int context = i.intValue();
+		matcher.link(context, 1, focus, "structure point");
+
+		i.unpreserve();
+	    }
 	} finally {
 	    LocalContext.exit();
 	}
@@ -73,7 +96,7 @@ public class SpatialContextLob extends AbstractDelegateLob {
 
     private static final Factory FACTORY = new Factory() {
 	    public Object create() {
-		return new SpatialContextLob();
+		return new ViewThumbnailLinkerLob();
 	    }
 	};
 }

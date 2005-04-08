@@ -66,21 +66,22 @@ public class SimpleSpatialView implements SpatialViewSettings.SpatialView {
     }
 
     public Lob getMainviewLob(Cursor cursor) {
-	return getLob(cursor.getNode(), 150, true);
+	return getLob(cursor.getNode(), 150, true, true, false);
     }
 
-    public Lob getBuoyLob(Object node) {
-	return getLob(node, 75, false);
+    public Lob getBuoyLob(Object node, boolean useFakeFocus) {
+	return getLob(node, 75, false, false, useFakeFocus);
     }
 
-    private Lob getLob(Object node, float maxY, boolean align) {
+    private Lob getLob(Object node, float maxY, boolean align,
+		       boolean useFocus, boolean useFakeFocus) {
 	Color borderColor = 
 	    (node instanceof Literal) ? literalBorderColor : nodeBorderColor;
 
 	Lob l = contentViewSettings.getLob(node);
 	l = Lobs.margin(l, 3);
 	l = Lobs.clip(l);
-	l = BuoyConnectorLob.newInstance(l, node);
+	l = BuoyConnectorLob.newInstance(l, node, useFocus, useFakeFocus);
 	l = Lobs.frame(l, bgColor, borderColor, 2, 0, false);
 
 	if(l.getLayoutableAxis() == Axis.X) {
@@ -89,7 +90,7 @@ public class SimpleSpatialView implements SpatialViewSettings.SpatialView {
 	    l = Lobs.request(l, -1, 125, 125, -1, -1, maxY);
 	}
 
-	l = SpatialContextLob.newInstance(l);
+	l = SpatialContextLob.newInstance(l, "simple context");
 
 	if(align)
 	    l = Lobs.align(l, .5f, .5f, .5f, .5f);

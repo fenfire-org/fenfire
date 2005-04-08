@@ -49,7 +49,7 @@ public class SpatialViewSettings extends ViewSettings {
 	 *  The lob's size request should be that of the buoy;
 	 *  the lob will be rendered into the buoy box.
 	 */
-	Lob getBuoyLob(Object node);
+	Lob getBuoyLob(Object node, boolean useFakeFocus);
     }
 
     public SpatialViewSettings(Set views) {
@@ -67,9 +67,13 @@ public class SpatialViewSettings extends ViewSettings {
     }
 
     public Lob getBuoyLob(Object node) {
+	return getBuoyLob(node, false);
+    }
+
+    public Lob getBuoyLob(Object node, boolean useFakeFocus) {
 	SpatialView v = (SpatialView)getViewByNode(node);
 	if(v != null)
-	    return v.getBuoyLob(node);
+	    return v.getBuoyLob(node, useFakeFocus);
 	else
 	    return errorLob;
     }

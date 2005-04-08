@@ -165,7 +165,7 @@ public class CalendarSpatialView
     private Map buoyCache = new org.nongnu.navidoc.util.WeakValueMap();
     */
 
-    public Lob getBuoyLob(Object node) {
+    public Lob getBuoyLob(Object node, boolean useFakeFocus) {
 	throw new Error();
 	/*
 	if(buoyCache.get(node) != null) 

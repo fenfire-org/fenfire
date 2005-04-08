@@ -231,7 +231,7 @@ public class Main {
 					    graph, cursor, potionsCommand));
 
 	    Lob main = Lobs.tray(false);
-	    main.add(Lobs.clip(Lobs.keyController(getMainLob(), k)));
+	    main.add(Lobs.keyController(getMainLob(), k));
 	    main.add(Lobs.align(getDocLob(), 0, 1));
 
 
@@ -244,28 +244,24 @@ public class Main {
 	    try {
 		viewbox = Lobs.vbox();
 
+		ViewSettings.View currentView =
+		    spatialViewSettings.getViewByNode(cursor.getNode());
+
 		for(Iterator i=spatialViewSettings.getViews().iterator();
 		    i.hasNext();) {
 
 		    SpatialViewSettings.SpatialView view = 
 			(SpatialViewSettings.SpatialView)i.next();
 
-		    Lob lob;
+		    if(view == currentView) continue;
 
-		    RoleContext.enter(view.getClass());
-		    try {
-			lob = view.getBuoyLob(cursor.getNode());
-
-			lob = Components.button(lob, new @realtime-i Action(Cursor cursor, SpatialViewSettings spatialViewSettings, SpatialViewSettings.SpatialView view) {
-			    public void run() {
-				spatialViewSettings.changeView(cursor, view);
-			    }
-			});
-			
-			lob = RoleContext.lob(lob);
-		    } finally {
-			RoleContext.exit();
-		    }
+		    Lob lob = view.getBuoyLob(cursor.getNode(), true);
+		    
+		    lob = Lobs.clickController(lob, 1, new @realtime-i Action(Cursor cursor, SpatialViewSettings spatialViewSettings, SpatialViewSettings.SpatialView view) {
+			public void run() {
+			    spatialViewSettings.changeView(cursor, view);
+			}
+		    });
 			
 		    viewbox.add(lob);
 		    viewbox.add(Lobs.glue(Axis.Y, 10, 10, 10));
@@ -273,7 +269,6 @@ public class Main {
 
 		viewbox.add(Lobs.glue(Axis.Y, 0, 0, SizeRequest.INF*1024));
 
-		viewbox = Components.frame(viewbox);
 		viewbox = RoleContext.lob(viewbox);
 	    } finally {
 		RoleContext.exit();
@@ -327,14 +322,16 @@ public class Main {
 
 	    Lob vbox = Lobs.vbox();
 	    vbox.add(locationBar);
-	    vbox.add(hbox);
+	    vbox.add(Lobs.clip(hbox));
 	    vbox.add(potionsBar);
+	    
+	    Lob lob = ViewThumbnailLinkerLob.newInstance(vbox);
 
 	    /*
-	    FocusLob fl = new FocusLob(vbox);
+	    FocusLob fl = new FocusLob(lob);
 	    fl.getFocusModel().set(k);
 	    */
-	    return vbox;
+	    return lob;
 	}
 
 	protected VobMatcher makeMatcher() {

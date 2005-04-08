@@ -34,18 +34,27 @@ import java.util.*;
 public class BuoyConnectorLob extends AbstractDelegateLob {
 
     protected Object key;
+    protected boolean isFocus;
+    protected boolean isFakeFocus;
 
     private BuoyConnectorLob() {}
 
-    public static Lob newInstance(Lob content, Object key) {
+    public static Lob newInstance(Lob content, Object key,
+				  boolean isFocus, boolean isFakeFocus) {
 	BuoyConnectorLob l = (BuoyConnectorLob)FACTORY.object();
+
+	if(isFocus && isFakeFocus)
+	    throw new IllegalArgumentException("BuoyConnectorLob cannot be focus and fake focus at the same time");
+
 	l.delegate = content;
 	l.key = key;
+	l.isFocus = isFocus;
+	l.isFakeFocus = isFakeFocus;
 	return l;
     }
 
     protected Lob wrap(Lob l) {
-	return newInstance(l, key);
+	return newInstance(l, key, isFocus, isFakeFocus);
     }
 
     public void render(VobScene scene, int into, int matchingParent,
@@ -55,10 +64,18 @@ public class BuoyConnectorLob extends AbstractDelegateLob {
 	SizeRequest r = delegate.getSizeRequest();
 	int cs = scene.coords.box(into, r.width(), r.height());
 	ConnectionVobMatcher m = (ConnectionVobMatcher)scene.matcher;
+
+	Object key = isFakeFocus ? "fake focus" : this.key;
+
 	m.add(matchingParent, cs, key);
 	m.link(context, 1, cs, "structure point");
 	m.getLink(context, 1, key, "structure point");
 	super.render(scene, cs, cs, d, visible);
+
+	if(isFocus)
+	    m.setFocus(cs);
+	else if(isFakeFocus)
+	    ViewThumbnailLinkerLob.connectToFocus(context);
     }
 
     private static final Factory FACTORY = new Factory() {

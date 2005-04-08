@@ -97,7 +97,7 @@ public abstract class ViewSettings {
 	return views;
     }
 
-    protected View getViewByCursor(Cursor cursor) {
+    public View getViewByCursor(Cursor cursor) {
 	// use numeric iteration instead of Iterator
 	// because this is called in an inner loop
 	for(int i=0; i<types.size(); i++) {
@@ -109,7 +109,7 @@ public abstract class ViewSettings {
 	return null;
     }
 
-    protected View getViewByNode(Object node) {
+    public View getViewByNode(Object node) {
 	// use numeric iteration instead of Iterator
 	// because this is called in an inner loop
 	for(int i=0; i<types.size(); i++) {

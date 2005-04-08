@@ -98,7 +98,8 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 	Object node = cursor.getNode();
 	CanvasCursor cc = getCanvasCursor(cursor);
 
-	Lob l = getCanvasContent(cc.getCanvas(), cursor);
+	Lob l = getCanvasContent(cc.getCanvas(), cursor, 
+				 cursor.getNode(), false);
 
 	l = Lobs.translate(l, -cc.getPanX(), -cc.getPanY(), false);
 	l = Lobs.scale(l, cc.getZoom());
@@ -152,22 +153,24 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 	l = new DepthChangeLob(l, 10);
 	*/
 
-	l = SpatialContextLob.newInstance(l);
+	l = SpatialContextLob.newInstance(l, cc.getCanvas());
 	l = Lobs.margin(l, 40);
 
 	return l;
     }
 
-    public Lob getBuoyLob(Object node) {
+    public Lob getBuoyLob(Object node, boolean useFakeFocus) {
 	CanvasCursor cc = makeCanvasCursor(node);
 
-	Lob l = getContentLob(node);
+	Lob l = getCanvasContent(node, null, 
+				 useFakeFocus ? node : null,
+				 true);
 	l = Lobs.translate(l, -cc.getPanX(), -cc.getPanY());
 	l = Lobs.align(l, .5f, .5f);
 	l = Lobs.request(l, 100, 100, 100, 100, 100, 100);
 	l = addBackground(l, cc.getCanvas(), false);
 
-	l = SpatialContextLob.newInstance(l);
+	l = SpatialContextLob.newInstance(l, cc.getCanvas());
 
 	return l;
     }
@@ -180,7 +183,8 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
     /**
      *  'cursor' may be null.
      */
-    protected Lob getCanvasContent(Object canvas, Cursor cursor) {
+    protected Lob getCanvasContent(Object canvas, Cursor cursor,
+				   Object focusNode, boolean useFakeFocus) {
 	
 	Lob tray = Lobs.tray(false);
 	
@@ -193,7 +197,11 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 	    if(label.getLayoutableAxis() == Axis.X)
 		label = label.layoutOneAxis(100); // hmm, arbitrary value
 
-	    Lob l = BuoyConnectorLob.newInstance(label, n);
+	    boolean isFocus = (!useFakeFocus) && n.equals(focusNode);
+	    boolean isFakeFocus = useFakeFocus && n.equals(focusNode);
+
+	    Lob l = BuoyConnectorLob.newInstance(label, n, isFocus, 
+						 isFakeFocus);
 
 	    float x = RDFUtil.getFloat(graph, n, CANVAS2D.x);
 	    float y = RDFUtil.getFloat(graph, n, CANVAS2D.y);

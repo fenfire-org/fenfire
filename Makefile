@@ -57,7 +57,7 @@ BIN?=fenpdf10.py
 FILE?=myFenfire/mygraph.rdf
 WINDOWSIZE?=1600x1200
 run:
-	$(LDLIB) $(JAVACMD) org.python.util.jython ../libvob/rundemo.py -Dfenpdf.file=$(FILE) $(DBG) org/fenfire/bin/$(BIN)
+	$(LDLIB) $(JAVACMD) $(DBG) org.fenfire.Main
 
 run_edit:
 	$(LDLIB) $(JAVACMD) $(DBG) org.fenfire.fenedit.Editor
@@ -67,9 +67,6 @@ run_notebook:
 
 run_fiction:
 	$(LDLIB) $(JAVACMD) $(DBG) org.fenfire.fenfiction.FenFiction
-
-run_main:
-	$(LDLIB) $(JAVACMD) $(DBG) org.fenfire.Main
 
 
 FEEDS='http://tbray.org/ongoing/ongoing.rss' 'http://dannyayers.com/index.rdf' 'http://captsolo.net/info/xmlsrv/rdf.php?blog=2' 'http://planet.classpath.org/rss10.xml'
