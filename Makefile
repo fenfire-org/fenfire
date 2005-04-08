@@ -21,6 +21,7 @@ JAVAC ?= javac
 
 java:
 	python ../libvob/metacode/rj2java.py org/fenfire/view/CanvasSpatialView.rj org/fenfire/view/CanvasSpatialView.java
+	python ../libvob/metacode/rj2java.py org/fenfire/Main.rj org/fenfire/Main.java
 	python ../libvob/metacode/rj2java.py org/fenfire/swamp/impl/PairMap.rj org/fenfire/swamp/impl/PairMap.java
 	mkdir -p build
 	$(JAVAC) -d build -classpath $(FFCLASSPATH):$(CLASSPATH) `find org -name '*.java'`
@@ -66,6 +67,10 @@ run_notebook:
 
 run_fiction:
 	$(LDLIB) $(JAVACMD) $(DBG) org.fenfire.fenfiction.FenFiction
+
+run_main:
+	$(LDLIB) $(JAVACMD) $(DBG) org.fenfire.Main
+
 
 FEEDS='http://tbray.org/ongoing/ongoing.rss' 'http://dannyayers.com/index.rdf' 'http://captsolo.net/info/xmlsrv/rdf.php?blog=2' 'http://planet.classpath.org/rss10.xml'
 

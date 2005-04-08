@@ -93,6 +93,10 @@ public abstract class ViewSettings {
 	}
     }
 
+    public Set getViews() {
+	return views;
+    }
+
     protected View getViewByCursor(Cursor cursor) {
 	// use numeric iteration instead of Iterator
 	// because this is called in an inner loop

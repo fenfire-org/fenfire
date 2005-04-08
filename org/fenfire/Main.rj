@@ -1,0 +1,449 @@
+/* -*-java-*-
+Main.java
+ *
+ *    Copyright (c) 2003-2005 by Benja Fallenstein
+ *
+ *    This file is part of Fenfire.
+ *    
+ *    Fenfire is free software; you can redistribute it and/or modify it under
+ *    the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *    
+ *    Fenfire is distributed in the hope that it will be useful, but WITHOUT
+ *    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *    or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+ *    Public License for more details.
+ *    
+ *    You should have received a copy of the GNU General
+ *    Public License along with Fenfire; if not, write to the Free
+ *    Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+ *    MA  02111-1307  USA
+ *
+ */
+/*
+ * Written by Benja Fallenstein
+ */
+package org.fenfire;
+import org.fenfire.util.*;
+import org.nongnu.navidoc.util.Obs;
+import org.nongnu.libvob.*;
+import org.nongnu.libvob.fn.*;
+import org.nongnu.libvob.lob.*;
+import org.nongnu.libvob.vobs.*;
+import org.nongnu.libvob.impl.NewLobMain;
+import org.nongnu.libvob.util.Background;
+import org.fenfire.lob.*;
+import org.fenfire.vocab.*;
+import org.fenfire.gnowsis.*;
+import org.fenfire.swamp.*;
+import org.fenfire.swamp.impl.*;
+import org.fenfire.swamp.smush.*;
+import org.fenfire.functional.*;
+import org.fenfire.fenfeed.*;
+import org.fenfire.fenfeed.http.*;
+import org.fenfire.potion.*;
+import org.fenfire.view.*;
+import org.fenfire.view.content.*;
+import javolution.realtime.*;
+import javolution.util.*;
+import java.awt.Color;
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    private static void p(String s) { System.out.println("Main:: "+s); }
+    
+    public static final Color BG_COLOR = new Color(.1f, .1f, .3f);
+
+
+    private static final Object[] IMAGE_TYPES = {
+	Nodes.get("http://xmlns.com/foaf/0.1/Image"),
+    };
+
+
+    private static final String[] TEXT_PROPS = {
+        "http://fenfire.org/rdf-v/2003/05/ff#content",
+	"http://purl.oclc.org/NET/fenfire/vocab/showAsContent",
+	"http://www.w3.org/2000/01/rdf-schema#label",
+	"http://www.w3.org/2000/01/rdf-schema#description",
+        "http://www.w3.org/1999/02/22-rdf-syntax-ns#value",
+	"http://purl.org/dc/elements/1.0/title",
+	"http://purl.org/dc/elements/1.1/title",
+	"http://purl.org/rss/1.0/title",
+	"http://www.w3.org/2001/vcard-rdf/3.0#FN",
+	"http://norman.walsh.name/knows/taxonomy#primary",
+	"http://xmlns.com/foaf/0.1/name",
+	"http://xmlns.com/foaf/0.1/firstName",
+	"http://xmlns.com/foaf/0.1/firstname",
+	"http://xmlns.com/foaf/0.1/givenName",
+	"http://xmlns.com/foaf/0.1/surname",
+	"http://example.org/foo#firstName",
+    };
+
+    private static final String[] NAMESPACES = {
+	"rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+	"rdfs", "http://www.w3.org/2000/01/rdf-schema#",
+	"sl", "http://fenfire.org/rdf-v/2003/05/structlink#",
+	"ffv", "http://purl.oclc.org/NET/fenfire/vocab/",
+	"emir", "http:/xmlns.filsa.net/emir/0.2/#",
+	"moz", "http://www.gnowsis.org/ont/mozilla/0.1/",
+	"file", "http://www.gnowsis.org/ont/filesys/0.1#",
+	"canvas", "http://fenfire.org/rdf-v/2003/05/canvas2d#",
+	"dc", "http://purl.org/dc/elements/1.1/",
+    };
+
+    public static void main(String[] argv) throws IOException {
+	final SmushedQuadsGraph quadsGraph = new SmushedQuadsGraph();
+	final Graph graph = new AllQuadsGraph(quadsGraph, "");
+
+	Object mainnode = Nodes.N();
+	graph.addAll(getDefaultGraph(mainnode));
+
+	FenfireMain m = new FenfireMain(quadsGraph, graph, mainnode);
+	m.start();
+    }
+
+    public static class FenfireMain extends NewLobMain {
+
+	SmushedQuadsGraph quadsGraph;
+	Graph graph;
+	Object startNode;
+
+	Cursor cursor;
+	Set textProps;
+	Set noShowProps;
+	NamespaceMap nmap;
+
+	SpatialViewSettings spatialViewSettings;
+	ContentViewSettings contentViewSettings;
+	PropertyView propView;
+
+	public FenfireMain(SmushedQuadsGraph quadsGraph, Graph graph,
+			   Object startNode) {
+	    super(BG_COLOR);
+
+	    dontUseFocusLob = true; // argh!
+	    
+	    this.quadsGraph = quadsGraph;
+	    this.graph = graph;
+	    
+	    cursor = new Cursor();
+	    quadsGraph.addSmushListener(cursor);
+	    
+	    if(startNode == null) {
+		Iterator i = graph.findN_XAA_Iter();
+		if(i.hasNext())
+		    startNode = i.next();
+		else
+		    startNode = Nodes.N();
+	    }
+
+	    cursor.set(startNode);
+
+	    textProps = new HashSet();
+	    for(int i=0; i<TEXT_PROPS.length; i++)
+		textProps.add(Nodes.get(TEXT_PROPS[i]));
+
+	    nmap = new NamespaceMap();
+	    for(int i=0; i<NAMESPACES.length; i+=2)
+		nmap.put(NAMESPACES[i], NAMESPACES[i+1]);
+
+	    Set contentViews = new HashSet(Arrays.asList(new Object[] {
+		new ImageContentView(graph, IMAGE_TYPES),
+		new TextContentView(graph, cursor, nmap, textProps, 
+				      RDFS.label),
+	    }));
+
+	    contentViewSettings = new ContentViewSettings(contentViews);
+
+	    propView = new PropertyView(graph, cursor, nmap, 
+					textProps, 
+					RDFS.label, .25f, 1f);
+
+	    Set spatialViews = new HashSet(Arrays.asList(new Object[] {
+		new SimpleSpatialView(contentViewSettings),
+		// these don't work currently:
+		//new CalendarSpatialView(graph, contentViewSettings, windowAnim, 13),
+		new CanvasSpatialView(graph, contentViewSettings, windowAnim),
+	    }));
+
+	    spatialViewSettings = new SpatialViewSettings(spatialViews);
+
+	    noShowProps = new HashSet();
+	    noShowProps.addAll(textProps);
+	}
+
+	protected Lob getMainLob() {
+	    return spatialViewSettings.getMainviewLob(cursor);
+	}
+
+	protected Lob createLob() { 
+	    Set allProps = new HashSet(); //new AllPropertiesSetModel(graph);
+	    for(Iterator i=graph.findN_AXA_Iter(); i.hasNext();)
+		allProps.add(i.next());
+
+	    Set properties = new HashSet(allProps);
+	    properties.removeAll(noShowProps);
+	    //new SetModel.Difference(allProps, noShowProps);
+
+	    Map k = FastMap.newInstance();
+	    k.put("Ctrl-J", new @realtime-i Action(Cursor cursor, WindowAnimation windowAnim) { public void run() {
+		System.out.println("Please enter URI to jump to:");
+		try {
+		    Reader r0 = new InputStreamReader(System.in);
+		    BufferedReader r = new BufferedReader(r0);
+		    String uri = r.readLine();
+		    cursor.set(Nodes.get(uri));
+		} catch(IOException e) {
+		    throw new Error(e);
+		}
+		windowAnim.switchVS();
+		AbstractUpdateManager.chg();
+		System.out.println("Done.");
+	    }});
+	    k.put("Ctrl-V", new @realtime-i Action(Cursor cursor, SpatialViewSettings spatialViewSettings, WindowAnimation windowAnim) {
+		public void run() {
+		    spatialViewSettings.changeView(cursor, 1);
+		    windowAnim.animate();
+		}
+	    });
+
+
+	    Model potionsCommand = StateModel.newInstance("potions command");
+
+	    k.put("Alt-N", new PotionAction(null, Potions.newNode, 
+					    graph, cursor, potionsCommand));
+	    k.put("Alt-C", new PotionAction(Potions.connect.call(Potions.currentNode, null, null), null,
+					    graph, cursor, potionsCommand));
+	    k.put("Alt-B", new PotionAction(Potions.connectBackwards.call(Potions.currentNode, null, null), null,
+					    graph, cursor, potionsCommand));
+	    k.put("Alt-L", new PotionAction(Potions.connect.call(Potions.currentNode, null, null),
+					    Potions.node(STRUCTLINK.linkedTo,
+							 "linkedTo"), 
+					    graph, cursor, potionsCommand));
+	    k.put("Alt-T", new PotionAction(null, Potions.currentNode,
+					    graph, cursor, potionsCommand));
+	    k.put("Alt-G", new PotionAction(Potions.goTo.call(null), null,
+					    graph, cursor, potionsCommand));
+	    k.put("Alt-H", new PotionAction(null, Potions.node(startNode, 
+							       "start node"),
+					    graph, cursor, potionsCommand));
+
+	    Lob main = Lobs.tray(false);
+	    main.add(Lobs.clip(Lobs.keyController(getMainLob(), k)));
+	    main.add(Lobs.align(getDocLob(), 0, 1));
+
+
+
+	    List sortedProps = FastList.newInstance(); 
+	    sortedProps.addAll(allProps); //new TreeSet(NeighbourWheel.lexicalComparator, allProps));
+	    Lob viewbox;
+
+	    RoleContext.enter("views listbox");
+	    try {
+		viewbox = Lobs.vbox();
+
+		for(Iterator i=spatialViewSettings.getViews().iterator();
+		    i.hasNext();) {
+
+		    SpatialViewSettings.SpatialView view = 
+			(SpatialViewSettings.SpatialView)i.next();
+
+		    Lob lob;
+
+		    RoleContext.enter(view.getClass());
+		    try {
+			lob = view.getBuoyLob(cursor.getNode());
+
+			lob = Components.button(lob, new @realtime-i Action(Cursor cursor, SpatialViewSettings spatialViewSettings, SpatialViewSettings.SpatialView view) {
+			    public void run() {
+				spatialViewSettings.changeView(cursor, view);
+			    }
+			});
+			
+			lob = RoleContext.lob(lob);
+		    } finally {
+			RoleContext.exit();
+		    }
+			
+		    viewbox.add(lob);
+		    viewbox.add(Lobs.glue(Axis.Y, 10, 10, 10));
+		}
+
+		viewbox.add(Lobs.glue(Axis.Y, 0, 0, SizeRequest.INF*1024));
+
+		viewbox = Components.frame(viewbox);
+		viewbox = RoleContext.lob(viewbox);
+	    } finally {
+		RoleContext.exit();
+	    }
+
+	    /*
+	    Model templateNode = Parameter.model(ListModel.PARAM, new ObjectModel(startNode));
+	    Model templateText = new NodeTextModel(graph, templateNode, nmap, textProps, RDFS.label);
+	    Model templateNotChecked = noShowProps.containsModel(templateNode);
+	    Model templateChecked = templateNotChecked.not();
+
+	    propbox.setTemplate(new CheckBox(new Label(templateText), templateChecked));
+	    */
+
+	    Lob hbox = Lobs.hbox();
+	    hbox.add(main);
+	    hbox.add(Lobs.request(Axis.X, viewbox, 150, 150, 150));
+
+	    Lob locationBar;
+
+	    RoleContext.enter("location bar");
+	    try {
+		String uri = cursor.getNode().toString();
+
+		locationBar = Components.label(uri);
+		locationBar = Components.frame(locationBar);
+
+		locationBar = RoleContext.lob(locationBar);
+	    } finally {
+		RoleContext.exit();
+	    }
+
+	    Lob potionsBar;
+
+	    RoleContext.enter("potions bar");
+	    try {
+		org.fenfire.potion.Expression expr =
+		    (org.fenfire.potion.Expression)potionsCommand.get();
+
+		if(expr != null) {
+		    potionsBar = Components.label(expr.getString(Maps.map()));
+		    potionsBar = Components.frame(potionsBar);
+		} else {
+		    potionsBar = Lobs.glue(Axis.Y, 0, 0, 0);
+		}
+
+		potionsBar = RoleContext.lob(potionsBar);
+	    } finally {
+		RoleContext.exit();
+	    }
+
+	    Lob vbox = Lobs.vbox();
+	    vbox.add(locationBar);
+	    vbox.add(hbox);
+	    vbox.add(potionsBar);
+
+	    /*
+	    FocusLob fl = new FocusLob(vbox);
+	    fl.getFocusModel().set(k);
+	    */
+	    return vbox;
+	}
+
+	protected VobMatcher makeMatcher() {
+	    return new ConnectionVobMatcher();
+	}
+    }
+
+    private static Graph getDefaultGraph(Object mainnode) {
+	Graph graph = new HashGraph();
+
+	Object canvas = Nodes.N();
+	graph.add(canvas, RDF.type, CANVAS2D.Canvas);
+
+	Object node = mainnode;
+	graph.add(canvas, CANVAS2D.contains, node);
+	graph.add(node, RDFS.label, new PlainLiteral("Foo"));
+	graph.add(node, CANVAS2D.x, new PlainLiteral("25"));
+	graph.add(node, CANVAS2D.y, new PlainLiteral("25"));
+
+	Object node3 = Nodes.N();
+	graph.add(canvas, CANVAS2D.contains, node3);
+	graph.add(node3, RDFS.label, new PlainLiteral("Bar"));
+	graph.add(node3, CANVAS2D.x, new PlainLiteral("40"));
+	graph.add(node3, CANVAS2D.y, new PlainLiteral("60"));
+
+	/*
+	Object home = Nodes.N(), n1 = Nodes.N(), n2 = Nodes.N();
+	Object label =
+	    Nodes.get("http://www.w3.org/2000/01/rdf-schema#label");
+
+
+	graph.add(home, STRUCTLINK.linkedTo, n1);
+	graph.add(home, STRUCTLINK.linkedTo, n2);
+	graph.add(n1, label, new PlainLiteral("Node 1"));
+	graph.add(n2, label, new PlainLiteral("Node 2"));
+	*/
+
+	return graph;
+    }
+
+    private static String[] docStrings = {
+	"Cursor keys: move",
+	"Alt-Cursor keys: move text cursor",
+	null,
+	"Alt-C: connect on [prop] to [node]",
+	"Alt-B: connect backwards on [prop] to [node]",
+	null,
+	"Alt-T: this node",
+	"Alt-L: linkedTo",
+	"Alt-N: a new node",
+	null,
+	"Alt-G: go to [node]",
+	"Alt-H: the 'home'/'start' node",
+	null,
+	"Ctrl-B, cursor key: break connection",
+	"Ctrl-G: load data from Gnowsis+Web",
+	"Ctrl-O: open item in Gnowsis",
+	"Ctrl-S: save graph",
+    };
+
+    protected static Lob getDocLob() {
+	RoleContext.enter("doc");
+	try {
+	    Model model = StateModel.newInstance("doc shown");
+	    boolean shown = model.get() == Boolean.TRUE;
+	    
+	    Lob box = Lobs.vbox();
+	    String buttonText;
+
+	    if(shown) {
+		Lob vbox = Lobs.vbox();
+		
+		for(int i=0; i<docStrings.length; i++) {
+		    if(docStrings[i] != null)
+			vbox.add(Components.label(docStrings[i]));
+		    else
+			vbox.add(Lobs.glue(Axis.Y, 5, 5, 5));
+		}
+
+		box.add(vbox);
+		box.add(Lobs.glue(Axis.Y, 5, 5, 5));
+		buttonText = "Hide shortcuts";
+	    } else {
+		buttonText = "Show shortcuts";
+	    }
+	    
+	    Action action = new @realtime-i Action(Model model) {
+		public void run() {
+		    if(model.get() == Boolean.TRUE)
+		        model.set(Boolean.FALSE);
+		    else
+		        model.set(Boolean.TRUE);
+		}
+	    };
+
+	    RoleContext.enter("button");
+	    try {
+		Lob label = Components.label(buttonText);
+		box.add(RoleContext.lob(Components.button(label, action)));
+	    } finally {
+		RoleContext.exit();
+	    }
+			
+	    Lob bg = Lobs.filledRect(Color.white);
+	    Lob lob = Lobs.between(bg, Lobs.margin(box, 5), null);
+
+	    return RoleContext.lob(lob);
+	} finally {
+	    RoleContext.exit();
+	}
+    }
+}
