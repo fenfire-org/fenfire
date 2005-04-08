@@ -173,6 +173,17 @@ private static final String rcsid = "$Id: ConnectionVobMatcher.java,v 1.1 2003/0
 
     public int getLinkIndex(int from, int dir, Object childKey,
 			    Object linkKey) {
+	int result = getLinkIndexNE(from, dir, childKey, linkKey);
+	if(result < 0) throw NoSuchElementException();
+	return result;
+    }
+
+
+    /** Get link index, throw no exception (NE = no exception).
+     *  "No such element" is indicated by a negative return value.
+     */
+    public int getLinkIndexNE(int from, int dir, Object childKey,
+			      Object linkKey) {
 	if(dir > 0) {
 	    for(int i=0; i<size; i++)
 		if(cs1[i] == from && linkkey[i].equals(linkKey)
@@ -184,8 +195,8 @@ private static final String rcsid = "$Id: ConnectionVobMatcher.java,v 1.1 2003/0
 		   && getKey(cs1[i]).equals(childKey))
 		    return i;
 	}
-	
-	throw new NoSuchElementException();
+
+	return -1;
     }
 
     public boolean hasLink(int from, int dir, Object childKey,
@@ -250,12 +261,11 @@ private static final String rcsid = "$Id: ConnectionVobMatcher.java,v 1.1 2003/0
 	for(int i=0; i<size; i++) {
 	    if(cs == cs1[i]) {
 		if(cs2[i] == parent) continue;
-		int j;
-		try {
-		    j = o.getLinkIndex(ocs, 1, getKey(cs2[i]), linkkey[i]);
-		} catch(NoSuchElementException _) {
-		    continue;
-		}
+
+		int j = o.getLinkIndexNE(ocs, 1, getKey(cs2[i]), linkkey[i]);
+		
+		if(j < 0) continue;
+
 		list[cs2[i]] = o.cs2[j];
 		if(linkcs[i] >= 0 && o.linkcs[j] >= 0)
 		    list[linkcs[i]] = o.linkcs[j];
@@ -263,12 +273,11 @@ private static final String rcsid = "$Id: ConnectionVobMatcher.java,v 1.1 2003/0
 		if(dbg) p("Rematch(+): "+cs1[i]+" "+linkkey[i]+" "+cs2[i]);
 	    } else if(cs == cs2[i]) {
 		if(cs1[i] == parent) continue;
-		int j;
-		try {
-		    j = o.getLinkIndex(ocs, -1, getKey(cs1[i]), linkkey[i]);
-		} catch(NoSuchElementException _) {
-		    continue;
-		}
+
+		int j = o.getLinkIndexNE(ocs, -1, getKey(cs1[i]), linkkey[i]);
+
+		if(j < 0) continue;
+
 		list[cs1[i]] = o.cs1[j];
 		if(linkcs[i] >= 0 && o.linkcs[j] >= 0)
 		    list[linkcs[i]] = o.linkcs[j];

@@ -21,6 +21,7 @@ JAVAC ?= javac
 
 java:
 	python ../libvob/metacode/rj2java.py org/fenfire/view/CanvasSpatialView.rj org/fenfire/view/CanvasSpatialView.java
+	python ../libvob/metacode/rj2java.py org/fenfire/swamp/impl/PairMap.rj org/fenfire/swamp/impl/PairMap.java
 	mkdir -p build
 	$(JAVAC) -d build -classpath $(FFCLASSPATH):$(CLASSPATH) `find org -name '*.java'`
 

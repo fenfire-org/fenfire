@@ -1,4 +1,4 @@
-/*
+/* -*-java-*-
 PairMap.java
  *    
  *    Copyright (c) 2003-2004, Tuomas J. Lukka and Benja Fallenstein
@@ -26,6 +26,7 @@ PairMap.java
 
 package org.fenfire.swamp.impl;
 import org.nongnu.libvob.util.AbstractHashtable;
+import javolution.realtime.*;
 import java.util.*;
 
 /** A mapping from pairs of objects to sets of objects, for use as an 
@@ -109,25 +110,27 @@ public class PairMap extends AbstractHashtable {
     public Iterator getIter(final Object k1, final Object k2) {
 	return getIter(k1, k2, null);
     }
-    public Iterator getIter(final Object k1, final Object k2, final Object k3) {
-	return new Iterator() {
-		int index = first(PairMap.this.hashCode(k1, k2, k3));
+    public Iterator getIter(Object k1, Object k2, Object k3) {
+	PairMap map = this;
+	int index = first(hashCode(k1, k2, k3));
+
+	return new @realtime-i Iterator(PairMap map, int index, Object k1, Object k2, Object k3) {
 		public boolean hasNext() { skip(); return index >= 0; }
 		public Object next() {
 		    skip();
 		    if(index == -1) throw new NoSuchElementException();
-		    Object o = value[index];
-		    index = PairMap.this.next(index);
+		    Object o = map.value[index];
+		    index = map.next(index);
 		    return o;
 		}
 		private void skip() {
 		    while(true) {
 			if(index == -1) break;
-			if(PairMap.equals(k1, key1[index]) && 
-			   PairMap.equals(k2, key2[index]) && 
-			   PairMap.equals(k3, key3[index]))
+			if(PairMap.equals(k1, map.key1[index]) && 
+			   PairMap.equals(k2, map.key2[index]) && 
+			   PairMap.equals(k3, map.key3[index]))
 			    break;
-			index = PairMap.this.next(index);
+			index = map.next(index);
 		    }
 		}
 		public void remove() { 
