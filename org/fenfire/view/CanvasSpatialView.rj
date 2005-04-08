@@ -162,7 +162,7 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
     public Lob getBuoyLob(Object node, boolean useFakeFocus) {
 	CanvasCursor cc = makeCanvasCursor(node);
 
-	Lob l = getCanvasContent(node, null, 
+	Lob l = getCanvasContent(cc.getCanvas(), null, 
 				 useFakeFocus ? node : null,
 				 true);
 	l = Lobs.translate(l, -cc.getPanX(), -cc.getPanY());
@@ -207,7 +207,12 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 	    float y = RDFUtil.getFloat(graph, n, CANVAS2D.y);
 
 	    CanvasCursor cc = makeCanvasCursor(n);
-	    float zoom = getCanvasCursor(cursor).getZoom();
+
+	    float zoom;
+	    if(cursor != null)
+		zoom = getCanvasCursor(cursor).getZoom();
+	    else
+		zoom = 1; // buoy
 
 	    if(cursor != null) {
 		l = Lobs.clickController(l, 1, new @realtime-i Action(Object n, float zoom, Object canvas, Cursor cursor, CanvasCursor cc) {
