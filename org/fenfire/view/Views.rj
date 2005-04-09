@@ -1,0 +1,90 @@
+/* -*-java-*-
+Views.rj
+ *
+ *    Copyright (c) 2005 by Benja Fallenstein
+ *
+ *    This file is part of Fenfire.
+ *    
+ *    Fenfire is free software; you can redistribute it and/or modify it under
+ *    the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *    
+ *    Fenfire is distributed in the hope that it will be useful, but WITHOUT
+ *    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *    or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+ *    Public License for more details.
+ *    
+ *    You should have received a copy of the GNU General
+ *    Public License along with Fenfire; if not, write to the Free
+ *    Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+ *    MA  02111-1307  USA
+ *
+ */
+/*
+ * Written by Benja Fallenstein
+ */
+package org.fenfire.view;
+import org.fenfire.*;
+import org.fenfire.util.*;
+import org.nongnu.libvob.fn.*;
+import org.nongnu.libvob.lob.*;
+import org.fenfire.view.content.*;
+import javolution.realtime.*;
+import javolution.util.*;
+import java.util.*;
+
+public class Views {
+
+    /**
+     *  @param align If < 0, align top or left; if == 0, align center;
+     *               if > 0, align bottom or right.
+     */
+    public static Lob thumbnailBox(Axis axis, Cursor cursor, 
+				   SpatialViewSettings svs, int align) {
+	Lob viewbox = Lobs.box(axis);
+
+	ViewSettings.View currentView =
+	    svs.getViewByNode(cursor.getNode());
+
+	if(align <= 0)
+	    viewbox.add(Lobs.glue(axis, 0, 0, SizeRequest.INF));
+
+	for(Iterator i=svs.getViews().iterator();
+	    i.hasNext();) {
+
+	    SpatialViewSettings.SpatialView view = 
+		(SpatialViewSettings.SpatialView)i.next();
+
+	    if(view == currentView) continue;
+
+	    boolean ok = false;
+
+	    for(Iterator j=view.getTypes().iterator(); j.hasNext();) {
+		ViewSettings.Type type = (ViewSettings.Type)j.next();
+
+		if(type.containsNode(cursor.getNode()))
+		    ok = true;
+	    }
+
+	    if(!ok) continue;
+
+	    Lob lob = view.getBuoyLob(cursor.getNode(), true);
+	    lob = Lobs.noGrow(axis, lob);
+		    
+	    lob = Lobs.clickController(lob, 1, new @realtime-i Action(Cursor cursor, SpatialViewSettings svs, SpatialViewSettings.SpatialView view) {
+		public void run() {
+		    svs.changeView(cursor, view);
+		}
+	    });
+			
+	    viewbox.add(lob);
+	    viewbox.add(Lobs.glue(axis, 10, 10, 10));
+	}
+
+	if(align >= 0)
+	    viewbox.add(Lobs.glue(axis, 0, 0, SizeRequest.INF));
+
+	return viewbox;
+    }
+}

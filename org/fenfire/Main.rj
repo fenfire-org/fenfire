@@ -241,33 +241,8 @@ public class Main {
 
 	    RoleContext.enter("views listbox");
 	    try {
-		viewbox = Lobs.vbox();
-
-		ViewSettings.View currentView =
-		    spatialViewSettings.getViewByNode(cursor.getNode());
-
-		for(Iterator i=spatialViewSettings.getViews().iterator();
-		    i.hasNext();) {
-
-		    SpatialViewSettings.SpatialView view = 
-			(SpatialViewSettings.SpatialView)i.next();
-
-		    if(view == currentView) continue;
-
-		    Lob lob = view.getBuoyLob(cursor.getNode(), true);
-		    lob = Lobs.noGrow(Axis.Y, lob);
-		    
-		    lob = Lobs.clickController(lob, 1, new @realtime-i Action(Cursor cursor, SpatialViewSettings spatialViewSettings, SpatialViewSettings.SpatialView view) {
-			public void run() {
-			    spatialViewSettings.changeView(cursor, view);
-			}
-		    });
-			
-		    viewbox.add(lob);
-		    viewbox.add(Lobs.glue(Axis.Y, 10, 10, 10));
-		}
-
-		viewbox.add(Lobs.glue(Axis.Y, 0, 0, SizeRequest.INF));
+		viewbox = Views.thumbnailBox(Axis.Y, cursor, 
+					     spatialViewSettings, -1);
 
 		viewbox = Components.frame(viewbox, 
 					   Maps.map("clip", Boolean.FALSE));
