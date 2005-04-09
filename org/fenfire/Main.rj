@@ -231,9 +231,8 @@ public class Main {
 					    graph, cursor, potionsCommand));
 
 	    Lob main = Lobs.tray(false);
-	    main.add(Lobs.keyController(getMainLob(), k));
 	    main.add(Lobs.align(getDocLob(), 0, 1));
-
+	    main.add(Lobs.keyController(getMainLob(), k));
 
 
 	    List sortedProps = FastList.newInstance(); 
@@ -256,6 +255,7 @@ public class Main {
 		    if(view == currentView) continue;
 
 		    Lob lob = view.getBuoyLob(cursor.getNode(), true);
+		    lob = Lobs.noGrow(Axis.Y, lob);
 		    
 		    lob = Lobs.clickController(lob, 1, new @realtime-i Action(Cursor cursor, SpatialViewSettings spatialViewSettings, SpatialViewSettings.SpatialView view) {
 			public void run() {
@@ -267,7 +267,10 @@ public class Main {
 		    viewbox.add(Lobs.glue(Axis.Y, 10, 10, 10));
 		}
 
-		viewbox.add(Lobs.glue(Axis.Y, 0, 0, SizeRequest.INF*1024));
+		viewbox.add(Lobs.glue(Axis.Y, 0, 0, SizeRequest.INF));
+
+		viewbox = Components.frame(viewbox, 
+					   Maps.map("clip", Boolean.FALSE));
 
 		viewbox = RoleContext.lob(viewbox);
 	    } finally {
