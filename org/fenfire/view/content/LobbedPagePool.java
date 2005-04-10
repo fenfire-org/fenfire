@@ -41,6 +41,11 @@ public class LobbedPagePool extends AWTPagePool {
 			int w = (int)(info1.width), 
 			    h = (int)(info1.height);
 			
+			if (g instanceof Graphics2D)
+			    ((Graphics2D) g).setRenderingHint(
+				   RenderingHints.KEY_INTERPOLATION,
+				   RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+
 			g.drawImage(img, x,y,w,h, null); 
 		    }
 		};
