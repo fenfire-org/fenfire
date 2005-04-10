@@ -68,11 +68,13 @@ public class PageContentView implements ContentViewSettings.ContentView {
     private Object[] types;
     private WindowAnimation anim;
     private LobbedPagePool pagePool;
+    private LOD lods;
     public PageContentView(Graph graph, Object[] types, WindowAnimation anim) {
 	this.graph = graph;
 	this.types = types;
 	this.anim = anim;
 	pagePool = LobbedPagePool.getInstance();
+	lods = new LOD();
     }
 
     public Set getTypes() {
@@ -119,12 +121,16 @@ public class PageContentView implements ContentViewSettings.ContentView {
 	String ct = null;
 	BlockId id = null;
 	PageImageScroll page = null;
+	int maxw = -1, maxh = -1;
 	String tmpImgPrefix = null;
 	boolean imagesGenerated = false;
 	public State(Object node) { this.uri = (String) node; }
     }
 
     public Lob getLob(Object node) {
+	return getLob(node, 0);
+    }
+    public Lob getLob(Object node, float change) {
 	Lob lob = Lobs.nullLob();
 	State s = (State) node2state.get(node);
 	if (s == null) {
@@ -143,7 +149,7 @@ public class PageContentView implements ContentViewSettings.ContentView {
 	if (s.imagesGenerated == false)
 	    lob = generateImages(s);
 
-	lob = getRealLob(s);
+	lob = getRealLob(s, change);
 
 	return lob;
     }
@@ -200,8 +206,7 @@ public class PageContentView implements ContentViewSettings.ContentView {
 	    BlockOutputStream bos = pool.getBlockOutputStream(s.ct);
 	    CopyUtil.copy(new FileInputStream(s.file), bos);
 	    s.page = new PageImageScroll(new StormAlph(
-					   pool), s.id, s.ct);
-	    //p("p: "+page);
+					     pool), s.id, s.ct);
 	} catch (Exception e) {
 	    e.printStackTrace();
 	    Lob lob = Lobs.hbox(Lobs.text(Components.font(Color.black), "Something wrong while creating page image scroll: '"+e.getMessage()+"'"));
@@ -224,6 +229,11 @@ public class PageContentView implements ContentViewSettings.ContentView {
 	    if(d.width > maxw) maxw = d.width;
 	    if(d.height > maxh) maxh = d.height;
 	}
+	s.maxw = maxw;
+	s.maxh = maxh;
+
+	// 72 dpi? http://www.scantips.com/basics1a.html
+	// this is passed to gs
 	float inchWidth = maxw / 72.0f;
 	float inchHeight = maxh / 72.0f;
 	
@@ -277,33 +287,164 @@ public class PageContentView implements ContentViewSettings.ContentView {
 	return Lobs.nullLob();
     }
     
-    boolean u = true;
+    protected Lob getRealLob(State s, float dx) {
+	long time = System.currentTimeMillis();
+	long tooMuch = time + 20;
 
-    protected Lob getRealLob(State s) {
 	List list = new ArrayList();
 	int n = ((Span1D)(s.page.getCurrent())).length();
-	for (int i=0; i<n; i++) {
-	    int w = pagePool.getW(i);
-	    int h = pagePool.getH(i);
-	    File img = new File(ScrollBlockImager.tmp(),
-				w+"x"+h+"_"+s.tmpImgPrefix+(i+1));
-
-	    try {
-		if (u)
-		    pagePool.setImage(new FileInputStream(img), i, w,h);
-		list.add(pagePool.getLob(i));
-	    } catch(Exception e) {
-		e.printStackTrace();
+	
+	
+	// set priority == LOD
+	float x0 = 0;
+	if (dx < 0) {
+	    for (int i=0; i<n; i++)
+		if (System.currentTimeMillis() < tooMuch)
+		    lods.setLOD(s, i, i);
+	} else if (dx > (n*s.maxw)) {
+	    for (int i=0; i<n; i++)
+		if (System.currentTimeMillis() < tooMuch)
+		    lods.setLOD(s, i, n-i-1);
+	} else {
+	    for (int i=0; i<n; i++) {
+		if (x0 <= dx && dx < (x0+s.maxw)) {
+		    int lod = 0;
+		    for (int j=i; j<n; j++) {
+			if (System.currentTimeMillis() < tooMuch)
+			    lods.setLOD(s, j, lod++);
+		    }
+		    lod = 1;
+		    for (int j=i-1; j>=0; j--) {
+			if (System.currentTimeMillis() < tooMuch)
+			    lods.setLOD(s, j, lod++);
+		    }
+		    break;
+		}
+		x0 += s.maxw;
 	    }
 	}
-	u = false;
-	return Lobs.hbox(list);
+
+	Lob l = Lobs.hbox();
+	for (int i=0; i<n; i++) {
+	    int w = s.maxw;
+	    int h = s.maxh;
+	    Lob l2;
+	    try {
+		l2 = pagePool.getLob(lods.getIndex(s, i));
+	    } catch (Exception e) {
+		l2 = Components.label(e.getMessage());
+	    }
+	    l2 = Lobs.request(l2, w,w,w,h,h,h);
+	    l.add(l2);
+	}
+	    
+	return l; 
     }	
 
     PythonInterpreter interp;
 
 
+    class LOD {
+	List actives = new ArrayList();
 
+	class SPP {
+	    State state;
+	    int page;
+	    int prior;
+	    SPP(State s, int p, int pr) {
+		state = s; page = p; prior = pr;
+	    }
+	}
+	
+	void setLOD(State s, int page, int prior) {
+	    //p("SET LOD: page: "+page+". prior: "+prior);
+	    boolean needCreate = true;
+	    for (int i=0; i<actives.size(); i++) {
+		SPP spp = (SPP)actives.get(i);
+		if (spp.state.uri.equals(s.uri) && spp.page == page)
+		    needCreate = false;
+	    }
+	    if (needCreate) actives.add(new SPP(s, page, prior));
+	    //p("needCreate: "+needCreate);
+
+	    
+	    int current = 0;
+	    for (int i=0; i<actives.size(); i++) {
+		SPP spp = (SPP)actives.get(i);
+		if (spp.state.uri.equals(s.uri) && spp.page == page) {
+		    current = i; 
+		    spp.prior = prior;
+		    break;
+		}
+	    }
+	    
+	    int swap = current;
+	    for (int i=swap-1; i>=0; i--) {
+		SPP spp = (SPP)actives.get(i);
+		if ((spp.prior > ((SPP)actives.get(current)).prior) &&
+		    ((pagePool.getW(i) > pagePool.getW(current)) ||
+		     (pagePool.getH(i) > pagePool.getW(current)))) {
+		    swap = i;
+		    break;
+		}
+	    }
+
+	    //p("current: "+current+", swap: "+swap);
+		
+	    if (needCreate) {
+		int w = pagePool.getW(current);
+		int h = pagePool.getH(current);
+		File img = new File(ScrollBlockImager.tmp(),
+				    w+"x"+h+"_"+s.tmpImgPrefix+(page+1));
+		
+		try {
+		    pagePool.setImage(new FileInputStream(img), current, w,h);
+		} catch(Exception e) {
+		    e.printStackTrace();
+		}
+		return;
+	    }
+	    
+	    if (swap != current) {
+		//p("SWAP current: "+current+" with swap: "+swap);
+		SPP swap_ = (SPP) actives.get(swap);
+		SPP current_ = (SPP) actives.get(current);
+
+		try {
+		    int w = pagePool.getW(swap);
+		    int h = pagePool.getH(swap);
+		    File img = new File(ScrollBlockImager.tmp(),
+					w+"x"+h+"_"+current_.state.tmpImgPrefix+
+					(current_.page+1));
+		    pagePool.setImage(new FileInputStream(img), swap, w,h);
+
+		    w = pagePool.getW(current);
+		    h = pagePool.getH(current);
+		    img = new File(ScrollBlockImager.tmp(),
+				   w+"x"+h+"_"+swap_.state.tmpImgPrefix+
+				   (swap_.page+1));
+		    pagePool.setImage(new FileInputStream(img), current, w,h);
+		    
+		    actives.set(current, swap_);
+		    actives.set(swap, current_);
+
+		} catch(Exception e) {
+		    e.printStackTrace();
+		}
+		
+	    }
+		
+	}
+	
+	int getIndex(State s, int page) {
+	    for (int i=0; i<actives.size(); i++) {
+		SPP spp = (SPP)actives.get(i);
+		if (spp.state.equals(s) && (spp.page == page))
+		    return i;
+	    }
+	    return -1;
+	}
+    }
 
 	/*
 	String uri = (String) node;

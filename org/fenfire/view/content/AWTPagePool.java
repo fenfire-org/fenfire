@@ -17,8 +17,8 @@ public class AWTPagePool {
     protected final int[][] sizes = {
 	// how many, width, height
 	{ 1, 2048, 2048 },
-	{ 4, 256, 512 },
-	//{ 8, 128, 256 },
+	{ 2, 256, 512 },
+	{ 4, 128, 256 },
 	{ 64, 64, 64 },
     };
 
@@ -172,7 +172,6 @@ public class AWTPagePool {
 	*/
 	imgs[index].setRGB(0,0,getW(index), getH(index), 
 			   pixs[index], 0, getW(index));
-	p("index: "+index);
 	png.removeConsumer(imgConsumer);
     }
 

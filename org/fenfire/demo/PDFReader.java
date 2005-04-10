@@ -94,10 +94,9 @@ public class PDFReader extends NewLobMain {
 
 	Lob lob;
 	//lob = Lobs.filledRect(Color.black);
-	lob = pageView.getLob(node);
+	lob = pageView.getLob(node, -x);
 
         lob = Lobs.key(lob, "PDF");
-	lob = Lobs.request(lob, 100,100,100,100,100,100);
 	lob = Lobs.keyController(lob, keys);
 	lob = Lobs.translate(lob, x,y);
 	lob = Lobs.scale(lob, zoom);

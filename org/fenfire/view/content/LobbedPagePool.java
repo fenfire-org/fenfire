@@ -55,9 +55,6 @@ public class LobbedPagePool extends AWTPagePool {
     public Lob getLob(int index) {
 	Lob l;
 	l = Lobs.vob(vobs[index]);
-	int w = getW(index);
-	int h = getH(index);
-	w = 100; h = 141;
-	return Lobs.request(l, w,w,w, h,h,h);
+	return l;
     }
 }
