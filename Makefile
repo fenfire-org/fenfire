@@ -93,6 +93,10 @@ run_textmm:
 run_java:
 	$(JAVACMD) `echo $(CLASS) | sed 's/\//./g;'` $(ARGS)
 
+run_pdfreader:
+	$(LDLIB) $(JAVACMD) $(DBG) org.fenfire.demo.PDFReader testdata/paper.pdf
+
+
 
 test_fenpdfdemo:
 	$(LDLIB) $(JAVACMD) org.python.util.jython ../libvob/rundemo.py -Dfenpdf.file=$(FILE) -Dfenpdf.demo=1 -DtestFenPDF=1 $(DBG) org/fenfire/bin/$(BIN)

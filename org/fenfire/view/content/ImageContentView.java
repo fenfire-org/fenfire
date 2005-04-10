@@ -1,5 +1,5 @@
 /*
-TextContentView.java
+ImageContentView.java
  *    
  *    Copyright (c) 2003-2005, Benja Fallenstein
  *                  2005, Matti J. Katila

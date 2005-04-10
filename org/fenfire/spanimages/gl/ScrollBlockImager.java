@@ -40,11 +40,11 @@ import org.nongnu.alph.*;
 public abstract class ScrollBlockImager {
     /** The directory to store the cached images in (in mipzip format).
      */
-    static private File __tmp = new File("../tmpimg");
+    static private File __tmp = new File("./tmpimg");
 
     /** Get the directory to store the cached images in (in mipzip format).
      */
-    static File tmp() {
+    static public File tmp() {
 	if(!__tmp.exists())
 	    __tmp.mkdir();
 	return __tmp;
@@ -52,7 +52,7 @@ public abstract class ScrollBlockImager {
 
     /** Hide the slash and colon characters from the filesystem.
      */
-    static protected String protectChars(String s) {
+    static public String protectChars(String s) {
 	StringBuffer res = new StringBuffer();
 	for(int i=0; i<s.length(); i++) {
 	    char c = s.charAt(i);
