@@ -1,0 +1,7 @@
+# (c): Matti J. Katila
+
+import org.fenfire as ff
+
+def testContentType():
+    lit = ff.swamp.PlainLiteral('file://ff_bg.png')
+    assert ff.util.ImportUtil.getContentType(lit) == 'image/png'
