@@ -158,7 +158,7 @@ public class Main {
 	    Set contentViews = new HashSet(Arrays.asList(new Object[] {
 		new ImageContentView(graph, IMAGE_TYPES),
 		textContentView,
-		new PropertyListContentView(graph, propListProperties,
+		new PropertyListContentView(graph, cursor, propListProperties,
 					    textContentView),
 	    }));
 

@@ -25,21 +25,26 @@ PropertyListContentView.java
  * Written by Benja Fallenstein
  */
 package org.fenfire.view.content;
+import org.fenfire.Cursor;
 import org.fenfire.view.*;
 import org.fenfire.swamp.*;
 import org.nongnu.libvob.lob.*;
 import org.nongnu.libvob.lob.lobs.*;
 import javolution.realtime.*;
+import java.awt.Color;
 import java.util.*;
 
 public class PropertyListContentView implements ContentViewSettings.ContentView {
     
     Graph graph;
+    Cursor cursor;
     List properties;
     ContentViewSettings.ContentView subView;
 
-    public PropertyListContentView(Graph graph, List properties, ContentViewSettings.ContentView subView) {
+    public PropertyListContentView(Graph graph, Cursor cursor, List properties,
+				   ContentViewSettings.ContentView subView) {
 	this.graph = graph;
+	this.cursor = cursor;
 	this.properties = properties;
 	this.subView = subView;
     }
@@ -49,7 +54,7 @@ public class PropertyListContentView implements ContentViewSettings.ContentView 
     }
 
     public Lob getLob(Object node) {
-	Lob table = TableLob.newInstance(new @realtime-i TableLob.Table(Object node, List properties, ContentViewSettings.ContentView subView, Graph graph) {
+	Lob table = TableLob.newInstance(new @realtime-i TableLob.Table(Object node, List properties, ContentViewSettings.ContentView subView, Graph graph, Cursor cursor) {
 	    public int getRowCount() {
 		return properties.size();
 	    }
@@ -77,13 +82,20 @@ public class PropertyListContentView implements ContentViewSettings.ContentView 
 
 		    if(vbox == null) vbox = Lobs.vbox();
 
-		    vbox.add(subView.getLob(value));
+		    Lob lob = subView.getLob(value);
+		    lob = Lobs.clickController(lob, 1, new @realtime-i Action(Object value, Cursor cursor) {
+			public void run() {
+			    cursor.setNode(value);
+			}
+		    });
+		    vbox.add(lob);
 		}
 
 		if(vbox != null)
 		    return vbox;
 		else
-		    return Components.label("<no value>");
+		    return Lobs.hbox(Lobs.text(Components.font(Color.lightGray),
+					       "<no value>"));
 	    }
 	});
 

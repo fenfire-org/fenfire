@@ -230,7 +230,7 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 				(ConnectionVobMatcher)sc.matcher;
 			    
 			    int focus = m.getFocus();
-			    int context = m.getLink(focus, -1, "spatial context", "structure point");
+			    int context = m.getLink(focus, -1, canvas, "structure point");
 			    m.setNextFocus(m.getLink(context, 1, n, "structure point"));
 			}
 		    });
