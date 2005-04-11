@@ -1,0 +1,106 @@
+/* -*-java-*-
+PropertyListContentView.java
+ *
+ *    Copyright (c) 2003-2005 by Benja Fallenstein
+ *
+ *    This file is part of Fenfire.
+ *    
+ *    Fenfire is free software; you can redistribute it and/or modify it under
+ *    the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *    
+ *    Fenfire is distributed in the hope that it will be useful, but WITHOUT
+ *    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *    or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+ *    Public License for more details.
+ *    
+ *    You should have received a copy of the GNU General
+ *    Public License along with Fenfire; if not, write to the Free
+ *    Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+ *    MA  02111-1307  USA
+ *
+ */
+/*
+ * Written by Benja Fallenstein
+ */
+package org.fenfire.view.content;
+import org.fenfire.view.*;
+import org.fenfire.swamp.*;
+import org.nongnu.libvob.lob.*;
+import org.nongnu.libvob.lob.lobs.*;
+import javolution.realtime.*;
+import java.util.*;
+
+public class PropertyListContentView implements ContentViewSettings.ContentView {
+    
+    Graph graph;
+    List properties;
+    ContentViewSettings.ContentView subView;
+
+    public PropertyListContentView(Graph graph, List properties, ContentViewSettings.ContentView subView) {
+	this.graph = graph;
+	this.properties = properties;
+	this.subView = subView;
+    }
+
+    public Set getTypes() {
+	return Collections.singleton(ViewSettings.ALL);
+    }
+
+    public Lob getLob(Object node) {
+	Lob table = TableLob.newInstance(new @realtime-i TableLob.Table(Object node, List properties, ContentViewSettings.ContentView subView, Graph graph) {
+	    public int getRowCount() {
+		return properties.size();
+	    }
+
+	    public int getColumnCount() {
+		return 3;
+	    }
+
+	    public Lob getLob(int row, int col) {
+		Object prop = properties.get(row);
+
+		if(col == 0)
+		    return subView.getLob(prop).layoutOneAxis(100);
+		else if(col == 1)
+		    return Lobs.glue(Axis.X, 10, 10, 10);
+
+		Lob vbox = null;
+		
+		for(Iterator i=graph.findN_11X_Iter(node, prop); i.hasNext();){
+		    Object value = i.next();
+
+		    if(vbox == null) vbox = Lobs.vbox();
+
+		    //vbox.add(subView.getLob(value).layoutOneAxis(100));
+		    vbox.add(subView.getLob(value));
+		}
+
+		if(vbox != null)
+		    return vbox;
+		else
+		    return Components.label("<no value>");
+	    }
+	});
+
+	/*Lob hbox = Lobs.hbox();
+	hbox.add(Lobs.scale(subView.getLob(node), 1.5f));
+	hbox.add(Lobs.glue(Axis.X, 0, 0, SizeRequest.INF));
+
+	Lob vbox = Lobs.vbox();
+	vbox.add(hbox);
+	vbox.add(Lobs.glue(Axis.Y, 30, 30, 30));
+	vbox.add(table);
+
+	return Components.frame(vbox, Maps.map("clip", Boolean.FALSE));
+	*/
+
+	Lob vbox = Lobs.vbox();
+	vbox.add(Lobs.request(Axis.X, Lobs.scale(subView.getLob(node), 1.5f), -1, -1, SizeRequest.INF));
+	vbox.add(Lobs.glue(Axis.Y, 15, 15, 15));
+	vbox.add(table);
+
+	return Components.frame(vbox, Maps.map("clip", Boolean.FALSE));
+    }
+}

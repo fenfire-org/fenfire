@@ -21,6 +21,7 @@ JAVAC ?= javac
 
 java:
 	python ../libvob/metacode/rj2java.py org/fenfire/view/CanvasSpatialView.rj org/fenfire/view/CanvasSpatialView.java
+	python ../libvob/metacode/rj2java.py org/fenfire/view/content/PropertyListContentView.rj org/fenfire/view/content/PropertyListContentView.java
 	python ../libvob/metacode/rj2java.py org/fenfire/view/Views.rj org/fenfire/view/Views.java
 	python ../libvob/metacode/rj2java.py org/fenfire/Main.rj org/fenfire/Main.java
 	python ../libvob/metacode/rj2java.py org/fenfire/swamp/impl/PairMap.rj org/fenfire/swamp/impl/PairMap.java
