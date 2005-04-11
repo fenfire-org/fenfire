@@ -194,8 +194,15 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 	    Object n = i.next();
 	    Lob label = getContentLob(n);
 
-	    if(label.getLayoutableAxis() == Axis.X)
-		label = label.layoutOneAxis(100); // hmm, arbitrary value
+	    if(label.getLayoutableAxis() == Axis.X) {
+		SizeRequest r = label.getSizeRequest();
+
+		float size = 100; // hmm, arbitrary value
+		if(size < r.minW) 
+		    size = r.minW;
+
+		label = label.layoutOneAxis(size); 
+	    }
 
 	    boolean isFocus = (!useFakeFocus) && n.equals(focusNode);
 	    boolean isFakeFocus = useFakeFocus && n.equals(focusNode);

@@ -83,9 +83,15 @@ public class SimpleSpatialView implements SpatialViewSettings.SpatialView {
 	l = Lobs.clip(l);
 	l = BuoyConnectorLob.newInstance(l, node, useFocus, useFakeFocus);
 	l = Lobs.frame(l, bgColor, borderColor, 2, 0, false);
-
+	
 	if(l.getLayoutableAxis() == Axis.X) {
-	    l = l.layoutOneAxis(125);
+	    SizeRequest r = l.getSizeRequest();
+	
+	    float size = 125;
+	    if(size < r.minW) 
+		size = r.minW;
+
+	    l = l.layoutOneAxis(size);
 	} else {
 	    l = Lobs.request(l, 125, -1, -1, -1, -1, maxY);
 	}

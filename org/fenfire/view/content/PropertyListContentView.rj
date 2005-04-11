@@ -35,6 +35,7 @@ import java.awt.Color;
 import java.util.*;
 
 public class PropertyListContentView implements ContentViewSettings.ContentView {
+    private static final void p(String s) { System.out.println("PropertyListContentView:: "+s); }
     
     Graph graph;
     Cursor cursor;
@@ -91,11 +92,14 @@ public class PropertyListContentView implements ContentViewSettings.ContentView 
 		    vbox.add(lob);
 		}
 
-		if(vbox != null)
-		    return vbox;
-		else
-		    return Lobs.hbox(Lobs.text(Components.font(Color.lightGray),
-					       "<no value>"));
+		if(vbox == null) {
+		    vbox = Lobs.vbox();
+		    vbox.add(Lobs.hbox(Lobs.text(Components.font(Color.lightGray),
+						 "<no value>")));
+		}
+
+		vbox.add(Lobs.glue(Axis.Y, 0, 0, SizeRequest.INF));
+		return vbox;
 	    }
 	});
 
