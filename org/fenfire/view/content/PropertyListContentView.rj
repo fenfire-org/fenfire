@@ -55,25 +55,28 @@ public class PropertyListContentView implements ContentViewSettings.ContentView 
 	    }
 
 	    public int getColumnCount() {
-		return 3;
+		return 5;
 	    }
 
 	    public Lob getLob(int row, int col) {
 		Object prop = properties.get(row);
 
-		if(col == 0)
+		if(col == 2)
 		    return subView.getLob(prop).layoutOneAxis(100);
-		else if(col == 1)
+		else if(col == 1 || col == 3)
 		    return Lobs.glue(Axis.X, 10, 10, 10);
 
 		Lob vbox = null;
+
+		Iterator i = (col==0) 
+		    ? graph.findN_X11_Iter(prop, node)
+		    : graph.findN_11X_Iter(node, prop);
 		
-		for(Iterator i=graph.findN_11X_Iter(node, prop); i.hasNext();){
+		for(; i.hasNext();){
 		    Object value = i.next();
 
 		    if(vbox == null) vbox = Lobs.vbox();
 
-		    //vbox.add(subView.getLob(value).layoutOneAxis(100));
 		    vbox.add(subView.getLob(value));
 		}
 
@@ -83,18 +86,6 @@ public class PropertyListContentView implements ContentViewSettings.ContentView 
 		    return Components.label("<no value>");
 	    }
 	});
-
-	/*Lob hbox = Lobs.hbox();
-	hbox.add(Lobs.scale(subView.getLob(node), 1.5f));
-	hbox.add(Lobs.glue(Axis.X, 0, 0, SizeRequest.INF));
-
-	Lob vbox = Lobs.vbox();
-	vbox.add(hbox);
-	vbox.add(Lobs.glue(Axis.Y, 30, 30, 30));
-	vbox.add(table);
-
-	return Components.frame(vbox, Maps.map("clip", Boolean.FALSE));
-	*/
 
 	Lob vbox = Lobs.vbox();
 	vbox.add(Lobs.request(Axis.X, Lobs.scale(subView.getLob(node), 1.5f), -1, -1, SizeRequest.INF));
