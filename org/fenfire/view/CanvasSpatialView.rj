@@ -32,6 +32,7 @@ import org.fenfire.vocab.*;
 import org.fenfire.lob.*;
 import org.fenfire.util.RDFUtil;
 import org.nongnu.libvob.lob.*;
+import org.nongnu.libvob.lob.lobs.DragController;
 import org.nongnu.libvob.*;
 import org.nongnu.libvob.util.*;
 import org.nongnu.navidoc.util.Obs;
@@ -94,6 +95,29 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
     }
 
 
+    private Lob dragController(Lob delegate, int button, Cursor cursor) {
+	CanvasSpatialView view = this;
+
+	CanvasCursor cc = view.getCanvasCursor(cursor);
+	
+	return new @realtime DragController(@set Lob delegate, @set int button, Cursor cursor, CanvasSpatialView view, CanvasCursor cc) {
+
+	    protected Lob wrap(Lob l) {
+		return view.dragController(l, button, cursor);
+	    }
+	    
+	    public void drag(VobScene scene, int cs, float x, float y) {
+		float panX = cc.getPanX()+startx-x, 
+		    panY = cc.getPanY()+starty-y;
+
+		cursor.setSpatialCursor(new CanvasCursor(cc.getCanvas(), panX, panY, cc.getZoom()));
+
+		Lobs.getWindowAnimation().switchVS();
+	    }
+	}; 
+    }
+
+
     public Lob getMainviewLob(Cursor cursor) {
 	Object node = cursor.getNode();
 	CanvasCursor cc = getCanvasCursor(cursor);
@@ -102,11 +126,16 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 				 cursor.getNode(), false);
 
 	l = Lobs.translate(l, -cc.getPanX(), -cc.getPanY(), false);
+
+	l = dragController(l, 1, cursor);
+
 	l = Lobs.scale(l, cc.getZoom());
+
+	l = Lobs.request(l, 0, 0, 0, 0, 0, 0);
 	l = Lobs.align(l, .5f, .5f);
 
 	/*
-	Lob l = new DragController(pzl, 3, new org.nongnu.libvob.mouse.RelativeAdapter() {
+	l = new ***realtime-i DragController(l, 3, new org.nongnu.libvob.mouse.RelativeAdapter() {
 		public void startDrag(int x, int y) {
 		    super.startDrag(x, y);
 		    mainviewCache = (Lob)theLob.get();
@@ -124,25 +153,6 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
 		    winAnim.rerender();
 		}
 	    });
-	l = new DragController(l, 1, new org.nongnu.libvob.mouse.RelativeAdapter() {
-		public void startDrag(int x, int y) {
-		    super.startDrag(x, y);
-		    mainviewCache = (Lob)theLob.get();
-		}
-
-		public void changedRelative(float dx, float dy) {
-		    float nx = panX.getFloat() - dx/zoom.getFloat();
-		    float ny = panY.getFloat() - dy/zoom.getFloat();
-		    float nz = zoom.getFloat();
-
-		    panX.setFloat(nx);
-		    panY.setFloat(ny);
-
-		    pzl.setParams(nx, ny, nz);
-		    mainviewCache = (Lob)theLob.get();
-		    winAnim.rerender();
-		}
-	    }); 
 	*/
 
 	/*

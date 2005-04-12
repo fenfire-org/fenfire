@@ -320,6 +320,7 @@ public class Main {
 	    vbox.add(potionsBar);
 	    
 	    Lob lob = ViewThumbnailLinkerLob.newInstance(vbox);
+	    lob = DragManager.newInstance(lob);
 
 	    /*
 	    FocusLob fl = new FocusLob(lob);
