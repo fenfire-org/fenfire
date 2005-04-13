@@ -1,5 +1,5 @@
 /*
-PageContentView.java
+PageReprView.java
  *    
  *    Copyright (c) 2003-2005, Benja Fallenstein
  *                  2005, Matti J. Katila
@@ -26,7 +26,7 @@ PageContentView.java
 /*
  * Written by Benja Fallenstein and Matti J. Katila
  */
-package org.fenfire.view.content;
+package org.fenfire.view.repr;
 import org.fenfire.vocab.*;
 import org.fenfire.view.*;
 import org.fenfire.spanimages.gl.*;
@@ -60,8 +60,8 @@ import java.awt.Dimension;
 import java.util.*;
 import java.io.*;
 
-public class PageContentView implements ContentViewSettings.ContentView {
-    private static void p(String s) { System.out.println("PageContentView:: "+s); }
+public class PageReprView extends ReprView.AbstractLobView {
+    private static void p(String s) { System.out.println("PageReprView:: "+s); }
 
 
     private Graph graph;
@@ -69,7 +69,7 @@ public class PageContentView implements ContentViewSettings.ContentView {
     private WindowAnimation anim;
     private LobbedPagePool pagePool;
     private LOD lods;
-    public PageContentView(Graph graph, Object[] types, WindowAnimation anim) {
+    public PageReprView(Graph graph, Object[] types, WindowAnimation anim) {
 	this.graph = graph;
 	this.types = types;
 	this.anim = anim;

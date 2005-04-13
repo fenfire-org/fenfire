@@ -2,7 +2,7 @@
 
 package org.fenfire.demo;
 import org.fenfire.view.*;
-import org.fenfire.view.content.*;
+import org.fenfire.view.repr.*;
 import org.fenfire.swamp.Nodes;
 
 import org.nongnu.libvob.*;
@@ -79,12 +79,12 @@ public class PDFReader extends NewLobMain {
 	    });
 
 
-	pageView = new PageContentView(null, null, windowAnim);
+	pageView = new PageReprView(null, null, windowAnim);
 	node = Nodes.get("file://"+file);
     }
 
     Object node;
-    PageContentView pageView;
+    PageReprView pageView;
     Map keys = FastMap.newInstance();
     float zoom = 1f, 
 	x=-100, 

@@ -24,7 +24,7 @@ PropertyViewlet.java
 /*
  * Written by Benja Fallenstein
  */
-package org.fenfire.view.content;
+package org.fenfire.view.repr;
 import org.fenfire.Cursor;
 import org.fenfire.view.*;
 import org.fenfire.swamp.*;
@@ -35,14 +35,14 @@ import java.awt.Color;
 import java.util.*;
 
 public @realtime class PropertyViewlet implements Viewlet {
-    private static final void p(String s) { System.out.println("PropertyListContentView:: "+s); }
+    private static final void p(String s) { System.out.println("PropertyListReprView:: "+s); }
     
     Graph graph;
     Object property;
-    ContentViewSettings.ContentView subView;
+    ReprView subView;
 
     public @constructor(Graph graph, Object property,
-			ContentViewSettings.ContentView subView) {
+			ReprView subView) {
 	this.graph = graph;
 	this.property = property;
 	this.subView = subView;

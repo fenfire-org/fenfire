@@ -1,5 +1,5 @@
 /*
-TextContentView.java
+TextReprView.java
  *    
  *    Copyright (c) 2003-2005, Benja Fallenstein
  *                  2005, Matti J. Katila
@@ -26,7 +26,7 @@ TextContentView.java
 /*
  * Written by Benja Fallenstein and Matti J. Katila
  */
-package org.fenfire.view.content;
+package org.fenfire.view.repr;
 import org.fenfire.view.*;
 import org.fenfire.Cursor;
 import org.fenfire.lob.*;
@@ -39,8 +39,8 @@ import javolution.realtime.*;
 import java.awt.Color;
 import java.util.*;
 
-public class TextContentView implements ContentViewSettings.ContentView {
-    private static void p(String s) { System.out.println("TextContentView:: "+s); }
+public class TextReprView extends ReprView.AbstractLobView {
+    private static void p(String s) { System.out.println("TextReprView:: "+s); }
 
 
     private Map propCache = new org.nongnu.navidoc.util.WeakValueMap();
@@ -53,7 +53,7 @@ public class TextContentView implements ContentViewSettings.ContentView {
 
     private NodeTexter texter;
 
-    public TextContentView(Graph graph, Cursor cursor, NamespaceMap nmap, 
+    public TextReprView(Graph graph, Cursor cursor, NamespaceMap nmap, 
 			     Set textProperties, Object defaultProperty) {
 	this.graph = graph;
 	this.cursor = cursor;

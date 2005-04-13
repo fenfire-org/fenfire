@@ -1,6 +1,6 @@
 // (c): Matti J. Katila
 
-package org.fenfire.view.content;
+package org.fenfire.view.repr;
 
 import org.nongnu.libvob.vobs.*;
 import org.nongnu.libvob.*;

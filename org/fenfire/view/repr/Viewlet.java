@@ -24,7 +24,7 @@ Viewlet.java
 /*
  * Written by Benja Fallenstein
  */
-package org.fenfire.view.content;
+package org.fenfire.view.repr;
 import org.fenfire.Cursor;
 import org.fenfire.view.*;
 import org.fenfire.swamp.*;

@@ -1,5 +1,5 @@
 /*
-ContentViewSettings.java
+ReprViewSettings.java
  *    
  *    Copyright (c) 2004-2005, Benja Fallenstein and Matti Katila
  *
@@ -28,39 +28,22 @@ ContentViewSettings.java
 package org.fenfire.view;
 import org.fenfire.Cursor;
 import org.nongnu.libvob.lob.*;
-import org.nongnu.libvob.*;
-import org.nongnu.libvob.util.*;
-import org.nongnu.navidoc.util.Obs;
 import java.util.*;
 
-public class ContentViewSettings extends ViewSettings {
+public interface ReprView extends ViewSettings.View {
 
-    public interface ContentView extends View {
-	Lob getLob(Object node);
-	//Lob getPropertyLob(Object prop);
+    Lob getLob(Object node);
+    List getLobList(Object node);
+
+    abstract class AbstractLobView implements ReprView {
+	public List getLobList(Object node) {
+	    return Lists.list(getLob(node));
+	}
     }
 
-    public ContentViewSettings(Set views) {
-	super(views);
+    abstract class AbstractListView implements ReprView {
+	public Lob getLob(Object node) {
+	    return Lobs.hbox(getLobList(node));
+	}
     }
-
-    private Lob errorLob = Components.label("No matching content view found!");
-
-    public Lob getLob(Object node) {
-	ContentView v = (ContentView)getViewByNode(node);
-	if(v != null)
-	    return v.getLob(node);
-	else
-	    return errorLob;
-    }
-
-    /*
-    public Lob getPropertyLob(Object node) {
-	ContentView v = (ContentView)getViewByNode(node);
-	if(v != null)
-	    return v.getPropertyLob(node);
-	else
-	    return errorLob;
-    }
-    */
 }

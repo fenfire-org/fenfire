@@ -1,5 +1,5 @@
 /*
-SpatialViewSettings.java
+ReprViewSettings.java
  *    
  *    Copyright (c) 2004-2005, Benja Fallenstein and Matti Katila
  *
@@ -33,31 +33,27 @@ import org.nongnu.libvob.util.*;
 import org.nongnu.navidoc.util.Obs;
 import java.util.*;
 
-public class SpatialViewSettings extends ViewSettings implements SpatialView {
+public class ReprViewSettings extends ViewSettings implements ReprView {
 
-    public SpatialViewSettings(Set views) {
+    public ReprViewSettings(Set views) {
 	super(views);
     }
 
-    private Lob errorLob = Components.label("No matching spatial view found!");
+    private Lob errorLob = Components.label("No matching content view found!");
 
-    public Lob getMainviewLob(Cursor cursor) {
-	SpatialView v = (SpatialView)getViewByCursor(cursor);
+    public Lob getLob(Object node) {
+	ReprView v = (ReprView)getViewByNode(node);
 	if(v != null)
-	    return v.getMainviewLob(cursor);
+	    return v.getLob(node);
 	else
 	    return errorLob;
     }
 
-    public Lob getBuoyLob(Object node) {
-	return getBuoyLob(node, false);
-    }
-
-    public Lob getBuoyLob(Object node, boolean useFakeFocus) {
-	SpatialView v = (SpatialView)getViewByNode(node);
+    public List getLobList(Object node) {
+	ReprView v = (ReprView)getViewByNode(node);
 	if(v != null)
-	    return v.getBuoyLob(node, useFakeFocus);
+	    return v.getLobList(node);
 	else
-	    return errorLob;
+	    return Lists.list(errorLob);
     }
 }

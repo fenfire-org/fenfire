@@ -1,5 +1,5 @@
 /* -*-java-*-
-PropertyListContentView.java
+PropertyListReprView.java
  *
  *    Copyright (c) 2003-2005 by Benja Fallenstein
  *
@@ -24,7 +24,7 @@ PropertyListContentView.java
 /*
  * Written by Benja Fallenstein
  */
-package org.fenfire.view.content;
+package org.fenfire.view.repr;
 import org.fenfire.Cursor;
 import org.fenfire.view.*;
 import org.fenfire.swamp.*;
@@ -34,16 +34,16 @@ import javolution.realtime.*;
 import java.awt.Color;
 import java.util.*;
 
-public class PropertyListContentView implements ContentViewSettings.ContentView {
-    private static final void p(String s) { System.out.println("PropertyListContentView:: "+s); }
+public class PropertyListReprView extends ReprView.AbstractLobView {
+    private static final void p(String s) { System.out.println("PropertyListReprView:: "+s); }
     
     Graph graph;
     Cursor cursor;
     List viewlets;
-    ContentViewSettings.ContentView subView;
+    ReprView subView;
 
-    public PropertyListContentView(Graph graph, Cursor cursor, List viewlets,
-				   ContentViewSettings.ContentView subView) {
+    public PropertyListReprView(Graph graph, Cursor cursor, List viewlets,
+				   ReprView subView) {
 	this.graph = graph;
 	this.cursor = cursor;
 	this.viewlets = viewlets;
@@ -55,7 +55,7 @@ public class PropertyListContentView implements ContentViewSettings.ContentView 
     }
 
     public Lob getLob(Object node) {
-	Lob table = TableLob.newInstance(new @realtime-i TableLob.Table(Object node, List viewlets, ContentViewSettings.ContentView subView, Graph graph, Cursor cursor) {
+	Lob table = TableLob.newInstance(new @realtime-i TableLob.Table(Object node, List viewlets, ReprView subView, Graph graph, Cursor cursor) {
 	    public int getRowCount() {
 		return viewlets.size();
 	    }

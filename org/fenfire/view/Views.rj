@@ -29,7 +29,7 @@ import org.fenfire.*;
 import org.fenfire.util.*;
 import org.nongnu.libvob.fn.*;
 import org.nongnu.libvob.lob.*;
-import org.fenfire.view.content.*;
+import org.fenfire.view.repr.*;
 import javolution.realtime.*;
 import javolution.util.*;
 import java.util.*;
@@ -53,8 +53,7 @@ public class Views {
 	for(Iterator i=svs.getViews().iterator();
 	    i.hasNext();) {
 
-	    SpatialViewSettings.SpatialView view = 
-		(SpatialViewSettings.SpatialView)i.next();
+	    SpatialView view = (SpatialView)i.next();
 
 	    if(view == currentView) continue;
 
@@ -72,7 +71,7 @@ public class Views {
 	    Lob lob = view.getBuoyLob(cursor.getNode(), true);
 	    lob = Lobs.noGrow(axis, lob);
 		    
-	    lob = Lobs.clickController(lob, 1, new @realtime-i Action(Cursor cursor, SpatialViewSettings svs, SpatialViewSettings.SpatialView view) {
+	    lob = Lobs.clickController(lob, 1, new @realtime-i Action(Cursor cursor, SpatialViewSettings svs, SpatialView view) {
 		public void run() {
 		    svs.changeView(cursor, view);
 		}

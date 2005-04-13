@@ -44,7 +44,7 @@ import org.fenfire.fenfeed.*;
 import org.fenfire.fenfeed.http.*;
 import org.fenfire.potion.*;
 import org.fenfire.view.*;
-import org.fenfire.view.content.*;
+import org.fenfire.view.repr.*;
 import javolution.realtime.*;
 import javolution.util.*;
 import java.awt.Color;
@@ -116,10 +116,10 @@ public class Main {
 	NamespaceMap nmap;
 
 	SpatialViewSettings spatialViewSettings;
-	ContentViewSettings contentViewSettings;
+	ReprViewSettings reprViewSettings;
 	PropertyView propView;
 
-	ContentViewSettings.ContentView textContentView;
+	ReprView textReprView;
 
 	List viewlets = new FastList();
 
@@ -153,28 +153,28 @@ public class Main {
 	    for(int i=0; i<NAMESPACES.length; i+=2)
 		nmap.put(NAMESPACES[i], NAMESPACES[i+1]);
 
-	    textContentView =
-		new TextContentView(graph, cursor, nmap, textProps, 
+	    textReprView =
+		new TextReprView(graph, cursor, nmap, textProps, 
 				    RDFS.label);
 
-	    Set contentViews = new HashSet(Arrays.asList(new Object[] {
-		new ImageContentView(graph, IMAGE_TYPES),
-		textContentView,
-		new PropertyListContentView(graph, cursor, viewlets,
-					    textContentView),
+	    Set reprViews = new HashSet(Arrays.asList(new Object[] {
+		new ImageReprView(graph, IMAGE_TYPES),
+		textReprView,
+		new PropertyListReprView(graph, cursor, viewlets,
+					    textReprView),
 	    }));
 
-	    contentViewSettings = new ContentViewSettings(contentViews);
+	    reprViewSettings = new ReprViewSettings(reprViews);
 
 	    propView = new PropertyView(graph, cursor, nmap, 
 					textProps, 
 					RDFS.label, .25f, 1f);
 
 	    Set spatialViews = new HashSet(Arrays.asList(new Object[] {
-		new SimpleSpatialView(contentViewSettings),
+		new SimpleSpatialView(reprViewSettings),
 		// these don't work currently:
-		//new CalendarSpatialView(graph, contentViewSettings, windowAnim, 13),
-		new CanvasSpatialView(graph, contentViewSettings, windowAnim),
+		//new CalendarSpatialView(graph, reprViewSettings, windowAnim, 13),
+		new CanvasSpatialView(graph, reprViewSettings, windowAnim),
 	    }));
 
 	    spatialViewSettings = new SpatialViewSettings(spatialViews);
@@ -197,7 +197,7 @@ public class Main {
 		Object prop = i.next();
 		
 		viewlets.add(PropertyViewlet.newInstance(graph, prop, 
-							 textContentView));
+							 textReprView));
 	    }
 
 	    Set properties = new HashSet(allProps);
@@ -225,9 +225,9 @@ public class Main {
 		    windowAnim.animate();
 		}
 	    });
-	    k.put("Alt-V", new @realtime-i Action(Cursor cursor, ViewSettings contentViewSettings, WindowAnimation windowAnim) {
+	    k.put("Alt-V", new @realtime-i Action(Cursor cursor, ViewSettings reprViewSettings, WindowAnimation windowAnim) {
 		public void run() {
-		    contentViewSettings.changeView(cursor, 1);
+		    reprViewSettings.changeView(cursor, 1);
 		    windowAnim.animate();
 		}
 	    });

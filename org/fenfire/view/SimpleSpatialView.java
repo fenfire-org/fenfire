@@ -36,22 +36,22 @@ import org.nongnu.navidoc.util.Obs;
 import java.awt.Color;
 import java.util.*;
 
-public class SimpleSpatialView implements SpatialViewSettings.SpatialView {
+public class SimpleSpatialView implements SpatialView {
 
-    private ContentViewSettings contentViewSettings;
+    private ReprViewSettings reprViewSettings;
     private Color bgColor;
     private Color nodeBorderColor;
     private Color literalBorderColor;
 
-    public SimpleSpatialView(ContentViewSettings contentViewSettings) {
-	this(contentViewSettings, new Color(.85f, .85f, .8f),
+    public SimpleSpatialView(ReprViewSettings reprViewSettings) {
+	this(reprViewSettings, new Color(.85f, .85f, .8f),
 	     new Color(.56f, .425f, 1), new Color(.85f, .425f, 0));
     }
 
-    public SimpleSpatialView(ContentViewSettings contentViewSettings,
+    public SimpleSpatialView(ReprViewSettings reprViewSettings,
 			     Color bgColor, Color nodeBorderColor,
 			     Color literalBorderColor) {
-	this.contentViewSettings = contentViewSettings;
+	this.reprViewSettings = reprViewSettings;
 	this.bgColor = bgColor;
 	this.nodeBorderColor = nodeBorderColor;
 	this.literalBorderColor = literalBorderColor;
@@ -78,7 +78,7 @@ public class SimpleSpatialView implements SpatialViewSettings.SpatialView {
 	Color borderColor = 
 	    (node instanceof Literal) ? literalBorderColor : nodeBorderColor;
 
-	Lob l = contentViewSettings.getLob(node);
+	Lob l = reprViewSettings.getLob(node);
 	l = Lobs.margin(l, 3);
 	l = Lobs.clip(l);
 	l = BuoyConnectorLob.newInstance(l, node, useFocus, useFakeFocus);

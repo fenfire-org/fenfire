@@ -34,7 +34,6 @@ import org.nongnu.navidoc.util.Obs;
 import java.util.*;
 
 public abstract class ViewSettings {
-
     public interface Type {
 	boolean containsCursor(Cursor cursor);
 	boolean containsNode(Object node);
@@ -91,6 +90,10 @@ public abstract class ViewSettings {
 		    viewByType.put(t, v);
 	    }
 	}
+    }
+
+    public Set getTypes() {
+	return Collections.singleton(ALL);
     }
 
     public Set getViews() {

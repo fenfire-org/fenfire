@@ -40,18 +40,18 @@ import javolution.realtime.*;
 import java.awt.Color;
 import java.util.*;
 
-public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
+public class CanvasSpatialView implements SpatialView {
     static private void p(String s) { System.out.println("CanvasSpatialView:: "+s); }
 
     private Graph graph;
-    private ContentViewSettings contentViewSettings;
+    private ReprViewSettings reprViewSettings;
     private WindowAnimation winAnim;
 
     public CanvasSpatialView(Graph graph, 
-			     ContentViewSettings contentViewSettings,
+			     ReprViewSettings reprViewSettings,
 			     WindowAnimation winAnim) {
 	this.graph = graph;
-	this.contentViewSettings = contentViewSettings;
+	this.reprViewSettings = reprViewSettings;
 	this.winAnim = winAnim;
     }
 
@@ -186,7 +186,7 @@ public class CanvasSpatialView implements SpatialViewSettings.SpatialView {
     }
 
     protected Lob getContentLob(Object node) {
-	return contentViewSettings.getLob(node);
+	return reprViewSettings.getLob(node);
     }
 
 

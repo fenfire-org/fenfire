@@ -1,5 +1,5 @@
 /*
-ImageContentView.java
+ImageReprView.java
  *    
  *    Copyright (c) 2003-2005, Benja Fallenstein
  *                  2005, Matti J. Katila
@@ -26,7 +26,7 @@ ImageContentView.java
 /*
  * Written by Benja Fallenstein and Matti J. Katila
  */
-package org.fenfire.view.content;
+package org.fenfire.view.repr;
 import org.fenfire.vocab.*;
 import org.fenfire.view.*;
 import org.fenfire.Cursor;
@@ -38,13 +38,13 @@ import org.nongnu.libvob.lob.*;
 import java.awt.Color;
 import java.util.*;
 
-public class ImageContentView implements ContentViewSettings.ContentView {
-    private static void p(String s) { System.out.println("ImageContentView:: "+s); }
+public class ImageReprView extends ReprView.AbstractLobView {
+    private static void p(String s) { System.out.println("ImageReprView:: "+s); }
 
 
     private Graph graph;
     private Object[] types         ;
-    public ImageContentView(Graph graph, Object[] types) {
+    public ImageReprView(Graph graph, Object[] types) {
 	this.graph = graph;
 	this.types = types;
     }

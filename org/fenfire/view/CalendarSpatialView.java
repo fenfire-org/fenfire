@@ -38,12 +38,11 @@ import java.awt.Color;
 import java.text.DateFormat;
 import java.util.*;
 
-public class CalendarSpatialView 
-    implements SpatialViewSettings.SpatialView, Obs {
+public class CalendarSpatialView implements SpatialView, Obs {
     static private void p(String s) { System.out.println("CalendarSpatialView:: "+s); }
 
     private Graph graph;
-    private ContentViewSettings contentViewSettings;
+    private ReprViewSettings reprViewSettings;
     private WindowAnimation winAnim;
     private int ndays;
 
@@ -55,10 +54,10 @@ public class CalendarSpatialView
     private Map cache = new org.nongnu.navidoc.util.WeakValueMap();
 
     public CalendarSpatialView(Graph graph, 
-			       ContentViewSettings contentViewSettings,
+			       ReprViewSettings reprViewSettings,
 			       WindowAnimation winAnim, int days) {
 	this.graph = graph;
-	this.contentViewSettings = contentViewSettings;
+	this.reprViewSettings = reprViewSettings;
 	this.winAnim = winAnim;
 
 	dateFormat = DateFormat.getDateInstance();
@@ -256,7 +255,7 @@ public class CalendarSpatialView
 		v.glue(25, 25, 25);
 		for (Iterator j=nodes.iterator(); j.hasNext();) {
 		    Object n = j.next();
-		    Lob l3 = contentViewSettings.getLob(n);
+		    Lob l3 = reprViewSettings.getLob(n);
 		    l3 = new RequestChangeLob(Lob.X, l3,
 					      Float.NaN, Float.NaN, 160);
 		    // XXX add click controller to select new focus...

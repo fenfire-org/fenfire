@@ -1,6 +1,6 @@
 // (c): Matti J. Katila
 
-package org.fenfire.view.content;
+package org.fenfire.view.repr;
 import java.awt.image.*;
 import java.awt.*;
 import java.io.*;
