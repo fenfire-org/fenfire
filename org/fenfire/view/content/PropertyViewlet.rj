@@ -1,0 +1,83 @@
+/* -*-java-*-
+PropertyViewlet.java
+ *
+ *    Copyright (c) 2005 by Benja Fallenstein
+ *
+ *    This file is part of Fenfire.
+ *    
+ *    Fenfire is free software; you can redistribute it and/or modify it under
+ *    the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *    
+ *    Fenfire is distributed in the hope that it will be useful, but WITHOUT
+ *    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *    or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+ *    Public License for more details.
+ *    
+ *    You should have received a copy of the GNU General
+ *    Public License along with Fenfire; if not, write to the Free
+ *    Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+ *    MA  02111-1307  USA
+ *
+ */
+/*
+ * Written by Benja Fallenstein
+ */
+package org.fenfire.view.content;
+import org.fenfire.Cursor;
+import org.fenfire.view.*;
+import org.fenfire.swamp.*;
+import org.nongnu.libvob.lob.*;
+import org.nongnu.libvob.lob.lobs.*;
+import javolution.realtime.*;
+import java.awt.Color;
+import java.util.*;
+
+public @realtime class PropertyViewlet implements Viewlet {
+    private static final void p(String s) { System.out.println("PropertyListContentView:: "+s); }
+    
+    Graph graph;
+    Object property;
+    ContentViewSettings.ContentView subView;
+
+    public @constructor(Graph graph, Object property,
+			ContentViewSettings.ContentView subView) {
+	this.graph = graph;
+	this.property = property;
+	this.subView = subView;
+    }
+
+    public Lob getCaption() {
+	return subView.getLob(property);
+    }
+
+    public Lob getLob(Cursor cursor, Object node, int dir) {
+
+	Lob vbox = null;
+	
+	Iterator i = (dir < 0) 
+	    ? graph.findN_X11_Iter(property, node)
+	    : graph.findN_11X_Iter(node, property);
+	
+	for(; i.hasNext();){
+	    Object value = i.next();
+	    
+	    if(vbox == null) vbox = Lobs.vbox();
+	    
+	    Lob lob = subView.getLob(value);
+	    lob = Lobs.clickController(lob, 1, new @realtime-i Action(Object value, Cursor cursor) {
+		public void run() {
+		    cursor.setNode(value);
+		}
+	    });
+	    vbox.add(lob);
+	}
+	
+	if(vbox != null)
+	    return vbox;
+	else
+	    return Lobs.hbox(Lobs.text(Components.font(Color.lightGray),
+				       "<no value>"));
+    }
+}

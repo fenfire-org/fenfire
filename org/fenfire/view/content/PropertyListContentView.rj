@@ -39,14 +39,14 @@ public class PropertyListContentView implements ContentViewSettings.ContentView 
     
     Graph graph;
     Cursor cursor;
-    List properties;
+    List viewlets;
     ContentViewSettings.ContentView subView;
 
-    public PropertyListContentView(Graph graph, Cursor cursor, List properties,
+    public PropertyListContentView(Graph graph, Cursor cursor, List viewlets,
 				   ContentViewSettings.ContentView subView) {
 	this.graph = graph;
 	this.cursor = cursor;
-	this.properties = properties;
+	this.viewlets = viewlets;
 	this.subView = subView;
     }
 
@@ -55,9 +55,9 @@ public class PropertyListContentView implements ContentViewSettings.ContentView 
     }
 
     public Lob getLob(Object node) {
-	Lob table = TableLob.newInstance(new @realtime-i TableLob.Table(Object node, List properties, ContentViewSettings.ContentView subView, Graph graph, Cursor cursor) {
+	Lob table = TableLob.newInstance(new @realtime-i TableLob.Table(Object node, List viewlets, ContentViewSettings.ContentView subView, Graph graph, Cursor cursor) {
 	    public int getRowCount() {
-		return properties.size();
+		return viewlets.size();
 	    }
 
 	    public int getColumnCount() {
@@ -65,39 +65,17 @@ public class PropertyListContentView implements ContentViewSettings.ContentView 
 	    }
 
 	    public Lob getLob(int row, int col) {
-		Object prop = properties.get(row);
+		Viewlet viewlet = (Viewlet)viewlets.get(row);
 
 		if(col == 2)
-		    return subView.getLob(prop).layoutOneAxis(100);
+		    return viewlet.getCaption().layoutOneAxis(100);
 		else if(col == 1 || col == 3)
 		    return Lobs.glue(Axis.X, 10, 10, 10);
 
-		Lob vbox = null;
+		int dir = (col == 0) ? -1 : +1;
 
-		Iterator i = (col==0) 
-		    ? graph.findN_X11_Iter(prop, node)
-		    : graph.findN_11X_Iter(node, prop);
-		
-		for(; i.hasNext();){
-		    Object value = i.next();
-
-		    if(vbox == null) vbox = Lobs.vbox();
-
-		    Lob lob = subView.getLob(value);
-		    lob = Lobs.clickController(lob, 1, new @realtime-i Action(Object value, Cursor cursor) {
-			public void run() {
-			    cursor.setNode(value);
-			}
-		    });
-		    vbox.add(lob);
-		}
-
-		if(vbox == null) {
-		    vbox = Lobs.vbox();
-		    vbox.add(Lobs.hbox(Lobs.text(Components.font(Color.lightGray),
-						 "<no value>")));
-		}
-
+		Lob vbox = Lobs.vbox();
+		vbox.add(viewlet.getLob(cursor, node, dir));
 		vbox.add(Lobs.glue(Axis.Y, 0, 0, SizeRequest.INF));
 		return vbox;
 	    }

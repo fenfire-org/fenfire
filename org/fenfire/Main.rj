@@ -119,7 +119,9 @@ public class Main {
 	ContentViewSettings contentViewSettings;
 	PropertyView propView;
 
-	List propListProperties = new ArrayList();
+	ContentViewSettings.ContentView textContentView;
+
+	List viewlets = new FastList();
 
 	public FenfireMain(SmushedQuadsGraph quadsGraph, Graph graph,
 			   Object startNode) {
@@ -151,14 +153,14 @@ public class Main {
 	    for(int i=0; i<NAMESPACES.length; i+=2)
 		nmap.put(NAMESPACES[i], NAMESPACES[i+1]);
 
-	    TextContentView textContentView =
+	    textContentView =
 		new TextContentView(graph, cursor, nmap, textProps, 
 				    RDFS.label);
 
 	    Set contentViews = new HashSet(Arrays.asList(new Object[] {
 		new ImageContentView(graph, IMAGE_TYPES),
 		textContentView,
-		new PropertyListContentView(graph, cursor, propListProperties,
+		new PropertyListContentView(graph, cursor, viewlets,
 					    textContentView),
 	    }));
 
@@ -190,8 +192,13 @@ public class Main {
 	    for(Iterator i=graph.findN_AXA_Iter(); i.hasNext();)
 		allProps.add(i.next());
 
-	    propListProperties.clear();
-	    propListProperties.addAll(allProps);
+	    viewlets.clear();
+	    for(Iterator i=allProps.iterator(); i.hasNext();) {
+		Object prop = i.next();
+		
+		viewlets.add(PropertyViewlet.newInstance(graph, prop, 
+							 textContentView));
+	    }
 
 	    Set properties = new HashSet(allProps);
 	    properties.removeAll(noShowProps);
