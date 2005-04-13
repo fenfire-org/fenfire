@@ -38,20 +38,20 @@ import java.util.*;
 
 public class SimpleSpatialView implements SpatialView {
 
-    private ReprViewSettings reprViewSettings;
+    private ReprView reprView;
     private Color bgColor;
     private Color nodeBorderColor;
     private Color literalBorderColor;
 
-    public SimpleSpatialView(ReprViewSettings reprViewSettings) {
-	this(reprViewSettings, new Color(.85f, .85f, .8f),
+    public SimpleSpatialView(ReprView reprView) {
+	this(reprView, new Color(.85f, .85f, .8f),
 	     new Color(.56f, .425f, 1), new Color(.85f, .425f, 0));
     }
 
-    public SimpleSpatialView(ReprViewSettings reprViewSettings,
+    public SimpleSpatialView(ReprView reprView,
 			     Color bgColor, Color nodeBorderColor,
 			     Color literalBorderColor) {
-	this.reprViewSettings = reprViewSettings;
+	this.reprView = reprView;
 	this.bgColor = bgColor;
 	this.nodeBorderColor = nodeBorderColor;
 	this.literalBorderColor = literalBorderColor;
@@ -78,7 +78,7 @@ public class SimpleSpatialView implements SpatialView {
 	Color borderColor = 
 	    (node instanceof Literal) ? literalBorderColor : nodeBorderColor;
 
-	Lob l = reprViewSettings.getLob(node);
+	Lob l = reprView.getLob(node);
 	l = Lobs.margin(l, 3);
 	l = Lobs.clip(l);
 	l = BuoyConnectorLob.newInstance(l, node, useFocus, useFakeFocus);

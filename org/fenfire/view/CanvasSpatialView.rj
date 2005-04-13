@@ -44,14 +44,14 @@ public class CanvasSpatialView implements SpatialView {
     static private void p(String s) { System.out.println("CanvasSpatialView:: "+s); }
 
     private Graph graph;
-    private ReprViewSettings reprViewSettings;
+    private ReprView reprView;
     private WindowAnimation winAnim;
 
     public CanvasSpatialView(Graph graph, 
-			     ReprViewSettings reprViewSettings,
+			     ReprView reprView,
 			     WindowAnimation winAnim) {
 	this.graph = graph;
-	this.reprViewSettings = reprViewSettings;
+	this.reprView = reprView;
 	this.winAnim = winAnim;
     }
 
@@ -186,7 +186,7 @@ public class CanvasSpatialView implements SpatialView {
     }
 
     protected Lob getContentLob(Object node) {
-	return reprViewSettings.getLob(node);
+	return reprView.getLob(node);
     }
 
 

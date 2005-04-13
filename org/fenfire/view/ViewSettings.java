@@ -126,7 +126,6 @@ public abstract class ViewSettings {
 
     public void changeView(Cursor position, int steps) {
 	List list = new ArrayList();
-	System.out.println("views: "+list);
 
 	for(Iterator i=views.iterator(); i.hasNext();) {
 	    View v = (View)i.next();
@@ -140,10 +139,12 @@ public abstract class ViewSettings {
 	    }
 	}
 
+	System.out.println("views: "+list);
+
 	int index = list.indexOf(getViewByCursor(position));
 	index = (index + steps) % list.size();
 	if(index < 0) index += list.size();
-	System.out.println("move to index "+index);
+	System.out.println("move to index "+index+": "+list.get(index));
 	changeView(position, (View)list.get(index));
     }
 
@@ -158,9 +159,11 @@ public abstract class ViewSettings {
 	    t = null;
 	}
 
-	if(t == null)
+	if(t == null) {
 	    // no matching type
+	    //System.out.println("XXX no matching type");
 	    return;
+	}
 
 	types.remove(t);
 	types.add(0, t);

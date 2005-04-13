@@ -43,7 +43,9 @@ public interface ReprView extends ViewSettings.View {
 
     abstract class AbstractListView implements ReprView {
 	public Lob getLob(Object node) {
-	    return Lobs.hbox(getLobList(node));
+	    List text = Lists.concat(getLobList(node),
+				     Lists.list(Lobs.hglue()));
+	    return Lobs.hbox(text);
 	}
     }
 }

@@ -43,7 +43,7 @@ public class PropertyListReprView extends ReprView.AbstractLobView {
     ReprView subView;
 
     public PropertyListReprView(Graph graph, Cursor cursor, List viewlets,
-				   ReprView subView) {
+				ReprView subView) {
 	this.graph = graph;
 	this.cursor = cursor;
 	this.viewlets = viewlets;

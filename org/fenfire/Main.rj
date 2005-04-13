@@ -117,9 +117,9 @@ public class Main {
 
 	SpatialViewSettings spatialViewSettings;
 	ReprViewSettings reprViewSettings;
-	PropertyView propView;
+	ReprView reprView;
 
-	ReprView textReprView;
+	PropertyView propView;
 
 	List viewlets = new FastList();
 
@@ -153,28 +153,27 @@ public class Main {
 	    for(int i=0; i<NAMESPACES.length; i+=2)
 		nmap.put(NAMESPACES[i], NAMESPACES[i+1]);
 
-	    textReprView =
-		new TextReprView(graph, cursor, nmap, textProps, 
-				    RDFS.label);
-
 	    Set reprViews = new HashSet(Arrays.asList(new Object[] {
 		new ImageReprView(graph, IMAGE_TYPES),
-		textReprView,
-		new PropertyListReprView(graph, cursor, viewlets,
-					    textReprView),
+		new TextReprView(graph, cursor, nmap, textProps, 
+				 RDFS.label),
+		new CanvasNodeReprView(graph),
 	    }));
 
 	    reprViewSettings = new ReprViewSettings(reprViews);
+
+	    reprView = new PropertyListReprView(graph, cursor, viewlets,
+						reprViewSettings);
 
 	    propView = new PropertyView(graph, cursor, nmap, 
 					textProps, 
 					RDFS.label, .25f, 1f);
 
 	    Set spatialViews = new HashSet(Arrays.asList(new Object[] {
-		new SimpleSpatialView(reprViewSettings),
+		new SimpleSpatialView(reprView),
 		// these don't work currently:
-		//new CalendarSpatialView(graph, reprViewSettings, windowAnim, 13),
-		new CanvasSpatialView(graph, reprViewSettings, windowAnim),
+		//new CalendarSpatialView(graph, reprView, windowAnim, 13),
+		new CanvasSpatialView(graph, reprView, windowAnim),
 	    }));
 
 	    spatialViewSettings = new SpatialViewSettings(spatialViews);
@@ -197,7 +196,7 @@ public class Main {
 		Object prop = i.next();
 		
 		viewlets.add(PropertyViewlet.newInstance(graph, prop, 
-							 textReprView));
+							 reprViewSettings));
 	    }
 
 	    Set properties = new HashSet(allProps);
@@ -225,7 +224,7 @@ public class Main {
 		    windowAnim.animate();
 		}
 	    });
-	    k.put("Alt-V", new @realtime-i Action(Cursor cursor, ViewSettings reprViewSettings, WindowAnimation windowAnim) {
+	    k.put("Alt-V", new @realtime-i Action(Cursor cursor, ReprViewSettings reprViewSettings, WindowAnimation windowAnim) {
 		public void run() {
 		    reprViewSettings.changeView(cursor, 1);
 		    windowAnim.animate();
