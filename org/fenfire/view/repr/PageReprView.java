@@ -174,7 +174,7 @@ public class PageReprView extends ReprView.AbstractLobView {
 	if (s.ct.equals("application/pdf") ||
 	    s.ct.equals("application/postscript")) { ok = true; }
 	if (!ok) {
-	    Lob lob = Lobs.hbox(Lobs.text(Components.font(Color.black), "Wrong content-type: '"+s.ct+"'"));
+	    Lob lob = Components.label("Wrong content-type: '"+s.ct+"'");
 	    lob = Lobs.frame3d(lob, null, Color.red, 1, 5, false, true);
 	    lob = Lobs.align(lob, .5f, .5f);
 	    s.ct = null;
@@ -190,7 +190,7 @@ public class PageReprView extends ReprView.AbstractLobView {
 					     new FileInputStream(s.file));
 	} catch (Exception e) {
 	    e.printStackTrace();
-	    Lob lob = Lobs.hbox(Lobs.text(Components.font(Color.black), "Something wrong: '"+e.getMessage()+"'"));
+	    Lob lob = Components.label("Something wrong: '"+e.getMessage()+"'");
 	    lob = Lobs.frame3d(lob, null, Color.red, 1, 5, false, true);
 	    lob = Lobs.align(lob, .5f, .5f);
 	    s.id = null;
@@ -209,7 +209,7 @@ public class PageReprView extends ReprView.AbstractLobView {
 					     pool), s.id, s.ct);
 	} catch (Exception e) {
 	    e.printStackTrace();
-	    Lob lob = Lobs.hbox(Lobs.text(Components.font(Color.black), "Something wrong while creating page image scroll: '"+e.getMessage()+"'"));
+	    Lob lob = Components.label("Something wrong while creating page image scroll: '"+e.getMessage()+"'");
 	    lob = Lobs.frame3d(lob, null, Color.red, 1, 5, false, true);
 	    lob = Lobs.align(lob, .5f, .5f);
 	    s.id = null;

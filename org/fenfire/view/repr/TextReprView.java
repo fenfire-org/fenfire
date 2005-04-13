@@ -157,7 +157,7 @@ public class TextReprView extends ReprView.AbstractLobView {
 	Model textModel = texter.model(node);
 	Model cursorModel = SimpleModel.newInstance(cursor.textCursor);
 
-	List text = Lobs.text(Components.font(), texter.getText(node));
+	List text = Components.font().textLn(texter.getText(node));
 	text = Lobs.keyList(text, node);
 	Lob lob = Lobs.linebreaker(text);
 	

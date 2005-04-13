@@ -77,7 +77,6 @@ public @realtime class PropertyViewlet implements Viewlet {
 	if(vbox != null)
 	    return vbox;
 	else
-	    return Lobs.hbox(Lobs.text(Components.font(Color.lightGray),
-				       "<no value>"));
+	    return Lobs.hbox(Components.font(Color.lightGray).textLn("<no value>"));
     }
 }

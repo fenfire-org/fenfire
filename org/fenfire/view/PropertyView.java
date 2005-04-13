@@ -73,8 +73,7 @@ public class PropertyView {
     public Lob getPropertyLob(Object node) {
 	Color color = UniqueColors.getColor(node, minPropBrightness,
 					    maxPropBrightness);
-	return Lobs.hbox(Lobs.text(Components.font(color),
-				   texter.getText(node)));
+	return Lobs.hbox(Components.font(color).text(texter.getText(node)));
 	/*
 	Model nodeModel = new ObjectModel(node);
 
