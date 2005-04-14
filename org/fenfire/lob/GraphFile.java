@@ -27,6 +27,7 @@ GraphFile.java
  */
 package org.fenfire.lob;
 import org.fenfire.swamp.*;
+import org.fenfire.util.*;
 import java.io.*;
 import java.util.*;
 
@@ -117,7 +118,9 @@ public interface GraphFile {
 
 	public void save() {
 	    try {
-		Graphs.writeXML(graph, /*namespaces,*/ file);
+		NamespaceMap nmap = new NamespaceMap();
+		nmap.putAll(namespaces);
+		Graphs.writeXML(graph, file, nmap);
 	    } catch(java.io.IOException e) {
 		throw new Error(e);
 	    }

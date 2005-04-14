@@ -29,12 +29,15 @@ package org.fenfire.swamp;
 import org.fenfire.swamp.impl.*;
 import org.nongnu.storm.util.URN5Namespace;
 import org.fenfire.util.NamespaceMap;
+/*
 import com.hp.hpl.mesa.rdf.jena.model.*;
 import com.hp.hpl.mesa.rdf.jena.model.Statement;
 import com.hp.hpl.mesa.rdf.jena.model.Resource;
 import com.hp.hpl.mesa.rdf.jena.mem.*;
+*/
 import org.openrdf.rio.*;
 import org.openrdf.model.*;
+import org.openrdf.model.impl.*;
 import java.io.*;
 import java.util.*;
 
@@ -60,6 +63,19 @@ public class Graphs {
 	    }
 	} else {
 	    throw new ClassCastException(""+node);
+	}
+    }
+
+    protected static Object rioNode(Object node) { 
+	if(Nodes.isNode(node)) {
+	    return new URIImpl(Nodes.toString(node));
+	} else if(node instanceof PlainLiteral) {
+	    PlainLiteral l = (PlainLiteral)node;
+	    return new LiteralImpl(l.getString(), l.getLang());
+	} else {
+	    TypedLiteral l = (TypedLiteral)node;
+	    URI type = new URIImpl(Nodes.toString(l.getType()));
+	    return new LiteralImpl(l.getString(), type);
 	}
     }
 
@@ -295,16 +311,45 @@ public class Graphs {
 	w.close();
     }
 
-    public static void writeXML(ConstGraph g, File file) throws IOException {
-	Model jenaModel = toModel(g);
+    public static void writeXML(ConstGraph g, File file, NamespaceMap nmap) throws IOException {
+	RdfDocumentWriter writer = new org.openrdf.rio.rdfxml.RdfXmlWriter(new java.io.FileOutputStream(file));
+	writer.startDocument();
 
-	try {
-	    jenaModel.write(new java.io.FileWriter(file));
-	} catch(com.hp.hpl.mesa.rdf.jena.model.RDFException e) {
-	    throw new IOException(""+e);
+	if(nmap != null) {
+	    Iterator n = nmap.uriIterator();
+	    while(n.hasNext()) {
+		String uri = (String) n.next();
+		String prefix = nmap.getAbbrev(uri);
+		writer.setNamespace(prefix, uri);
+	    }
 	}
+
+	for (Iterator i=g.findN_XAA_Iter(); i.hasNext();) {
+	    Object subj = i.next();
+
+	    Iterator j = g.findN_1XA_Iter(subj);
+	    if(!j.hasNext()) throw new Error();
+
+	    while(j.hasNext()) {
+		Object pred = j.next();
+
+		Iterator k = g.findN_11X_Iter(subj,pred);
+		if(!k.hasNext()) throw new Error();
+
+		while(k.hasNext()) {
+		    Object obj = k.next();
+
+		    writer.writeStatement((Resource)rioNode(subj),
+					  (URI)rioNode(pred),
+					  (Value)rioNode(obj));
+		}
+	    }
+	}
+
+	writer.endDocument();
     }
 
+    /*
     public static Model toModel(ConstGraph g) {
         try {
             Model m = new ModelMem();
@@ -412,4 +457,5 @@ public class Graphs {
             throw new Error("Exception converting graph");
         }
     }
+    */
 }

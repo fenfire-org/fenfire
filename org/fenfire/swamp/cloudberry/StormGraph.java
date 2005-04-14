@@ -77,13 +77,10 @@ public class StormGraph extends AllQuadsGraph {
 		s = buf.readLine();
 	    }
 	    
-	    
-	    com.hp.hpl.mesa.rdf.jena.mem.ModelMem m = 
-		new com.hp.hpl.mesa.rdf.jena.mem.ModelMem();
-	    m.read(new InputStreamReader(b.getInputStream(), "US-ASCII"), null);
-	    
-	    Graph graph = Graphs.toGraph(m);
-	    m = null;
+	    Graph graph = new HashGraph();
+
+	    Graphs.readXML(b.getInputStream(), b.getId().toString(),
+			   graph, new HashMap());
 	}
     }
 

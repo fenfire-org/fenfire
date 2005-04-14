@@ -511,16 +511,4 @@ public final class TurtleReader {
 
 	curPosition = 0;
     }
-
-
-
-    public static void main(String[] argv) throws IOException {
-	String file = argv[0];
-	Reader r = new InputStreamReader(new FileInputStream(file), "UTF-8");
-	Graph g = new org.fenfire.swamp.impl.HashGraph();
-
-	read(r, g, new HashMap(), file);
-
-	Graphs.writeXML(g, new File(file+".rdfxml"));
-    }
 }
