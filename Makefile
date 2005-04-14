@@ -57,7 +57,7 @@ API?=gl
 POOLDIR?=../fenfire-priv/
 SETTINGS?=../fenfire-priv/
 BIN?=fenpdf10.py
-FILE?=myFenfire/mygraph.rdf
+#FILE?=myFenfire/mygraph.rdf
 WINDOWSIZE?=1600x1200
 run:
 	$(LDLIB) $(JAVACMD) $(DBG) org.fenfire.Main $(FILE)

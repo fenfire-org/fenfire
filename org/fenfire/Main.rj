@@ -655,20 +655,6 @@ public class Main {
     }
 
     private static String[] docStrings = {
-	"Cursor keys: move",
-	"Alt-Cursor keys: move text cursor",
-	null,
-	"Alt-C: connect on [prop] to [node]",
-	"Alt-B: connect backwards on [prop] to [node]",
-	null,
-	"Alt-T: this node",
-	"Alt-L: linkedTo",
-	"Alt-N: a new node",
-	null,
-	"Alt-G: go to [node]",
-	"Alt-H: the 'home'/'start' node",
-	null,
-	"Ctrl-B, cursor key: break connection",
 	"Ctrl-G: load data from Gnowsis+Web",
 	"Ctrl-O: open item in Gnowsis",
 	"Ctrl-S: save graph",
@@ -677,7 +663,7 @@ public class Main {
     protected static Lob getDocLob() {
 	RoleContext.enter("doc");
 	try {
-	    Model model = StateModel.newInstance("doc shown");
+	    Model model = StateModel.newInstance("doc shown", Boolean.TRUE);
 	    boolean shown = model.get() == Boolean.TRUE;
 	    
 	    Lob box = Lobs.vbox();
