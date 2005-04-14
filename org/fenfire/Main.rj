@@ -95,12 +95,83 @@ public class Main {
 
     public static void main(String[] argv) throws IOException {
 	final SmushedQuadsGraph quadsGraph = new SmushedQuadsGraph();
+
+	String filename;
+
+	GraphFile gf0 = null;
+	List pipes = new LinkedList();
+
+	for(int i=0; i<argv.length; i++) {
+	    boolean xml = false;
+	    if(argv[i].equals("--xml")) {
+		xml = true;
+		i++;
+	    } else if(argv[i].equals("--pipe")) {
+		i++;
+		File file = new File(argv[i]);
+		// we try to accept only readable pipe special files
+		if (!file.canRead() || file.isDirectory()) {
+		    System.err.println("Can't read "+argv[i]);
+		    System.exit(1);
+		} else if (file.isFile()) {
+		    System.err.println(argv[i]+" is normal file!");
+		    System.exit(1);
+		}
+		pipes.add(file);
+		continue;
+	    } else if(argv[i].equals("--quit")) {
+		System.exit(1);
+	    }
+
+	    String gf_uri = gf0==null ? "" : "foo:"+argv[i];
+	    Graph gf_graph = new OneQuadGraph(quadsGraph, gf_uri);
+	    GraphFile gf;
+	
+	    File file = new File(argv[i]);
+	    // we try to accept only readable files (or creatable for gf0)
+	    if (!file.canRead() || file.isDirectory()) {
+		if (gf0!=null) {
+		    System.err.println("Can't read additional file "+argv[i]);
+		    System.exit(1);
+		} else {
+		    try {
+			if (file.createNewFile()) {
+			    System.out.println("Creating new file "+argv[i]);
+			    file.delete();
+			} else {
+			    throw new IOException("Couldn't create: "+argv[i]);
+			}
+		    } catch (IOException _) {
+			System.err.println("Can't read or create "+argv[i]);
+			System.exit(1);
+		    }
+		}
+	    } else if (gf0==null && !file.canWrite()) {
+		System.out.println("Can't save changes to "+argv[i]);
+	    }
+
+	    if(!xml)
+		gf = new GraphFile.Turtle(file, gf_graph, new HashGraph());
+	    else
+		gf = new GraphFile.XML(file, gf_graph, new HashGraph());
+
+	    if(gf0 == null) {
+		gf0 = gf;
+	    }
+	}
+
+	Object mainnode = null;
+	if(argv.length == 0) {
+	    File file = new File("/tmp/ff.turtle");
+	    Graph gf_graph = new OneQuadGraph(quadsGraph, "");
+	    mainnode = Nodes.N();
+	    gf0 = new GraphFile.Turtle(file, gf_graph, getDefaultGraph(mainnode));
+	}
+
 	final Graph graph = new AllQuadsGraph(quadsGraph, "");
 
-	Object mainnode = Nodes.N();
-	graph.addAll(getDefaultGraph(mainnode));
-
-	FenfireMain m = new FenfireMain(quadsGraph, graph, mainnode);
+	FenfireMain m = new FenfireMain(quadsGraph, graph, gf0, mainnode, 
+					(File[]) pipes.toArray(new File[0]));
 	m.start();
     }
 
@@ -108,6 +179,8 @@ public class Main {
 
 	SmushedQuadsGraph quadsGraph;
 	Graph graph;
+	GraphFile graphFile;
+	File[] pipes;
 	Object startNode;
 
 	Cursor cursor;
@@ -124,13 +197,16 @@ public class Main {
 	List viewlets = new FastList();
 
 	public FenfireMain(SmushedQuadsGraph quadsGraph, Graph graph,
-			   Object startNode) {
+			   GraphFile graphFile, Object startNode,
+			   File[] pipes) {
 	    super(BG_COLOR);
 
 	    dontUseFocusLob = true; // argh!
 	    
 	    this.quadsGraph = quadsGraph;
 	    this.graph = graph;
+	    this.graphFile = graphFile;
+	    this.pipes = pipes;
 	    
 	    cursor = new Cursor();
 	    quadsGraph.addSmushListener(cursor);
@@ -143,6 +219,8 @@ public class Main {
 		    startNode = Nodes.N();
 	    }
 
+	    this.startNode = startNode;
+
 	    cursor.set(startNode);
 
 	    textProps = new HashSet();
@@ -152,6 +230,20 @@ public class Main {
 	    nmap = new NamespaceMap();
 	    for(int i=0; i<NAMESPACES.length; i+=2)
 		nmap.put(NAMESPACES[i], NAMESPACES[i+1]);
+
+	    if(graphFile != null)
+		nmap.putAll(graphFile.getNamespaces());
+
+	    for(int i=0; i<pipes.length; i++)
+		readPipeThread(quadsGraph, pipes[i].toURI().toString(), 
+			       nmap, windowAnim);
+
+	    // create interface for gnowsis to call
+	    try {
+		new GnowsisBrowser(quadsGraph, cursor, nmap, windowAnim);
+	    } catch(IOException e) {
+		e.printStackTrace();
+	    }
 
 	    Set reprViews = new HashSet(Arrays.asList(new Object[] {
 		new ImageReprView(graph, IMAGE_TYPES),
@@ -217,6 +309,26 @@ public class Main {
 		windowAnim.switchVS();
 		AbstractUpdateManager.chg();
 		System.out.println("Done.");
+	    }});
+	    k.put("Ctrl-G", new @realtime-i Action(Cursor cursor, WindowAnimation windowAnim, Graph graph, QuadsGraph quadsGraph, NamespaceMap nmap) { public void run() {
+		final String uri = Nodes.toString(cursor.getNode());
+		new Thread() { public void run() {
+		    readCBD(quadsGraph, uri, nmap, windowAnim);
+		}}.start();
+
+		readWebThread(quadsGraph, uri, nmap, windowAnim);
+		for(Iterator i=graph.findN_11X_Iter(cursor.getNode(), RDFS.seeAlso); i.hasNext();) {
+		    Object node2 = i.next();
+		    if(node2 instanceof Literal) continue;
+		    readWebThread(quadsGraph, Nodes.toString(node2), nmap, windowAnim);
+		}
+	    }});
+	    k.put("Ctrl-O", new @realtime-i Action(Cursor cursor, WindowAnimation windowAnim) { public void run() {
+		Gnowsis.open(cursor.getNode());
+	    }});
+	    k.put("Ctrl-S", new @realtime-i Action(GraphFile graphFile) { public void run() {
+		graphFile.save();
+		System.out.println("Saved.");
 	    }});
 	    k.put("Ctrl-V", new @realtime-i Action(Cursor cursor, SpatialViewSettings spatialViewSettings, WindowAnimation windowAnim) {
 		public void run() {
@@ -371,6 +483,175 @@ public class Main {
 	*/
 
 	return graph;
+    }
+
+    private static class Adder implements Runnable {
+	Graph src, dst;
+	Map namespaces;
+	NamespaceMap nmap;
+	WindowAnimation anim;
+
+	public void run() {
+	    Main.p("start adding...");
+	    if(namespaces != null)
+		nmap.putAll(namespaces);
+
+	    dst.startUpdate();
+	    dst.rm_AAA();
+
+	    if(dst.find1_XAA() != null) 
+		throw new Error("graph not empty");
+	    else
+		Main.p("The graph is nice, clean and tidy.");
+
+	    dst.addAll(src);
+	    dst.endUpdate();
+		
+	    anim.animate();
+	    Main.p("added data to graph.");
+	}
+
+	Adder(Graph src, Graph dst, Map namespaces, NamespaceMap nmap,
+	      WindowAnimation anim) {
+	    this.src = src; this.dst = dst; 
+	    this.namespaces = namespaces; this.nmap = nmap;
+	    this.anim = anim;
+	}
+    }
+
+    private static void add(Graph src, Graph dst, Map namespaces,
+			    NamespaceMap nmap, WindowAnimation anim) {
+	AbstractUpdateManager mgr = AbstractUpdateManager.getInstance();
+	if(mgr == null) 
+	    throw new IllegalStateException("updatemanager not initialized");
+	mgr.addTask(new Adder(src, dst, namespaces, nmap, anim), 0);
+    }
+
+
+    private static void readWebThread(final QuadsGraph quadsGraph, 
+				      final String uri,
+				      final NamespaceMap nmap,
+				      final WindowAnimation windowAnim) {
+	if(!uri.startsWith("http://")) return;
+
+	new Thread() { public void run() {
+	    readWeb(quadsGraph, uri, nmap, windowAnim);
+	}}.start();
+    }
+
+    private static void readPipeThread(final QuadsGraph quadsGraph, 
+				       final String uri,
+				       final NamespaceMap nmap,
+				       final WindowAnimation windowAnim) {
+	if(!uri.startsWith("file:/")) return;
+
+	new Thread() { public void run() {
+	    readPipe(quadsGraph, uri, nmap, windowAnim);
+	}}.start();
+    }
+
+    private static void readPipe(QuadsGraph quadsGraph, String uri,
+				NamespaceMap nmap,
+				WindowAnimation winAnim) {
+	if(!uri.startsWith("file:/")) return;
+
+	try {
+	    int i = 0;
+	    while (true) {
+		i++;
+		BufferedReader pipe = new BufferedReader(new FileReader(new File(new java.net.URI(uri))));
+
+		Graph graph = new HashGraph();
+		Map namespaces = new HashMap();		
+		try {
+		    Graphs.readTurtle(pipe, uri, graph, namespaces);
+		} catch(Exception e) {
+		    e.printStackTrace();
+		}
+
+		Graph _graph = new OneQuadGraph(quadsGraph, uri/*+'/'+i*/);
+		add(graph, _graph, namespaces, nmap, winAnim);
+
+		/*		while (true) {
+		    String line = pipe.readLine();
+		    if (line == null)
+			break;
+		    System.out.println(line);
+		    }*/
+	    }
+	} catch(Exception e) {
+	    e.printStackTrace();
+	}
+    }
+    
+    private static HTTPContext httpContext;
+    private static void readWeb(QuadsGraph quadsGraph, String uri,
+				NamespaceMap nmap,
+				WindowAnimation winAnim) {
+	if(!uri.startsWith("http://")) return;
+
+	try {
+	    if(httpContext == null) httpContext = new HTTPContext();
+	    HTTPResource res = new HTTPResource(uri, httpContext);
+	    
+	    System.out.println("Loading data from Web: "+uri+"...");
+	    res.reload(false);
+
+	    System.out.println("Parsing data from Web...");
+	    Graph graph = new HashGraph();
+
+	    Map namespaces = new HashMap();
+	    FeedReader.read(res, graph, namespaces);
+	    System.out.println("Add data from Web to graph...");
+	    Graph _graph = new OneQuadGraph(quadsGraph, uri);
+	    add(graph, _graph, namespaces, nmap, winAnim);
+	    System.out.println("Loaded from the Web.");	
+	} catch(IOException e) {
+	    e.printStackTrace();
+	}
+    }
+    
+    private static void readCBD(QuadsGraph quadsGraph, String uri,
+				NamespaceMap nmap,
+				WindowAnimation winAnim) {
+	System.out.println("Loading CBD from Gnowsis...");
+	Graph cbd = Gnowsis.getCBD(uri);
+	Graph graph = new OneQuadGraph(quadsGraph, uri);
+	add(cbd, graph, null, null, winAnim);
+	System.out.println("Loaded.");
+    }
+
+
+    protected static class GnowsisBrowser 
+	extends org.gnowsis.plugins.remotebrowser.RemoteBrowserServer {
+
+	protected QuadsGraph quadsGraph;
+	protected Cursor cursor;
+	protected NamespaceMap nmap;
+	protected WindowAnimation windowAnim;
+
+	public GnowsisBrowser(QuadsGraph quadsGraph, Cursor cursor, 
+			      NamespaceMap nmap, WindowAnimation windowAnim) 
+	    throws IOException {
+
+	    this.quadsGraph = quadsGraph;
+	    this.cursor = cursor;
+	    this.nmap = nmap;
+	    this.windowAnim = windowAnim;
+	}
+
+	public int browse(final String uri) {
+	    System.out.println("Gnowsis-browse to: "+uri);
+
+	    cursor.set(Nodes.get(uri));
+	    windowAnim.switchVS();
+
+	    new Thread() { public void run() {
+		readCBD(quadsGraph, uri, nmap, windowAnim);
+	    }}.start();
+
+	    return 0;
+	}
     }
 
     private static String[] docStrings = {

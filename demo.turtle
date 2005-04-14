@@ -1,0 +1,22 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix foaf: <http://xmlns.com/foaf/0.1/>.
+@prefix sl: <http://fenfire.org/rdf-v/2003/05/structlink#>.
+
+
+<http://example.org/DEMO> sl:linkedTo <http://captsolo.net/info/blog_all.php>.
+<http://captsolo.net/info/blog_all.php> rdfs:seeAlso <http://captsolo.net/info/xmlsrv/rdf.php?blog=1>.
+<http://example.org/DEMO> sl:linkedTo <http://dannyayers.com/misc/foaf/foaf.rdf>.
+<http://example.org/DEMO> sl:linkedTo <irc://irc.freenode.net/swig>.
+<irc://irc.freenode.net/swig> rdfs:seeAlso <http://www.ilrt.bris.ac.uk/discovery/chatlogs/swig/2005-03-02.rdf>.
+
+<http://captsolo.net/info/blog_all.php> rdfs:label "CaptSolo's blog".
+<http://dannyayers.com/misc/foaf/foaf.rdf> rdfs:label "Danny's FOAF file".
+
+<http://example.org/DEMO> sl:linkedTo <http://fenfire.org/#project>.
+<http://fenfire.org/#project> rdfs:label "Fenfire project",
+                                         "Fenfire-projekti"@fi;
+                              rdfs:seeAlso <http://fenfire.org/doap.turtle>;
+                              sl:linkedTo <http://fenfire.org/irc/fenfire/index.rdf>.
+
+#<http://example.org/DANNY> rdfs:seeAlso <http://dannyayers.com/misc/foaf/foaf.rdf>.
+#<http://example.org/DANNY> foaf:mbox "danny.ayers@gmail.com".
