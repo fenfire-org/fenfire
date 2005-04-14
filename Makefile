@@ -108,6 +108,13 @@ test_fenpdfdemo:
 
 
 VERSION=snapshot-`date -I`
+
+jar: JARNAME=fenfire-$(VERSION).jar
+jar: MAINCLASS=org.fenfire.Main
+jar:
+	./jarbuilder.sh "$(FFCLASSPATH)" "$(PYTHONPATH)" "$(VERSION)" "$(JARNAME)" "$(MAINCLASS)" "$(EXCLUDELIBS)"
+
+
 textmm_jar: JARNAME=textmm-$(VERSION).jar
 textmm_jar: mainclass=org.fenfire.fenmm.TextMain
 textmm_jar: excludelibs=libvob

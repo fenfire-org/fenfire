@@ -31,6 +31,7 @@ getLicense() {
 
 rm -Rf $jardir
 mkdir $jardir
+echo "Main-Class: $MAINCLASS"
 echo "Main-Class: $MAINCLASS" > $jardir/manifest
 
 cd $jardir
@@ -39,6 +40,7 @@ echo "Gathering files from CLASSPATH"
 for name in $(echo $CLASSPATH|tr : '\n'); do
     case $name in 
 	*.jar) 
+	    echo "unpack $name"
 	    jar xf ../$name ;
 	    # cat META-INF/MANIFEST.MF >>manifest.try
 	    getLicense ../$name
