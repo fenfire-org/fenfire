@@ -28,6 +28,7 @@ package org.fenfire.view.repr;
 import org.fenfire.Cursor;
 import org.fenfire.view.*;
 import org.fenfire.swamp.*;
+import org.nongnu.libvob.fn.*;
 import org.nongnu.libvob.lob.*;
 import org.nongnu.libvob.lob.lobs.*;
 import javolution.realtime.*;
@@ -55,7 +56,9 @@ public class PropertyListReprView extends ReprView.AbstractLobView {
     }
 
     public Lob getLob(Object node) {
-	Lob table = TableLob.newInstance(new @realtime-i TableLob.Table(Object node, List viewlets, ReprView subView, Graph graph, Cursor cursor) {
+	Model focusedPropertyModel = StateModel.newInstance("focused property");
+
+	Lob table = TableLob.newInstance(new @realtime-i TableLob.Table(Object node, List viewlets, ReprView subView, Graph graph, Cursor cursor, Model focusedPropertyModel) {
 	    public int getRowCount() {
 		return viewlets.size();
 	    }
@@ -67,10 +70,12 @@ public class PropertyListReprView extends ReprView.AbstractLobView {
 	    public Lob getLob(int row, int col) {
 		Viewlet viewlet = (Viewlet)viewlets.get(row);
 
-		if(col == 2)
-		    return viewlet.getCaption().layoutOneAxis(100);
-		else if(col == 1 || col == 3)
+		if(col == 2) {
+		    Lob l = viewlet.getCaption(focusedPropertyModel);
+		    return l.layoutOneAxis(100);
+		} else if(col == 1 || col == 3) {
 		    return Lobs.glue(Axis.X, 10, 10, 10);
+		}
 
 		int dir = (col == 0) ? -1 : +1;
 
@@ -80,6 +85,8 @@ public class PropertyListReprView extends ReprView.AbstractLobView {
 		return vbox;
 	    }
 	});
+
+	table = Lobs.viewport(Axis.Y, table, focusedPropertyModel.get(), -1);
 
 	Lob vbox = Lobs.vbox();
 	vbox.add(Lobs.request(Axis.X, Lobs.scale(subView.getLob(node), 1.5f), -1, -1, SizeRequest.INF));

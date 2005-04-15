@@ -28,6 +28,7 @@ package org.fenfire.view.repr;
 import org.fenfire.Cursor;
 import org.fenfire.view.*;
 import org.fenfire.swamp.*;
+import org.nongnu.libvob.fn.*;
 import org.nongnu.libvob.lob.*;
 import org.nongnu.libvob.lob.lobs.*;
 import javolution.realtime.*;
@@ -36,6 +37,6 @@ import java.util.*;
 
 public interface Viewlet extends Realtime {
 
-    public Lob getCaption();
+    public Lob getCaption(Model focusedPropertyModel);
     public Lob getLob(Cursor cursor, Object node, int dir);
 }

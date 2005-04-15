@@ -28,6 +28,7 @@ package org.fenfire.view.repr;
 import org.fenfire.Cursor;
 import org.fenfire.view.*;
 import org.fenfire.swamp.*;
+import org.nongnu.libvob.fn.*;
 import org.nongnu.libvob.lob.*;
 import org.nongnu.libvob.lob.lobs.*;
 import javolution.realtime.*;
@@ -48,8 +49,23 @@ public @realtime class PropertyViewlet implements Viewlet {
 	this.subView = subView;
     }
 
-    public Lob getCaption() {
-	return subView.getLob(property);
+    public Lob getCaption(Model focusedPropertyModel) {
+	Lob l;
+
+	RoleContext.enter(property);
+	try {
+	    l = subView.getLob(property);
+	    l = Lobs.clickController(l, 1, new @realtime-i Action(Model focusedPropertyModel, Object property) {
+		public void run() {
+		    focusedPropertyModel.set(property);
+		}
+	    });
+	    l = RoleContext.lob(l);
+	} finally {
+	    RoleContext.exit();
+	}
+
+	return l;
     }
 
     public Lob getLob(Cursor cursor, Object node, int dir) {
