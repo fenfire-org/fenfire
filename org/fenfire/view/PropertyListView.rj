@@ -216,6 +216,10 @@ public class PropertyListView implements SpatialView {
 		i = i/2;
 
 		Object prop = properties.get(i);
+		
+		if (!graph.findN_11X_Iter(node, prop).hasNext()) {
+		    return Lobs.nullLob();
+		}
 
 		for(Iterator iter = viewlets.iterator(); iter.hasNext();) {
 		    Viewlet v = (Viewlet)iter.next();
