@@ -39,7 +39,7 @@ import javolution.realtime.*;
 import java.awt.Color;
 import java.util.*;
 
-public class TextReprView extends ReprView.AbstractLobView {
+public class TextReprView implements ReprView {
     private static void p(String s) { System.out.println("TextReprView:: "+s); }
 
 
@@ -114,6 +114,13 @@ public class TextReprView extends ReprView.AbstractLobView {
 	public void set(int value) {
 	    throw new UnsupportedOperationException();
 	}
+    }
+
+    public List getLobList(Object node) {
+	if(node instanceof Literal)
+	    return Components.font().text(node.toString());
+	
+	return Components.font().text(texter.getText(node));
     }
 
     private Lob makeLob(Object node, boolean isPropertyLob) {

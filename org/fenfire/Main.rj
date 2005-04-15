@@ -218,7 +218,8 @@ public class Main {
 
 	PropertyView propView;
 
-	List viewlets = new FastList();
+	//List viewlets = new FastList();
+	List listViewProperties = new ArrayList();
 
 	public FenfireMain(SmushedQuadsGraph quadsGraph, Graph graph,
 			   GraphFile graphFile, Object startNode,
@@ -279,19 +280,18 @@ public class Main {
 
 	    reprViewSettings = new ReprViewSettings(reprViews);
 
-	    reprView = reprViewSettings;
-	    /*
 	    reprView = new PropertyListReprView(graph, cursor, viewlets,
 						reprViewSettings);
-	    */
 
 	    propView = new PropertyView(graph, cursor, nmap, 
 					textProps, 
 					RDFS.label, .25f, 1f);
 
+	    List listViewViewlets = new ArrayList();
+	    listViewViewlets.add(new PropertyListView.SimpleViewlet());
+
 	    Set spatialViews = new HashSet(Arrays.asList(new Object[] {
-		new DocumentSpatialView(graph, windowAnim),
-		//new SimpleSpatialView(reprView),
+		new SimpleSpatialView(reprView),
 		// these don't work currently:
 		//new CalendarSpatialView(graph, reprView, windowAnim, 13),
 		new CanvasSpatialView(graph, reprView, windowAnim),
@@ -316,6 +316,7 @@ public class Main {
 	    for(Iterator i=graph.findN_AXA_Iter(); i.hasNext();)
 		allProps.add(i.next());
 
+	    /*
 	    viewlets.clear();
 	    for(Iterator i=allProps.iterator(); i.hasNext();) {
 		Object prop = i.next();
@@ -323,10 +324,14 @@ public class Main {
 		viewlets.add(PropertyViewlet.newInstance(graph, prop, 
 							 reprViewSettings));
 	    }
+	    */
 
 	    Set properties = new HashSet(allProps);
 	    properties.removeAll(noShowProps);
 	    //new SetModel.Difference(allProps, noShowProps);
+
+	    listViewProperties.clear();
+	    listViewProperties.addAll(allProps);
 
 	    Map k = FastMap.newInstance();
 	    k.put("Ctrl-J", new @realtime-i Action(Cursor cursor, WindowAnimation windowAnim) { public void run() {

@@ -78,6 +78,14 @@ public class BuoyConnectorLob extends AbstractDelegateLob {
 	    ViewThumbnailLinkerLob.connectToFocus(context);
     }
 
+    public boolean mouse(VobMouseEvent e, VobScene scene, int cs, 
+			 float x, float y) {
+
+	cs = scene.matcher.getCS(cs, key);
+	if(cs < 0) throw new Error("ARGH");
+	return delegate.mouse(e, scene, cs, x, y);
+    }
+
     private static final Factory FACTORY = new Factory() {
 	    public Object create() {
 		return new BuoyConnectorLob();

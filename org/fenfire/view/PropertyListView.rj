@@ -1,0 +1,188 @@
+/* -*-java-*-
+PropertyListView.java
+ *
+ *    Copyright (c) 2005 by Benja Fallenstein
+ *
+ *    This file is part of Fenfire.
+ *    
+ *    Fenfire is free software; you can redistribute it and/or modify it under
+ *    the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *    
+ *    Fenfire is distributed in the hope that it will be useful, but WITHOUT
+ *    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *    or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+ *    Public License for more details.
+ *    
+ *    You should have received a copy of the GNU General
+ *    Public License along with Fenfire; if not, write to the Free
+ *    Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+ *    MA  02111-1307  USA
+ *
+ */
+/*
+ * Written by Benja Fallenstein
+ */
+package org.fenfire.view;
+import org.fenfire.Cursor;
+import org.fenfire.swamp.*;
+import org.nongnu.libvob.VobScene;
+import org.nongnu.libvob.fn.*;
+import org.nongnu.libvob.lob.*;
+import org.nongnu.libvob.lob.lobs.*;
+import javolution.realtime.*;
+import java.awt.Color;
+import java.util.*;
+
+public class PropertyListView implements SpatialView {
+    private static final void p(String s) { System.out.println("PropertyListReprView:: "+s); }
+
+    public interface Viewlet {
+	boolean canRender(Graph graph, Object prop, Object node);
+	Lob getLob(Graph graph, ReprView reprView, Cursor cursor, 
+		   Object prop, Object node);
+    }
+
+    public static class SimpleViewlet implements Viewlet {
+	public boolean canRender(Graph graph, Object prop, Object node) {
+	    return true;
+	}
+
+	public Lob getLob(Graph graph, ReprView reprView, Cursor cursor,
+			  Object prop, Object node) {
+
+	    Lob vbox = Lobs.vbox();
+
+	    Lob lob = Lobs.hbox(reprView.getLobList(prop));
+
+	    Lob hbox = Lobs.hbox();
+	    hbox.add(Lobs.hglue());
+	    hbox.add(lob);
+	    hbox.add(Lobs.hglue());
+
+	    vbox.add(hbox);
+
+	    hbox = Lobs.hbox();
+	    Lob leftValues = Components.frame(Lobs.vbox(), 
+					      Maps.map("clip", Boolean.FALSE));
+	    Lob rightValues = Components.frame(Lobs.vbox(), 
+					      Maps.map("clip", Boolean.FALSE));
+	    hbox.add(Lobs.request(Axis.X, leftValues, 0, 0, Lob.INF));
+	    hbox.add(Lobs.request(Axis.X, rightValues, 0, 0, Lob.INF));
+
+	    vbox.add(hbox);
+
+	    for(Iterator i=graph.findN_X11_Iter(prop, node); i.hasNext();) {
+		Object value = i.next();
+		Lob l = reprView.getLob(value);
+		l = Lobs.clickController(l, 1, new @realtime-i Action(Cursor cursor, Object value) {
+		    public void run() {
+			cursor.set(value);
+
+			VobScene sc = ClickController.getClickScene();
+			int cs = ClickController.getClickCS();
+
+			ConnectionVobMatcher m = (ConnectionVobMatcher)sc.matcher;
+			m.setNextFocus(cs);
+		    }
+		});
+		l = BuoyConnectorLob.newInstance(l, value, false, false);
+		leftValues.add(l);
+	    }
+
+	    for(Iterator i=graph.findN_11X_Iter(node, prop); i.hasNext();) {
+		Object value = i.next();
+		Lob l = reprView.getLob(value);
+		l = Lobs.clickController(l, 1, new @realtime-i Action(Cursor cursor, Object value) {
+		    public void run() {
+			cursor.set(value);
+
+			VobScene sc = ClickController.getClickScene();
+			int cs = ClickController.getClickCS();
+
+			ConnectionVobMatcher m = (ConnectionVobMatcher)sc.matcher;
+			m.setNextFocus(cs);
+		    }
+		});
+		l = BuoyConnectorLob.newInstance(l, value, false, false);
+		rightValues.add(l);
+	    }
+
+	    leftValues.add(Lobs.vglue());
+	    rightValues.add(Lobs.vglue());
+
+	    return Lobs.noGrow(Axis.Y, vbox);
+	}
+    }
+    
+    Graph graph;
+    List properties;
+    List viewlets;
+    ReprView reprView;
+
+    public PropertyListView(Graph graph, List properties,
+			    List viewlets, ReprView reprView) {
+	this.graph = graph;
+	this.properties = properties;
+	this.viewlets = viewlets;
+	this.reprView = reprView;
+    }
+
+    public Set getTypes() {
+	return Collections.singleton(ViewSettings.ALL);
+    }
+
+    public Lob getMainviewLob(Cursor cursor) {
+	Object node = cursor.getNode();
+
+	List lobs = new @realtime RealtimeList(Cursor cursor, Object node,
+					       List properties, List viewlets,
+					       Graph graph, ReprView reprView){
+	    public int size() {
+		return properties.size()*2-1;
+	    }
+
+	    public Object get(int i) {
+		if(i%2 == 1) return Lobs.glue(Axis.Y, 15);
+		i = i/2;
+
+		Object prop = properties.get(i);
+
+		for(Iterator iter = viewlets.iterator(); iter.hasNext();) {
+		    Viewlet v = (Viewlet)iter.next();
+		    if(v.canRender(graph, prop, node))
+			return v.getLob(graph, reprView, cursor, prop, node);
+		}
+
+		return Lobs.glue(Axis.Y, 0, 0, 0); // argh!
+	    }
+	};
+
+	Lob title = Lobs.scale(reprView.getLob(node), 1.5f);
+	title = BuoyConnectorLob.newInstance(title, node, true, false);
+	title = Lobs.request(Axis.X, title, -1, -1, SizeRequest.INF);
+	title = Lobs.noGrow(Axis.Y, title);
+
+	Lob hbox = Lobs.hbox();
+	hbox.add(Lobs.hglue());
+	hbox.add(title);
+	hbox.add(Lobs.hglue());
+
+	Lob vbox = Lobs.vbox();
+	vbox.add(hbox);
+	vbox.add(Lobs.glue(Axis.Y, 15, 15, 15));
+	vbox.add(Lobs.vbox(lobs));
+	vbox.add(Lobs.vglue());
+
+	Lob lob = Lobs.viewport(Axis.Y, vbox, null, -1);
+	lob = Lobs.request(Axis.Y, lob, 0, 0, -1);
+
+	return Components.frame(SpatialContextLob.newInstance(lob, node));
+    }
+
+    public Lob getBuoyLob(Object node, boolean useFakeFocus) {
+	Lob l = Components.frame(reprView.getLob(node));
+	return BuoyConnectorLob.newInstance(l, node, false, useFakeFocus);
+    }
+}
