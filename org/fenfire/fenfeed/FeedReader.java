@@ -134,8 +134,9 @@ public class FeedReader {
     private static XSLTransform getTransform() throws IOException {
 	if(rss2rdf_transform == null) {
 	    try {
-		InputStream in = 
-		    new FileInputStream("org/fenfire/fenfeed/feed-rss1.0.xsl");
+		ClassLoader loader = FeedReader.class.getClassLoader();
+		String path = "org/fenfire/fenfeed/feed-rss1.0.xsl";
+		InputStream in = loader.getResourceAsStream(path);
 		
 		rss2rdf_transform = new XSLTransform(new Builder().build(in));
 	    } catch(ParsingException e) {

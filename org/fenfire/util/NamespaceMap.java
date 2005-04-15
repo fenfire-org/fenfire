@@ -96,6 +96,7 @@ public class NamespaceMap {
 
     /** Load the name -> uri mappings from an XML file.
      */
+    /*
     public void loadMappings(Reader r) throws IOException, SAXException {
 	XMLReader xr = new org.apache.xerces.parsers.SAXParser();
 	ContentHandler h = new org.xml.sax.helpers.DefaultHandler() {
@@ -107,6 +108,7 @@ public class NamespaceMap {
 	xr.setContentHandler(h);
 	xr.parse(new InputSource(r));
     }
+    */
 
     public Comparator getComparator() {
 	return new CompareByAbbrev();

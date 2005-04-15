@@ -10,7 +10,7 @@ TEST=org/
 
 LDLIB=LD_LIBRARY_PATH=/usr/lib:../libvob/src/jni:${JAVAHOME}/jre/lib/i386:${JAVAHOME}/jre/lib/i386/client
 
-FFCLASSPATH=../depends/cryptix-jce-provider.jar:./build:../navidoc/CLASSES:../storm/CLASSES:../alph/CLASSES:../libvob/CLASSES:../depends/jython.jar:../depends/icu4j.jar:../depends/je.jar:../depends/png.jar:../depends/gnowsis/gnoclient.jar:../depends/gnowsis/xmlrpc-1.2-b1.jar:../depends/rio.jar:../depends/xom-1.0b7.jar:../depends/xerces.jar:../depends/javolution.jar:../depends/gnowsis/remotebrowser.jar
+FFCLASSPATH=../depends/cryptix-jce-provider.jar:./build:../navidoc/CLASSES:../storm/CLASSES:../alph/CLASSES:../libvob/CLASSES:../depends/jython.jar:../depends/je.jar:../depends/png.jar:../depends/gnowsis/gnoclient.jar:../depends/gnowsis/xmlrpc-1.2-b1.jar:../depends/rio.jar:../depends/xom-1.0b7.jar:../depends/javolution.jar:../depends/gnowsis/remotebrowser.jar
       # ../depends/libvob.jar
 
 PYTHONPATH=-Dpython.path=../depends/jythonlib.jar:../depends/jython.jar:../depends/pythonlib.jar:.:../libvob:../alph
@@ -26,6 +26,8 @@ JAVAC ?= javac
 
 java: $(GENSRC)
 	mkdir -p build
+	mkdir -p build/org/fenfire/fenfeed/
+	cp org/fenfire/fenfeed/*.xsl build/org/fenfire/fenfeed/
 	$(JAVAC) -d build -classpath $(FFCLASSPATH):$(CLASSPATH) `find org -name '*.java'`
 
 applet_java:
@@ -108,10 +110,16 @@ test_fenpdfdemo:
 
 
 VERSION=snapshot-`date -I`
+EXCLUDELIBS=pythonlib.jar|jythonlib.jar|jython.jar|jena.jar|icu4j.jar|xerces.jar
 
 jar: JARNAME=fenfire-$(VERSION).jar
 jar: MAINCLASS=org.fenfire.Main
 jar:
+	./jarbuilder-nopy.sh "$(FFCLASSPATH)" "$(VERSION)" "$(JARNAME)" "$(MAINCLASS)" "$(EXCLUDELIBS)"
+
+jar_py: JARNAME=fenfire-$(VERSION).jar
+jar_py: MAINCLASS=org.fenfire.Main
+jar_py:
 	./jarbuilder.sh "$(FFCLASSPATH)" "$(PYTHONPATH)" "$(VERSION)" "$(JARNAME)" "$(MAINCLASS)" "$(EXCLUDELIBS)"
 
 
