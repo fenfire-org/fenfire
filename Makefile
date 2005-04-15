@@ -3,6 +3,8 @@ all: java
 PRIVATE_POOL=himalia.it.jyu.fi:~fenfire-pools/fenfire-priv
 PRIVATE_DIR=../fenfire-priv
 
+RJSRC := $(shell find org -name "*.rj")
+GENSRC := $(RJSRC:%.rj=%.java)
 
 TEST=org/
 
@@ -19,13 +21,10 @@ JAVA ?= java -Xincgc -Xnoclassgc
 
 JAVAC ?= javac
 
-java:
-	python ../libvob/metacode/rj2java.py org/fenfire/view/CanvasSpatialView.rj org/fenfire/view/CanvasSpatialView.java
-	python ../libvob/metacode/rj2java.py org/fenfire/view/repr/PropertyListReprView.rj org/fenfire/view/repr/PropertyListReprView.java
-	python ../libvob/metacode/rj2java.py org/fenfire/view/repr/PropertyViewlet.rj org/fenfire/view/repr/PropertyViewlet.java
-	python ../libvob/metacode/rj2java.py org/fenfire/view/Views.rj org/fenfire/view/Views.java
-	python ../libvob/metacode/rj2java.py org/fenfire/Main.rj org/fenfire/Main.java
-	python ../libvob/metacode/rj2java.py org/fenfire/swamp/impl/PairMap.rj org/fenfire/swamp/impl/PairMap.java
+%.java: %.rj
+	python ../libvob/metacode/rj2java.py $*.rj $*.java
+
+java: $(GENSRC)
 	mkdir -p build
 	$(JAVAC) -d build -classpath $(FFCLASSPATH):$(CLASSPATH) `find org -name '*.java'`
 
@@ -34,6 +33,7 @@ applet_java:
 
 clean:
 	rm -Rf build
+	rm -f $(GENSRC)
 
 JAVACMD=$(JAVA) -cp $(FFCLASSPATH):$(CLASSPATH) $(PYTHONPATH) 
 
