@@ -38,12 +38,14 @@ import java.util.*;
 public class PropertyListView implements SpatialView {
     private static final void p(String s) { System.out.println("PropertyListReprView:: "+s); }
 
+    /** Viewlet is a small view that renders a property of a node */
     public interface Viewlet {
 	boolean canRender(Graph graph, Object prop, Object node);
 	Lob getLob(Graph graph, ReprView reprView, Cursor cursor, 
 		   Object prop, Object node);
     }
 
+    /** Simple viewlet shows any property using the representation view */
     public static class SimpleViewlet implements Viewlet {
 	public boolean canRender(Graph graph, Object prop, Object node) {
 	    return true;
@@ -110,6 +112,72 @@ public class PropertyListView implements SpatialView {
 	    }
 
 	    leftValues.add(Lobs.vglue());
+	    rightValues.add(Lobs.vglue());
+
+	    return Lobs.noGrow(Axis.Y, vbox);
+	}
+    }
+
+    /** Body viewlet shows content of a big property such as a message body. */
+    public static class BodyViewlet implements Viewlet {
+	public boolean canRender(Graph graph, Object prop, Object node) {
+	    // XXX return false if the property doesn't denote a body
+	    // eg. content:encoded
+
+	    for (Iterator i=graph.findN_11X_Iter(node, prop); i.hasNext();) {
+		Object value = i.next();
+		if (value instanceof Literal)
+		    return true;
+	    }
+	    return false;
+	}
+
+	public Lob getLob(Graph graph, ReprView reprView, Cursor cursor,
+			  Object prop, Object node) {
+
+	    Lob vbox = Lobs.vbox();
+
+	    Lob lob = Lobs.hbox(reprView.getLobList(prop));
+
+	    Lob hbox = Lobs.hbox();
+	    hbox.add(lob);
+	    hbox.add(Lobs.hglue());
+
+	    vbox.add(hbox);
+
+	    hbox = Lobs.hbox();
+	    Lob rightValues = Components.frame(Lobs.vbox(), 
+					      Maps.map("clip", Boolean.FALSE));
+	    hbox.add(Lobs.request(Axis.X, rightValues, 0, 0, Lob.INF));
+
+	    vbox.add(hbox);
+
+	    for(Iterator i=graph.findN_11X_Iter(node, prop); i.hasNext();) {
+		Object value = i.next();
+
+		if (value instanceof Literal) {
+		    String body = ((Literal) value).getString();
+		    List list = Lists.list(body);
+		    Lob l = Lobs.linebreaker(Components.font().textLn(body));
+		    rightValues.add(l);
+		    continue;
+		}
+		Lob l = reprView.getLob(value);
+		l = Lobs.clickController(l, 1, new @realtime-i Action(Cursor cursor, Object value) {
+		    public void run() {
+			cursor.set(value);
+
+			VobScene sc = ClickController.getClickScene();
+			int cs = ClickController.getClickCS();
+
+			ConnectionVobMatcher m = (ConnectionVobMatcher)sc.matcher;
+			m.setNextFocus(cs);
+		    }
+		});
+		l = BuoyConnectorLob.newInstance(l, value, false, false);
+		rightValues.add(l);
+	    }
+
 	    rightValues.add(Lobs.vglue());
 
 	    return Lobs.noGrow(Axis.Y, vbox);
