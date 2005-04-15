@@ -183,6 +183,8 @@ public class PropertyListView implements SpatialView {
 
     public Lob getBuoyLob(Object node, boolean useFakeFocus) {
 	Lob l = Components.frame(reprView.getLob(node));
-	return BuoyConnectorLob.newInstance(l, node, false, useFakeFocus);
+	l = BuoyConnectorLob.newInstance(l, node, !useFakeFocus, useFakeFocus);
+	l = SpatialContextLob.newInstance(l, node);
+	return l;
     }
 }
