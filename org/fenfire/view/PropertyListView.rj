@@ -208,13 +208,10 @@ public class PropertyListView implements SpatialView {
 					       List properties, List viewlets,
 					       Graph graph, ReprView reprView){
 	    public int size() {
-		return properties.size()*2-1;
+		return properties.size();
 	    }
 
 	    public Object get(int i) {
-		if(i%2 == 1) return Lobs.glue(Axis.Y, 15);
-		i = i/2;
-
 		Object prop = properties.get(i);
 		
 		if (!graph.findN_11X_Iter(node, prop).hasNext() &&
