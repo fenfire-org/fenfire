@@ -607,7 +607,10 @@ public class Main {
 	    add(graph, _graph, namespaces, nmap, winAnim);
 	    System.out.println("Loaded from the Web.");	
 	} catch(IOException e) {
-	    e.printStackTrace();
+	    if (e.getMessage().startsWith("Unhandled content type "))
+		System.out.println(e.getMessage());
+	    else
+		e.printStackTrace();
 	}
     }
     
