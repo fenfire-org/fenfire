@@ -31,18 +31,14 @@ import java.io.*;
 public class Gnowsis {
     private static Client client;
 
-    public static Graph getCBD(Object node) {
-	try {
-	    if(client == null) client = new Client();
+    public static Graph getCBD(Object node) throws Exception {
+	if(client == null) client = new Client();
 
-	    String uri = Nodes.toString(node);
-	    Graph g = new org.fenfire.swamp.impl.HashGraph();
-	    Graphs.readXML(new StringReader(client.runBDesc(uri)), uri, g,
-			   new java.util.HashMap());
-	    return g;
-	} catch(Exception e) {
-	    throw new Error(e);
-	}
+	String uri = Nodes.toString(node);
+	Graph g = new org.fenfire.swamp.impl.HashGraph();
+	Graphs.readXML(new StringReader(client.runBDesc(uri)), uri, g,
+		       new java.util.HashMap());
+	return g;
     }
 
     public static void open(Object node) {

@@ -615,10 +615,19 @@ public class Main {
 				NamespaceMap nmap,
 				WindowAnimation winAnim) {
 	System.out.println("Loading CBD from Gnowsis...");
-	Graph cbd = Gnowsis.getCBD(uri);
-	Graph graph = new OneQuadGraph(quadsGraph, uri);
-	add(cbd, graph, null, null, winAnim);
-	System.out.println("Loaded.");
+	try {
+	    Graph cbd = Gnowsis.getCBD(uri);
+	    Graph graph = new OneQuadGraph(quadsGraph, uri);
+	    add(cbd, graph, null, null, winAnim);
+	    System.out.println("Loaded data from Gnowsis.");
+	} catch (IOException e) {
+	    if (e.getMessage().equals("Connection refused"))
+		System.out.println("Couldn't connect Gnowsis.");
+	    else
+		throw new Error(e);
+	} catch (Exception e) {
+	    throw new Error(e);
+	}
     }
 
 
