@@ -55,26 +55,44 @@ public class PropertyListView implements SpatialView {
 	public Lob getLob(Graph graph, ReprView reprView, Cursor cursor,
 			  Object prop, Object node) {
 
-	    Lob vbox = Lobs.vbox();
+	    LobFont font = Components.font();
 
-	    Lob lob = Lobs.hbox(reprView.getLobList(prop));
+	    boolean 
+		hasLeftValues = graph.findN_X11_Iter(prop, node).hasNext(),
+		hasRightValues = graph.findN_11X_Iter(node, prop).hasNext();
+
+	    Lob leftLabel, rightLabel;
+
+	    if(hasLeftValues)
+		leftLabel = Lobs.hbox(Lists.concat(font.text("Inverse "),
+						   reprView.getLobList(prop),
+						   font.textLn(":")));
+	    else
+		leftLabel = Lobs.nullLob();
+
+	    if(hasRightValues)
+		rightLabel = Lobs.hbox(Lists.concat(reprView.getLobList(prop),
+						    font.textLn(":")));
+	    else
+		rightLabel = Lobs.nullLob();
+
+	    Lob vbox = Lobs.vbox();
+	    vbox.add(leftLabel); vbox.add(Lobs.vglue());
+	    leftLabel = vbox;
+
+	    vbox = Lobs.vbox();
+	    vbox.add(rightLabel); vbox.add(Lobs.vglue());
+	    rightLabel = vbox;
 
 	    Lob hbox = Lobs.hbox();
-	    hbox.add(Lobs.hglue());
-	    hbox.add(lob);
-	    hbox.add(Lobs.hglue());
+	    Lob leftValues = Lobs.vbox();
+	    Lob rightValues = Lobs.vbox();
 
-	    vbox.add(hbox);
-
-	    hbox = Lobs.hbox();
-	    Lob leftValues = Components.frame(Lobs.vbox(), 
-					      Maps.map("clip", Boolean.FALSE));
-	    Lob rightValues = Components.frame(Lobs.vbox(), 
-					      Maps.map("clip", Boolean.FALSE));
+	    hbox.add(Lobs.request(Axis.X, leftLabel, 0, 0, 2*Lob.INF/3));
 	    hbox.add(Lobs.request(Axis.X, leftValues, 0, 0, Lob.INF));
+	    hbox.add(Lobs.glue(Axis.X, 15, 15, 15));
+	    hbox.add(Lobs.request(Axis.X, rightLabel, 0, 0, 2*Lob.INF/3));
 	    hbox.add(Lobs.request(Axis.X, rightValues, 0, 0, Lob.INF));
-
-	    vbox.add(hbox);
 
 	    for(Iterator i=graph.findN_X11_Iter(prop, node); i.hasNext();) {
 		Object value = i.next();
@@ -91,7 +109,9 @@ public class PropertyListView implements SpatialView {
 		    }
 		});
 		l = BuoyConnectorLob.newInstance(l, value, false, false);
-		leftValues.add(l);
+		l = Lobs.noGrow(Axis.Y, l);
+		leftValues.add(Components.frame(l, Maps.map("clip", Boolean.FALSE)));
+		leftValues.add(Lobs.glue(Axis.Y, 2, 2, 2));
 	    }
 
 	    for(Iterator i=graph.findN_11X_Iter(node, prop); i.hasNext();) {
@@ -109,13 +129,15 @@ public class PropertyListView implements SpatialView {
 		    }
 		});
 		l = BuoyConnectorLob.newInstance(l, value, false, false);
-		rightValues.add(l);
+		l = Lobs.noGrow(Axis.Y, l);
+		rightValues.add(Components.frame(l, Maps.map("clip", Boolean.FALSE)));
+		rightValues.add(Lobs.glue(Axis.Y, 2, 2, 2));
 	    }
 
 	    leftValues.add(Lobs.vglue());
 	    rightValues.add(Lobs.vglue());
 
-	    return Lobs.noGrow(Axis.Y, vbox);
+	    return Lobs.noGrow(Axis.Y, hbox);
 	}
     }
 
@@ -312,10 +334,16 @@ public class PropertyListView implements SpatialView {
 					       List properties, List viewlets,
 					       Graph graph, ReprView reprView){
 	    public int size() {
-		return properties.size();
+		return properties.size()*2 - 1;
 	    }
 
 	    public Object get(int i) {
+		if(i % 2 == 1) {
+		    return Lobs.glue(Axis.Y, 5, 5, 5);
+		}
+		
+		i = i/2;
+
 		Object prop = properties.get(i);
 		
 		if (!graph.findN_11X_Iter(node, prop).hasNext() &&

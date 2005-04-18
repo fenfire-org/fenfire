@@ -310,10 +310,6 @@ public class Main {
 	}
 
 	protected Lob createLob() { 
-	    org.fenfire.spanimages.PagePool.init(graph, 
-						windowAnim);
-	    org.fenfire.spanimages.PagePool.flush();
-
 	    Set allProps = new HashSet(); //new AllPropertiesSetModel(graph);
 	    for(Iterator i=graph.findN_AXA_Iter(); i.hasNext();)
 		allProps.add(i.next());
