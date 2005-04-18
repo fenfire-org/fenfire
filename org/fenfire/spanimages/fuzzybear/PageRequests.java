@@ -396,7 +396,6 @@ public class PageRequests {
 	float inchHeight = s.maxh / 72.0f;
 	
 	try {
-	    s.imagesGenerated = true;
 	    for (int i=0; i<pagePool.getSizes(); i++) {
 		int w_size = pagePool.getSizeW(i);
 		int h_size = pagePool.getSizeH(i);
@@ -438,6 +437,7 @@ public class PageRequests {
 			throw new Exception("Conversion unsuccessful");
 		}
 	    }
+	    s.imagesGenerated = true;
 
 	    // clear to mimimize memory usage
 	    s.page = null;
