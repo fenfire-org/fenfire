@@ -42,6 +42,9 @@ import java.io.*;
 
 
 public class LodElevator {
+   private static void p(String s) { System.out.println("LodElevator:: "+s); }
+
+
     List actives = new ArrayList();
 
     Map node2state;
@@ -58,39 +61,42 @@ public class LodElevator {
 		public void run() {
 		    while (true) {
 			try {
-
+			    boolean changes = false;
 			    int n = 0;
-			    synchronized (node2state) {
-				for (Iterator i=node2state.values().iterator(); i.hasNext();) {
-				    PageRequests.State s = (PageRequests.State) i.next();
 
-				    /*
-				    int w = pool.getW(swap);
-				    int h = pool.getH(swap);
-				    File img = new File(ScrollBlockImager.tmp(),
-							w+"x"+h+"_"+current_.state.tmpImgPrefix+
-							(current_.page+1));
-				    pool.setImage(new FileInputStream(img), swap, w,h);
-				    
-				    w = pool.getW(current);
-				    h = pool.getH(current);
-				    img = new File(ScrollBlockImager.tmp(),
-						   w+"x"+h+"_"+swap_.state.tmpImgPrefix+
-						   (swap_.page+1));
-				    pool.setImage(new FileInputStream(img), current, w,h);
-				    
-				    actives.set(current, swap_);
-				    actives.set(swap, current_);
-				    */
-				}
+			    Collections.sort(actives, new Comparator() {
+				    public int compare(Object o1, Object o2) {
+					SinglePage sp1 = (SinglePage) o1;
+					SinglePage sp2 = (SinglePage) o2;
+					return ((sp1.basePrior+sp1.prior) - (sp2.basePrior+sp2.prior));
+				    }
+				    public boolean equals(Object o) { return false; }
+				});
 
+
+			    for (int i = 0; i<actives.size(); i++) {
+				SinglePage sp = (SinglePage)actives.get(i);
+				if (sp.state.poolInds[sp.getPage()] == i) continue;
+				else sp.state.poolInds[sp.getPage()] = i;
+				changes = true;
+				
+				int w = pool.getW(i);
+				int h = pool.getH(i);
+				File img = new File(ScrollBlockImager.tmp(),
+						    w+"x"+h+"_"+sp.state.tmpImgPrefix+
+						    (sp.getPage()+1));
+				if (img.exists())
+				    pool.setImage(new FileInputStream(img), i, w,h);
+				else p("no such image! "+img);
 			    }
-			    
 
 			    if (!anim.hasSceneReplacementPending() &&
 				!anim.hasAnimModeSet())
 				anim.switchVS();
-			    sleep(500);
+			    if (!changes)
+				sleep(1000);
+			    else
+				sleep(500);
 			} catch (Exception e) {
 			    e.printStackTrace();
 			}
@@ -100,17 +106,40 @@ public class LodElevator {
 	t.start();
     }
 
-
-    /*
     
-    class SPP {
-	State state;
-	int page;
-	int prior;
-	SPP(State s, int p, int pr) {
-	    state = s; page = p; prior = pr;
+    // page is in base 0
+    public void setLOD(PageRequests.State s, int pageB0, int prior) {
+	if (s.pages[pageB0] == null) {
+	    s.pages[pageB0] = new SinglePage(s, prior);
+	    actives.add(s.pages[pageB0]);
+	    s.poolInds[pageB0] = actives.indexOf(s.pages[pageB0]);
+	}
+	s.pages[pageB0].basePrior = 0;
+	s.pages[pageB0].prior = prior;
+    }
+
+    public void flush() {
+	for (int i = 0; i<actives.size(); i++) {
+	    SinglePage sp = (SinglePage)actives.get(i);
+	    sp.basePrior++;
 	}
     }
+
+    
+    static public class SinglePage {
+	PageRequests.State state;
+	int prior;
+	int basePrior = 0;
+	SinglePage(PageRequests.State s, int pr) {
+	    state = s; prior = pr;
+	}
+	public int getPage() {
+	    for (int i=0; i<state.pages.length; i++)
+		if (state.pages[i] == this) return i;
+	    throw new Error("no page found? -- This should not happend because every page is in system.");
+	}
+    }
+    /*
 	
     void setLOD(State s, int page, int prior) {
 	//p("SET LOD: page: "+page+". prior: "+prior);

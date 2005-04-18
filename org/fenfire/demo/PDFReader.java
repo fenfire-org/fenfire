@@ -23,10 +23,11 @@ public class PDFReader extends NewLobMain {
 	super(bg);
 	p("Read file: "+file);
 
+	final float d = 90;
 	keys.put("a", new Action() {
 		public void run() {
 		    p("zoom in");
-		    zoom *= 1.5;
+		    zoom *= 1.25;
 		    windowAnim.animate();
 		}
 		public javolution.lang.Text toText() { return null; }
@@ -35,7 +36,7 @@ public class PDFReader extends NewLobMain {
 	keys.put("z", new Action() {
 		public void run() {
 		    p("zoom out");
-		    zoom *= 0.5;
+		    zoom *= 0.75;
 		    windowAnim.animate();
 		}
 		public javolution.lang.Text toText() { return null; }
@@ -44,7 +45,7 @@ public class PDFReader extends NewLobMain {
 	keys.put("Up", new Action() {
 		public void run() {
 		    p("up");
-		     y -= 50;
+		     y -= d;
 		    windowAnim.animate();
 		}
 		public javolution.lang.Text toText() { return null; }
@@ -53,7 +54,7 @@ public class PDFReader extends NewLobMain {
 	keys.put("Down", new Action() {
 		public void run() {
 		    p("down");
-		     y += 50;
+		     y += d;
 		    windowAnim.animate();
 		}
 		public javolution.lang.Text toText() { return null; }
@@ -62,7 +63,7 @@ public class PDFReader extends NewLobMain {
 	keys.put("Right", new Action() {
 		public void run() {
 		    p("right");
-		     x += 50;
+		     x += d;
 		    windowAnim.animate();
 		}
 		public javolution.lang.Text toText() { return null; }
@@ -71,7 +72,7 @@ public class PDFReader extends NewLobMain {
 	keys.put("Left", new Action() {
 		public void run() {
 		    p("left");
-		     x -= 50;
+		     x -= d;
 		    windowAnim.animate();
 		}
 		public javolution.lang.Text toText() { return null; }
@@ -90,8 +91,8 @@ public class PDFReader extends NewLobMain {
 	y=-50 ;
 
     public Lob createLob() {
-	org.fenfire.spanimages.PagePool.init(null, 
-					     windowAnim);
+	PagePool.init(null, windowAnim);
+	PagePool.flush();
 	
 	Lob lob;
 	//lob = Lobs.filledRect(Color.black);

@@ -49,8 +49,8 @@ public class PagePool {
     protected Lob get(Object node, int page) {
 	return requests.getOnePage(node, page);
     }
-    protected Lob getFull(Object node, int page) {
-	return requests.getWholeDocument(node);
+    protected Lob getFull(Object node, float prior) {
+	return requests.getWholeDocument(node, prior);
     }
 
 
@@ -83,11 +83,14 @@ public class PagePool {
     static public Lob fullDocument(Object node, float lod) {
 	PagePool pool = getInstance();
 	pool.request(node);
+
 	Lob l;
-	l = pool.getFull(node, 1);
+	l = pool.getFull(node, lod);
 	return l;
     }
 
-
+    static public void flush() {
+	getInstance().requests.flush();
+    }
 
 }

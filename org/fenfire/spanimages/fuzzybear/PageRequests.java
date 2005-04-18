@@ -83,7 +83,9 @@ public class PageRequests {
 	lodElevator = new LodElevator(node2state, pagePool, anim);
     }
 
-    
+    public void flush() { 
+	lodElevator.flush(); 
+    }
 
     public void request(final String node) {
 	if (node2state.containsKey(node)) return;
@@ -130,7 +132,6 @@ public class PageRequests {
 		    generateImages(s);
 		    s.setMessage("All done - you should see an image now");
 		    s.setProgress(100f/100);
-		    sleep(300);
 		    } catch (Exception e) { e.printStackTrace(); 
 		    } catch (Error e) { e.printStackTrace(); 
 		    }
@@ -153,7 +154,6 @@ public class PageRequests {
 	int h = s.maxh;
 	Lob l;
 	try {
-	    s.priors[page-1] = 0;
 	    l = pagePool.getLob(s.poolInds[page-1], 0,0,w,h);
 	} catch (Exception e) {
 	    l = Components.label(""+e.getMessage());
@@ -166,7 +166,7 @@ public class PageRequests {
 	return Lobs.request(l, w,w,w,h,h,h);
     }
 
-    public Lob getWholeDocument(Object node) {
+    public Lob getWholeDocument(Object node, float dx) {
 	State s = (State) node2state.get(node);
 	if (s == null)
 	    return Components.label("Information lost in cyberspace.");
@@ -174,6 +174,31 @@ public class PageRequests {
 	if (!s.imagesGenerated)
 	    return s.getLob();
 
+	// set priority == LOD
+	int n = s.n;
+	float x0 = 0;
+	if (dx < 0) {
+	    for (int i=0; i<n; i++)
+		lodElevator.setLOD(s, i, i);
+	} else if (dx > (n*s.maxw)) {
+	    for (int i=0; i<n; i++)
+		lodElevator.setLOD(s, i, n-i-1);
+	} else {
+	    for (int i=0; i<n; i++) {
+		if (x0 <= dx && dx < (x0+s.maxw)) {
+		    int lod = 0;
+		    for (int j=i; j<n; j++) {
+			lodElevator.setLOD(s, j, lod++);
+		    }
+		    lod = 1;
+		    for (int j=i-1; j>=0; j--) {
+			lodElevator.setLOD(s, j, lod++);
+		    }
+		    break;
+		}
+		x0 += s.maxw;
+	    }
+	}
 
 	Lob l = Lobs.hbox();
 	for (int i=0; i<s.n; i++) {
@@ -216,7 +241,7 @@ public class PageRequests {
     }
 
     Map node2state = Collections.synchronizedMap(new HashMap());
-    class State implements ProgressListener {
+    public class State implements ProgressListener {
 	int state = -1;
 	String uri;
 	File file = null;
@@ -226,8 +251,8 @@ public class PageRequests {
 	int maxw = -1, maxh = -1, n = -1;
 	String tmpImgPrefix = null;
 	boolean imagesGenerated = false;
-	int[] poolInds = null;
-	int[] priors = null;
+	int [] poolInds = null;
+	LodElevator.SinglePage[] pages = null;
 
 	public State(String node) { this.uri = node; }
 
@@ -365,10 +390,12 @@ public class PageRequests {
 					     pool), s.id, s.ct);
 
 	    s.n = ((Span1D)(s.page.getCurrent())).length();
+	    s.pages = new LodElevator.SinglePage[s.n];
 	    s.poolInds = new int[s.n];
-	    s.priors = new int[s.n];
-	    for (int i=0; i<s.n; i++) s.poolInds[i] = -1;
-
+	    for (int i=0; i<s.n; i++) {
+		s.pages[i] = null; //new LodElevator.SinglePage(s, 10);
+		s.poolInds[i] = -1;
+	    }
 
 	    // Find largest dimensions
 	    int maxw = 0, maxh = 0;

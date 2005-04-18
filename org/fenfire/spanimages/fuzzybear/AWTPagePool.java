@@ -152,6 +152,7 @@ public class AWTPagePool {
 				      int width, int height) 
 	throws IOException {
 
+	if (!inited) return;
 
 	if (width > maxW || height > maxH)
 	    throw new IllegalArgumentException("Width or height too big! "+
