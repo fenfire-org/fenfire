@@ -234,7 +234,43 @@ public class PropertyListView implements SpatialView {
     /** Container viewlet shows a list of elements instead of the container.
      */
     public static class ContainerViewlet implements Viewlet {
+	private Object reverseProperty(Graph graph, Object prop, 
+					 Object node) {
+	    // XXX the rest of URI should be integer without leading zeros
+	    if (!prop.toString().startsWith(RDF.voc+"_"))
+		return null; // we only show containment properties
+
+	    if (graph.findN_11X_Iter(node, prop).hasNext())
+		return null; // we won't show forward properties
+	    Iterator i = graph.findN_X11_Iter(prop, node); 
+	    if (!i.hasNext())
+		return null;
+	    Object container = i.next();
+	    if (i.hasNext())
+		return null; // we won't show more than one container
+
+	    Iterator j = graph.findN_AX1_Iter(container);
+	    if (!j.hasNext())
+		return null;
+	    Object reverseProperty = j.next();
+	    if (j.hasNext())
+		return null; // we won't show more than one container
+
+	    Iterator k = graph.findN_X11_Iter(reverseProperty, container);
+	    if (!k.hasNext())
+		return null;
+	    Object source = k.next();
+	    if (k.hasNext())
+		return null; // we won't show more than one container
+	    
+	    // XXX container can have additional properties that we don't show
+	    return reverseProperty; // OK
+	}
+
 	public boolean canRender(Graph graph, Object prop, Object node) {
+	    if (reverseProperty(graph, prop, node) != null)
+		return true;
+
 	    if (graph.findN_X11_Iter(prop, node).hasNext())
 		return false; // we won't show reverse properties
 	    Iterator i = graph.findN_11X_Iter(node, prop); 
@@ -249,8 +285,38 @@ public class PropertyListView implements SpatialView {
 	    return graph.findN_11X_Iter(container, RDF.voc+"_1").hasNext();
 	}
 
+	public Lob getReverseLob(Graph graph, ReprView reprView, Cursor cursor,
+			  Object reverseProperty, Object container) {
+	    Object source = graph.find1_X11(reverseProperty, container);
+
+	    LobFont font = Components.font();
+
+	    Lob leftLabel = Lobs.hbox(Lists.concat(font.text("One in "),
+						   reprView.getLobList(
+						       reverseProperty),
+						   font.textLn(" of:")));
+	    Lob vbox = Lobs.vbox();
+	    vbox.add(leftLabel); vbox.add(Lobs.vglue());
+	    leftLabel = vbox;
+
+	    Lob left = Components.frame(reprView.getLob(source));
+
+
+	    Lob hbox = Lobs.hbox();
+
+	    hbox.add(Lobs.request(Axis.X, leftLabel, 0, 0, 2*Lob.INF/3));
+	    hbox.add(Lobs.request(Axis.X, left, 0, 0, Lob.INF));
+	    hbox.add(Lobs.request(Axis.X, Lobs.nullLob(), 0, 0, 5*Lob.INF/3));
+
+	    return Lobs.noGrow(Axis.Y, hbox);
+	}
+
 	public Lob getLob(Graph graph, ReprView reprView, Cursor cursor,
 			  Object prop, Object node) {
+	    Object reverseProperty = reverseProperty(graph, prop, node);
+	    if (reverseProperty != null)
+		return getReverseLob(graph, reprView, cursor, reverseProperty, 
+				     graph.find1_X11(prop, node));
 
 	    Lob vbox = Lobs.vbox();
 
