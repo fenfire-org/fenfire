@@ -248,22 +248,22 @@ public class PropertyListView implements SpatialView {
 	}
     }
 
-    /** List viewlet shows list elements instead of the blank node. */
-    public static class ListViewlet implements Viewlet {
+    /** Container viewlet shows a list of elements instead of the container.
+     */
+    public static class ContainerViewlet implements Viewlet {
 	public boolean canRender(Graph graph, Object prop, Object node) {
+	    if (graph.findN_X11_Iter(prop, node).hasNext())
+		return false; // we won't show reverse properties
+	    Iterator i = graph.findN_11X_Iter(node, prop); 
+	    if (!i.hasNext())
+		return false;
+	    Object container = i.next();
+	    if (i.hasNext())
+		return false; // we won't show more than the container
 
-	    for (Iterator i=graph.findN_11X_Iter(node, prop); i.hasNext();) {
-		Object value = i.next();
-		if (!(value instanceof Literal)) {
-		    for (Iterator j=graph.findN_11X_Iter(value, RDF.type); 
-			 j.hasNext();) {
-			Object type = j.next();
-			if (type.equals(Nodes.get(RDF.voc + "Seq")))
-			    return true;
-		    }
-		}
-	    }
-	    return false;
+	    // XXX there can be additional properties that we don't show or
+	    // container properties after we stop showing
+	    return graph.findN_11X_Iter(container, RDF.voc+"_1").hasNext();
 	}
 
 	public Lob getLob(Graph graph, ReprView reprView, Cursor cursor,
@@ -286,65 +286,37 @@ public class PropertyListView implements SpatialView {
 
 	    vbox.add(hbox);
 
-	    for(Iterator i=graph.findN_11X_Iter(node, prop); i.hasNext();) {
-		Object value = i.next();
+	    Object container = graph.find1_11X(node, prop);
 
-		if (!(value instanceof Literal)) {
-		    boolean list = false;
-		    for (Iterator j=graph.findN_11X_Iter(value, RDF.type); 
-			 j.hasNext();) {
-			Object type = j.next();
-			if (type.equals(Nodes.get(RDF.voc + "Seq")))
-			    list = true;
-		    }
-		    if (list) {
-			int itemnum=1;
-			while (true) {
-			    Object itemprop = Nodes.get(RDF.voc+'_'+itemnum);
-			    Iterator j=graph.findN_11X_Iter(value, itemprop);
-			    if (!j.hasNext())
-				break; // end of list
-			    while (j.hasNext()) {
-				Object item = j.next();
-				Lob l = reprView.getLob(item);
-				l = Lobs.clickController(l, 1, new @realtime-i Action(Cursor cursor, Object item) {
-				    public void run() {
-					cursor.set(item);
+	    int itemnum=1;
+	    while (true) {
+		Object itemprop = Nodes.get(RDF.voc+'_'+itemnum);
+		Iterator j=graph.findN_11X_Iter(container, itemprop);
+		if (!j.hasNext())
+		    break; // end of continuous part of the list
+		while (j.hasNext()) {
+		    Object item = j.next();
+		    Lob l = reprView.getLob(item);
+		    l = Lobs.clickController(l, 1, 
+			   new @realtime-i Action(Cursor cursor, Object item) {
+			public void run() {
+			    cursor.set(item);
 					
-					VobScene sc = ClickController.getClickScene();
-					int cs = ClickController.getClickCS();
+			    VobScene sc = ClickController.getClickScene();
+			    int cs = ClickController.getClickCS();
 					
-					ConnectionVobMatcher m = (ConnectionVobMatcher)sc.matcher;
-					m.setNextFocus(cs);
-				    }
-				});
-				l = BuoyConnectorLob.newInstance(l, item, false, false);
-				
-				rightValues.add(l);
-				
-			    }
-			    itemnum++; // next item property
+			    ConnectionVobMatcher m = 
+			        (ConnectionVobMatcher) sc.matcher;
+			    m.setNextFocus(cs);
 			}
-			continue; // the value is now shown, as a list
-		    }
+		    });
+		    l = BuoyConnectorLob.newInstance(l, item, false, false);
+				
+		    rightValues.add(l);
+				
 		}
-
-		Lob l = reprView.getLob(value);
-		l = Lobs.clickController(l, 1, new @realtime-i Action(Cursor cursor, Object value) {
-		    public void run() {
-			cursor.set(value);
-
-			VobScene sc = ClickController.getClickScene();
-			int cs = ClickController.getClickCS();
-
-			ConnectionVobMatcher m = (ConnectionVobMatcher)sc.matcher;
-			m.setNextFocus(cs);
-		    }
-		});
-		l = BuoyConnectorLob.newInstance(l, value, false, false);
-		rightValues.add(l);
+		itemnum++; // next item property
 	    }
-
 	    rightValues.add(Lobs.vglue());
 
 	    return Lobs.noGrow(Axis.Y, vbox);
