@@ -359,9 +359,16 @@ public class PropertyListView implements SpatialView {
 								false);
 			l = Lobs.between(conn, l, null);
 
-			l = Lobs.clickController(l, 1, new @realtime-i Action(Cursor cursor, Object prop) {
+			l = Lobs.clickController(l, 1, new @realtime-i Action(Cursor cursor, Object node, Object prop, Graph graph) {
 			    public void run() {
-				cursor.setSpatialCursor(prop);
+				Iterator i = graph.findN_11X_Iter(node, prop);
+				Iterator j = graph.findN_X11_Iter(prop, node);
+
+				if(j.hasNext())
+				    cursor.setRotation(j.next(), prop, node);
+
+				if(i.hasNext())
+				    cursor.setRotation(node, prop, i.next());
 			    }
 			});
 
@@ -394,12 +401,17 @@ public class PropertyListView implements SpatialView {
 	vbox.add(Lobs.vbox(lobs));
 	vbox.add(Lobs.vglue());
 
+	Object property = null;
+
+	if(cursor.getRotation(node) != null)
+	    property = cursor.getRotation(node).getRotationProperty();
+
         Lob cursor_lob = Lobs.filledRect(Components.darkColor);
         cursor_lob = Lobs.key(cursor_lob, "cursor");
 
 	Lob lob = vbox;
-        lob = Lobs.decorate(lob, cursor_lob, cursor.getSpatialCursor(), -1, 0);
-	lob = Lobs.viewport(Axis.Y, lob, cursor.getSpatialCursor(), -1);
+        lob = Lobs.decorate(lob, cursor_lob, property, -1, 0);
+	lob = Lobs.viewport(Axis.Y, lob, property, -1);
 	lob = Lobs.request(Axis.Y, lob, 0, 0, -1);
 
 	return Components.frame(SpatialContextLob.newInstance(lob, node));
