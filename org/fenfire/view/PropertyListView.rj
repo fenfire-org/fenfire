@@ -139,7 +139,19 @@ public class PropertyListView implements SpatialView {
 	    leftValues.add(Lobs.vglue());
 	    rightValues.add(Lobs.vglue());
 
-	    return Lobs.noGrow(Axis.Y, hbox);
+	    Lob l = Lobs.noGrow(Axis.Y, hbox);
+
+	    Lob conn = BuoyConnectorLob.newInstance(Lobs.nullLob(), prop,
+						    false, false);
+	    l = Lobs.between(conn, l, null);
+
+	    l = Lobs.clickController(l, 1, new @realtime-i Action(Cursor cursor, Object prop) {
+		public void run() {
+		    cursor.setSpatialCursor(prop);
+		}
+	    });
+
+	    return l;
 	}
     }
 
@@ -376,7 +388,12 @@ public class PropertyListView implements SpatialView {
 	vbox.add(Lobs.vbox(lobs));
 	vbox.add(Lobs.vglue());
 
-	Lob lob = Lobs.viewport(Axis.Y, vbox, null, -1);
+        Lob cursor_lob = Lobs.filledRect(Components.darkColor);
+        cursor_lob = Lobs.key(cursor_lob, "cursor");
+
+	Lob lob = vbox;
+        lob = Lobs.decorate(lob, cursor_lob, cursor.getSpatialCursor(), -1, 0);
+	lob = Lobs.viewport(Axis.Y, lob, cursor.getSpatialCursor(), -1);
 	lob = Lobs.request(Axis.Y, lob, 0, 0, -1);
 
 	return Components.frame(SpatialContextLob.newInstance(lob, node));
