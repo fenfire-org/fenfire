@@ -250,6 +250,7 @@ public class Main {
 		new TextReprView(graph, cursor, nmap, textProps, 
 				 RDFS.label),
 		new CanvasNodeReprView(graph),
+		new OneFullPageSpanReprView(graph),
 	    }));
 
 	    reprViewSettings = new ReprViewSettings(reprViews);
@@ -279,6 +280,9 @@ public class Main {
 	}
 
 	protected Lob createLob() { 
+	    org.fenfire.spanimages.PagePool.init(graph, 
+						windowAnim);
+
 	    Set allProps = new HashSet(); //new AllPropertiesSetModel(graph);
 	    for(Iterator i=graph.findN_AXA_Iter(); i.hasNext();)
 		allProps.add(i.next());
@@ -458,7 +462,7 @@ public class Main {
 	Object canvas = Nodes.N();
 	graph.add(canvas, RDF.type, CANVAS2D.Canvas);
 
-	Object node = mainnode;
+	Object node = Nodes.N();
 	graph.add(canvas, CANVAS2D.contains, node);
 	graph.add(node, RDFS.label, new PlainLiteral("Foo"));
 	graph.add(node, CANVAS2D.x, new PlainLiteral("25"));
@@ -469,6 +473,20 @@ public class Main {
 	graph.add(node3, RDFS.label, new PlainLiteral("Bar"));
 	graph.add(node3, CANVAS2D.x, new PlainLiteral("40"));
 	graph.add(node3, CANVAS2D.y, new PlainLiteral("60"));
+
+	Object pageSpan = mainnode;
+	graph.add(canvas, CANVAS2D.contains, pageSpan);
+	graph.add(pageSpan, CANVAS2D.x, new PlainLiteral("-100"));
+	graph.add(pageSpan, CANVAS2D.y, new PlainLiteral("260"));
+	graph.add(pageSpan, RDF.type, FF.OneFullPageSpan);
+	graph.add(pageSpan, FF.page, new TypedLiteral(""+1, XSD._int));
+	graph.add(pageSpan, FF.partOf, new PlainLiteral("file://testdata/paper.pdf"));
+
+	// 23:33 < benja_> [ rdf:type alph:MultiPageSpan; 
+	// alph:startPage "3"; alph:endPage "7"; alph:partOf <storm:...> ]
+
+	
+
 
 	/*
 	Object home = Nodes.N(), n1 = Nodes.N(), n2 = Nodes.N();

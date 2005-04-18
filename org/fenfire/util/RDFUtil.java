@@ -64,7 +64,7 @@ public class RDFUtil {
 	while(it.hasNext()) {
 	    Object obj = it.next();
 	    if(dbg) p(" entry: "+ obj);
-	    if ( obj.equals(type) ) return true;
+	    if ( obj == type ) return true;
 	}
 	if(dbg) p("None matched");
 	return false;

@@ -1,6 +1,6 @@
 // (c): Matti J. Katila
 
-package org.fenfire.view.repr;
+package org.fenfire.spanimages.fuzzybear;
 import java.awt.image.*;
 import java.awt.*;
 import java.io.*;
@@ -28,10 +28,11 @@ public class AWTPagePool {
     private int[] buff, WxH;
     protected int count, maxW, maxH;
     static protected Object instance;
+    static protected boolean inited = false;
 
     /** Singleton pool for awt
      */
-    protected AWTPagePool() {
+    protected void init() { //AWTPagePool() {
 	count=0;
 	for (int i=0; i<sizes.length; i++)
 	    count += sizes[i][0];
@@ -89,6 +90,7 @@ public class AWTPagePool {
 	}
 	*/
 	buff = new int[maxH*maxW];
+	inited = true;
     }
 
     public int getW(int index) { return WxH[2*index]; }

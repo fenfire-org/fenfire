@@ -46,7 +46,7 @@ import java.util.*;
  */
 public class CanvasView2D extends View2D 
     implements NodedView2D {
-    public static boolean dbg = true;
+    public static boolean dbg = false;
     private static void p(String s) { System.out.println("CanvasView2D:: "+s); }
     
     private Fen fen;
@@ -108,7 +108,7 @@ public class CanvasView2D extends View2D
 	int containerCS = vs.coords.translate(canvasCS, 0,0);
 	vs.matcher.add(canvasCS, containerCS, container);
 
-	p("containerCS: "+containerCS);
+	if (dbg) p("containerCS: "+containerCS);
 	Iterator iter = fen.constgraph.findN_11X_Iter(container, 
 						      CANVAS2D.contains);
 	if (dbg) p("Canvas begin");
@@ -125,7 +125,7 @@ public class CanvasView2D extends View2D
 	    int cs = vs.coords.orthoBox(paper2screen, 0,1,2,3,4,5,6);
 	    vs.matcher.add(containerCS, cs, n);
 	    vs.activate(cs);
-	    p("cs: "+cs);
+	    if (dbg) p("cs: "+cs);
 	    if(cull) {
 		//cs = vs.cullCS(cs, "CULL", box2screen);
 		cs = vs.cullCS(cs, "CULL", matchingParent);
@@ -202,7 +202,7 @@ public class CanvasView2D extends View2D
 		      ", p: "+p+", x: "+x+", y: "+y);
 
 	    int cs = oldVS.matcher.getCS(containerCS, n);
-	    p("cs: "+cs);
+	    if (dbg) p("cs: "+cs);
 	    if (cs < 1) throw new Error(cs+" is not possible!");
 
             oldVS.coords.setOrthoBoxParams(cs, 0, 

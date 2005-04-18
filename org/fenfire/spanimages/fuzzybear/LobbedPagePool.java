@@ -1,6 +1,6 @@
 // (c): Matti J. Katila
 
-package org.fenfire.view.repr;
+package org.fenfire.spanimages.fuzzybear;
 
 import org.nongnu.libvob.vobs.*;
 import org.nongnu.libvob.*;
@@ -19,14 +19,27 @@ public class LobbedPagePool extends AWTPagePool {
     static public LobbedPagePool getInstance() {
 	if (instance==null)
 	    instance = new LobbedPagePool();
+
 	return (LobbedPagePool) instance;
     }
 
-
-    /** 
-     */
+    
     protected LobbedPagePool() {
-	super();
+	Thread t = new Thread() {
+		public void run() {
+		    try {
+			sleep(1000);
+		    } catch (Exception e) {}
+		    init();
+		}
+	    };
+	t.start();
+    }
+
+
+    protected boolean inited = false;
+    protected void init() { //LobbedPagePool() {
+	super.init();
 
 	// create vobs
 	vobs = new Vob[count];
@@ -50,11 +63,20 @@ public class LobbedPagePool extends AWTPagePool {
 		    }
 		};
 	}
+	inited = true;
+    }
+
+    public Lob getLob(int index, int x0, int y0, int w, int h) {
+	return getLob(index);
     }
 
     public Lob getLob(int index) {
 	Lob l;
-	l = Lobs.vob(vobs[index]);
+	try {
+	    l = Lobs.vob(vobs[index]);
+	} catch (ArrayIndexOutOfBoundsException e) {
+	    l = Components.label("no such index but it might be available soon");
+	}
 	return l;
     }
 }

@@ -26,7 +26,7 @@ PageReprView.java
 /*
  * Written by Benja Fallenstein and Matti J. Katila
  */
-package org.fenfire.view.repr;
+package org.fenfire.spanimages.fuzzybear;
 import org.fenfire.vocab.*;
 import org.fenfire.view.*;
 import org.fenfire.spanimages.gl.*;

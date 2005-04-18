@@ -49,10 +49,19 @@ public class FF {
 
     static public final Object PageContentView;
 
+
+    static public final Object OneFullPageSpan;
+    static public final Object page;
+    static public final Object partOf;
+    
+
     static {
 	content = Nodes.get(_nsId + "#content");
 	AlphImg = Nodes.get("http://fenfire.org/rdf-v/2005/03/alph-image");
 	PageContentView = Nodes.get("http://fenfire.org/rdf-v/2005/04/PageContentView");
+	OneFullPageSpan = Nodes.get("http://fenfire.org/rdf-v/2005/04/AlphOneFullPageSpan");
+	page = Nodes.get("http://fenfire.org/rdf-v/2005/05/alphPageSpanNumber");
+	partOf = Nodes.get("http://fenfire.org/rdf-v/2005/05/alphPgaSpanPartOf");
     }
 }
 
