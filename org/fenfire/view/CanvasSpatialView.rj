@@ -109,6 +109,9 @@ public class CanvasSpatialView implements SpatialView {
 	    public void drag(VobScene scene, int cs, float x, float y,
 			     VobMouseEvent e) {
 		CanvasCursor cc = view.getCanvasCursor(cursor);
+		p("pan: "+cc.getPanX()+":"+cc.getPanY()+
+		  ", start "+startx+":"+starty+
+		  ", xy: "+x+":"+y);
 		float panX = cc.getPanX()+startx-x, 
 		    panY = cc.getPanY()+starty-y;
 		cursor.setSpatialCursor(new CanvasCursor(cc.getCanvas(), 
