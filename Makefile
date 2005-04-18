@@ -136,7 +136,7 @@ bench:
 	$(LDLIB) $(JAVACMD) -Dvob.api=$(API) org.python.util.jython ../libvob/runbench.py $(BENCH)
 
 copyrighted::
-	python ../fenfire/metacode/copyrighter.py Fenfire
+	python ../fenfire/metacode/copyrighter.py Fenfire org/ basalt/
 
 .PHONY: docs
 
