@@ -54,6 +54,24 @@ public class PropertyListView implements SpatialView {
 		graph.findN_11X_Iter(node, prop).hasNext();
 	}
 
+	private Lob valueLob(Cursor cursor, ReprView reprView, Object value) {
+	    Lob l = reprView.getLob(value);
+	    l = Lobs.clickController(l, 1, new @realtime-i Action(Cursor cursor, Object value) {
+		public void run() {
+		    cursor.set(value);
+		    
+		    VobScene sc = ClickController.getClickScene();
+		    int cs = ClickController.getClickCS();
+		    
+		    ConnectionVobMatcher m = (ConnectionVobMatcher)sc.matcher;
+			m.setNextFocus(cs);
+		}
+	    });
+	    l = BuoyConnectorLob.newInstance(l, value, false, false);
+	    l = Lobs.noGrow(Axis.Y, l);
+	    return Components.frame(l, Maps.map("clip", Boolean.FALSE));
+	}
+	
 	public Lob getLob(Graph graph, ReprView reprView, Cursor cursor,
 			  Object prop, Object node) {
 
@@ -63,20 +81,11 @@ public class PropertyListView implements SpatialView {
 		hasLeftValues = graph.findN_X11_Iter(prop, node).hasNext(),
 		hasRightValues = graph.findN_11X_Iter(node, prop).hasNext();
 
-	    Lob leftLabel, rightLabel;
-
-	    if(hasLeftValues)
-		leftLabel = Lobs.hbox(Lists.concat(font.text("Inverse "),
+	    Lob leftLabel = Lobs.hbox(Lists.concat(font.text("Inverse "),
 						   reprView.getLobList(prop),
 						   font.textLn(":")));
-	    else
-		leftLabel = Lobs.nullLob();
-
-	    if(hasRightValues)
-		rightLabel = Lobs.hbox(Lists.concat(reprView.getLobList(prop),
+	    Lob rightLabel = Lobs.hbox(Lists.concat(reprView.getLobList(prop),
 						    font.textLn(":")));
-	    else
-		rightLabel = Lobs.nullLob();
 
 	    Lob vbox = Lobs.vbox();
 	    vbox.add(leftLabel); vbox.add(Lobs.vglue());
@@ -86,60 +95,82 @@ public class PropertyListView implements SpatialView {
 	    vbox.add(rightLabel); vbox.add(Lobs.vglue());
 	    rightLabel = vbox;
 
-	    Lob hbox = Lobs.hbox();
-	    Lob leftValues = Lobs.vbox();
-	    Lob rightValues = Lobs.vbox();
 
-	    hbox.add(Lobs.request(Axis.X, leftLabel, 0, 0, 2*Lob.INF/3));
-	    hbox.add(Lobs.request(Axis.X, leftValues, 0, 0, Lob.INF));
-	    hbox.add(Lobs.glue(Axis.X, 15, 15, 15));
-	    hbox.add(Lobs.request(Axis.X, rightLabel, 0, 0, 2*Lob.INF/3));
-	    hbox.add(Lobs.request(Axis.X, rightValues, 0, 0, Lob.INF));
+	    vbox = Lobs.vbox();
 
-	    for(Iterator i=graph.findN_X11_Iter(prop, node); i.hasNext();) {
-		Object value = i.next();
-		Lob l = reprView.getLob(value);
-		l = Lobs.clickController(l, 1, new @realtime-i Action(Cursor cursor, Object value) {
+	    Iterator 
+		iter_left  = graph.findN_X11_Iter(prop, node),
+		iter_right = graph.findN_11X_Iter(node, prop);
+
+	    boolean isFirst = true;
+
+	    while(iter_left.hasNext() || iter_right.hasNext()) {
+
+		if(!isFirst)
+		    vbox.add(Lobs.glue(Axis.Y, 2, 2, 2));
+
+		Lob hbox = Lobs.hbox();
+
+		Cursor.Rotation leftRotation, rightRotation;
+		Lob left, right;
+		Lob llabel, rlabel;
+		
+		if(iter_left.hasNext()) {
+		    Object value = iter_left.next();
+
+		    left = valueLob(cursor, reprView, value);
+		    llabel = isFirst ? leftLabel : Lobs.nullLob();
+		    leftRotation = new Cursor.Rotation(prop, value, -1);
+		} else {
+		    left = llabel = Lobs.nullLob();
+		    leftRotation = null;
+		}
+		
+		if(iter_right.hasNext()) {
+		    Object value = iter_right.next();
+
+		    right = valueLob(cursor, reprView, value);
+		    rlabel = isFirst ? rightLabel : Lobs.nullLob();
+		    rightRotation = new Cursor.Rotation(prop, value, 1);
+		} else {
+		    right = rlabel = Lobs.nullLob();
+		    rightRotation = null;
+		}
+
+		hbox.add(Lobs.request(Axis.X, llabel, 0, 0, 2*Lob.INF/3));
+		hbox.add(Lobs.request(Axis.X, left, 0, 0, Lob.INF));
+		hbox.add(Lobs.glue(Axis.X, 15, 15, 15));
+		hbox.add(Lobs.request(Axis.X, rlabel, 0, 0, 2*Lob.INF/3));
+		hbox.add(Lobs.request(Axis.X, right, 0, 0, Lob.INF));
+
+		Lob lob = hbox;
+
+		if(leftRotation != null) {
+		    Lob keylob = Lobs.key(Lobs.nullLob(), leftRotation);
+		    lob = Lobs.between(keylob, lob, null);
+		}
+
+		if(rightRotation != null) {
+		    Lob keylob = Lobs.key(Lobs.nullLob(), rightRotation);
+		    lob = Lobs.between(keylob, lob, null);
+		}
+
+		lob = Lobs.clickController(lob, 1, new @realtime-i Action(Cursor cursor, Object node, Cursor.Rotation leftRotation, Cursor.Rotation rightRotation) {
 		    public void run() {
-			cursor.set(value);
-
-			VobScene sc = ClickController.getClickScene();
-			int cs = ClickController.getClickCS();
-
-			ConnectionVobMatcher m = (ConnectionVobMatcher)sc.matcher;
-			m.setNextFocus(cs);
+			if(rightRotation != null) {
+			    cursor.setRotation(node, rightRotation);
+			} else if(leftRotation != null) {
+			    cursor.setRotation(node, leftRotation);
+			}
 		    }
 		});
-		l = BuoyConnectorLob.newInstance(l, value, false, false);
-		l = Lobs.noGrow(Axis.Y, l);
-		leftValues.add(Components.frame(l, Maps.map("clip", Boolean.FALSE)));
-		leftValues.add(Lobs.glue(Axis.Y, 2, 2, 2));
+
+		vbox.add(lob);
+
+		isFirst = false;
 	    }
 
-	    for(Iterator i=graph.findN_11X_Iter(node, prop); i.hasNext();) {
-		Object value = i.next();
-		Lob l = reprView.getLob(value);
-		l = Lobs.clickController(l, 1, new @realtime-i Action(Cursor cursor, Object value) {
-		    public void run() {
-			cursor.set(value);
-
-			VobScene sc = ClickController.getClickScene();
-			int cs = ClickController.getClickCS();
-
-			ConnectionVobMatcher m = (ConnectionVobMatcher)sc.matcher;
-			m.setNextFocus(cs);
-		    }
-		});
-		l = BuoyConnectorLob.newInstance(l, value, false, false);
-		l = Lobs.noGrow(Axis.Y, l);
-		rightValues.add(Components.frame(l, Maps.map("clip", Boolean.FALSE)));
-		rightValues.add(Lobs.glue(Axis.Y, 2, 2, 2));
-	    }
-
-	    leftValues.add(Lobs.vglue());
-	    rightValues.add(Lobs.vglue());
-
-	    return Lobs.noGrow(Axis.Y, hbox);
+	    return Lobs.noGrow(Axis.Y, vbox);
 	}
     }
 
@@ -354,24 +385,6 @@ public class PropertyListView implements SpatialView {
 		    if(v.canRender(graph, prop, node)) {
 			Lob l = v.getLob(graph, reprView, cursor, prop, node);
 
-			Lob conn = BuoyConnectorLob.newInstance(Lobs.nullLob(),
-								prop, false,
-								false);
-			l = Lobs.between(conn, l, null);
-
-			l = Lobs.clickController(l, 1, new @realtime-i Action(Cursor cursor, Object node, Object prop, Graph graph) {
-			    public void run() {
-				Iterator i = graph.findN_11X_Iter(node, prop);
-				Iterator j = graph.findN_X11_Iter(prop, node);
-
-				if(j.hasNext())
-				    cursor.setRotation(j.next(), prop, node);
-
-				if(i.hasNext())
-				    cursor.setRotation(node, prop, i.next());
-			    }
-			});
-
 			Lob vbox = Lobs.vbox();
 			vbox.add(l);
 			vbox.add(Lobs.glue(Axis.Y, 5, 5, 5));
@@ -401,17 +414,14 @@ public class PropertyListView implements SpatialView {
 	vbox.add(Lobs.vbox(lobs));
 	vbox.add(Lobs.vglue());
 
-	Object property = null;
-
-	if(cursor.getRotation(node) != null)
-	    property = cursor.getRotation(node).getRotationProperty();
+	Object rotation = cursor.getRotation(node);
 
         Lob cursor_lob = Lobs.filledRect(Components.darkColor);
         cursor_lob = Lobs.key(cursor_lob, "cursor");
 
 	Lob lob = vbox;
-        lob = Lobs.decorate(lob, cursor_lob, property, -1, 0);
-	lob = Lobs.viewport(Axis.Y, lob, property, -1);
+        lob = Lobs.decorate(lob, cursor_lob, rotation, -1, 0);
+	lob = Lobs.viewport(Axis.Y, lob, rotation, -1);
 	lob = Lobs.request(Axis.Y, lob, 0, 0, -1);
 
 	return Components.frame(SpatialContextLob.newInstance(lob, node));
