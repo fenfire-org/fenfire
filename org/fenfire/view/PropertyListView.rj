@@ -171,6 +171,12 @@ public class PropertyListView implements SpatialView {
 
 	public Lob getLob(Graph graph, ReprView reprView, Cursor cursor,
 			  Object prop, Object node) {
+	    // Don't show content:encoded if there's rss:description too
+	    if (prop.toString().equals(
+                    "http://purl.org/rss/1.0/modules/content/encoded") &&
+		graph.findN_11X_Iter(node, Nodes.get(
+                    "http://purl.org/rss/1.0/description")).hasNext())
+		return Lobs.nullLob();
 
 	    Lob vbox = Lobs.vbox();
 
