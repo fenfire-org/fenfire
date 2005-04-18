@@ -28,6 +28,7 @@ package org.fenfire.view;
 import org.fenfire.Cursor;
 import org.fenfire.swamp.*;
 import org.fenfire.vocab.RDF;
+import org.fenfire.vocab.RSS;
 import org.nongnu.libvob.VobScene;
 import org.nongnu.libvob.fn.*;
 import org.nongnu.libvob.lob.*;
@@ -178,25 +179,26 @@ public class PropertyListView implements SpatialView {
     /** Body viewlet shows content of a big property such as a message body. */
     public static class BodyViewlet implements Viewlet {
 	public boolean canRender(Graph graph, Object prop, Object node) {
-	    // XXX return false if the property doesn't denote a body
-	    // eg. content:encoded
+	    // XXX more "body" properties?
+	    if (prop != RSS.description && prop != RSS.encoded)
+		return false;
+	    if (graph.findN_X11_Iter(prop, node).hasNext())
+		return false; // we won't show reverse properties
+	    Iterator i = graph.findN_11X_Iter(node, prop); 
+	    if (!i.hasNext())
+		return false;
+	    Object body = i.next();
+	    if (i.hasNext())
+		return false; // we won't show more than the body
 
-	    for (Iterator i=graph.findN_11X_Iter(node, prop); i.hasNext();) {
-		Object value = i.next();
-		if (value instanceof Literal)
-		    return true;
-	    }
-	    return false;
+	    return (body instanceof Literal);
 	}
 
 	public Lob getLob(Graph graph, ReprView reprView, Cursor cursor,
 			  Object prop, Object node) {
 	    // Don't show rss:description if there's content:encoded too
-	    if (prop.toString().equals(
-		    "http://purl.org/rss/1.0/description") &&
-		graph.findN_11X_Iter(node, Nodes.get(
-		    "http://purl.org/rss/1.0/modules/content/encoded")
-		    ).hasNext())
+	    if (prop == RSS.description &&
+		graph.findN_11X_Iter(node, RSS.encoded).hasNext())
 		return Lobs.nullLob();
 
 	    Lob vbox = Lobs.vbox();
@@ -216,31 +218,12 @@ public class PropertyListView implements SpatialView {
 
 	    vbox.add(hbox);
 
-	    for(Iterator i=graph.findN_11X_Iter(node, prop); i.hasNext();) {
-		Object value = i.next();
+	    Literal value = (Literal) graph.find1_11X(node, prop);
 
-		if (value instanceof Literal) {
-		    String body = ((Literal) value).getString();
-		    List list = Lists.list(body);
-		    Lob l = Lobs.linebreaker(Components.font().textLn(body));
-		    rightValues.add(l);
-		    continue;
-		}
-		Lob l = reprView.getLob(value);
-		l = Lobs.clickController(l, 1, new @realtime-i Action(Cursor cursor, Object value) {
-		    public void run() {
-			cursor.set(value);
-
-			VobScene sc = ClickController.getClickScene();
-			int cs = ClickController.getClickCS();
-
-			ConnectionVobMatcher m = (ConnectionVobMatcher)sc.matcher;
-			m.setNextFocus(cs);
-		    }
-		});
-		l = BuoyConnectorLob.newInstance(l, value, false, false);
-		rightValues.add(l);
-	    }
+	    String body = value.getString();
+	    List list = Lists.list(body);
+	    Lob l = Lobs.linebreaker(Components.font().textLn(body));
+	    rightValues.add(l);
 
 	    rightValues.add(Lobs.vglue());
 
