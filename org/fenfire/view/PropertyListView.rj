@@ -49,7 +49,9 @@ public class PropertyListView implements SpatialView {
     /** Simple viewlet shows any property using the representation view */
     public static class SimpleViewlet implements Viewlet {
 	public boolean canRender(Graph graph, Object prop, Object node) {
-	    return true;
+	    return 
+		graph.findN_X11_Iter(prop, node).hasNext() ||
+		graph.findN_11X_Iter(node, prop).hasNext();
 	}
 
 	public Lob getLob(Graph graph, ReprView reprView, Cursor cursor,
@@ -334,30 +336,27 @@ public class PropertyListView implements SpatialView {
 					       List properties, List viewlets,
 					       Graph graph, ReprView reprView){
 	    public int size() {
-		return properties.size()*2 - 1;
+		return properties.size();
 	    }
 
 	    public Object get(int i) {
-		if(i % 2 == 1) {
-		    return Lobs.glue(Axis.Y, 5, 5, 5);
-		}
-		
-		i = i/2;
-
 		Object prop = properties.get(i);
 		
-		if (!graph.findN_11X_Iter(node, prop).hasNext() &&
-		    !graph.findN_X11_Iter(prop, node).hasNext()) {
-		    return Lobs.nullLob();
-		}
-
 		for(Iterator iter = viewlets.iterator(); iter.hasNext();) {
 		    Viewlet v = (Viewlet)iter.next();
-		    if(v.canRender(graph, prop, node))
-			return v.getLob(graph, reprView, cursor, prop, node);
+		    if(v.canRender(graph, prop, node)) {
+			Lob l = v.getLob(graph, reprView, cursor, prop, node);
+
+			Lob vbox = Lobs.vbox();
+			vbox.add(l);
+			vbox.add(Lobs.glue(Axis.Y, 5, 5, 5));
+
+			return vbox;
+		    }
 		}
 
-		return Lobs.glue(Axis.Y, 0, 0, 0); // argh!
+		// no viewlet can render this, so we don't render it
+		return Lobs.glue(Axis.Y, 0, 0, 0);
 	    }
 	};
 
