@@ -113,30 +113,28 @@ public class PropertyListView implements SpatialView {
 
 		Lob hbox = Lobs.hbox();
 
-		Cursor.Rotation leftRotation, rightRotation;
 		Lob left, right;
 		Lob llabel, rlabel;
+		Object lvalue, rvalue;
 		
 		if(iter_left.hasNext()) {
-		    Object value = iter_left.next();
+		    lvalue = iter_left.next();
 
-		    left = valueLob(cursor, reprView, value);
+		    left = valueLob(cursor, reprView, lvalue);
 		    llabel = isFirst ? leftLabel : Lobs.nullLob();
-		    leftRotation = new Cursor.Rotation(prop, value, -1);
 		} else {
 		    left = llabel = Lobs.nullLob();
-		    leftRotation = null;
+		    lvalue = null;
 		}
 		
 		if(iter_right.hasNext()) {
-		    Object value = iter_right.next();
+		    rvalue = iter_right.next();
 
-		    right = valueLob(cursor, reprView, value);
+		    right = valueLob(cursor, reprView, rvalue);
 		    rlabel = isFirst ? rightLabel : Lobs.nullLob();
-		    rightRotation = new Cursor.Rotation(prop, value, 1);
 		} else {
 		    right = rlabel = Lobs.nullLob();
-		    rightRotation = null;
+		    rvalue = null;
 		}
 
 		hbox.add(Lobs.request(Axis.X, llabel, 0, 0, 2*Lob.INF/3));
@@ -147,22 +145,24 @@ public class PropertyListView implements SpatialView {
 
 		Lob lob = hbox;
 
-		if(leftRotation != null) {
-		    Lob keylob = Lobs.key(Lobs.nullLob(), leftRotation);
+		if(lvalue != null) {
+		    Object key = newKey(prop, lvalue, -1);
+		    Lob keylob = Lobs.key(Lobs.nullLob(), key);
 		    lob = Lobs.between(keylob, lob, null);
 		}
 
-		if(rightRotation != null) {
-		    Lob keylob = Lobs.key(Lobs.nullLob(), rightRotation);
+		if(rvalue != null) {
+		    Object key = newKey(prop, rvalue, 1);
+		    Lob keylob = Lobs.key(Lobs.nullLob(), key);
 		    lob = Lobs.between(keylob, lob, null);
 		}
 
-		lob = Lobs.clickController(lob, 1, new @realtime-i Action(Cursor cursor, Object node, Cursor.Rotation leftRotation, Cursor.Rotation rightRotation) {
+		lob = Lobs.clickController(lob, 1, new @realtime-i Action(Cursor cursor, Object node, Object lvalue, Object rvalue, Object prop) {
 		    public void run() {
-			if(rightRotation != null) {
-			    cursor.setRotation(node, rightRotation);
-			} else if(leftRotation != null) {
-			    cursor.setRotation(node, leftRotation);
+			if(rvalue != null) {
+			    cursor.setRotation(node, prop, rvalue);
+			} else if(lvalue != null) {
+			    cursor.setRotation(lvalue, prop, node);
 			}
 		    }
 		});
@@ -173,6 +173,42 @@ public class PropertyListView implements SpatialView {
 	    }
 
 	    return Lobs.noGrow(Axis.Y, vbox);
+	}
+    }
+
+    /** Literal viewlet shows a short, literal-valued property */
+    public static class LiteralViewlet implements Viewlet {
+	public boolean canRender(Graph graph, Object prop, Object node) {
+	    Iterator i = graph.findN_11X_Iter(node, prop);
+	    if(!i.hasNext()) return false;
+
+	    while(i.hasNext()) 
+		if(!(i.next() instanceof Literal)) 
+		    return false;
+
+	    return true;
+	}
+
+	public Lob getLob(Graph graph, ReprView reprView, Cursor cursor,
+			  Object prop, Object node) {
+
+	    Lob vbox = Lobs.vbox();
+
+	    for(Iterator i = graph.findN_11X_Iter(node, prop); i.hasNext();) {
+		Literal value = (Literal)i.next();
+
+		LobFont font = Components.font();
+		
+		List lobs = Lists.concat(reprView.getLobList(prop),
+					 font.text(": "),
+					 font.text(value.getString()),
+					 font.text("\n"));
+
+		vbox.add(Lobs.linebreaker(lobs));
+		vbox.add(Lobs.glue(Axis.Y, 2, 2, 2));
+	    }
+
+	    return vbox;
 	}
     }
 
@@ -402,8 +438,8 @@ public class PropertyListView implements SpatialView {
 	    public Object get(int i) {
 		Object prop = properties.get(i);
 		
-		for(Iterator iter = viewlets.iterator(); iter.hasNext();) {
-		    Viewlet v = (Viewlet)iter.next();
+		for(int iter = 0; iter < viewlets.size(); iter++) {
+		    Viewlet v = (Viewlet)viewlets.get(iter);
 		    if(v.canRender(graph, prop, node)) {
 			Lob l = v.getLob(graph, reprView, cursor, prop, node);
 
@@ -436,14 +472,19 @@ public class PropertyListView implements SpatialView {
 	vbox.add(Lobs.vbox(lobs));
 	vbox.add(Lobs.vglue());
 
-	Object rotation = cursor.getRotation(node);
+	Key key = null;
+	Cursor.Rotation r = cursor.getRotation(node);
+	if(r != null) {
+	    key = newKey(r.getRotationProperty(), r.getRotationNode(),
+			 r.getRotationDir());
+	}
 
         Lob cursor_lob = Lobs.filledRect(Components.darkColor);
         cursor_lob = Lobs.key(cursor_lob, "cursor");
 
 	Lob lob = vbox;
-        lob = Lobs.decorate(lob, cursor_lob, rotation, -1, 0);
-	lob = Lobs.viewport(Axis.Y, lob, rotation, -1);
+        lob = Lobs.decorate(lob, cursor_lob, key, -1, 0);
+	lob = Lobs.viewport(Axis.Y, lob, key, -1);
 	lob = Lobs.request(Axis.Y, lob, 0, 0, -1);
 
 	FastMap keys = FastMap.newInstance();
@@ -592,5 +633,35 @@ public class PropertyListView implements SpatialView {
 	    list.add(i.next());
 
 	return list;
+    }
+
+
+
+    private static Key newKey(Object prop, Object value, int dir) {
+	Key k = (Key)KEY_FACTORY.object();
+	k.prop = prop; k.value = value; k.dir = dir;
+	return k;
+    }
+
+    private static final RealtimeObject.Factory KEY_FACTORY = 
+	new RealtimeObject.Factory() {
+	    protected Object create() {
+		return new Key();
+	    }
+	};
+
+    private static class Key extends RealtimeObject {
+	Object prop, value;
+	int dir;
+
+	public boolean equals(Object other) {
+	    if(!(other instanceof Key)) return false;
+	    Key o = (Key)other;
+	    return prop.equals(o.prop) && value.equals(o.value) && dir==o.dir;
+	}
+
+	public int hashCode() {
+	    return 2349*prop.hashCode() + 34908*value.hashCode() + dir;
+	}
     }
 }

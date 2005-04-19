@@ -293,6 +293,7 @@ public class Main {
 	    List listViewViewlets = new ArrayList();
 	    listViewViewlets.add(new PropertyListView.ContainerViewlet());
 	    listViewViewlets.add(new PropertyListView.BodyViewlet());
+	    listViewViewlets.add(new PropertyListView.LiteralViewlet());
 	    listViewViewlets.add(new PropertyListView.SimpleViewlet());
 
 	    Set spatialViews = new HashSet(Arrays.asList(new Object[] {
@@ -321,9 +322,13 @@ public class Main {
 						windowAnim);
 	    org.fenfire.spanimages.PagePool.flush();
 
-	    Set allProps = new TreeSet();
+	    Set allProps0 = FastSet.newInstance();
 	    for(Iterator i=graph.findN_AXA_Iter(); i.hasNext();)
-		allProps.add(i.next());
+		allProps0.add(i.next());
+
+	    List allProps = FastList.newInstance();
+	    allProps.addAll(allProps0);
+	    Collections.sort(allProps);
 
 	    /*
 	    viewlets.clear();
@@ -335,7 +340,8 @@ public class Main {
 	    }
 	    */
 
-	    Set properties = new HashSet(allProps);
+	    Set properties = FastSet.newInstance();
+	    properties.addAll(allProps);
 	    properties.removeAll(noShowProps);
 	    //new SetModel.Difference(allProps, noShowProps);
 

@@ -177,26 +177,41 @@ public class NodeTexter extends RealtimeObject {
     }
 
     public Model model(final Object node) {
-	return new Model() {
-		public Object get() { 
-		    return getText(node); 
-		}
-		public void set(Object value) { 
-		    setText(node, (String)value); 
-		}
-		public int getInt() {
-		    throw new UnsupportedOperationException();
-		}
-		public void set(int i) {
-		    throw new UnsupportedOperationException();
-		}
+	NodeTexterModel m = (NodeTexterModel)MODEL_FACTORY.object();
+	m.texter = this;
+	m.node = node;
+	return m;
+    }
 
-		public javolution.lang.Text toText() {
-		    throw new UnsupportedOperationException();
-		}
-		public boolean move(Realtime.ObjectSpace o) {
-		    throw new UnsupportedOperationException();
-		}
-	    };
+    private static final RealtimeObject.Factory MODEL_FACTORY =
+	new RealtimeObject.Factory() {
+	    protected Object create() {
+		return new NodeTexterModel();
+	    }
+	};
+
+    private static class NodeTexterModel extends RealtimeObject implements Model {
+	private NodeTexter texter;
+	private Object node;
+
+	public Object get() { 
+	    return texter.getText(node); 
+	}
+	public void set(Object value) { 
+	    texter.setText(node, (String)value); 
+	}
+	public int getInt() {
+	    throw new UnsupportedOperationException();
+	}
+	public void set(int i) {
+	    throw new UnsupportedOperationException();
+	}
+	
+	public javolution.lang.Text toText() {
+	    throw new UnsupportedOperationException();
+	}
+	public boolean move(Realtime.ObjectSpace o) {
+	    throw new UnsupportedOperationException();
+	}
     }
 }
