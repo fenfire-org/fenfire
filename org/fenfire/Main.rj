@@ -280,8 +280,11 @@ public class Main {
 
 	    reprViewSettings = new ReprViewSettings(reprViews);
 
+	    reprView = reprViewSettings;
+	    /*
 	    reprView = new PropertyListReprView(graph, cursor, viewlets,
 						reprViewSettings);
+	    */
 
 	    propView = new PropertyView(graph, cursor, nmap, 
 					textProps, 
