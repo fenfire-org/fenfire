@@ -70,7 +70,7 @@ public class AWTPagePool {
 	maxH = 0; maxW = 0;
 
 	for (int i=0; i<sizes.length; i++) {
-	    p("size: "+i);
+	    //p("size: "+i);
 	    for(int j=0; j<sizes[i][0]; j++) {
 		int w = sizes[i][1], h = sizes[i][2];
 		WxH[ind*2] = w; WxH[ind*2+1] = h;

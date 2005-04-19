@@ -50,7 +50,7 @@ public class LobbedPagePool extends AWTPagePool {
 	Thread t = new Thread() {
 		public void run() {
 		    try {
-			sleep(1000);
+			sleep(100);
 		    } catch (Exception e) {}
 		    init();
 		}

@@ -78,8 +78,8 @@ public class ViewThumbnailLinkerLob extends AbstractDelegateLob {
 
 	    int focus = matcher.getFocus();
 	    
-	    if(focus < 0)
-		throw new Error("focus not set by ViewThumbnailLinkerLob's child");
+	    if(focus < 0) return;
+	    //throw new Error("focus not set by ViewThumbnailLinkerLob's child");
 
 	    for(Iterator iter = contexts.fastIterator(); iter.hasNext();) {
 		FastInt i = (FastInt)iter.next();

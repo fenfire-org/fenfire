@@ -263,7 +263,8 @@ public class Main {
 					RDFS.label, .25f, 1f);
 
 	    Set spatialViews = new HashSet(Arrays.asList(new Object[] {
-		new SimpleSpatialView(reprView),
+		new DocumentSpatialView(graph, windowAnim),
+		//new SimpleSpatialView(reprView),
 		// these don't work currently:
 		//new CalendarSpatialView(graph, reprView, windowAnim, 13),
 		new CanvasSpatialView(graph, reprView, windowAnim),
@@ -282,6 +283,7 @@ public class Main {
 	protected Lob createLob() { 
 	    org.fenfire.spanimages.PagePool.init(graph, 
 						windowAnim);
+	    org.fenfire.spanimages.PagePool.flush();
 
 	    Set allProps = new HashSet(); //new AllPropertiesSetModel(graph);
 	    for(Iterator i=graph.findN_AXA_Iter(); i.hasNext();)

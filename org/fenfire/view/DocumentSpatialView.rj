@@ -1,5 +1,5 @@
 /* -*-java-*-
-CanvasSpatialView.java
+DocumentSpatialView.java
  *    
  *    Copyright (c) 2005, Benja Fallenstein and Matti Katila
  *
@@ -29,9 +29,10 @@ package org.fenfire.view;
 import org.fenfire.Cursor;
 import org.fenfire.swamp.*;
 import org.fenfire.vocab.*;
-import org.fenfire.lob.*;
+import org.fenfire.spanimages.*;
 import org.fenfire.util.RDFUtil;
 import org.nongnu.libvob.lob.*;
+import org.nongnu.libvob.lob.lobs.*;
 import org.nongnu.libvob.lob.lobs.DragController;
 import org.nongnu.libvob.*;
 import org.nongnu.libvob.util.*;
@@ -40,18 +41,15 @@ import javolution.realtime.*;
 import java.awt.Color;
 import java.util.*;
 
-public class CanvasSpatialView implements SpatialView {
-    static private void p(String s) { System.out.println("CanvasSpatialView:: "+s); }
+public class DocumentSpatialView implements SpatialView {
+    static private void p(String s) { System.out.println("DocumentSpatialView:: "+s); }
 
     private Graph graph;
-    private ReprView reprView;
     private WindowAnimation winAnim;
 
-    public CanvasSpatialView(Graph graph, 
-			     ReprView reprView,
+    public DocumentSpatialView(Graph graph, 
 			     WindowAnimation winAnim) {
 	this.graph = graph;
-	this.reprView = reprView;
 	this.winAnim = winAnim;
     }
 
@@ -60,7 +58,7 @@ public class CanvasSpatialView implements SpatialView {
     public final ViewSettings.Type TYPE = // XXX should be static
 	new ViewSettings.AbstractType() {
 	    public boolean containsNode(Object node) {
-		return graph.find1_X11(CANVAS2D.contains, node) != null;
+		return RDFUtil.isNodeType(graph, node, FF.OneFullPageSpan);
 	    }
 	};
     
@@ -80,27 +78,19 @@ public class CanvasSpatialView implements SpatialView {
     }
 
     protected CanvasCursor makeCanvasCursor(Object n) {
-	Object canvas = graph.find1_X11(CANVAS2D.contains, n);
-
-	float x = RDFUtil.getFloat(graph, n, CANVAS2D.x);
-	float y = RDFUtil.getFloat(graph, n, CANVAS2D.x);
-	
-	Lob l = getContentLob(n);
-	SizeRequest r = l.getSizeRequest();
-
-	x += r.natW/2;
-	y += r.natH/2;
-
-	return new CanvasCursor(canvas, x, y, 1);
+	Object node = graph.find1_11X(n, FF.partOf);
+	float x = 0;
+	float y = 0;
+	return new CanvasCursor(node, x, y, 1);
     }
 
 
     private Lob transDragController(Lob delegate, int button, Cursor cursor) {
-	CanvasSpatialView view = this;
+	DocumentSpatialView view = this;
 
 	CanvasCursor cc = view.getCanvasCursor(cursor);
 	
-	return new @realtime DragController(@set Lob delegate, @set int button, Cursor cursor, CanvasSpatialView view, CanvasCursor cc) {
+	return new @realtime DragController(@set Lob delegate, @set int button, Cursor cursor, DocumentSpatialView view, CanvasCursor cc) {
 
 	    protected Lob wrap(Lob l) {
 		return view.transDragController(l, button, cursor);
@@ -122,11 +112,11 @@ public class CanvasSpatialView implements SpatialView {
 	}; 
     }
     private Lob scaleDragController(Lob delegate, int button, Cursor cursor) {
-	CanvasSpatialView view = this;
+	DocumentSpatialView view = this;
 
 	CanvasCursor cc = view.getCanvasCursor(cursor);
 	
-	return new @realtime DragController(@set Lob delegate, @set int button, Cursor cursor, CanvasSpatialView view, CanvasCursor cc) {
+	return new @realtime DragController(@set Lob delegate, @set int button, Cursor cursor, DocumentSpatialView view, CanvasCursor cc) {
 
 	    protected Lob wrap(Lob l) {
 		return view.scaleDragController(l, button, cursor);
@@ -162,12 +152,27 @@ public class CanvasSpatialView implements SpatialView {
     }
 
 
+    protected Lob getTransclusions(CanvasCursor cc) {
+	Tray tray = Tray.newInstance(Lists.list(), false);
+
+	for (Iterator i=graph.findN_X11_Iter(FF.partOf, cc.getCanvas());
+	     i.hasNext();) {
+	    Object n = i.next();
+	    // do stuff and put red rectangle around..
+	}
+	
+	return tray;
+    }
+    
+
     public Lob getMainviewLob(Cursor cursor) {
 	Object node = cursor.getNode();
 	CanvasCursor cc = getCanvasCursor(cursor);
 
-	Lob l = getCanvasContent(cc.getCanvas(), cursor, 
-				 cursor.getNode(), false);
+	Lob l;
+	l = PagePool.fullDocument(cc.getCanvas(), cc.getPanX());
+
+	l = Lobs.between(l, getTransclusions(cc), Lobs.nullLob());
 
 	l = Lobs.translate(l, -cc.getPanX(), -cc.getPanY(), false);
 
@@ -180,35 +185,6 @@ public class CanvasSpatialView implements SpatialView {
 	l = Lobs.request(l, 0, 0, 0, 0, 0, 0);
 	l = Lobs.align(l, .5f, .5f);
 
-	/*
-	l = new ***realtime-i DragController(l, 3, new org.nongnu.libvob.mouse.RelativeAdapter() {
-		public void startDrag(int x, int y) {
-		    super.startDrag(x, y);
-		    mainviewCache = (Lob)theLob.get();
-		}
-
-		public void changedRelative(float dx, float dy) {
-		    float nx = panX.getFloat();
-		    float ny = panY.getFloat();
-		    float nz = zoom.getFloat() + dy/100;
-
-		    zoom.setFloat(nz);
-
-		    pzl.setParams(nx, ny, nz);
-		    mainviewCache = (Lob)theLob.get();
-		    winAnim.rerender();
-		}
-	    });
-	*/
-
-	/*
-	l = new DepthChangeLob(l, -10);
-	*/
-	l = addBackground(l, cc.getCanvas(), true);
-	/*
-	l = new DepthChangeLob(l, 10);
-	*/
-
 	l = SpatialContextLob.newInstance(l, cc.getCanvas());
 	l = Lobs.margin(l, 40);
 
@@ -218,9 +194,9 @@ public class CanvasSpatialView implements SpatialView {
     public Lob getBuoyLob(Object node, boolean useFakeFocus) {
 	CanvasCursor cc = makeCanvasCursor(node);
 
-	Lob l = getCanvasContent(cc.getCanvas(), null, 
-				 useFakeFocus ? node : null,
-				 true);
+	Lob l;
+	l = PagePool.fullDocument(cc.getCanvas(), -cc.getPanX());
+	//l = Lobs.filledRect(java.awt.Color.yellow);
 	l = Lobs.translate(l, -cc.getPanX(), -cc.getPanY());
 	l = Lobs.align(l, .5f, .5f);
 	l = Lobs.request(l, 100, 100, 100, 100, 100, 100);
@@ -231,100 +207,10 @@ public class CanvasSpatialView implements SpatialView {
 	return l;
     }
 
-    protected Lob getContentLob(Object node) {
-	return reprView.getLob(node);
-    }
-
-
-    /**
-     *  'cursor' may be null.
-     */
-    protected Lob getCanvasContent(Object canvas, Cursor cursor,
-				   Object focusNode, boolean useFakeFocus) {
-	
-	Lob tray = Lobs.tray(false);
-	
-	for(Iterator i=graph.findN_11X_Iter(canvas, CANVAS2D.contains); 
-	    i.hasNext();) {
-	    
-	    Object n = i.next();
-	    Lob label = getContentLob(n);
-
-	    if(label.getLayoutableAxis() == Axis.X) {
-		SizeRequest r = label.getSizeRequest();
-
-		float size = 100; // hmm, arbitrary value
-		if(size < r.minW) 
-		    size = r.minW;
-
-		label = label.layoutOneAxis(size); 
-	    }
-
-	    boolean isFocus = (!useFakeFocus) && n.equals(focusNode);
-	    boolean isFakeFocus = useFakeFocus && n.equals(focusNode);
-
-	    Lob l = BuoyConnectorLob.newInstance(label, n, isFocus, 
-						 isFakeFocus);
-
-	    float x = RDFUtil.getFloat(graph, n, CANVAS2D.x);
-	    float y = RDFUtil.getFloat(graph, n, CANVAS2D.y);
-
-	    CanvasCursor cc = makeCanvasCursor(n);
-
-	    float zoom;
-	    if(cursor != null)
-		zoom = getCanvasCursor(cursor).getZoom();
-	    else
-		zoom = 1; // buoy
-
-	    if(cursor != null) {
-		l = Lobs.clickController(l, 1, new @realtime-i Action(Object n, float zoom, Object canvas, Cursor cursor, CanvasCursor cc) {
-			public void run() {
-			    float nx = cc.getPanX();
-			    float ny = cc.getPanY();
-
-			    CanvasCursor c = new CanvasCursor(canvas,
-							      nx, ny, zoom);
-
-			    cursor.set(n, c);
-
-			    VobScene sc = Lobs.getWindowAnimation().getCurrentVS();
-			    ConnectionVobMatcher m = 
-				(ConnectionVobMatcher)sc.matcher;
-			    
-			    int focus = m.getFocus();
-			    int context = m.getLink(focus, -1, canvas, "structure point");
-			    m.setNextFocus(m.getLink(context, 1, n, "structure point"));
-			}
-		    });
-            }
-
-	    l = Lobs.translate(l, x, y);
-	    tray.add(l);
-	}
-	
-	return Lobs.request(tray, 100, 100, 100, 100, 100, 100);
-    }
-
     protected Lob addBackground(Lob content, Object canvas, boolean fade) {
 	Color bgcolor = UniqueColors.getColor(canvas, .75f, 1f);
 
 	Lob l = Lobs.frame(content, bgcolor, Color.black, 2, 0, true);
-
-	/*
-	if(fade) l = new AbstractMonoLob(l) { 
-		public void render(VobScene scene, int into, int matchingParent,
-				   float w, float h, float d,
-				   boolean visible) {
-		    scene.fader = new ColorFader((Color)bgcolor.get(), 0, 10);
-		    super.render(scene, into, matchingParent, w, h, d, visible);
-		}
-		protected Object clone(Object[] params) {
-		    throw new Error("not impl");
-		}
-	    };
-	*/
-
 	return l;
     }
 }

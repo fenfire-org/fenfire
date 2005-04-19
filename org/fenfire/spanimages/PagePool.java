@@ -81,6 +81,9 @@ public class PagePool {
     }
 
     static public Lob fullDocument(Object node, float lod) {
+	if (node instanceof Literal)
+	    node = ((Literal)node).getString();
+
 	PagePool pool = getInstance();
 	pool.request(node);
 
