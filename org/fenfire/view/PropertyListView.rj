@@ -237,7 +237,7 @@ public class PropertyListView implements SpatialView {
 	private Object reverseProperty(Graph graph, Object prop, 
 					 Object node) {
 	    // XXX the rest of URI should be integer without leading zeros
-	    if (!prop.toString().startsWith(RDF.voc+"_"))
+	    if (!prop.toString().startsWith(RDF.voc_))
 		return null; // we only show containment properties
 
 	    if (graph.findN_11X_Iter(node, prop).hasNext())
@@ -282,7 +282,7 @@ public class PropertyListView implements SpatialView {
 
 	    // XXX there can be additional properties that we don't show or
 	    // container properties after we stop showing
-	    return graph.findN_11X_Iter(container, RDF.voc+"_1").hasNext();
+	    return graph.findN_11X_Iter(container, RDF._1).hasNext();
 	}
 
 	public Lob getReverseLob(Graph graph, ReprView reprView, Cursor cursor,
