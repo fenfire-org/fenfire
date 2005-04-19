@@ -58,7 +58,8 @@ public class DocumentSpatialView implements SpatialView {
     public final ViewSettings.Type TYPE = // XXX should be static
 	new ViewSettings.AbstractType() {
 	    public boolean containsNode(Object node) {
-		return RDFUtil.isNodeType(graph, node, FF.OneFullPageSpan);
+		return RDFUtil.isNodeType(graph, node, FF.PsPdfDocument) ||
+		    graph.findN_X11_Iter(FF.regionOf, node).hasNext();
 	    }
 	};
     
@@ -78,7 +79,7 @@ public class DocumentSpatialView implements SpatialView {
     }
 
     protected CanvasCursor makeCanvasCursor(Object n) {
-	Object node = graph.find1_11X(n, FF.partOf);
+	Object node = graph.find1_11X(n, FF.regionOf);
 	float x = 0;
 	float y = 0;
 	return new CanvasCursor(node, x, y, 1);
@@ -155,7 +156,7 @@ public class DocumentSpatialView implements SpatialView {
     protected Lob getTransclusions(CanvasCursor cc) {
 	Tray tray = Tray.newInstance(Lists.list(), false);
 
-	for (Iterator i=graph.findN_X11_Iter(FF.partOf, cc.getCanvas());
+	for (Iterator i=graph.findN_X11_Iter(FF.regionOf, cc.getCanvas());
 	     i.hasNext();) {
 	    Object n = i.next();
 	    // do stuff and put red rectangle around..

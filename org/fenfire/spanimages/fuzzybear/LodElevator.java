@@ -59,6 +59,9 @@ public class LodElevator {
 
 	Thread t = new Thread() {
 		public void run() {
+
+		    int activesSize = actives.size();
+
 		    while (true) {
 			try {
 			    boolean changes = false;
@@ -76,7 +79,8 @@ public class LodElevator {
 
 			    for (int i = 0; i<actives.size(); i++) {
 				SinglePage sp = (SinglePage)actives.get(i);
-				if (sp.state.poolInds[sp.getPage()] == i) continue;
+				if ((sp.state.poolInds[sp.getPage()] == i) &&
+				    (activesSize == actives.size())) continue;
 				else sp.state.poolInds[sp.getPage()] = i;
 				changes = true;
 				
@@ -89,6 +93,8 @@ public class LodElevator {
 				    pool.setImage(new FileInputStream(img), i, w,h);
 				else p("no such image! "+img);
 			    }
+
+			    activesSize = actives.size();
 
 			    if (!anim.hasSceneReplacementPending() &&
 				!anim.hasAnimModeSet())

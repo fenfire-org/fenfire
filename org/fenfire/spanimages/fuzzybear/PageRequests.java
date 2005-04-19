@@ -166,6 +166,32 @@ public class PageRequests {
 	return Lobs.request(l, w,w,w,h,h,h);
     }
 
+
+    public Lob getRegion(Object node, int start, int end,
+			 float x0, float y0, float x1, float y1) {
+	State s = (State) node2state.get(node);
+	if (s == null)
+	    return Components.label("Information lost in cyberspace.");
+
+	if (!s.imagesGenerated)
+	    return s.getLob();
+
+
+	if (start+1 == end) {
+	    lodElevator.setLOD(s, start, 0);
+
+	    Lob l;
+	    float w = s.maxw * (x1-x0);
+	    float h = s.maxh * (y1-y0);
+	    //System.out.println("START IS "+start+" POOLIND "+s.poolInds[start]+", FINNISH KEYMAP IS BORING");
+	    l = pagePool.getLob(s.poolInds[start], x0,y0,x1,y1);
+	    l = Lobs.request(l, w,w,w,h,h,h);
+	    return l;
+	} else {
+	    throw new Error("not yet implemented.");	    
+	}
+    }
+
     public Lob getWholeDocument(Object node, float dx) {
 	State s = (State) node2state.get(node);
 	if (s == null)
@@ -201,6 +227,7 @@ public class PageRequests {
 	}
 
 	Lob l = Lobs.hbox();
+
 	for (int i=0; i<s.n; i++) {
 	    int w = s.maxw;
 	    int h = s.maxh;
@@ -218,7 +245,6 @@ public class PageRequests {
 	}
 	    
 	return l; 
-
     }
 
 

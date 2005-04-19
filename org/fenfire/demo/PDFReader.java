@@ -66,28 +66,19 @@ public class PDFReader extends NewLobMain {
 		public javolution.lang.Text toText() { return null; }
 		public boolean move(javolution.realtime.Realtime.ObjectSpace o) { return false; }
 	    });
-	keys.put("Up", new Action() {
+	keys.put("Down", new Action() {
 		public void run() {
-		    p("up");
+		    p("-up");
 		     y -= d;
 		    windowAnim.animate();
 		}
 		public javolution.lang.Text toText() { return null; }
 		public boolean move(javolution.realtime.Realtime.ObjectSpace o) { return false; }
 	    });
-	keys.put("Down", new Action() {
+	keys.put("Up", new Action() {
 		public void run() {
-		    p("down");
+		    p("-down");
 		     y += d;
-		    windowAnim.animate();
-		}
-		public javolution.lang.Text toText() { return null; }
-		public boolean move(javolution.realtime.Realtime.ObjectSpace o) { return false; }
-	    });
-	keys.put("Right", new Action() {
-		public void run() {
-		    p("right");
-		     x += d;
 		    windowAnim.animate();
 		}
 		public javolution.lang.Text toText() { return null; }
@@ -95,7 +86,16 @@ public class PDFReader extends NewLobMain {
 	    });
 	keys.put("Left", new Action() {
 		public void run() {
-		    p("left");
+		    p("-right");
+		     x += d;
+		    windowAnim.animate();
+		}
+		public javolution.lang.Text toText() { return null; }
+		public boolean move(javolution.realtime.Realtime.ObjectSpace o) { return false; }
+	    });
+	keys.put("Right", new Action() {
+		public void run() {
+		    p("-left");
 		     x -= d;
 		    windowAnim.animate();
 		}

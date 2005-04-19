@@ -122,7 +122,7 @@ public class LobbedPagePool extends AWTPagePool {
 	Lob l;
 	try {
 	    if (!inited) 
-		return Components.label("Waiting for initialazion.");
+		return Components.label("Waiting for initialization.");
 
 	    int x = (int) (getW(index) * x0);
 	    int y = (int) (getH(index) * y0);
@@ -130,7 +130,7 @@ public class LobbedPagePool extends AWTPagePool {
 	    int h = (int) (getH(index) * h0);
 	    l = Lobs.vob(ImageVob.newInstance(imgs[index], x,y,w,h));
 	} catch (ArrayIndexOutOfBoundsException e) {
-	    l = Components.label("no such index but it might be available soon");
+	    l = Components.label("no such pool index but it might be available soon ("+index+")");
 	}
 	return l;
     }

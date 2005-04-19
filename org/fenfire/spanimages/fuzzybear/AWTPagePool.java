@@ -176,7 +176,15 @@ public class AWTPagePool {
 				      int width, int height) 
 	throws IOException {
 
-	if (!inited) return;
+	if (!inited) {
+	    while (true) {
+		try {
+		    p("AAARRGGH");
+		    if (inited) break;
+		    Thread.sleep(100);
+		} catch (InterruptedException e) {}
+	    }
+	}
 
 	if (width > maxW || height > maxH)
 	    throw new IllegalArgumentException("Width or height too big! "+

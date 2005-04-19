@@ -1,5 +1,5 @@
 /*
-CanvasNodeReprView.java
+PsPdfRegionReprView.java
  *    
  *    Copyright (c) 2003-2005, Benja Fallenstein
  *                  2005, Matti J. Katila
@@ -35,18 +35,19 @@ import org.fenfire.spanimages.*;
 import org.nongnu.libvob.lob.*;
 import java.util.*;
 
-public class OneFullPageSpanReprView extends ReprView.AbstractLobView {
+public class PsPdfRegionReprView extends ReprView.AbstractLobView {
     static private void p(String s) { System.out.println("OneFullPageView:: "+s); }
 
     private Graph graph;
 
-    public OneFullPageSpanReprView(Graph graph) {
+    public PsPdfRegionReprView(Graph graph) {
 	this.graph = graph;
     }
 
     public ViewSettings.Type TYPE = new ViewSettings.AbstractType() {
 	    public boolean containsNode(Object node) {
-		return RDFUtil.isNodeType(graph, node, FF.OneFullPageSpan);
+		return RDFUtil.isNodeType(graph, node, FF.PsPdfRegion) &&
+		    !(graph.find1_11X(node, FF.regionOf) instanceof Literal);
 	    }
 	};
 
@@ -55,15 +56,16 @@ public class OneFullPageSpanReprView extends ReprView.AbstractLobView {
     }
 
     public Lob getLob(Object node) {
-	Object src = graph.find1_11X(node, FF.partOf);
-	int page = RDFUtil.getInt(graph, node, FF.page);
+	Object src = graph.find1_11X(node, FF.regionOf);
+	int p0 = RDFUtil.getInt(graph, node, FF.startPage) - 1;
+	int p1 = RDFUtil.getInt(graph, node, FF.endPage);
+	float x0 = RDFUtil.getFloat(graph, node, FF.startX);
+	float y0 = RDFUtil.getFloat(graph, node, FF.startY);
+	float x1 = RDFUtil.getFloat(graph, node, FF.endX);
+	float y1 = RDFUtil.getFloat(graph, node, FF.endY);
 	
-	Lob l;
 	if (src instanceof Literal)
-	    l = PagePool.oneFullPage(((Literal)src).getString(), 
-				     page);
-	else
-	    l = PagePool.oneFullPage(src, page);
-	return l;
+	    throw new IllegalArgumentException();
+	return PagePool.region(src, p0,p1,x0,y0,x1,y1);
     }
 }

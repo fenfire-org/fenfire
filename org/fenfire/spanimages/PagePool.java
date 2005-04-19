@@ -46,6 +46,12 @@ public class PagePool {
 	requests.request((String) node);
     }
 
+
+    protected Lob get(Object node, int start, int end,
+		      float x0, float y0, 
+		      float x1, float y1) {
+	return requests.getRegion(node, start, end, x0,y0,x1,y1);
+    }
     protected Lob get(Object node, int page) {
 	return requests.getOnePage(node, page);
     }
@@ -69,6 +75,15 @@ public class PagePool {
 		instance.requests = new PageRequests(g, anim);
 	    else throw new Error("unreadable error -- see soursce");
 	}
+    }
+
+
+    static public Lob region(Object node, int start, int end, 
+			     float x0, float y0, 
+			     float x1, float y1) {
+	PagePool pool = getInstance();
+	pool.request(node);
+	return pool.get(node, start, end, x0,y0,x1,y1);
     }
 
 

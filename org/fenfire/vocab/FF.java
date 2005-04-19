@@ -31,7 +31,7 @@ import org.fenfire.swamp.Nodes;
  */
 public class FF {
     static public final String _nsId = 
-	"http://fenfire.org/rdf-v/2003/05/ff";
+	"http://fenfire.org/rdf-v/2003/05/ff#";
 
     /** A property signifying fluid media "content" of a node.
      * Used as  (node, FF.content, literal) where the literal is
@@ -39,29 +39,33 @@ public class FF {
      * parseable by alph.
      * This is analogous to spreadsheet or zzStructure cell contents.
      */
-    static public final Object content;
+    static public final Object content = Nodes.get(_nsId + "content");
 
 
     /** Alph vocabulary for images
      */
-    static public final Object AlphImg;
+    static public final Object AlphImg = Nodes.get("http://fenfire.org/rdf-v/2005/03/alph-image");
 
 
-    static public final Object PageContentView;
+    static public final String pspdf = 
+	"http://fenfire.org/rdf-v/2005/04/ps-pdf-region#";
 
+    static public final Object PsPdfDocument 
+	= Nodes.get(pspdf+"PsPdfDocument");
 
-    static public final Object OneFullPageSpan;
-    static public final Object page;
-    static public final Object partOf;
-    
+    static public final Object PsPdfRegion = Nodes.get(pspdf+"PsPdfRegion");
 
-    static {
-	content = Nodes.get(_nsId + "#content");
-	AlphImg = Nodes.get("http://fenfire.org/rdf-v/2005/03/alph-image");
-	PageContentView = Nodes.get("http://fenfire.org/rdf-v/2005/04/PageContentView");
-	OneFullPageSpan = Nodes.get("http://fenfire.org/rdf-v/2005/04/AlphOneFullPageSpan");
-	page = Nodes.get("http://fenfire.org/rdf-v/2005/05/alphPageSpanNumber");
-	partOf = Nodes.get("http://fenfire.org/rdf-v/2005/05/alphPgaSpanPartOf");
-    }
+    static public final Object regionOf    = Nodes.get(pspdf+"regionOf");
+
+    /** Pages are one-based, i.e., the first page is page 1
+     *  endPage/endX/endY are inclusive, i.e., startPage = 1 and endPage = 2
+     *  means a region consisting of two pages (not one).
+     */
+    static public final Object startPage   = Nodes.get(pspdf+"startPage");
+    static public final Object endPage     = Nodes.get(pspdf+"endPage");
+    static public final Object startX      = Nodes.get(pspdf+"startX");
+    static public final Object endX        = Nodes.get(pspdf+"endX");
+    static public final Object startY      = Nodes.get(pspdf+"startY");
+    static public final Object endY        = Nodes.get(pspdf+"endY");
 }
 
