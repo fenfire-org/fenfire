@@ -33,6 +33,7 @@ import org.nongnu.libvob.fn.*;
 import org.nongnu.libvob.lob.*;
 import org.nongnu.libvob.lob.lobs.*;
 import javolution.realtime.*;
+import javolution.util.*;
 import java.awt.Color;
 import java.util.*;
 
@@ -424,6 +425,31 @@ public class PropertyListView implements SpatialView {
 	lob = Lobs.viewport(Axis.Y, lob, rotation, -1);
 	lob = Lobs.request(Axis.Y, lob, 0, 0, -1);
 
+	FastMap keys = FastMap.newInstance();
+	PropertyListView view = this;
+	keys.put("Up", new @realtime-i Action(Cursor cursor, PropertyListView view) {
+	    public void run() {
+		view.scroll(cursor, -1);
+	    }
+	});
+	keys.put("Down", new @realtime-i Action(Cursor cursor, PropertyListView view) {
+	    public void run() {
+		view.scroll(cursor, 1);
+	    }
+	});
+	keys.put("Left", new @realtime-i Action(Cursor cursor, PropertyListView view) {
+	    public void run() {
+		view.move(cursor, -1);
+	    }
+	});
+	keys.put("Right", new @realtime-i Action(Cursor cursor, PropertyListView view) {
+	    public void run() {
+		view.move(cursor, 1);
+	    }
+	});
+
+	lob = Lobs.keyController(lob, keys);
+
 	return Components.frame(SpatialContextLob.newInstance(lob, node));
     }
 
@@ -432,5 +458,120 @@ public class PropertyListView implements SpatialView {
 	l = BuoyConnectorLob.newInstance(l, node, !useFakeFocus, useFakeFocus);
 	l = SpatialContextLob.newInstance(l, node);
 	return l;
+    }
+
+    void move(Cursor cursor, int dir) {
+	Object oldNode = cursor.getNode();
+
+	Cursor.Rotation r = cursor.getRotation();
+	Object prop = r.getRotationProperty();
+
+	List conns = getConnectionList(oldNode, prop, r.getRotationDir());
+	int index = indexOf(conns, r.getRotationNode());
+
+	if(index < 0) return; // XXX
+
+	conns = getConnectionList(oldNode, prop, dir);
+	if(index >= conns.size()) return; // no such connection, do nothing
+	Object node = conns.get(index);
+
+	cursor.setRotation(node, prop, oldNode, -dir);
+	cursor.set(node);
+    }
+
+    void scroll(Cursor cursor, int dir) {
+	Object node = cursor.getNode();
+
+	Cursor.Rotation r = cursor.getRotation();
+
+	Object prop = r.getRotationProperty();
+	Object value = r.getRotationNode();
+	int rdir = r.getRotationDir();
+
+	List conns = getConnectionList(node, prop, rdir);
+	int index = indexOf(conns, value);
+	if(index < 0) return; // XXX
+
+	index += dir;
+	
+	if(index >= 0 && index < conns.size()) {
+	    cursor.setRotation(node, prop, conns.get(index), rdir);
+	    return;
+	}
+
+	conns = getConnectionList(node, prop, -rdir);
+
+	if(index >= 0 && index < conns.size()) {
+	    cursor.setRotation(node, prop, conns.get(index), -rdir);
+	    return;
+	}
+
+	int pindex = indexOf(properties, prop);
+	if(pindex < 0) {
+	    System.out.println("pindex < 0");
+	    return; // XXX
+	}
+
+	List left, right;
+
+	do {
+	    System.out.println("add "+dir+" to pindex "+pindex);
+	    pindex += dir;
+
+	    if(pindex < 0)
+		return; // we're already at the top, can't go up more
+
+	    if(pindex >= properties.size())
+		return; // we're already at the bottom, can't go down more
+
+	    prop = properties.get(pindex);
+	
+	    left = getConnectionList(node, prop, -1);
+	    right = getConnectionList(node, prop, 1);
+
+	    if(left.size() == 0 && right.size() == 0)
+		continue;
+
+	    if(dir > 0) {
+		if(right.size() > 0) {
+		    cursor.setRotation(node, prop, right.get(0), 1);
+		} else if(left.size() > 0) {
+		    cursor.setRotation(node, prop, left.get(0), -1);
+		} else {
+		    continue;
+		}
+	    } else {
+		if(left.size() > right.size()) {
+		    cursor.setRotation(node, prop, left.get(left.size()-1), -1);
+		} else if(right.size() > 0) {
+		    cursor.setRotation(node, prop, right.get(right.size()-1), 1);
+		} else {
+		    continue;
+		}
+	    }
+
+	    break;
+	} while(true);
+    }
+
+    int indexOf(List l, Object o) {
+	// argl, seems like Javolution's indexOf implementation is buggy...
+
+	for(int i=0; i<l.size(); i++)
+	    if(l.get(i).equals(o)) return i;
+
+	return -1;
+    }
+
+    List getConnectionList(Object node, Object prop, int dir) {
+	List list = Lists.list();
+
+	Iterator i = (dir > 0) ? graph.findN_11X_Iter(node, prop)
+	                       : graph.findN_X11_Iter(prop, node);
+
+	while(i.hasNext()) 
+	    list.add(i.next());
+
+	return list;
     }
 }
