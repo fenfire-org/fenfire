@@ -529,14 +529,12 @@ public class PropertyListView implements SpatialView {
 
 	int pindex = indexOf(properties, prop);
 	if(pindex < 0) {
-	    System.out.println("pindex < 0");
 	    return; // XXX
 	}
 
 	List left, right;
 
 	do {
-	    System.out.println("add "+dir+" to pindex "+pindex);
 	    pindex += dir;
 
 	    if(pindex < 0)
