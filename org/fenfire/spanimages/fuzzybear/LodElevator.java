@@ -96,9 +96,11 @@ public class LodElevator {
 
 			    activesSize = actives.size();
 
-			    if (!anim.hasSceneReplacementPending() &&
+			    if (changes &&
+				!anim.hasSceneReplacementPending() &&
 				!anim.hasAnimModeSet())
 				anim.switchVS();
+
 			    if (!changes)
 				sleep(1000);
 			    else
