@@ -27,6 +27,7 @@ NamespaceMap.java
 package org.fenfire.util;
 import java.io.*;
 import java.util.*;
+import javolution.lang.Text;
 import org.xml.sax.*;
 
 /** A class mapping XML namespace abbreviations like "rdf:" to
@@ -86,13 +87,27 @@ public class NamespaceMap {
      *  (e.g. "rdf:type"). Otherwise, a full URI
      *  is returned.
      */
-    public String getAbbrev(String uri) {
+    public Text getAbbrev(String uri) {
+	Text uri_text = Text.valueOf(uri);
+
 	for(int i=0; i<n; i++) {
-	    if(uri.startsWith(uris[i]))
-		return names[i] + ":" + uri.substring(uris[i].length());
+	    if(uri.startsWith(uris[i])) {
+		Text prefix_text = Text.valueOf(names[i]);
+		Text local_text = uri_text.subtext(uris[i].length());
+		
+		return prefix_text.concat(COLON).concat(local_text);
+	    }
 	}
-	return uri;
+
+	return uri_text;
     }
+
+    public String getAbbrevString(String uri) {
+	return getAbbrev(uri).toString();
+    }
+
+    private static final Text COLON = Text.valueOf(":").intern();
+
 
     /** Load the name -> uri mappings from an XML file.
      */
@@ -116,8 +131,8 @@ public class NamespaceMap {
 
     public class CompareByAbbrev implements Comparator {
 	public int compare(Object o1, Object o2) {
-	    String s1 = getAbbrev(o1.toString());
-	    String s2 = getAbbrev(o2.toString());
+	    Text s1 = getAbbrev(o1.toString());
+	    Text s2 = getAbbrev(o2.toString());
 	    return s1.compareTo(s2);
 	}
     }

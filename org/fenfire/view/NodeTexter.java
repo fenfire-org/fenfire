@@ -32,6 +32,7 @@ import org.nongnu.libvob.fn.*;
 import org.nongnu.libvob.lob.*;
 import org.nongnu.navidoc.util.Obs;
 import javolution.realtime.*;
+import javolution.lang.Text;
 import java.util.*;
 
 /** XXX update javadoc.
@@ -133,27 +134,29 @@ public class NodeTexter extends RealtimeObject {
      *          email address or telephone number for mailto: and tel: URIs,
      *          otherwise a URI, abbreviated if it starts with a namespace.
      */
-    protected String fallback(Object node) {
-	String s = Nodes.toString(node);
+    protected Text fallback(Object node) {
+	String uri = Nodes.toString(node);
+	Text uri_text = Text.valueOf(uri);
 		
-	if(s.startsWith("anon:") || s.startsWith("bnode:") || s.startsWith("urn:urn-5:"))
-	    s = "";
-	else if(s.startsWith("mailto:")) 
-	    s = s.substring("mailto:".length());
-	else if(s.startsWith("tel:")) 
-	    s = s.substring("tel:".length());
+	if(uri.startsWith("anon:") || uri.startsWith("bnode:") || 
+	   uri.startsWith("urn:urn-5:"))
+	    return Text.EMPTY;
+	else if(uri.startsWith("mailto:")) 
+	    return uri_text.subtext("mailto:".length());
+	else if(uri.startsWith("tel:")) 
+	    return uri_text.subtext("tel:".length());
 	else if(nmap != null)
-	    s = nmap.getAbbrev(s);
+	    return nmap.getAbbrev(uri);
 
-	return s;
+	return uri_text;
     }
 
-    public String getText(Object n) {
+    public Text getText(Object n) {
 	Object p = getProperty(n);
-	if(p == null) 
+	if(p == null) {
 	    return fallback(n);
-	else {
-	    return getLiteral(n, p).getString();
+	} else {
+	    return Text.valueOf(getLiteral(n, p).getString());
 	}
     }
 

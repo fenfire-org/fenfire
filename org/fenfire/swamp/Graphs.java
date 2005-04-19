@@ -217,7 +217,7 @@ public class Graphs {
 	throws IOException {
 	w.write(pre);
 	String uri = Nodes.toString(res);
-	String abbrev = nmap.getAbbrev(uri);
+	String abbrev = nmap.getAbbrevString(uri);
 	if (abbrev == uri) { // if the uri wasn't abbreviated
 	    w.write('<');
 	    w.write(uri);
@@ -243,7 +243,7 @@ public class Graphs {
 	Iterator n = nmap.uriIterator();
 	while(n.hasNext()) {
 	    String uri = (String) n.next();
-	    w.write("@prefix "+nmap.getAbbrev(uri)+" <"+uri+">.\n");
+	    w.write("@prefix "+nmap.getAbbrevString(uri)+" <"+uri+">.\n");
 	}
 	w.write("\n");
 
@@ -319,7 +319,7 @@ public class Graphs {
 	    Iterator n = nmap.uriIterator();
 	    while(n.hasNext()) {
 		String uri = (String) n.next();
-		String prefix = nmap.getAbbrev(uri);
+		String prefix = nmap.getAbbrevString(uri);
 		writer.setNamespace(prefix, uri);
 	    }
 	}
