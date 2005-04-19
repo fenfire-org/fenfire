@@ -293,6 +293,10 @@ public class Main {
 	    listViewViewlets.add(new PropertyListView.SimpleViewlet());
 
 	    Set spatialViews = new HashSet(Arrays.asList(new Object[] {
+		new DocumentSpatialView(graph, windowAnim),
+		new PropertyListView(graph, listViewProperties,
+				     listViewViewlets,
+				     reprView),
 		new SimpleSpatialView(reprView),
 		// these don't work currently:
 		//new CalendarSpatialView(graph, reprView, windowAnim, 13),
@@ -310,7 +314,11 @@ public class Main {
 	}
 
 	protected Lob createLob() { 
-	    Set allProps = new HashSet(); //new AllPropertiesSetModel(graph);
+	    org.fenfire.spanimages.PagePool.init(graph, 
+						windowAnim);
+	    org.fenfire.spanimages.PagePool.flush();
+
+	    Set allProps = new TreeSet();
 	    for(Iterator i=graph.findN_AXA_Iter(); i.hasNext();)
 		allProps.add(i.next());
 
