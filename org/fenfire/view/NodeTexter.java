@@ -52,7 +52,7 @@ import java.util.*;
 public class NodeTexter extends RealtimeObject {
     private Graph graph;
     private NamespaceMap nmap;
-    private SortedSet textProperties; // the properties we look for, in order
+    private List textProperties; // the properties we look for, in order
     private Object defaultProperty; // used if text is added to textless node
 
     // XXX these are buggy on Kaffe 1.0.6
@@ -64,11 +64,14 @@ public class NodeTexter extends RealtimeObject {
 		      Set textProperties, Object defaultProperty) {
 	this.graph = graph;
 	this.nmap = nmap;
-	this.textProperties = new TreeSet(textProperties);
 	this.defaultProperty = defaultProperty;
 
+	textProperties = new TreeSet(textProperties);
+
 	// defaultProperty is expected to be in textProperties
-	this.textProperties.add(defaultProperty);
+	textProperties.add(defaultProperty);
+
+	this.textProperties = new ArrayList(textProperties);
     }
 
     /** Finds the first text property that has a literal object present.
@@ -76,8 +79,8 @@ public class NodeTexter extends RealtimeObject {
      *          or null if there isn't a suitable one
      */
     protected Object getProperty(Object n) {
-	for(Iterator i=textProperties.iterator(); i.hasNext();) {
-	    Object prop = i.next();
+	for(int i=0; i<textProperties.size(); i++) {
+	    Object prop = textProperties.get(i);
 	    Iterator j = graph.findN_11X_Iter(n, prop);
 	    while(j.hasNext()) {
 		Object value = j.next();
