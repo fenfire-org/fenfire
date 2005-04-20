@@ -171,7 +171,7 @@ public class DocumentSpatialView implements SpatialView {
 	CanvasCursor cc = getCanvasCursor(cursor);
 
 	Lob l;
-	l = PagePool.fullDocument(cc.getCanvas(), cc.getPanX());
+	l = PagePool.fullDocument(node, cc.getPanX());
 
 	l = Lobs.between(l, getTransclusions(cc), Lobs.nullLob());
 
@@ -186,7 +186,7 @@ public class DocumentSpatialView implements SpatialView {
 	l = Lobs.request(l, 0, 0, 0, 0, 0, 0);
 	l = Lobs.align(l, .5f, .5f);
 
-	l = SpatialContextLob.newInstance(l, cc.getCanvas());
+	l = SpatialContextLob.newInstance(l, node);
 	l = Lobs.margin(l, 40);
 
 	return l;
@@ -201,9 +201,9 @@ public class DocumentSpatialView implements SpatialView {
 	l = Lobs.translate(l, -cc.getPanX(), -cc.getPanY());
 	l = Lobs.align(l, .5f, .5f);
 	l = Lobs.request(l, 100, 100, 100, 100, 100, 100);
-	l = addBackground(l, cc.getCanvas(), false);
+	l = addBackground(l, node, false);
 
-	l = SpatialContextLob.newInstance(l, cc.getCanvas());
+	l = SpatialContextLob.newInstance(l, node);
 
 	return l;
     }
