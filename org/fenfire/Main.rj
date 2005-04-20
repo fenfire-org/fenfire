@@ -491,7 +491,7 @@ public class Main {
 	graph.add(pageSpan, FF.endX, new TypedLiteral("0.4", XSD._float));
 	graph.add(pageSpan, FF.startY, new TypedLiteral("0.5", XSD._float));
 	graph.add(pageSpan, FF.endY, new TypedLiteral("0.7", XSD._float));
-	graph.add(pageSpan, FF.regionOf, Nodes.get("file://testdata/paper.pdf"));
+	graph.add(pageSpan, FF.regionOf, Nodes.get("java-classpath:testdata/randompaper.pdf")); // the 'java-classpath' URI "scheme" is a stupid hack because I don't have a better idea right now --Benja
 
 	// 23:33 < benja_> [ rdf:type alph:MultiPageSpan; 
 	// alph:startPage "3"; alph:endPage "7"; alph:partOf <storm:...> ]

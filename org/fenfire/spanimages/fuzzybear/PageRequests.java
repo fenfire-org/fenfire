@@ -68,6 +68,7 @@ public class PageRequests {
 
     static final String FILE = "file://";
     static final String HTTP = "http://";
+    static final String CLASSPATH = "java-classpath:"; // argh, hack! --Benja
 
     private Graph graph;
     private WindowAnimation anim;
@@ -375,6 +376,26 @@ public class PageRequests {
 	// first get it from network if it's http://something..
 	if (s.uri.startsWith(HTTP)) {
 	    throw new Error("Not yet implemented");
+	}
+
+	if(s.uri.startsWith(CLASSPATH)) {
+	    String relative = s.uri.substring(CLASSPATH.length());
+	    
+	    try {
+		InputStream in = 
+		    getClass().getClassLoader().getResourceAsStream(relative);
+
+		if(in == null)
+		    throw new Error("resource not found: "+relative);
+
+		s.file = File.createTempFile("fenfire", null);
+		s.file.deleteOnExit();
+		OutputStream out = new FileOutputStream(s.file);
+		
+		org.nongnu.storm.util.CopyUtil.copy(in, out);
+	    } catch(IOException e) {
+		throw new Error(e); // argh...
+	    }
 	}
 
 	// then check the file and content type

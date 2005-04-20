@@ -27,7 +27,11 @@ JAVAC ?= javac
 java: $(GENSRC)
 	mkdir -p build
 	mkdir -p build/org/fenfire/fenfeed/
+	mkdir -p build/testdata/
+
+	cp testdata/randompaper.pdf build/testdata/
 	cp org/fenfire/fenfeed/*.xsl build/org/fenfire/fenfeed/
+
 	$(JAVAC) -d build -classpath $(FFCLASSPATH):$(CLASSPATH) `find org -name '*.java'`
 
 applet_java:
