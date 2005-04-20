@@ -118,7 +118,7 @@ public class TextReprView implements ReprView {
 
     public List getLobList(Object node) {
 	if(node instanceof Literal)
-	    return Components.font().text(node.toString());
+	    return Components.font().text(((Literal)node).getString());
 	
 	return Components.font().text(texter.getText(node));
     }

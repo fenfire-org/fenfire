@@ -213,15 +213,24 @@ public class PropertyListView implements SpatialView {
 		Lob hbox = Lobs.hbox();
 		hbox.add(Lobs.request(Axis.X, label, 0, 0, Lob.INF/4));
 		hbox.add(Components.frame(Lobs.request(Axis.X, 
-						       Lobs.hbox(literalLobs), 
+						       Lobs.linebreaker(literalLobs), 
 						       0, 0, Lob.INF)));
 
 		hbox = ConnectorLob.newInstance(hbox, prop, value, 1);
 
 		Object key = newKey(prop, value, 1);
 		Lob keylob = Lobs.key(Lobs.nullLob(), key);
-		vbox.add(Lobs.between(keylob, hbox, null));
+		Lob lob = Lobs.between(keylob, hbox, null);
 
+
+		lob = Lobs.clickController(lob, 1, new @realtime-i Action(Cursor cursor, Object node, Object prop, Object value) {
+		    public void run() {
+			cursor.setRotation(node, prop, value);
+		    }
+		});
+
+
+		vbox.add(lob);
 		vbox.add(Lobs.glue(Axis.Y, 2, 2, 2));
 	    }
 
@@ -472,11 +481,13 @@ public class PropertyListView implements SpatialView {
 		return Lobs.glue(Axis.Y, 0, 0, 0);
 	    }
 	};
+	
+	List titleLobs = reprView.getLobList(node);
 
-	Lob title = Lobs.scale(reprView.getLob(node), 1.5f);
+	Lob title = Lobs.scale(Lobs.hbox(titleLobs), 1.5f);
 	title = BuoyConnectorLob.newInstance(title, node, true, false);
 	title = Lobs.request(Axis.X, title, -1, -1, SizeRequest.INF);
-	title = Lobs.noGrow(Axis.Y, title);
+	title = Lobs.noGrow(title);
 
 	Lob hbox = Lobs.hbox();
 	hbox.add(Lobs.hglue());
