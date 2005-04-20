@@ -34,9 +34,18 @@ public class AWTPagePool {
     static void p(String s) { System.out.println("AWTPagePool:: "+s); }
 
 
-    public int getSizes() { return sizes.length; }
-    public int getSizeW(int index) { return sizes[index][1]; }
-    public int getSizeH(int index) { return sizes[index][2]; }
+    public int getSizes() { 
+	init();
+	return sizes.length; 
+    }
+    public int getSizeW(int index) {
+	init();
+	return sizes[index][1]; 
+    }
+    public int getSizeH(int index) { 
+	init();
+	return sizes[index][2]; 
+    }
 
     protected final int[][] sizes = {
 	// how many, width, height
@@ -56,7 +65,11 @@ public class AWTPagePool {
 
     /** Singleton pool for awt
      */
-    protected void init() { //AWTPagePool() {
+    protected synchronized void init() { //AWTPagePool() {
+
+	//p("inited: "+inited+" "+this);
+	if (inited) return;
+
 	count=0;
 	for (int i=0; i<sizes.length; i++)
 	    count += sizes[i][0];
@@ -117,8 +130,14 @@ public class AWTPagePool {
 	inited = true;
     }
 
-    public int getW(int index) { return WxH[2*index]; }
-    public int getH(int index) { return WxH[2*index+1]; }
+    public int getW(int index) { 
+	//if (!inited) throw new Error("should be already inited..");
+	return WxH[2*index]; 
+    }
+    public int getH(int index) { 
+	//if (!inited) throw new Error("should be already inited..");
+	return WxH[2*index+1]; 
+    }
 
     ImageConsumerImpl imgConsumer = new ImageConsumerImpl();
 	
@@ -176,15 +195,8 @@ public class AWTPagePool {
 				      int width, int height) 
 	throws IOException {
 
-	if (!inited) {
-	    while (true) {
-		try {
-		    p("AAARRGGH");
-		    if (inited) break;
-		    Thread.sleep(100);
-		} catch (InterruptedException e) {}
-	    }
-	}
+	if (!inited)
+	    init();
 
 	if (width > maxW || height > maxH)
 	    throw new IllegalArgumentException("Width or height too big! "+

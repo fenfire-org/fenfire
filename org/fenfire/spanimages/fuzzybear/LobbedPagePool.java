@@ -47,15 +47,6 @@ public class LobbedPagePool extends AWTPagePool {
 
     
     protected LobbedPagePool() {
-	Thread t = new Thread() {
-		public void run() {
-		    try {
-			sleep(100);
-		    } catch (Exception e) {}
-		    init();
-		}
-	    };
-	t.start();
     }
 
 
@@ -110,6 +101,8 @@ public class LobbedPagePool extends AWTPagePool {
 
     protected boolean inited = false;
     protected void init() { //LobbedPagePool() {
+	if(inited) return;
+
 	super.init();
 	inited = true;
     }
