@@ -291,8 +291,8 @@ public class Main {
 					RDFS.label, .25f, 1f);
 
 	    List listViewViewlets = new ArrayList();
-	    listViewViewlets.add(new PropertyListView.ContainerViewlet());
-	    listViewViewlets.add(new PropertyListView.BodyViewlet());
+	    //listViewViewlets.add(new PropertyListView.ContainerViewlet());
+	    //listViewViewlets.add(new PropertyListView.BodyViewlet());
 	    listViewViewlets.add(new PropertyListView.LiteralViewlet());
 	    listViewViewlets.add(new PropertyListView.SimpleViewlet());
 
