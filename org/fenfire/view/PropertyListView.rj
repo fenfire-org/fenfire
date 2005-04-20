@@ -199,12 +199,29 @@ public class PropertyListView implements SpatialView {
 
 		LobFont font = Components.font();
 		
-		List lobs = Lists.concat(reprView.getLobList(prop),
-					 font.text(": "),
-					 font.text(value.getString()),
-					 font.text("\n"));
+		List labelLobs = Lists.concat(reprView.getLobList(prop),
+					      font.textLn(":"));
 
-		vbox.add(Lobs.linebreaker(lobs));
+		Lob label = Lobs.vbox();
+		label.add(Lobs.hbox(labelLobs));
+		label.add(Lobs.vglue());
+
+		List literalLobs = Lists.concat(font.text(value.getString()),
+						Lists.list(Lobs.hglue()));
+					  
+
+		Lob hbox = Lobs.hbox();
+		hbox.add(Lobs.request(Axis.X, label, 0, 0, Lob.INF/4));
+		hbox.add(Components.frame(Lobs.request(Axis.X, 
+						       Lobs.hbox(literalLobs), 
+						       0, 0, Lob.INF)));
+
+		hbox = ConnectorLob.newInstance(hbox, prop, value, 1);
+
+		Object key = newKey(prop, value, 1);
+		Lob keylob = Lobs.key(Lobs.nullLob(), key);
+		vbox.add(Lobs.between(keylob, hbox, null));
+
 		vbox.add(Lobs.glue(Axis.Y, 2, 2, 2));
 	    }
 
@@ -536,6 +553,8 @@ public class PropertyListView implements SpatialView {
 	conns = getConnectionList(oldNode, prop, dir);
 	if(index >= conns.size()) return; // no such connection, do nothing
 	Object node = conns.get(index);
+
+	if(node instanceof Literal) return; // don't move onto literals
 
 	cursor.setRotation(node, prop, oldNode, -dir);
 	cursor.set(node);
