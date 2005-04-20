@@ -25,7 +25,10 @@ Cursor.java
  * Written by Benja Fallenstein
  */
 package org.fenfire;
+import org.nongnu.libvob.fn.Model;
+import org.nongnu.libvob.fn.FastInt;
 import org.fenfire.swamp.smush.SmushListener;
+import javolution.realtime.RealtimeObject;
 import java.util.*;
 
 /** A Fenfire cursor position.
@@ -36,6 +39,8 @@ public final class Cursor implements SmushListener {
     public Object spatialCursor;
     public int textCursor = -1;
     public Map rotations = new HashMap(); // should perhaps be LRU...
+
+    public final Model textCursorModel = new TextCursorModel();
 
 
     public void smushed(Object old, Object into) {
@@ -157,6 +162,30 @@ public final class Cursor implements SmushListener {
 	public int hashCode() {
 	    return 2349*getRotationProperty().hashCode() +
 		34908*getRotationNode().hashCode() + getRotationDir();
+	}
+    }
+
+
+    public final class TextCursorModel 
+	extends RealtimeObject implements Model {
+
+	private TextCursorModel() {
+	}
+
+	public int getInt() {
+	    return textCursor;
+	}
+	
+	public void set(int value) {
+	    textCursor = value;
+	}
+
+	public Object get() {
+	    return FastInt.newInstance(textCursor);
+	}
+
+	public void set(Object o) {
+	    textCursor = ((FastInt)o).intValue();
 	}
     }
 }

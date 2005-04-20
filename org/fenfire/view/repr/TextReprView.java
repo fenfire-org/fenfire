@@ -162,7 +162,12 @@ public class TextReprView implements ReprView {
 	}
 
 	Model textModel = texter.model(node);
-	Model cursorModel = SimpleModel.newInstance(cursor.textCursor);
+
+	Model cursorModel;
+	if(node.equals(cursor.getNode()))
+	    cursorModel = cursor.textCursorModel;
+	else
+	    cursorModel = SimpleModel.newInstance(-1);
 
 	List text = Components.font().textLn(texter.getText(node));
 	text = Lobs.keyList(text, node);
@@ -170,7 +175,7 @@ public class TextReprView implements ReprView {
 	
         Lob cursor_lob = Lobs.line(java.awt.Color.black, 0, 0, 0, 1);
         cursor_lob = Lobs.key(cursor_lob, "textcursor");
-        lob = Lobs.decorate(lob, cursor_lob, node, cursor.textCursor);
+        lob = Lobs.decorate(lob, cursor_lob, node, cursorModel.getInt());
 
         lob = org.nongnu.libvob.lob.lobs.TextKeyController.newInstance(lob, textModel, cursorModel);
 

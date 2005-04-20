@@ -46,6 +46,8 @@ public class PropertyListView implements SpatialView {
 	boolean canRender(Graph graph, Object prop, Object node);
 	Lob getLob(Graph graph, ReprView reprView, Cursor cursor, 
 		   Object prop, Object node);
+	boolean key(Graph graph, Cursor cursor, ReprView reprView, 
+		    Object prop, Object node, String key);
     }
 
     /** Simple viewlet shows any property using the representation view */
@@ -54,6 +56,11 @@ public class PropertyListView implements SpatialView {
 	    return 
 		graph.findN_X11_Iter(prop, node).hasNext() ||
 		graph.findN_11X_Iter(node, prop).hasNext();
+	}
+
+	public boolean key(Graph graph, Cursor cursor, ReprView reprView, 
+			   Object prop, Object node, String key) {
+	    return getLob(graph, reprView, cursor, prop, node).key(key);
 	}
 
 	private Lob valueLob(Cursor cursor, ReprView reprView, Object prop, Object value, int dir) {
@@ -172,7 +179,23 @@ public class PropertyListView implements SpatialView {
 		isFirst = false;
 	    }
 
-	    return Lobs.noGrow(Axis.Y, vbox);
+	    Lob lob = Lobs.noGrow(Axis.Y, vbox);
+
+	    Map keys = FastMap.newInstance();
+	    keys.put("Left", new @realtime-i Action(Graph graph, Cursor cursor) {
+		public void run() {
+		    PropertyListView.move(graph, cursor, -1);
+		}
+	    });
+	    keys.put("Right", new @realtime-i Action(Graph graph, Cursor cursor) {
+		public void run() {
+		    PropertyListView.move(graph, cursor, 1);
+		}
+	    });
+
+	    lob = Lobs.keyController(lob, keys);
+
+	    return lob;
 	}
     }
 
@@ -189,6 +212,97 @@ public class PropertyListView implements SpatialView {
 	    return true;
 	}
 
+	public boolean key(Graph graph, Cursor cursor, ReprView reprView, 
+			   Object prop, Object node, String key) {
+	    Literal value = (Literal)cursor.getRotation().getRotationNode();
+	    Lob lob = getRow(graph, cursor, reprView, node, prop, value);
+	    return lob.key(key);
+	}
+
+	Lob getRow(Graph graph, Cursor cursor, ReprView reprView,
+		   Object node, Object prop, Literal value) {
+	    LobFont font = Components.font();
+	    
+	    List labelLobs = Lists.concat(reprView.getLobList(prop),
+					  font.textLn(":"));
+	    
+	    Lob label = Lobs.vbox();
+	    label.add(Lobs.hbox(labelLobs));
+	    label.add(Lobs.vglue());
+	    
+
+	    List literalLobs = Lists.concat(font.text(value.getString()),
+					    Lists.list(Lobs.hglue()));
+
+	    literalLobs = Lobs.keyList(literalLobs, value);
+	    
+
+	    Lob literalLob = Lobs.linebreaker(literalLobs);
+
+	    Model textCursorModel;
+	    if(cursor.getRotation() != null &&
+	       value.equals(cursor.getRotation().getRotationNode()))
+		textCursorModel = cursor.textCursorModel;
+	    else
+		textCursorModel = SimpleModel.newInstance(-1);
+
+	    Lob cursor_lob = Lobs.line(java.awt.Color.black, 0, 0, 0, 1);
+	    cursor_lob = Lobs.key(cursor_lob, "textcursor");
+	    literalLob = Lobs.decorate(literalLob, cursor_lob, value, textCursorModel.getInt());
+
+	    
+	    Lob hbox = Lobs.hbox();
+	    hbox.add(Lobs.request(Axis.X, label, 0, 0, Lob.INF/4));
+	    hbox.add(Components.frame(Lobs.request(Axis.X, 
+						   literalLob, 
+						   0, 0, Lob.INF)));
+
+	    Lob lob = hbox;
+
+	    lob = TextKeyController.newInstance(lob, new @realtime-i Model(Graph graph, Cursor cursor, Object node, Object prop, Literal value) {
+		public Object get() {
+		    return value.getString();
+		}
+		public void set(Object o) {
+		    String s = (String)o;
+
+		    Literal lit;
+		    if(value instanceof TypedLiteral) {
+			lit = new TypedLiteral(s, ((TypedLiteral)value).getType());
+		    } else {
+			lit = new PlainLiteral(s, ((PlainLiteral)value).getLang());
+		    }
+
+		    graph.rm_111(node, prop, value);
+		    graph.add(node, prop, lit);
+
+		    cursor.setRotation(node, prop, lit);
+		    
+		    Lobs.getWindowAnimation().switchVS();
+		}
+		public int getInt() { 
+		    throw new UnsupportedOperationException(); 
+		}
+		public void set(int value) { 
+		    throw new UnsupportedOperationException(); 
+		}
+	    }, textCursorModel);
+
+	    lob = ConnectorLob.newInstance(lob, prop, value, 1);
+	    
+	    Object key = newKey(prop, value, 1);
+	    Lob keylob = Lobs.key(Lobs.nullLob(), key);
+	    lob = Lobs.between(keylob, lob, null);
+	    
+	    lob = Lobs.clickController(lob, 1, new @realtime-i Action(Cursor cursor, Object node, Object prop, Object value) {
+		public void run() {
+		    cursor.setRotation(node, prop, value);
+		}
+	    });
+
+	    return lob;
+	}
+
 	public Lob getLob(Graph graph, ReprView reprView, Cursor cursor,
 			  Object prop, Object node) {
 
@@ -197,40 +311,7 @@ public class PropertyListView implements SpatialView {
 	    for(Iterator i = graph.findN_11X_Iter(node, prop); i.hasNext();) {
 		Literal value = (Literal)i.next();
 
-		LobFont font = Components.font();
-		
-		List labelLobs = Lists.concat(reprView.getLobList(prop),
-					      font.textLn(":"));
-
-		Lob label = Lobs.vbox();
-		label.add(Lobs.hbox(labelLobs));
-		label.add(Lobs.vglue());
-
-		List literalLobs = Lists.concat(font.text(value.getString()),
-						Lists.list(Lobs.hglue()));
-					  
-
-		Lob hbox = Lobs.hbox();
-		hbox.add(Lobs.request(Axis.X, label, 0, 0, Lob.INF/4));
-		hbox.add(Components.frame(Lobs.request(Axis.X, 
-						       Lobs.linebreaker(literalLobs), 
-						       0, 0, Lob.INF)));
-
-		hbox = ConnectorLob.newInstance(hbox, prop, value, 1);
-
-		Object key = newKey(prop, value, 1);
-		Lob keylob = Lobs.key(Lobs.nullLob(), key);
-		Lob lob = Lobs.between(keylob, hbox, null);
-
-
-		lob = Lobs.clickController(lob, 1, new @realtime-i Action(Cursor cursor, Object node, Object prop, Object value) {
-		    public void run() {
-			cursor.setRotation(node, prop, value);
-		    }
-		});
-
-
-		vbox.add(lob);
+		vbox.add(getRow(graph, cursor, reprView, node, prop, value));
 		vbox.add(Lobs.glue(Axis.Y, 2, 2, 2));
 	    }
 
@@ -254,6 +335,11 @@ public class PropertyListView implements SpatialView {
 		return false; // we won't show more than the body
 
 	    return (body instanceof Literal);
+	}
+
+	public boolean key(Graph graph, Cursor cursor, ReprView reprView, Object prop, 
+			   Object node, String key) {
+	    return false;
 	}
 
 	public Lob getLob(Graph graph, ReprView reprView, Cursor cursor,
@@ -345,6 +431,11 @@ public class PropertyListView implements SpatialView {
 	    // XXX there can be additional properties that we don't show or
 	    // container properties after we stop showing
 	    return graph.findN_11X_Iter(container, RDF._1).hasNext();
+	}
+
+	public boolean key(Graph graph, Cursor cursor, ReprView reprView, Object prop, 
+			   Object node, String key) {
+	    return false;
 	}
 
 	public Lob getReverseLob(Graph graph, ReprView reprView, Cursor cursor,
@@ -515,6 +606,22 @@ public class PropertyListView implements SpatialView {
 	lob = Lobs.viewport(Axis.Y, lob, key, -1);
 	lob = Lobs.request(Axis.Y, lob, 0, 0, -1);
 
+	Lob delegate = lob;
+	lob = new @realtime AbstractDelegateLob(@set Lob delegate, Graph graph, Cursor cursor, List viewlets, ReprView reprView) {
+	    public boolean key(String key) {
+		Object prop = cursor.getRotation().getRotationProperty();
+		Object node = cursor.getNode();
+
+		for(int i=0; i < viewlets.size(); i++) {
+		    Viewlet v = (Viewlet)viewlets.get(i);
+		    if(v.canRender(graph, prop, node))
+			return v.key(graph, cursor, reprView, prop, node, key);
+		}
+
+		return false;
+	    }
+	};
+
 	FastMap keys = FastMap.newInstance();
 	PropertyListView view = this;
 	keys.put("Up", new @realtime-i Action(Cursor cursor, PropertyListView view) {
@@ -525,16 +632,6 @@ public class PropertyListView implements SpatialView {
 	keys.put("Down", new @realtime-i Action(Cursor cursor, PropertyListView view) {
 	    public void run() {
 		view.scroll(cursor, 1);
-	    }
-	});
-	keys.put("Left", new @realtime-i Action(Cursor cursor, PropertyListView view) {
-	    public void run() {
-		view.move(cursor, -1);
-	    }
-	});
-	keys.put("Right", new @realtime-i Action(Cursor cursor, PropertyListView view) {
-	    public void run() {
-		view.move(cursor, 1);
 	    }
 	});
 
@@ -550,18 +647,18 @@ public class PropertyListView implements SpatialView {
 	return l;
     }
 
-    void move(Cursor cursor, int dir) {
+    static void move(Graph graph, Cursor cursor, int dir) {
 	Object oldNode = cursor.getNode();
 
 	Cursor.Rotation r = cursor.getRotation();
 	Object prop = r.getRotationProperty();
 
-	List conns = getConnectionList(oldNode, prop, r.getRotationDir());
+	List conns = getConnectionList(graph, oldNode, prop, r.getRotationDir());
 	int index = indexOf(conns, r.getRotationNode());
 
 	if(index < 0) return; // XXX
 
-	conns = getConnectionList(oldNode, prop, dir);
+	conns = getConnectionList(graph, oldNode, prop, dir);
 	if(index >= conns.size()) return; // no such connection, do nothing
 	Object node = conns.get(index);
 
@@ -580,7 +677,7 @@ public class PropertyListView implements SpatialView {
 	Object value = r.getRotationNode();
 	int rdir = r.getRotationDir();
 
-	List conns = getConnectionList(node, prop, rdir);
+	List conns = getConnectionList(graph, node, prop, rdir);
 	int index = indexOf(conns, value);
 	if(index < 0) return; // XXX
 
@@ -588,13 +685,15 @@ public class PropertyListView implements SpatialView {
 	
 	if(index >= 0 && index < conns.size()) {
 	    cursor.setRotation(node, prop, conns.get(index), rdir);
+	    cursor.textCursor = -1;
 	    return;
 	}
 
-	conns = getConnectionList(node, prop, -rdir);
+	conns = getConnectionList(graph, node, prop, -rdir);
 
 	if(index >= 0 && index < conns.size()) {
 	    cursor.setRotation(node, prop, conns.get(index), -rdir);
+	    cursor.textCursor = -1;
 	    return;
 	}
 
@@ -616,8 +715,8 @@ public class PropertyListView implements SpatialView {
 
 	    prop = properties.get(pindex);
 	
-	    left = getConnectionList(node, prop, -1);
-	    right = getConnectionList(node, prop, 1);
+	    left = getConnectionList(graph, node, prop, -1);
+	    right = getConnectionList(graph, node, prop, 1);
 
 	    if(left.size() == 0 && right.size() == 0)
 		continue;
@@ -625,16 +724,20 @@ public class PropertyListView implements SpatialView {
 	    if(dir > 0) {
 		if(right.size() > 0) {
 		    cursor.setRotation(node, prop, right.get(0), 1);
+		    cursor.textCursor = -1;
 		} else if(left.size() > 0) {
 		    cursor.setRotation(node, prop, left.get(0), -1);
+		    cursor.textCursor = -1;
 		} else {
 		    continue;
 		}
 	    } else {
 		if(left.size() > right.size()) {
 		    cursor.setRotation(node, prop, left.get(left.size()-1), -1);
+		    cursor.textCursor = -1;
 		} else if(right.size() > 0) {
 		    cursor.setRotation(node, prop, right.get(right.size()-1), 1);
+		    cursor.textCursor = -1;
 		} else {
 		    continue;
 		}
@@ -644,7 +747,7 @@ public class PropertyListView implements SpatialView {
 	} while(true);
     }
 
-    int indexOf(List l, Object o) {
+    static int indexOf(List l, Object o) {
 	// argl, seems like Javolution's indexOf implementation is buggy...
 
 	for(int i=0; i<l.size(); i++)
@@ -653,7 +756,8 @@ public class PropertyListView implements SpatialView {
 	return -1;
     }
 
-    List getConnectionList(Object node, Object prop, int dir) {
+    static List getConnectionList(Graph graph, Object node, 
+				  Object prop, int dir) {
 	List list = Lists.list();
 
 	Iterator i = (dir > 0) ? graph.findN_11X_Iter(node, prop)
