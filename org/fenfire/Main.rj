@@ -102,6 +102,23 @@ public class Main {
 	GraphFile gf0 = null;
 	List pipes = new LinkedList();
 
+	Object mainnode = null;
+
+	if(argv.length == 0) {
+	    File f = File.createTempFile("fenfire", "turtle");
+	    argv = new String[] { f.getPath() };
+
+	    InputStream in = 
+		Main.class.getClassLoader().getResourceAsStream("demo.turtle");
+
+	    if(in == null)
+		throw new Error("resource not found: demo.turtle");
+
+	    OutputStream out = new FileOutputStream(f);
+	    
+	    org.nongnu.storm.util.CopyUtil.copy(in, out);
+	}
+
 	for(int i=0; i<argv.length; i++) {
 	    boolean xml = false;
 	    if(argv[i].equals("--xml")) {
@@ -127,6 +144,14 @@ public class Main {
 	    String gf_uri = gf0==null ? "" : "foo:"+argv[i];
 	    Graph gf_graph = new OneQuadGraph(quadsGraph, gf_uri);
 	    GraphFile gf;
+
+	    if(argv[i].equals("--pdfdemo")) {
+		File file = new File("/tmp/pdfdemo.turtle");
+		gf_graph = new OneQuadGraph(quadsGraph, "");
+		mainnode = Nodes.N();
+		gf = new GraphFile.Turtle(file, gf_graph, getPDFDemoGraph(mainnode));
+		continue;
+	    }
 	
 	    File file = new File(argv[i]);
 	    // we try to accept only readable files (or creatable for gf0)
@@ -161,12 +186,10 @@ public class Main {
 	    }
 	}
 
-	Object mainnode = null;
 	if(argv.length == 0) {
 	    File file = new File("/tmp/ff.turtle");
 	    Graph gf_graph = new OneQuadGraph(quadsGraph, "");
-	    mainnode = Nodes.N();
-	    gf0 = new GraphFile.Turtle(file, gf_graph, getDefaultGraph(mainnode));
+	    gf0 = new GraphFile.Turtle(file, gf_graph, new HashGraph());
 	}
 
 	final Graph graph = new AllQuadsGraph(quadsGraph, "");
@@ -462,7 +485,7 @@ public class Main {
 	}
     }
 
-    private static Graph getDefaultGraph(Object mainnode) {
+    private static Graph getPDFDemoGraph(Object mainnode) {
 	Graph graph = new HashGraph();
 
 	Object canvas = Nodes.N();

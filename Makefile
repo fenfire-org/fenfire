@@ -31,6 +31,7 @@ java: $(GENSRC)
 
 	cp testdata/randompaper.pdf build/testdata/
 	cp org/fenfire/fenfeed/*.xsl build/org/fenfire/fenfeed/
+	cp demo.turtle build/demo.turtle
 
 	$(JAVAC) -d build -classpath $(FFCLASSPATH):$(CLASSPATH) `find org -name '*.java'`
 
