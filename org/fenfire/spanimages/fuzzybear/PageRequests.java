@@ -50,8 +50,6 @@ import org.nongnu.alph.impl.*;
 
 import org.nongnu.alph.*;
 import org.nongnu.alph.util.*;
-import org.python.util.*;
-import org.python.core.*;
 
 
 import javolution.realtime.*;
@@ -488,27 +486,24 @@ public class PageRequests {
 		    if (!imgFile.exists()) ok = false;
 		}
 		if (!ok) {
-		    if(interp == null) {
-			interp = new PythonInterpreter();
-			interp.exec("import alph.util.psimages\n"+
-				    "import vob.putil.mipzipmaker\n"+
-				    "cv = alph.util.psimages.convertFile\n"+
-				    "mz = vob.putil.mipzipmaker.makeMipzip\n"
-			    );
-		    }
+		    // Convert ps/pdf to .png files
+
 		    File imgFile = new File(ScrollBlockImager.tmp(),
 					    w_size+"x"+h_size+"_"+
 					    s.tmpImgPrefix);  
+
 		    String resolution = ""+xreso+"x"+yreso;
 		    
-		    // 1. Convert ps/pdf to .png files
 		    BlockFile f = s.page.getBlockFile();
-		    if(! interp.get("cv").__call__(new PyObject[] {
-			new PyString(f.getFilename()),
-			new PyString(imgFile.getPath()),
-			new PyString(resolution)
-		    }).__nonzero__())
-			throw new Exception("Conversion unsuccessful");
+
+		    String cmdline = "gs -dBATCH -dNOPAUSE -sDEVICE=png256 -r"+resolution+" -sOutputFile="+imgFile.getPath()+"%d "+f.getFilename();
+
+		    Process p = Runtime.getRuntime().exec(cmdline);
+		    int res = p.waitFor();
+
+		    if(res != 0) {
+			throw new Error("Error running Ghostscript: "+res);
+		    }
 		}
 	    }
 	    s.imagesGenerated = true;
@@ -577,9 +572,6 @@ public class PageRequests {
 	return l; 
     }	
     */
-
-
-    PythonInterpreter interp;
 
 
 	/*
