@@ -1,11 +1,10 @@
 #!/bin/bash
 set -e
 CLASSPATH="$1"
-PYTHONPATH="$2"
-VERSION="$3"
-JARNAME="$4"
-MAINCLASS="$5"
-EXCLUDELIBS="$6"
+VERSION="$2"
+JARNAME="$3"
+MAINCLASS="$4"
+EXCLUDELIBS="$5"
 
 excludepattern="$EXCLUDELIBS"
 
@@ -49,29 +48,6 @@ for name in $(echo $CLASSPATH|tr : '\n'|egrep -v "$excludepattern"); do
 	    cp -a ../$name/* . 
 	    ;;
     esac
-done
-echo "Gathering files from PYTHONPATH"
-for name in $(echo $PYTHONPATH|sed "s/-Dpython.path=//"| \
-    tr : '\n'|egrep -v "^\.\$|$excludepattern"); do 
-    case $name in
-	*.jar)
-	    jar xf ../$name
-	    # cat META-INF/MANIFEST.MF >>manifest.try
-	    getLicense ../$name
-	    ;;
-	*)
-	    PYTHONDIRS="$PYTHONDIRS $name"
-	    ;;
-    esac
-done
-
-echo 'Gathering *.py from PYTHONPATH and .'
-for dir in $PYTHONDIRS . ; do
-    cd "$basedir/$dir"
-    find * -name "*.py"| while read file ; do 
-	mkdir -p "$basedir/$jardir/$(dirname $file)" 
-	cp "$file" "$basedir/$jardir/$file"
-    done
 done
 
 cd "$basedir"
