@@ -69,15 +69,15 @@ public class ConnectorLob extends AbstractDelegateLob {
 	super.render(scene, cs, cs, d, visible);
     }
 
-    /*
     public boolean mouse(VobMouseEvent e, VobScene scene, int cs, 
 			 float x, float y) {
 
-	cs = scene.matcher.getCS(cs, key);
+	ConnectionVobMatcher m = (ConnectionVobMatcher)scene.matcher;
+
+	cs = m.getLink(m.getFocus(), dir, key, prop);
 	if(cs < 0) throw new Error("ARGH");
 	return delegate.mouse(e, scene, cs, x, y);
     }
-    */
 
     private static final Factory FACTORY = new Factory() {
 	    public Object create() {
