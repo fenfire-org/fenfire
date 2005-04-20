@@ -56,7 +56,7 @@ public class PropertyListView implements SpatialView {
 		graph.findN_11X_Iter(node, prop).hasNext();
 	}
 
-	private Lob valueLob(Cursor cursor, ReprView reprView, Object value) {
+	private Lob valueLob(Cursor cursor, ReprView reprView, Object prop, Object value, int dir) {
 	    Lob l = reprView.getLob(value);
 	    l = Lobs.clickController(l, 1, new @realtime-i Action(Cursor cursor, Object value) {
 		public void run() {
@@ -69,7 +69,7 @@ public class PropertyListView implements SpatialView {
 			m.setNextFocus(cs);
 		}
 	    });
-	    l = BuoyConnectorLob.newInstance(l, value, false, false);
+	    l = ConnectorLob.newInstance(l, prop, value, dir);
 	    l = Lobs.noGrow(Axis.Y, l);
 	    return Components.frame(l, Maps.map("clip", Boolean.FALSE));
 	}
@@ -120,7 +120,7 @@ public class PropertyListView implements SpatialView {
 		if(iter_left.hasNext()) {
 		    lvalue = iter_left.next();
 
-		    left = valueLob(cursor, reprView, lvalue);
+		    left = valueLob(cursor, reprView, prop, lvalue, -1);
 		    llabel = isFirst ? leftLabel : Lobs.nullLob();
 		} else {
 		    left = llabel = Lobs.nullLob();
@@ -130,7 +130,7 @@ public class PropertyListView implements SpatialView {
 		if(iter_right.hasNext()) {
 		    rvalue = iter_right.next();
 
-		    right = valueLob(cursor, reprView, rvalue);
+		    right = valueLob(cursor, reprView, prop, rvalue, 1);
 		    rlabel = isFirst ? rightLabel : Lobs.nullLob();
 		} else {
 		    right = rlabel = Lobs.nullLob();
