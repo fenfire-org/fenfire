@@ -301,7 +301,7 @@ public class Main {
 		new PropertyListView(graph, listViewProperties,
 				     listViewViewlets,
 				     reprView),
-		new SimpleSpatialView(reprView),
+		//new SimpleSpatialView(reprView),
 		// these don't work currently:
 		//new CalendarSpatialView(graph, reprView, windowAnim, 13),
 		new CanvasSpatialView(graph, reprView, windowAnim),
