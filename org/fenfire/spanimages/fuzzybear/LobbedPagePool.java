@@ -31,7 +31,9 @@ import org.nongnu.libvob.*;
 import org.nongnu.libvob.lob.*;
 
 import java.awt.image.*;
+import java.awt.color.*;
 import java.awt.*;
+import java.util.*;
 import java.io.*;
 
 
@@ -49,27 +51,46 @@ public class LobbedPagePool extends AWTPagePool {
     protected LobbedPagePool() {
     }
 
-
     static class ImageVob extends AbstractVob {
 	protected Image img;
+	
 	protected int x0, y0, w0, h0;
+	
+	static Point p = new Point(0,0);
+	static protected ColorModel cm = 
+	new DirectColorModel(
+	    ColorSpace.getInstance(ColorSpace.CS_sRGB),
+	    32, // int
+	    0x00ff0000,
+	    0x0000ff00,
+	    0x000000ff,
+	    0, // we don't need alpha
+	    true,
+	    DataBuffer.TYPE_INT);
+	
 	private ImageVob() {}
 
-	public static ImageVob newInstance(Image content, int x, 
+	public static ImageVob newInstance(LobbedPagePool pool, 
+					   int ind, int x, 
 					   int y, int w, int h) {
 	    ImageVob m = (ImageVob)FACTORY.object();
-	    m.img = content;
+	    WritableRaster raster =
+		Raster.createWritableRaster(
+		    pool.models[ind],
+		    pool.dataBuffs[ind],
+		    p);
+	    m.img = new BufferedImage(cm, raster, false, null);
 	    m.x0 = x; 
 	    m.y0 = y;
 	    m.w0 = w; 
 	    m.h0 = h;
 	    return m;
 	}
-
+	
 	/*
-	protected Vob wrap(Image img) {
-	    return newInstance(img, x0, y0, w0, h0);
-	}
+	  protected Vob wrap(Image img) {
+	  return newInstance(img, x0, y0, w0, h0);
+	  }
 	*/
 	public void render(Graphics g, boolean fast, 
 			   RenderInfo info1, RenderInfo info2) {
@@ -84,13 +105,14 @@ public class LobbedPagePool extends AWTPagePool {
 		    RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 	    
 	    //p("size: "+x0+"x"+y0+"@"+w0+"x"+h0);
+	    //p("this is really drawn! "+img);
 	    g.drawImage(img, 
-			x,y,x+w,y+h, 
-			x0,y0,x0+w0,y0+h0, 
+			x,y, x+w,y+h, 
+			x0,y0, x0+w0,y0+h0, 
 			null); 
 	}
-
-
+	
+	
 	private static final Factory FACTORY = new Factory() {
 		public Object create() {
 		    return new ImageVob();
@@ -121,8 +143,9 @@ public class LobbedPagePool extends AWTPagePool {
 	    int y = (int) (getH(index) * y0);
 	    int w = (int) (getW(index) * w0);
 	    int h = (int) (getH(index) * h0);
-	    l = Lobs.vob(ImageVob.newInstance(imgs[index], x,y,w,h));
-	} catch (ArrayIndexOutOfBoundsException e) {
+	    l = Lobs.vob(ImageVob.newInstance(this, index, x,y,w,h));
+	} catch (/*ArrayIndexOutOfBounds */Exception e) {
+	    e.printStackTrace();
 	    l = Components.label("no such pool index but it might be available soon ("+index+")");
 	}
 	return l;

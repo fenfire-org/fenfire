@@ -56,9 +56,15 @@ public class AWTPagePool {
     };
 
 
-    protected BufferedImage[] imgs;
+    static int[] mask = new int[]{ 0x00ff0000,
+				   0x0000ff00,
+				   0x000000ff };
+    
     protected int pixs[][];
-    private int[] buff, WxH;
+    protected ColorModel cms[];
+    protected DataBufferInt dataBuffs[];
+    protected SampleModel models[];
+    private int[] /*buff, */ WxH;
     protected int count, maxW, maxH;
     static protected Object instance;
     static protected boolean inited = false;
@@ -75,9 +81,10 @@ public class AWTPagePool {
 	    count += sizes[i][0];
 
 	// create images
-	imgs = new BufferedImage[count];
 	pixs = new int[count][];
 	WxH = new int[count*2];
+	dataBuffs = new DataBufferInt[count];
+	models = new SampleModel[count];
 
 	int ind = 0;
 	maxH = 0; maxW = 0;
@@ -92,8 +99,9 @@ public class AWTPagePool {
 		maxH = (maxH < h ? h : maxH);
 
 		pixs[ind] = new int[w*h];
-		imgs[ind] = new BufferedImage(w,h, 
-					      BufferedImage.TYPE_INT_ARGB);
+		dataBuffs[ind] = new DataBufferInt(pixs[ind], w*h);
+		models[ind] = new SinglePixelPackedSampleModel(
+		    DataBuffer.TYPE_INT, getW(ind), getH(ind), mask);
 		ind++;
 	    }
 	}
@@ -109,8 +117,6 @@ public class AWTPagePool {
 		    pixs[i][y*getW(i)+x] = c;
 		}
 	    }
-	    imgs[i].setRGB(0,0,getW(i), getH(i), 
-			  pixs[i], 0, getW(i));
 	}
 
 	/*
@@ -126,7 +132,7 @@ public class AWTPagePool {
 			  pixs[i], 0, getW(i));
 	}
 	*/
-	buff = new int[maxH*maxW];
+	//buff = new int[maxH*maxW];
 	inited = true;
     }
 
@@ -142,16 +148,14 @@ public class AWTPagePool {
     ImageConsumerImpl imgConsumer = new ImageConsumerImpl();
 	
     class ImageConsumerImpl implements ImageConsumer {
-	int[] mic = null;
-	int width = 0;
-	ColorModel cm = null;
+	int [] mic = null;
+	int width = -1;
 	void p(String s) { System.out.println("Consumer:: "+s); }
 	public void imageComplete(int status) {
 	    //p("imageComplete: "+status);
 	}
 	public void setColorModel(ColorModel model) { 
 	    //p("setColorModel: "+model);
-	    cm = model;
 	}
 	public void setDimensions(int width, int height) { 
 	    //p("setDimensions: "+width+"x"+height);
@@ -168,28 +172,26 @@ public class AWTPagePool {
 	public void setPixels(int x, int y, int w, int h, ColorModel m,
 				  int[] pixels, int off, int scansize) {
 
-	    for(int _y=0; _y<h; _y++) {
-		for (int _x=0; _x<w; _x++) {
-		    int p = pixels[off + _y*scansize + _x];
-		    int r = m.getRed(p);
-		    int g = m.getGreen(p);
-		    int b = m.getBlue(p);
-		    int a = m.getAlpha(p);
-		    mic[(y+_y)*width + x+_x] = (a<<24)|(r<<16)|(g<<8)|b;
-		}
-	    }
+           for(int _y=0; _y<h; _y++) {
+               for (int _x=0; _x<w; _x++) {
+                   int p = pixels[off + _y*scansize + _x];
+                   int r = m.getRed(p);
+                   int g = m.getGreen(p);
+                   int b = m.getBlue(p);
+                   int a = m.getAlpha(p);
+                   mic[(y+_y)*width + x+_x] = (a<<24)|(r<<16)|(g<<8)|b;
+               }
+           }
 	}
 	public void setProperties(java.util.Hashtable props) {
 	    //p("setProperties: "+props);
 	}
 	
-	public void setMem(int[] mem, int width) {
-	    this.mic = mem;
+	public void setMem(int[] mic, int width) {
+	    this.mic = mic;
 	    this.width = width;
 	}
     }
-
-    static int FOO = 255;
 
     public synchronized void setImage(InputStream in, int index, 
 				      int width, int height) 
@@ -204,7 +206,8 @@ public class AWTPagePool {
 					       maxW+"x"+maxH);
 	com.sixlegs.image.png.PngImage png = 
 	    new com.sixlegs.image.png.PngImage(in, true);
-	png.setBuffer(buff);
+	
+	//png.setBuffer(buff);
 	png.setFlushAfterNextProduction(true);
 
 	imgConsumer.setMem(pixs[index], width);
@@ -217,9 +220,6 @@ public class AWTPagePool {
 					       png.getHeight()+" != "+
 					       getW(index)+"x"+getH(index));
 	*/
-	imgs[index].setRGB(0,0,getW(index), getH(index), 
-			   pixs[index], 0, getW(index));
 	png.removeConsumer(imgConsumer);
     }
-
 }
