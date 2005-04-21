@@ -169,6 +169,7 @@ public class Storm {
 		    Dir d = new Dir(repo.pool, repo.root.getPath(), 
 				    rootId, null);
 		    pullHttp(d, src, root);
+		    writeFiles(d, root);
 			
 		} catch (Exception e) {
 		    e.printStackTrace();
@@ -182,6 +183,25 @@ public class Storm {
 	}
 	System.out.println("Unknown command: "+cmd+"\n");
 	printHelpAndExit();
+    }
+
+    static private void writeFiles(Dir d, File root) throws IOException {
+	for (Iterator i=d.iterator(); i.hasNext();) {
+	    String name = (String) i.next();
+	    String hash = d.get(name);
+	    BlockId id = new BlockId(hash);
+	    String bp = id.getBitprint();
+	    String ct = id.getContentType();
+	    p("name: "+name+", ct: "+ct);
+	    if (ct.equals("application/storm-x-file"))
+		CopyUtil.copy(new FileInputStream(new File(root, "/_storm/pool/data_"+bp)), 
+			      new FileOutputStream(new File(d.getPath(), name)));
+	    if (ct.equals("application/storm-x-dir")) {
+		(new File(d.getPath(), name)).mkdirs();
+		writeFiles(d.cd(name), root);
+	    }
+	}
+
     }
 
     static private void pullHttp(Dir d, String src, File root) throws IOException {
