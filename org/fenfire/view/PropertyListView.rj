@@ -215,20 +215,27 @@ public class PropertyListView implements SpatialView {
 	public boolean key(Graph graph, Cursor cursor, ReprView reprView, 
 			   Object prop, Object node, String key) {
 	    Literal value = (Literal)cursor.getRotation().getRotationNode();
-	    Lob lob = getRow(graph, cursor, reprView, node, prop, value);
+	    Lob lob = getRow(graph, cursor, reprView, node, prop, value, false);
 	    return lob.key(key);
 	}
 
 	Lob getRow(Graph graph, Cursor cursor, ReprView reprView,
-		   Object node, Object prop, Literal value) {
+		   Object node, Object prop, Literal value,
+		   boolean isFirst) {
 	    LobFont font = Components.font();
 	    
-	    List labelLobs = Lists.concat(reprView.getLobList(prop),
-					  font.textLn(":"));
-	    
-	    Lob label = Lobs.vbox();
-	    label.add(Lobs.hbox(labelLobs));
-	    label.add(Lobs.vglue());
+	    Lob label;
+
+	    if(isFirst) {
+		List labelLobs = Lists.concat(reprView.getLobList(prop),
+					      font.textLn(":"));
+		
+		label = Lobs.vbox();
+		label.add(Lobs.hbox(labelLobs));
+		label.add(Lobs.vglue());
+	    } else {
+		label = Lobs.nullLob();
+	    }
 	    
 
 	    List literalLobs = Lists.concat(font.text(value.getString()),
@@ -308,11 +315,15 @@ public class PropertyListView implements SpatialView {
 
 	    Lob vbox = Lobs.vbox();
 
+	    boolean isFirst = true;
 	    for(Iterator i = graph.findN_11X_Iter(node, prop); i.hasNext();) {
 		Literal value = (Literal)i.next();
 
-		vbox.add(getRow(graph, cursor, reprView, node, prop, value));
+		vbox.add(getRow(graph, cursor, reprView, node, prop, value,
+				isFirst));
 		vbox.add(Lobs.glue(Axis.Y, 2, 2, 2));
+
+		isFirst = false;
 	    }
 
 	    return vbox;
