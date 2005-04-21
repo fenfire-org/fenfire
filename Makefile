@@ -10,7 +10,7 @@ TEST=org/
 
 LDLIB=LD_LIBRARY_PATH=/usr/lib:../libvob/src/jni:${JAVAHOME}/jre/lib/i386:${JAVAHOME}/jre/lib/i386/client
 
-FFCLASSPATH=../depends/cryptix-jce-provider.jar:./build:../navidoc/CLASSES:../storm/CLASSES:../alph/CLASSES:../libvob/CLASSES:../depends/jython.jar:../depends/je.jar:../depends/png.jar:../depends/gnowsis/gnoclient.jar:../depends/gnowsis/xmlrpc-1.2-b1.jar:../depends/rio.jar:../depends/xom-1.0b7.jar:../depends/javolution.jar:../depends/gnowsis/remotebrowser.jar
+FFCLASSPATH=../depends/cryptix-jce-provider.jar:./build:../navidoc/CLASSES:../storm/CLASSES:../alph/CLASSES:../libvob/CLASSES:../depends/jython.jar:../depends/je.jar:../depends/png.jar:../depends/gnowsis/gnoclient.jar:../depends/gnowsis/xmlrpc-1.2-b1.jar:../depends/rio.jar:../depends/xom-1.0b7.jar:../depends/javolution.jar:../depends/gnowsis/remotebrowser.jar:../depends/java-getopt-1.0.11.jar
       # ../depends/libvob.jar
 
 PYTHONPATH=-Dpython.path=../depends/jythonlib.jar:../depends/jython.jar:../depends/pythonlib.jar:.:../libvob:../alph
@@ -77,6 +77,9 @@ run_notebook:
 
 run_fiction:
 	$(LDLIB) $(JAVACMD) $(DBG) org.fenfire.fenfiction.FenFiction
+
+storm:
+	$(JAVACMD) $(DBG) org.fenfire.bin.Storm $(ARGS)
 
 
 FEEDS='http://tbray.org/ongoing/ongoing.rss' 'http://dannyayers.com/index.rdf' 'http://captsolo.net/info/xmlsrv/rdf.php?blog=2' 'http://planet.classpath.org/rss10.xml'
