@@ -401,6 +401,8 @@ public class Main {
 
 	    k.put("Alt-N", new PotionAction(null, Potions.newNode, 
 					    graph, cursor, potionsCommand));
+	    k.put("Alt-M", new PotionAction(null, Potions.newLiteral, 
+					    graph, cursor, potionsCommand));
 	    k.put("Alt-C", new PotionAction(Potions.connect.call(Potions.currentNode, null, null), null,
 					    graph, cursor, potionsCommand));
 	    k.put("Alt-B", new PotionAction(Potions.connectBackwards.call(Potions.currentNode, null, null), null,
@@ -408,6 +410,10 @@ public class Main {
 	    k.put("Alt-L", new PotionAction(Potions.connect.call(Potions.currentNode, null, null),
 					    Potions.node(STRUCTLINK.linkedTo,
 							 "linkedTo"), 
+					    graph, cursor, potionsCommand));
+	    k.put("Alt-K", new PotionAction(Potions.connect.call(Potions.currentNode, null, null),
+					    Potions.node(RDFS.label,
+							 "rdfs:label"), 
 					    graph, cursor, potionsCommand));
 	    k.put("Alt-T", new PotionAction(null, Potions.currentNode,
 					    graph, cursor, potionsCommand));

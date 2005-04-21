@@ -81,6 +81,13 @@ public class Potions {
 	    }
 	}.call();
 
+    public static FunctionExpression newLiteral = 
+	new SimpleFunction(new Object[] { "a new literal" }) {
+	    public Object evaluate(Object[] params, Map context) {
+		return new PlainLiteral("");
+	    }
+	}.call();
+
 
     public static FunctionExpression currentNode = new AbstractFunction.Pattern() {
 	    public Head instantiatePattern(Map context) {
