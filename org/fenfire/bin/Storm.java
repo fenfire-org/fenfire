@@ -210,7 +210,7 @@ public class Storm {
 					    new File(root, "_storm/root")
 					    )))).readLine(), null);
 		// check that we are not playing something stupid...
-		if (parents.getFirst().equals("_storm")) {
+		if (parents.size() > 0 && parents.getFirst().equals("_storm")) {
 		    p("You are trying to add to _storm directory -- "+ 
 		      "I will say this only once: *do not do that!*.");
 		    return;
@@ -233,7 +233,7 @@ public class Storm {
 
 		// DIRECTORY
 		if (f.isDirectory()) {
-		    d.add(
+		    d.addDir(name);
 		    p("dir "+name);
 		} 
 		// FILE
@@ -325,6 +325,26 @@ public class Storm {
 		e.printStackTrace();
 		throw new Error(e.getMessage());
 	    }
+	}
+
+	public void addDir(String d) {
+	    try {
+		// write file
+		BlockOutputStream bos = pool.getBlockOutputStream(
+		    "application/storm-x-dir");
+		bos.close();
+
+		SortedMap m = name2hash();
+		m.put(d, bos.getBlockId().getURI());
+
+		BlockId id = writeDir(m);
+		// update this and other dirs too..
+		update(dir, id.getURI());
+	    } catch (IOException e) {
+		e.printStackTrace();
+		throw new Error(e.getMessage());
+	    }
+
 	}
 
 
