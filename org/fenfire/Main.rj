@@ -212,6 +212,8 @@ public class Main {
 	Set noShowProps;
 	NamespaceMap nmap;
 
+	Model potionsCommand = SimpleModel.newInstance();
+
 	SpatialViewSettings spatialViewSettings;
 	ReprViewSettings reprViewSettings;
 	ReprView reprView;
@@ -397,7 +399,7 @@ public class Main {
 	    });
 
 
-	    Model potionsCommand = StateModel.newInstance("potions command");
+	    //Model potionsCommand = StateModel.newInstance("potions command");
 
 	    k.put("Alt-N", new PotionAction(null, Potions.newNode, 
 					    graph, cursor, potionsCommand));
@@ -423,9 +425,13 @@ public class Main {
 							       "start node"),
 					    graph, cursor, potionsCommand));
 
+	    Lob mainLob = getMainLob();
+	    mainLob = Lobs.keyController(mainLob, k);
+	    mainLob = UniqueShortcutController.newInstance(mainLob, allProps, graph, cursor, potionsCommand);
+
 	    Lob main = Lobs.tray(false);
 	    main.add(Lobs.align(getDocLob(), 0, 1));
-	    main.add(Lobs.keyController(getMainLob(), k));
+	    main.add(mainLob);
 
 
 	    List sortedProps = FastList.newInstance(); 
@@ -445,6 +451,8 @@ public class Main {
 		RoleContext.exit();
 	    }
 
+	    Lob propbox = Views.propbox(graph, reprView, allProps, noShowProps);
+
 	    /*
 	    Model templateNode = Parameter.model(ListModel.PARAM, new ObjectModel(startNode));
 	    Model templateText = new NodeTextModel(graph, templateNode, nmap, textProps, RDFS.label);
@@ -455,6 +463,7 @@ public class Main {
 	    */
 
 	    Lob hbox = Lobs.hbox();
+	    hbox.add(Lobs.request(Axis.X, propbox, 150, 150, 150));
 	    hbox.add(main);
 	    hbox.add(Lobs.request(Axis.X, viewbox, 250, 250, 250));
 

@@ -30,11 +30,17 @@ import org.fenfire.util.*;
 import org.nongnu.libvob.fn.*;
 import org.nongnu.libvob.lob.*;
 import org.fenfire.view.repr.*;
+import org.fenfire.swamp.*;
+import org.fenfire.vocab.*;
 import javolution.realtime.*;
 import javolution.util.*;
 import java.util.*;
 
 public class Views {
+
+    private static final Object
+	PROP_CATEGORY = Nodes.get("http://fenfire.org/2005/04/categories#PropertyCategory"),
+	CATEGORY_ITEM = Nodes.get("http://fenfire.org/2005/04/categories#item");
 
     /**
      *  @param align If < 0, align top or left; if == 0, align center;
@@ -85,5 +91,142 @@ public class Views {
 	    viewbox.add(Lobs.glue(axis, 0, 0, SizeRequest.INF));
 
 	return viewbox;
+    }
+
+
+    public static Lob propbox(Graph graph, ReprView reprView, 
+			      List allProps, Set noShowProps) {
+	List categories = Lists.list();
+	Map propsByCategory = FastMap.newInstance();
+	Map categoryByProp = FastMap.newInstance();
+	
+	for(Iterator i=graph.findN_X11_Iter(RDF.type, PROP_CATEGORY);
+	    i.hasNext();) {
+
+	    Object category = i.next();
+	    
+	    List props = Lists.list();
+	    
+	    for(Iterator j=graph.findN_11X_Iter(category, CATEGORY_ITEM);
+		j.hasNext();) {
+		
+		Object prop = j.next();
+		
+		if(!allProps.contains(prop)) continue;
+		if(categoryByProp.containsKey(prop)) continue;
+		
+		props.add(prop);
+	    }
+	    
+	    if(!props.isEmpty()) {
+		Collections.sort(props);
+		
+		categories.add(category);
+		propsByCategory.put(category, props);
+		
+		for(Iterator ii=props.iterator(); ii.hasNext();)
+		    categoryByProp.put(ii.next(), category);
+	    }
+	}
+	
+	List noCategoryProps = FastList.newInstance(); 
+	noCategoryProps.addAll(allProps);
+	noCategoryProps.removeAll(categoryByProp.keySet());
+	Collections.sort(noCategoryProps);
+	
+	Collections.sort(categories);
+	
+	Lob propbox;
+	
+	RoleContext.enter("properties listbox");
+	try {
+	    Tree propertyTree = new @realtime-i Tree(List categories, Map propsByCategory, List noCategoryProps, Map categoryByProp) {
+		public List getChildren(Object parent) {
+		    
+		    if(parent == null) {
+			return Lists.concat(categories, noCategoryProps);
+		    } else {
+			if(categories.contains(parent)) {
+			    return (List)propsByCategory.get(parent);
+			} else {
+			    return Lists.list();
+			}
+		    }
+		}
+		
+		public Object getParent(Object child) {
+		    Object cat = categoryByProp.get(child);
+		    if(cat != null) return cat;
+		    return null;
+		}
+	    };
+	    
+	    Transform transform = new @realtime-i Transform(ReprView reprView, List categories, Set noShowProps) {
+		public Object transform(Object o) {
+		    
+		    if(categories.contains(o)) {
+			Lob lob = reprView.getLob(o);
+			Lob hbox = Lobs.hbox();
+			
+			Lob checkbox = Lobs.vbox();
+			checkbox.add(Components.singleCheckBox(SimpleModel.newInstance(Boolean.TRUE)));
+			checkbox.add(Lobs.glue(Axis.Y, 0, 0, SizeRequest.INF));
+			
+			hbox.add(checkbox);
+			hbox.add(Lobs.glue(Axis.X, 5, 5, 5));
+			hbox.add(lob);
+			return hbox;
+		    }
+		    
+		    Model propShownModel = new @realtime-i Model(Object o, Set noShowProps) {
+			public Object get() {
+			    if(noShowProps.contains(o)) {
+				return Boolean.FALSE;
+			    } else {
+				return Boolean.TRUE;
+			    }
+			}
+			
+			public void set(Object value) {
+			    if(value == Boolean.TRUE) {
+				noShowProps.remove(o);
+			    } else {
+				noShowProps.add(o);
+			    }
+			}
+			
+			public int getInt() {
+			    throw new UnsupportedOperationException();
+			}
+			public void set(int value) {
+			    throw new UnsupportedOperationException();
+			}
+		    };
+		    
+		    Lob checkbox = Lobs.vbox();
+		    checkbox.add(Components.singleCheckBox(propShownModel));
+		    checkbox.add(Lobs.glue(Axis.Y, 0, 0, SizeRequest.INF));
+		    
+		    LobFont font = Components.font();
+
+		    List lobs = Lists.concat(Lists.list(checkbox, Lobs.glue(Axis.X, 5, 5, 5)),
+					     reprView.getLobList(o),
+					     font.textLn(" (" + UniqueShortcutController.getShortcut(o) + ")"));
+
+		    return Lobs.linebreaker(lobs);
+		}
+	    };
+	    
+	    propbox = Components.treeBox(propertyTree, 
+					 Maps.map("transform", transform));
+	    
+	    propbox = Lobs.ignoreKeyEventsLob(propbox);
+	    
+	    propbox = RoleContext.lob(propbox);
+	} finally {
+	    RoleContext.exit();
+	}
+	
+	return propbox;
     }
 }

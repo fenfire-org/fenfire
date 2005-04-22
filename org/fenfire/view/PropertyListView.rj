@@ -205,11 +205,6 @@ public class PropertyListView implements SpatialView {
     /** Literal viewlet shows a short, literal-valued property */
     public static class LiteralViewlet implements Viewlet {
 	public boolean canRender(Graph graph, Object prop, Object node) {
-	    if(prop.equals(RDFS.label)) 
-		// show an rdfs:label even if there isn't one
-		// to make it easy to add one
-		return true;
-
 	    Iterator i = graph.findN_11X_Iter(node, prop);
 	    if(!i.hasNext()) return false;
 
@@ -702,9 +697,6 @@ public class PropertyListView implements SpatialView {
 
 	List conns = getConnectionList(graph, node, prop, rdir);
 
-	if(prop.equals(RDFS.label) && conns.isEmpty())
-	    conns.add(EMPTY_LITERAL);
-
 	int index = indexOf(conns, value);
 	if(index < 0) return; // XXX
 
@@ -717,9 +709,6 @@ public class PropertyListView implements SpatialView {
 	}
 
 	conns = getConnectionList(graph, node, prop, -rdir);
-
-	if(prop.equals(RDFS.label) && conns.isEmpty())
-	    conns.add(EMPTY_LITERAL);
 
 	if(index >= 0 && index < conns.size()) {
 	    cursor.setRotation(node, prop, conns.get(index), -rdir);
@@ -749,11 +738,7 @@ public class PropertyListView implements SpatialView {
 	    right = getConnectionList(graph, node, prop, 1);
 
 	    if(left.size() == 0 && right.size() == 0) {
-		if(prop.equals(RDFS.label)) {
-		    right.add(EMPTY_LITERAL);
-		} else {
-		    continue;
-		}
+		continue;
 	    }
 
 	    if(dir > 0) {
