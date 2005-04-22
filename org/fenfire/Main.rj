@@ -92,6 +92,7 @@ public class Main {
 	"canvas", "http://fenfire.org/rdf-v/2003/05/canvas2d#",
 	"dc", "http://purl.org/dc/elements/1.1/",
 	"pspdf", "http://fenfire.org/rdf-v/2005/04/ps-pdf-region#",
+	"cat", "http://fenfire.org/2005/04/categories#",
     };
 
     public static void main(String[] argv) throws IOException {
@@ -182,6 +183,11 @@ public class Main {
 		gf = new GraphFile.XML(file, gf_graph, new HashGraph());
 
 	    if(gf0 == null) {
+
+		Iterator iter = gf_graph.findN_XAA_Iter();
+		if(iter.hasNext())
+		    mainnode = iter.next();
+
 		gf0 = gf;
 	    }
 	}

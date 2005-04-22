@@ -1,0 +1,91 @@
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix foaf: <http://xmlns.com/foaf/0.1/>.
+@prefix doap: <http://usefulinc.com/ns/doap#>.
+@prefix dc:   <http://purl.org/dc/elements/1.1/>.
+@prefix dc10: <http://purl.org/dc/elements/1.0/>.
+@prefix sl:   <http://fenfire.org/rdf-v/2003/05/structlink#>.
+
+@prefix vcard: <http://www.w3.org/2001/vcard-rdf/3.0#>.
+
+@prefix cat:  <http://fenfire.org/2005/04/categories#>.
+@prefix pcat: <http://foo.example/property-categories#>.
+
+pcat:category_textprops
+
+    a          cat:PropertyCategory;
+    rdfs:label "Text properties";
+
+    cat:item rdfs:label, rdfs:description, rdf:value,
+             dc:title, dc10:title, vcard:FN, foaf:name, foaf:firstName, 
+	     foaf:firstname, foaf:givenName, foaf:surname,
+             <http://norman.walsh.name/knows/taxonomy#primary>,
+             <http://fenfire.org/rdf-v/2003/05/ff#content>.
+
+pcat:category_weblinkprops
+
+    a          cat:PropertyCategory;
+    rdfs:label "Web link properties";
+
+    cat:item foaf:weblog, foaf:homepage, foaf:schoolHomepage,
+             foaf:workplaceHomepage, foaf:publications,
+             foaf:pubkeyAddress, foaf:mbox_sha1sum,
+             foaf:wishlist, foaf:workInfoHomepage, rdfs:seeAlso, 
+             <http://xmlns.com/wot/0.1/assurance>.
+
+pcat:category_relationships
+
+    a          cat:PropertyCategory;
+    rdfs:label "Relationships between people";
+
+    cat:item foaf:knows.
+
+pcat:category_docinfo
+
+    a          cat:PropertyCategory;
+    rdfs:label "Document information";
+
+    cat:item dc:creator, dc:contributor, dc:description, dc:format,
+             foaf:maker.
+
+pcat:category_contactinfo
+
+    a          cat:PropertyCategory;
+    rdfs:label "Contact information";
+
+    cat:item foaf:mbox, foaf:phone, foaf:nick.
+
+
+pcat:category_moreAboutPeople
+
+    a          cat:PropertyCategory;
+    rdfs:label "More about people";
+
+    cat:item foaf:contribProject, foaf:interest, foaf:myersBriggs,
+             foaf:currentProject, foaf:title.
+
+pcat:category_places
+
+    a          cat:PropertyCategory;
+    rdfs:label "Places";
+
+    cat:item 
+        <http://www.daml.org/2001/10/html/airport-ont#iataCode>,
+        <http://www.daml.org/2001/10/html/airport-ont#icaoCode>,
+        <http://www.w3.org/2000/10/swap/pim/contact#nearestAirport>,
+        <http://www.w3.org/2003/01/geo/wgs84_pos#lat>,
+        <http://www.w3.org/2003/01/geo/wgs84_pos#long>.
+
+pcat:category_images
+
+    a          cat:PropertyCategory;
+    rdfs:label "Images";
+
+    cat:item foaf:img, foaf:depiction, foaf:thumbnail.
+
+pcat:category_links
+
+    a          cat:PropertyCategory;
+    rdfs:label "Links";
+
+    cat:item sl:linkedTo.
