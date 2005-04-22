@@ -278,6 +278,9 @@ public class Main {
 		e.printStackTrace();
 	    }
 
+	    noShowProps = new HashSet();
+	    //noShowProps.addAll(textProps); // not useful with PropertyListView, as opposed to StructureView
+
 	    Set reprViews = new HashSet(Arrays.asList(new Object[] {
 		new ImageReprView(graph, IMAGE_TYPES),
 		new TextReprView(graph, cursor, nmap, textProps, 
@@ -306,7 +309,7 @@ public class Main {
 
 	    Set spatialViews = new HashSet(Arrays.asList(new Object[] {
 		new DocumentSpatialView(graph, windowAnim),
-		new PropertyListView(graph, listViewProperties,
+		new PropertyListView(graph, listViewProperties, noShowProps,
 				     listViewViewlets,
 				     reprView),
 		//new SimpleSpatialView(reprView),
@@ -316,9 +319,6 @@ public class Main {
 	    }));
 
 	    spatialViewSettings = new SpatialViewSettings(spatialViews);
-
-	    noShowProps = new HashSet();
-	    noShowProps.addAll(textProps);
 	}
 
 	protected Lob getMainLob() {

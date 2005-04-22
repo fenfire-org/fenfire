@@ -545,13 +545,15 @@ public class PropertyListView implements SpatialView {
     
     Graph graph;
     List properties;
+    Set noShowProps;
     List viewlets;
     ReprView reprView;
 
-    public PropertyListView(Graph graph, List properties,
+    public PropertyListView(Graph graph, List properties, Set noShowProps,
 			    List viewlets, ReprView reprView) {
 	this.graph = graph;
 	this.properties = properties;
+	this.noShowProps = noShowProps;
 	this.viewlets = viewlets;
 	this.reprView = reprView;
     }
@@ -564,7 +566,9 @@ public class PropertyListView implements SpatialView {
 	Object node = cursor.getNode();
 
 	List lobs = new @realtime RealtimeList(Cursor cursor, Object node,
-					       List properties, List viewlets,
+					       List properties, 
+					       Set noShowProps,
+					       List viewlets,
 					       Graph graph, ReprView reprView){
 	    public int size() {
 		return properties.size();
@@ -572,6 +576,8 @@ public class PropertyListView implements SpatialView {
 
 	    public Object get(int i) {
 		Object prop = properties.get(i);
+		if(noShowProps.contains(prop)) 
+		return Lobs.glue(Axis.Y, 0, 0, 0);
 		
 		for(int iter = 0; iter < viewlets.size(); iter++) {
 		    Viewlet v = (Viewlet)viewlets.get(iter);
@@ -734,12 +740,14 @@ public class PropertyListView implements SpatialView {
 
 	    prop = properties.get(pindex);
 	
+	    if(noShowProps.contains(prop))
+		continue;
+
 	    left = getConnectionList(graph, node, prop, -1);
 	    right = getConnectionList(graph, node, prop, 1);
 
-	    if(left.size() == 0 && right.size() == 0) {
+	    if(left.size() == 0 && right.size() == 0)
 		continue;
-	    }
 
 	    if(dir > 0) {
 		if(right.size() > 0) {
