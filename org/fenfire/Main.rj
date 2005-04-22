@@ -217,7 +217,7 @@ public class Main {
 
 	Cursor cursor;
 	Set textProps;
-	Set noShowProps;
+	Set noShowProps, activeCategories;
 	NamespaceMap nmap;
 
 	Model potionsCommand = SimpleModel.newInstance();
@@ -281,6 +281,8 @@ public class Main {
 	    noShowProps = new HashSet();
 	    //noShowProps.addAll(textProps); // not useful with PropertyListView, as opposed to StructureView
 
+	    activeCategories = new HashSet();
+
 	    Set reprViews = new HashSet(Arrays.asList(new Object[] {
 		new ImageReprView(graph, IMAGE_TYPES),
 		new TextReprView(graph, cursor, nmap, textProps, 
@@ -333,6 +335,14 @@ public class Main {
 	    Set allProps0 = FastSet.newInstance();
 	    for(Iterator i=graph.findN_AXA_Iter(); i.hasNext();)
 		allProps0.add(i.next());
+
+	    for(Iterator i=graph.findN_X11_Iter(RDF.type, Views.PROP_CATEGORY); i.hasNext();) {
+
+		Object cat = i.next();
+
+		for(Iterator j=graph.findN_11X_Iter(cat, Views.CATEGORY_ITEM); j.hasNext();)
+		    allProps0.add(j.next());
+	    }
 
 	    List allProps = FastList.newInstance();
 	    allProps.addAll(allProps0);
@@ -457,7 +467,7 @@ public class Main {
 		RoleContext.exit();
 	    }
 
-	    Lob propbox = Views.propbox(graph, reprView, allProps, noShowProps);
+	    Lob propbox = Views.propbox(graph, reprView, allProps, noShowProps, activeCategories);
 
 	    /*
 	    Model templateNode = Parameter.model(ListModel.PARAM, new ObjectModel(startNode));
@@ -469,9 +479,9 @@ public class Main {
 	    */
 
 	    Lob hbox = Lobs.hbox();
-	    hbox.add(Lobs.request(Axis.X, propbox, 150, 150, 150));
+	    hbox.add(Lobs.request(Axis.X, propbox, 200, 200, 200));
 	    hbox.add(main);
-	    hbox.add(Lobs.request(Axis.X, viewbox, 250, 250, 250));
+	    hbox.add(Lobs.request(Axis.X, viewbox, 200, 200, 200));
 
 	    Lob locationBar;
 

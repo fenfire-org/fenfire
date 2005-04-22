@@ -38,7 +38,7 @@ import java.util.*;
 
 public class Views {
 
-    private static final Object
+    public static final Object
 	PROP_CATEGORY = Nodes.get("http://fenfire.org/2005/04/categories#PropertyCategory"),
 	CATEGORY_ITEM = Nodes.get("http://fenfire.org/2005/04/categories#item");
 
@@ -95,7 +95,8 @@ public class Views {
 
 
     public static Lob propbox(Graph graph, ReprView reprView, 
-			      List allProps, Set noShowProps) {
+			      List allProps, Set noShowProps,
+			      Set activeCategories) {
 	List categories = Lists.list();
 	Map propsByCategory = FastMap.newInstance();
 	Map categoryByProp = FastMap.newInstance();
@@ -104,7 +105,7 @@ public class Views {
 	    i.hasNext();) {
 
 	    Object category = i.next();
-	    
+
 	    List props = Lists.list();
 	    
 	    for(Iterator j=graph.findN_11X_Iter(category, CATEGORY_ITEM);
@@ -140,13 +141,13 @@ public class Views {
 	
 	RoleContext.enter("properties listbox");
 	try {
-	    Tree propertyTree = new @realtime-i Tree(List categories, Map propsByCategory, List noCategoryProps, Map categoryByProp) {
+	    Tree propertyTree = new @realtime-i Tree(List categories, Map propsByCategory, List noCategoryProps, Map categoryByProp, Set activeCategories) {
 		public List getChildren(Object parent) {
 		    
 		    if(parent == null) {
 			return Lists.concat(categories, noCategoryProps);
 		    } else {
-			if(categories.contains(parent)) {
+			if(activeCategories.contains(parent)) {
 			    return (List)propsByCategory.get(parent);
 			} else {
 			    return Lists.list();
@@ -161,15 +162,41 @@ public class Views {
 		}
 	    };
 	    
-	    Transform transform = new @realtime-i Transform(ReprView reprView, List categories, Set noShowProps) {
+	    Transform transform = new @realtime-i Transform(ReprView reprView, List categories, Set noShowProps, Set activeCategories) {
 		public Object transform(Object o) {
 		    
 		    if(categories.contains(o)) {
+			Model catShownModel = new @realtime-i Model(Object o, Set activeCategories) {
+			    public Object get() {
+				if(activeCategories.contains(o)) {
+				    return Boolean.TRUE;
+				} else {
+				    return Boolean.FALSE;
+				}
+			    }
+			    
+			    public void set(Object value) {
+				if(value == Boolean.TRUE) {
+				    activeCategories.add(o);
+				} else {
+				    activeCategories.remove(o);
+				}
+			    }
+			    
+			    public int getInt() {
+				throw new UnsupportedOperationException();
+			    }
+			    public void set(int value) {
+				throw new UnsupportedOperationException();
+			    }
+			};
+		    
+
 			Lob lob = reprView.getLob(o);
 			Lob hbox = Lobs.hbox();
 			
 			Lob checkbox = Lobs.vbox();
-			checkbox.add(Components.singleCheckBox(SimpleModel.newInstance(Boolean.TRUE)));
+			checkbox.add(Components.singleCheckBox(catShownModel));
 			checkbox.add(Lobs.glue(Axis.Y, 0, 0, SizeRequest.INF));
 			
 			hbox.add(checkbox);
