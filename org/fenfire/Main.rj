@@ -104,6 +104,7 @@ public class Main {
 	List pipes = new LinkedList();
 
 	Object mainnode = null;
+	NamespaceMap nmap = new NamespaceMap();
 
 	if(argv.length == 0) {
 	    File f = File.createTempFile("fenfire", "turtle");
@@ -182,8 +183,9 @@ public class Main {
 	    else
 		gf = new GraphFile.XML(file, gf_graph, new HashGraph());
 
-	    if(gf0 == null) {
+	    nmap.putAll(gf.getNamespaces());
 
+	    if(gf0 == null) {
 		Iterator iter = gf_graph.findN_XAA_Iter();
 		if(iter.hasNext())
 		    mainnode = iter.next();
@@ -200,7 +202,7 @@ public class Main {
 
 	final Graph graph = new AllQuadsGraph(quadsGraph, "");
 
-	FenfireMain m = new FenfireMain(quadsGraph, graph, gf0, mainnode, 
+	FenfireMain m = new FenfireMain(quadsGraph, graph, gf0, mainnode, nmap,
 					(File[]) pipes.toArray(new File[0]));
 	m.start();
     }
@@ -231,8 +233,10 @@ public class Main {
 
 	public FenfireMain(SmushedQuadsGraph quadsGraph, Graph graph,
 			   GraphFile graphFile, Object startNode,
-			   File[] pipes) {
+			   NamespaceMap nmap, File[] pipes) {
 	    super(BG_COLOR);
+
+	    this.nmap = nmap;
 
 	    dontUseFocusLob = true; // argh!
 	    
@@ -260,12 +264,8 @@ public class Main {
 	    for(int i=0; i<TEXT_PROPS.length; i++)
 		textProps.add(Nodes.get(TEXT_PROPS[i]));
 
-	    nmap = new NamespaceMap();
 	    for(int i=0; i<NAMESPACES.length; i+=2)
 		nmap.put(NAMESPACES[i], NAMESPACES[i+1]);
-
-	    if(graphFile != null)
-		nmap.putAll(graphFile.getNamespaces());
 
 	    for(int i=0; i<pipes.length; i++)
 		readPipeThread(quadsGraph, pipes[i].toURI().toString(), 
