@@ -93,6 +93,7 @@ public class Main {
 	"dc", "http://purl.org/dc/elements/1.1/",
 	"pspdf", "http://fenfire.org/rdf-v/2005/04/ps-pdf-region#",
 	"cat", "http://fenfire.org/2005/04/categories#",
+	"rss", "http://purl.org/rss/1.0/",
     };
 
     public static void main(String[] argv) throws IOException {
