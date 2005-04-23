@@ -39,21 +39,46 @@ import javolution.util.*;
 import java.awt.Color;
 import java.util.*;
 
+/** PropertyListView shows a node as its represenation and a list of
+ *  its properties. Each property is shown by a viewlet that claims
+ *  to render the property in question.
+ *
+ *  @see ReprView, PropertyListView.Viewlet
+ */
 public class PropertyListView implements SpatialView {
     private static final void p(String s) { System.out.println("PropertyListReprView:: "+s); }
 
     private static final Literal EMPTY_LITERAL = new PlainLiteral("");
 
-    /** Viewlet is a small view that renders a property of a node */
+    // PropertyListView implementation is at the end of the file, it uses
+    // the following Viewlets.
+
+    /** Viewlet is a small view that renders a property of a node.
+     *  SimpleViewlet is the general and normal implementation, which
+     *  other viewlets should match in look and feel.
+     */
     public interface Viewlet {
+	/** Decides whether the viewlet should be considered to render the 
+	 *  given property. Should return true if the viewlet can render all 
+	 *  information of the property adequately. 
+	 */
 	boolean canRender(Graph graph, Object prop, Object node);
+	/** Renders the given property as a lob. The lob should be
+	 *  wide and not tall, and contain a KeyLob for focus indicator.
+	 */
 	Lob getLob(Graph graph, ReprView reprView, Cursor cursor, 
 		   Object prop, Object node);
+	/** Handles any interesting key events the view sends to the currently 
+	 *  selected viewlet.
+	 *  @return true if the event was handled, false otherwise
+	 *  @see Lob.key
+	 */
 	boolean key(Graph graph, Cursor cursor, ReprView reprView, 
 		    Object prop, Object node, String key);
     }
 
-    /** Simple viewlet shows any property using the representation view */
+    /** Simple viewlet shows any property using the representation view. This
+     *  is the general and normal viewlet implementation. */
     public static class SimpleViewlet implements Viewlet {
 	public boolean canRender(Graph graph, Object prop, Object node) {
 	    return 
