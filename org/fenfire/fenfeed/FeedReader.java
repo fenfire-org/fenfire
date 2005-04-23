@@ -110,15 +110,27 @@ public class FeedReader {
 	    }
 
 	    nu.xom.Nodes nodes; 
+	    Element elem;
 	    try {
 		nodes = getTransform().transform(xml);
+		elem = (Element)nodes.get(0);
 	    } catch(XSLException e) {
 		throw new IOException(""+e);
 	    }
 
+	    // work around a weird bug in the XSLT engine
+	    Element channel = elem.getFirstChildElement("channel", "http://purl.org/rss/1.0/");
+	    Attribute about = channel.getAttribute("about", "http://purl.org/rss/1.0/");
+	    if(about != null) {
+		about.setNamespace("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+		System.out.println("set about attribute namespace");
+	    } else {
+		System.out.println("no about attribute in rss namespace");
+	    }
+
 	    ByteArrayOutputStream bos = new ByteArrayOutputStream();
 	    Serializer serializer = new Serializer(bos, "UTF-8");
-	    serializer.write(new Document((Element)nodes.get(0)));
+	    serializer.write(new Document(elem));
 
 	    InputStream bin = new ByteArrayInputStream(bos.toByteArray());
 	    Graphs.readXML(bin, baseURI, graph, namespaces);
