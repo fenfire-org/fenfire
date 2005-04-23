@@ -90,16 +90,25 @@ public class NamespaceMap {
     public Text getAbbrev(String uri) {
 	Text uri_text = Text.valueOf(uri);
 
+	int longest = -1;
+	int longest_len = -1;
+
 	for(int i=0; i<n; i++) {
 	    if(uri.startsWith(uris[i])) {
-		Text prefix_text = Text.valueOf(names[i]);
-		Text local_text = uri_text.subtext(uris[i].length());
-		
-		return prefix_text.concat(COLON).concat(local_text);
+		int len = uris[i].length();
+		if (len > longest_len) {
+		    longest_len = len;
+		    longest = i;
+		}
 	    }
 	}
+	if (longest < 0)
+	    return uri_text;
 
-	return uri_text;
+	Text prefix_text = Text.valueOf(names[longest]);
+	Text local_text = uri_text.subtext(longest_len);
+		
+	return prefix_text.concat(COLON).concat(local_text);
     }
 
     public String getAbbrevString(String uri) {
