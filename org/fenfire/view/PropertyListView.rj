@@ -500,7 +500,7 @@ public class PropertyListView implements SpatialView {
 
 	public boolean key(Graph graph, Cursor cursor, ReprView reprView, Object prop, 
 			   Object node, String key) {
-	    return false;
+	    return getLob(graph, reprView, cursor, prop, node).key(key);
 	}
 
 	public Lob getReverseLob(Graph graph, ReprView reprView, Cursor cursor,
@@ -601,7 +601,41 @@ public class PropertyListView implements SpatialView {
 
 	    hbox.add(Components.frame(Lobs.request(Axis.X, rightValues, 
 						   0, 0, Lob.INF)));
-	    return hbox;
+
+	    Object key = newKey(prop, container, 1);
+	    Lob keylob = Lobs.key(Lobs.nullLob(), key);
+	    Lob lob = Lobs.between(keylob, hbox, null);
+	    
+	    lob = Lobs.clickController(lob, 1, new @realtime-i Action(Cursor cursor, Object node, Object prop, Object container) {
+		public void run() {
+		    cursor.setRotation(node, prop, container);
+		}
+	    });
+
+	    lob = Lobs.noGrow(Axis.Y, lob);
+	    lob = Lobs.ignoreKeyEventsLob(lob);
+
+	    Map keys = FastMap.newInstance();
+	    keys.put("Right", new @realtime-i Action(Graph graph, Cursor cursor) {
+		public void run() {
+		    PropertyListView.move(graph, cursor, 1);
+		}
+	    });
+	    keys.put("Ctrl-Right", new @realtime-i Action(Graph graph, Cursor cursor) {
+		public void run() {
+		    Object prop = cursor.getRotation().getRotationProperty();
+		    Object node = 
+			PropertyListView.getConnection(graph, cursor, 1);
+
+		    if(node == null) return;
+
+		    graph.rm_111(cursor.getNode(), prop, node);
+		}
+	    });
+
+	    lob = Lobs.keyController(lob, keys);
+
+	    return lob;
 	}
     }
     
