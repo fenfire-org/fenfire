@@ -482,13 +482,27 @@ public class PropertyListView implements SpatialView {
 	    leftLabel = vbox;
 
 	    Lob left = Components.frame(reprView.getLob(source));
+	    left = Lobs.clickController(left, 1, new @realtime-i Action(Cursor cursor, Object source) {
+		public void run() {
+		    cursor.set(source);
+		    
+		    VobScene sc = ClickController.getClickScene();
+		    int cs = ClickController.getClickCS();
+		    
+		    ConnectionVobMatcher m = (ConnectionVobMatcher)sc.matcher;
+		    m.setNextFocus(cs);
+		}
+	    });
+	    left = ConnectorLob.newInstance(left, reverseProperty, source, -1);
 
 
 	    Lob hbox = Lobs.hbox();
 
 	    hbox.add(Lobs.request(Axis.X, leftLabel, 0, 0, 2*Lob.INF/3));
 	    hbox.add(Lobs.request(Axis.X, left, 0, 0, Lob.INF));
-	    hbox.add(Lobs.request(Axis.X, Lobs.nullLob(), 0, 0, 5*Lob.INF/3));
+	    hbox.add(Lobs.glue(Axis.X, 15, 15, 15));
+	    hbox.add(Lobs.request(Axis.X, Lobs.nullLob(), 0, 0, 2*Lob.INF/3));
+	    hbox.add(Lobs.request(Axis.X, Lobs.nullLob(), 0, 0, Lob.INF));
 
 	    return Lobs.noGrow(Axis.Y, hbox);
 	}
@@ -500,22 +514,17 @@ public class PropertyListView implements SpatialView {
 		return getReverseLob(graph, reprView, cursor, reverseProperty, 
 				     graph.find1_X11(prop, node));
 
+	    LobFont font = Components.font();
+
+	    Lob leftLabel = Lobs.hbox(Lists.concat(reprView.getLobList(prop),
+						   font.textLn(":")));
+
 	    Lob vbox = Lobs.vbox();
+	    vbox.add(leftLabel);
+	    vbox.add(Lobs.vglue());
+	    leftLabel = vbox;
 
-	    Lob lob = Lobs.hbox(reprView.getLobList(prop));
-
-	    Lob hbox = Lobs.hbox();
-	    hbox.add(lob);
-	    hbox.add(Lobs.hglue());
-
-	    vbox.add(hbox);
-
-	    hbox = Lobs.hbox();
-	    Lob rightValues = Components.frame(Lobs.vbox(), 
-					      Maps.map("clip", Boolean.FALSE));
-	    hbox.add(Lobs.request(Axis.X, rightValues, 0, 0, Lob.INF));
-
-	    vbox.add(hbox);
+	    Lob rightValues = Lobs.vbox();
 
 	    Object container = graph.find1_11X(node, prop);
 
@@ -550,7 +559,13 @@ public class PropertyListView implements SpatialView {
 	    }
 	    rightValues.add(Lobs.vglue());
 
-	    return Lobs.noGrow(Axis.Y, vbox);
+	    Lob hbox = Lobs.hbox();
+
+	    hbox.add(Lobs.request(Axis.X, leftLabel, 0, 0, Lob.INF/4));
+
+	    hbox.add(Components.frame(Lobs.request(Axis.X, rightValues, 
+						   0, 0, Lob.INF)));
+	    return hbox;
 	}
     }
     
