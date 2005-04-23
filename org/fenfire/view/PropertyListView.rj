@@ -132,6 +132,11 @@ public class PropertyListView implements SpatialView {
 
 		    left = valueLob(cursor, reprView, prop, lvalue, -1);
 		    llabel = isFirst ? leftLabel : Lobs.nullLob();
+
+		    Lob box = Lobs.vbox();
+		    box.add(left);
+		    box.add(Lobs.vglue());
+		    left = box;
 		} else {
 		    left = llabel = Lobs.nullLob();
 		    lvalue = null;
@@ -142,6 +147,11 @@ public class PropertyListView implements SpatialView {
 
 		    right = valueLob(cursor, reprView, prop, rvalue, 1);
 		    rlabel = isFirst ? rightLabel : Lobs.nullLob();
+
+		    Lob box = Lobs.vbox();
+		    box.add(right);
+		    box.add(Lobs.vglue());
+		    right = box;
 		} else {
 		    right = rlabel = Lobs.nullLob();
 		    rvalue = null;
