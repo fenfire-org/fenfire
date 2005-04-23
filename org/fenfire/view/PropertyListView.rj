@@ -206,6 +206,28 @@ public class PropertyListView implements SpatialView {
 		    PropertyListView.move(graph, cursor, 1);
 		}
 	    });
+	    keys.put("Ctrl-Left", new @realtime-i Action(Graph graph, Cursor cursor) {
+		public void run() {
+		    Object prop = cursor.getRotation().getRotationProperty();
+		    Object node = 
+			PropertyListView.getConnection(graph, cursor, -1);
+
+		    if(node == null) return;
+
+		    graph.rm_111(node, prop, cursor.getNode());
+		}
+	    });
+	    keys.put("Ctrl-Right", new @realtime-i Action(Graph graph, Cursor cursor) {
+		public void run() {
+		    Object prop = cursor.getRotation().getRotationProperty();
+		    Object node = 
+			PropertyListView.getConnection(graph, cursor, 1);
+
+		    if(node == null) return;
+
+		    graph.rm_111(cursor.getNode(), prop, node);
+		}
+	    });
 
 	    lob = Lobs.keyController(lob, keys);
 
@@ -308,6 +330,20 @@ public class PropertyListView implements SpatialView {
 		    throw new UnsupportedOperationException(); 
 		}
 	    }, textCursorModel);
+
+	    Map keys = FastMap.newInstance();
+	    keys.put("Ctrl-Right", new @realtime-i Action(Graph graph, Cursor cursor) {
+		public void run() {
+		    Object prop = cursor.getRotation().getRotationProperty();
+		    Object node = 
+			PropertyListView.getConnection(graph, cursor, 1);
+
+		    if(node == null) return;
+
+		    graph.rm_111(cursor.getNode(), prop, node);
+		}
+	    });
+	    lob = Lobs.keyController(lob, keys);
 
 	    lob = ConnectorLob.newInstance(lob, prop, value, 1);
 	    
@@ -693,24 +729,30 @@ public class PropertyListView implements SpatialView {
 	return l;
     }
 
-    static void move(Graph graph, Cursor cursor, int dir) {
-	Object oldNode = cursor.getNode();
-
+    static Object getConnection(Graph graph, Cursor cursor, int dir) {
 	Cursor.Rotation r = cursor.getRotation();
+	Object oldNode = cursor.getNode();
 	Object prop = r.getRotationProperty();
 
 	List conns = getConnectionList(graph, oldNode, prop, r.getRotationDir());
 	int index = indexOf(conns, r.getRotationNode());
 
-	if(index < 0) return; // XXX
+	if(index < 0) return null; // XXX
 
 	conns = getConnectionList(graph, oldNode, prop, dir);
-	if(index >= conns.size()) return; // no such connection, do nothing
-	Object node = conns.get(index);
+	if(index >= conns.size()) return null; // no such connection
 
+	return conns.get(index);
+    }
+
+    static void move(Graph graph, Cursor cursor, int dir) {
+	Object node = getConnection(graph, cursor, dir);
+	Object prop = cursor.getRotation().getRotationProperty();
+
+	if(node == null) return; // no such connection, do nothing
 	if(node instanceof Literal) return; // don't move onto literals
 
-	cursor.setRotation(node, prop, oldNode, -dir);
+	cursor.setRotation(node, prop, cursor.getNode(), -dir);
 	cursor.set(node);
     }
 
