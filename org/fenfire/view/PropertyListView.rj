@@ -529,7 +529,8 @@ public class PropertyListView implements SpatialView {
 	}
 
 	public Lob getReverseLob(Graph graph, ReprView reprView, Cursor cursor,
-			  Object reverseProperty, Object container) {
+				 Object reverseProperty, Object container,
+				 Object node, Object prop) {
 	    Object source = graph.find1_X11(reverseProperty, container);
 
 	    LobFont font = Components.font();
@@ -565,7 +566,41 @@ public class PropertyListView implements SpatialView {
 	    hbox.add(Lobs.request(Axis.X, Lobs.nullLob(), 0, 0, 2*Lob.INF/3));
 	    hbox.add(Lobs.request(Axis.X, Lobs.nullLob(), 0, 0, Lob.INF));
 
-	    return Lobs.noGrow(Axis.Y, hbox);
+	    Lob lob = Lobs.noGrow(Axis.Y, hbox);
+
+	    Object key = newKey(prop, container, -1);
+	    Lob keylob = Lobs.key(Lobs.nullLob(), key);
+	    lob = Lobs.between(keylob, lob, null);
+	    
+	    lob = Lobs.clickController(lob, 1, new @realtime-i Action(Cursor cursor, Object node, Object prop, Object container) {
+		public void run() {
+		    cursor.setRotation(container, prop, node);
+		}
+	    });
+
+	    lob = Lobs.ignoreKeyEventsLob(lob);
+
+	    Map keys = FastMap.newInstance();
+	    keys.put("Left", new @realtime-i Action(Graph graph, Cursor cursor) {
+		public void run() {
+		    PropertyListView.move(graph, cursor, -1);
+		}
+	    });
+	    keys.put("Ctrl-Left", new @realtime-i Action(Graph graph, Cursor cursor) {
+		public void run() {
+		    Object prop = cursor.getRotation().getRotationProperty();
+		    Object node = 
+			PropertyListView.getConnection(graph, cursor, -1);
+
+		    if(node == null) return;
+
+		    graph.rm_111(node, prop, cursor.getNode());
+		}
+	    });
+
+	    lob = Lobs.keyController(lob, keys);
+
+	    return lob;
 	}
 
 	public Lob getLob(Graph graph, ReprView reprView, Cursor cursor,
@@ -573,7 +608,7 @@ public class PropertyListView implements SpatialView {
 	    Object reverseProperty = reverseProperty(graph, prop, node);
 	    if (reverseProperty != null)
 		return getReverseLob(graph, reprView, cursor, reverseProperty, 
-				     graph.find1_X11(prop, node));
+				     graph.find1_X11(prop, node), node, prop);
 
 	    LobFont font = Components.font();
 
