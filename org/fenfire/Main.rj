@@ -232,6 +232,8 @@ public class Main {
 	//List viewlets = new FastList();
 	List listViewProperties = new ArrayList();
 
+	Model uriPopupText;
+
 	public FenfireMain(SmushedQuadsGraph quadsGraph, Graph graph,
 			   GraphFile graphFile, Object startNode,
 			   NamespaceMap nmap, File[] pipes) {
@@ -442,6 +444,13 @@ public class Main {
 							       "start node"),
 					    graph, cursor, potionsCommand));
 
+	    FenfireMain ffmain = this;
+	    k.put("Alt-U", new @realtime-i Action(FenfireMain ffmain) {
+		public void run() {
+		    ffmain.uriPopupText = SimpleModel.newInstance("");
+		}
+	    });
+
 	    Lob mainLob = getMainLob();
 	    mainLob = Lobs.keyController(mainLob, k);
 	    mainLob = UniqueShortcutController.newInstance(mainLob, allProps, graph, cursor, potionsCommand);
@@ -531,6 +540,54 @@ public class Main {
 	    
 	    Lob lob = ViewThumbnailLinkerLob.newInstance(vbox);
 	    lob = DragManager.newInstance(lob);
+
+	    if(uriPopupText != null) {
+		Lob popup;
+
+		RoleContext.enter("POPUP");
+		try {
+		    popup = Lobs.vbox();
+
+		    popup.add(Components.label("Enter URI (use Ctrl-V to paste):"));
+		    popup.add(Lobs.glue(Axis.Y, 5, 5, 5));
+		    popup.add(Components.textBox(uriPopupText, Maps.map()));
+		    popup.add(Lobs.glue(Axis.Y, 5, 5, 5));
+
+		    Lob buttons = Lobs.hbox();
+
+		    buttons.add(Components.button(Components.label("Ok"), new @realtime-i Action(FenfireMain ffmain, Graph graph, Cursor cursor, Model potionsCommand) {
+			public void run() {
+			    String uri = (String)ffmain.uriPopupText.get();
+			    Object node = Nodes.get(uri);
+
+			    new PotionAction(Potions.goTo.call(null),
+					     Potions.node(node, uri),
+					     graph, cursor, 
+					     potionsCommand).run();
+						  
+			    ffmain.uriPopupText = null;
+			}
+		    }));
+		    buttons.add(Components.button(Components.label("Cancel"), new @realtime-i Action(FenfireMain ffmain, Cursor cursor) {
+			public void run() {
+			    ffmain.uriPopupText = null;
+			}
+		    }));
+
+		    popup.add(Lobs.align(buttons, .5f, .5f));
+
+		    popup = Components.frame(popup);
+		    popup = Lobs.request(Axis.X, popup, 250, -1, -1);
+		    popup = Lobs.margin(popup, 20);
+		    popup = Lobs.align(popup, .5f, .5f);
+
+		    popup = RoleContext.lob(popup);
+		} finally {
+		    RoleContext.exit();
+		}
+
+		lob = popup;
+	    }
 
 	    /*
 	    FocusLob fl = new FocusLob(lob);
