@@ -183,7 +183,7 @@ public class PageRequests {
 	    float w = s.maxw * (x1-x0);
 	    float h = s.maxh * (y1-y0);
 	    //System.out.println("START IS "+start+" POOLIND "+s.poolInds[start]+", FINNISH KEYMAP IS BORING");
-	    l = pagePool.getLob(s.poolInds[start], x0,y0,x1,y1);
+	    l = pagePool.getLob(s.poolInds[start], x0,y0,x1-x0,y1-y0);
 	    l = Lobs.request(l, w,w,w,h,h,h);
 	    return l;
 	} else {
