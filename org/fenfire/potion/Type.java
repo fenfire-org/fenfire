@@ -27,6 +27,7 @@ Type.java
  * Written by Sarah Stehlig
  */
 package org.fenfire.potion;
+import org.nongnu.libvob.lob.LobFont;
 import java.util.*;
 
 public interface Type {
@@ -36,4 +37,5 @@ public interface Type {
     FunctionExpression readDir(int win, int axis, int dir, Map context);
     */
     String getQuestionString();
+    List getQuestionLobs(LobFont font);
 }

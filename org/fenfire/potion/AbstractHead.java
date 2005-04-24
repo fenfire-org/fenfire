@@ -26,6 +26,8 @@ AbstractHead.java
  * Written by Benja Fallenstein
  */
 package org.fenfire.potion;
+import org.nongnu.libvob.lob.LobFont;
+import org.nongnu.libvob.lob.Lists;
 import java.util.*;
 
 public abstract class AbstractHead implements Head {
@@ -58,6 +60,27 @@ public abstract class AbstractHead implements Head {
 	}
 
 	return s;
+    }
+
+    public List getLobs(Expression[] params, Map context, LobFont font) {
+	List parts = Lists.list();
+	int p = 0;
+	
+	for(int i=0; i<spec.length; i++) {
+	    if(spec[i] instanceof String)
+		parts.add(font.text((String)spec[i]));
+	    else if(spec[i] instanceof Type) {
+		if(params[p] != null) 
+		    parts.add(params[p].getLobs(context, font));
+		else
+		    parts.add(((Type)spec[i]).getQuestionLobs(font));
+
+		p++;
+	    } else
+		throw new IllegalArgumentException("Neither String nor Type: "+spec[i]);
+	}
+
+	return Lists.concatElements(parts);
     }
 
     public Type[] getParams() {

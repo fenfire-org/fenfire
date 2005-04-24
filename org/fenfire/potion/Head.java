@@ -27,11 +27,15 @@ Head.java
  * Written by Anton Feldmann
  */
 package org.fenfire.potion;
+import org.nongnu.libvob.lob.LobFont;
 import java.util.*;
 
 public interface Head {
     String getString(Expression[] params, Map context);
+    List getLobs(Expression[] params, Map context, LobFont font);
+
     Type[] getParams();
 
     Head instantiatePattern(Map context);
+
 }

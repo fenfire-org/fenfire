@@ -28,6 +28,8 @@ Potions.java
 package org.fenfire.potion;
 import org.fenfire.Cursor;
 import org.fenfire.swamp.*;
+import org.fenfire.view.ReprView;
+import org.nongnu.libvob.lob.LobFont;
 import java.util.*;
 
 public class Potions {
@@ -102,6 +104,12 @@ public class Potions {
 		public List evaluate(List[] params, Map context) {
 		    return Collections.singletonList(n);
 		}
+
+		public List getLobs(Expression[] params, Map context, 
+				    LobFont font) {
+		    ReprView reprView = (ReprView)context.get("reprView");
+		    return reprView.getLobList(n);
+		}
 	    };
     }
 
@@ -120,6 +128,10 @@ public class Potions {
 
 	public String getQuestionString() {
 	    return "[" + question + "]";
+	}
+
+	public List getQuestionLobs(LobFont font) {
+	    return font.text(getQuestionString());
 	}
     }
 }

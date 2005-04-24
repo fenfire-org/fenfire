@@ -506,8 +506,15 @@ public class Main {
 		    (org.fenfire.potion.Expression)potionsCommand.get();
 
 		if(expr != null) {
-		    potionsBar = Components.label(expr.getString(Maps.map()));
+		    Map context = Maps.map("reprView", reprView);
+
+		    LobFont font = Components.font();
+		    List lobs = expr.getLobs(context, font);
+		    lobs = Lists.concat(lobs, font.textLn(""));
+
+		    potionsBar = Lobs.linebreaker(lobs);
 		    potionsBar = Components.frame(potionsBar);
+		    potionsBar = Lobs.noGrow(Axis.Y, potionsBar);
 		} else {
 		    potionsBar = Lobs.glue(Axis.Y, 0, 0, 0);
 		}

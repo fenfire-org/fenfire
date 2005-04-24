@@ -27,6 +27,7 @@ Expression.java
  * Written by Sarah Stehlig
  */
 package org.fenfire.potion;
+import org.nongnu.libvob.lob.LobFont;
 import java.util.*;
 
 public abstract class Expression {
@@ -42,6 +43,11 @@ public abstract class Expression {
     public String getString(Map context) {
 	return head.getString(params, context);
     }
+
+    public List getLobs(Map context, LobFont font) {
+	return head.getLobs(params, context, font);
+    }
+
 
     public boolean isComplete() {
 	for(int i=0; i<params.length; i++) {
