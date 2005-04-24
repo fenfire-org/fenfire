@@ -84,6 +84,7 @@ public class Views {
 	    });
 			
 	    viewbox.add(lob);
+	    viewbox.add(Lobs.hbox(Components.font().text(view.getClass().getName())));
 	    viewbox.add(Lobs.glue(axis, 10, 10, 10));
 	}
 
