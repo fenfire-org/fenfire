@@ -821,24 +821,24 @@ public class Main {
 	}
     }
 
-    private static String[] docStrings = {
-	"Cursor keys: move",
-	"Ctrl-Left/Right: break connection",
+    private static String[][] docStrings = {
+	{"Cursor keys:", "move"},
+	{"Ctrl-Left/Right:", "break connection"},
 	null,
-	"Alt-C: connect on [prop] to [node]",
-	"Alt-B: connect backwards on [prop] to [node]",
+	{"Alt-C:", "connect on [prop] to [node]"},
+	{"Alt-B:", "connect backwards on [prop] to [node]"},
 	null,
-	"Alt-T: this node",
-	"Alt-N: a new node",
-	"Alt-L: a new literal",
+	{"Alt-T:", "this node"},
+	{"Alt-N:", "a new node"},
+	{"Alt-L:", "a new literal"},
 	null,
-	"Alt-G: go to [node]",
-	"Alt-U: a node given by URI",
-	"Alt-H: the 'home'/'start' node",
+	{"Alt-G:", "go to [node]"},
+	{"Alt-U:", "a node given by URI"},
+	{"Alt-H:", "the 'home'/'start' node"},
 	null,
-	"Ctrl-G: load data about current node from Gnowsis+Web",
-	"Ctrl-O: open item in Gnowsis",
-	"Ctrl-S: save graph",
+	{"Ctrl-G:", "load data about current node from Gnowsis+Web"},
+	{"Ctrl-O:", "open item in Gnowsis"},
+	{"Ctrl-S:", "save graph"},
     };
 
     protected static Lob getDocLob() {
@@ -855,8 +855,20 @@ public class Main {
 		
 		for(int i=0; i<docStrings.length; i++) {
 		    if(docStrings[i] != null) {
-			List lobs = Components.font().textLn(docStrings[i]);
-			vbox.add(Lobs.linebreaker(lobs));
+			Lob hbox = Lobs.hbox();
+			if(docStrings[i][0] != null) {
+			    Lob label = Lobs.vbox();
+			    label.add(Lobs.noGrow(Axis.X, Components.label(docStrings[i][0])));
+			    label.add(Lobs.vglue());
+
+			    hbox.add(label);
+			    hbox.add(Lobs.glue(Axis.X, 5, 5, 5));
+			}
+
+			List lobs = Components.font().textLn(docStrings[i][1]);
+			hbox.add(Lobs.linebreaker(lobs));
+
+			vbox.add(hbox);
 		    } else {
 			vbox.add(Lobs.glue(Axis.Y, 5, 5, 5));
 		    }
@@ -888,6 +900,8 @@ public class Main {
 			
 	    Lob bg = Lobs.filledRect(Color.white);
 	    Lob lob = Lobs.between(bg, Lobs.margin(box, 5), null);
+
+	    lob.layout(200, 400); // check that this throws no exceptions
 
 	    return RoleContext.lob(lob);
 	} finally {
