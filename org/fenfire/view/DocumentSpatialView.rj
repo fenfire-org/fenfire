@@ -59,7 +59,8 @@ public class DocumentSpatialView implements SpatialView {
 	new ViewSettings.AbstractType() {
 	    public boolean containsNode(Object node) {
 		return RDFUtil.isNodeType(graph, node, FF.PsPdfDocument) ||
-		    graph.findN_X11_Iter(FF.regionOf, node).hasNext();
+		    graph.findN_X11_Iter(FF.regionOf, node).hasNext() ||
+		    graph.findN_11X_Iter(node, FF.regionOf).hasNext();
 	    }
 	};
     
@@ -80,9 +81,13 @@ public class DocumentSpatialView implements SpatialView {
 
     protected CanvasCursor makeCanvasCursor(Object n) {
 	Object node = graph.find1_11X(n, FF.regionOf);
-	float x = 0;
-	float y = 0;
-	return new CanvasCursor(node, x, y, 1);
+	if(node != null) {
+	    float x = 0;
+	    float y = 0;
+	    return new CanvasCursor(node, x, y, 1);
+	} else {
+	    return new CanvasCursor(n, 0, 0, 1);
+	}
     }
 
 
@@ -153,27 +158,69 @@ public class DocumentSpatialView implements SpatialView {
     }
 
 
-    protected Lob getTransclusions(CanvasCursor cc) {
+    protected Lob addTransclusions(Lob bg, Cursor cursor, CanvasCursor cc) {
 	Tray tray = Tray.newInstance(Lists.list(), false);
+
+	Object focus = (cursor != null) ? cursor.getNode() : null;
 
 	for (Iterator i=graph.findN_X11_Iter(FF.regionOf, cc.getCanvas());
 	     i.hasNext();) {
 	    Object n = i.next();
-	    // do stuff and put red rectangle around..
+	    
+	    int p0 = RDFUtil.getInt(graph, n, FF.startPage) - 1;
+	    int p1 = RDFUtil.getInt(graph, n, FF.endPage);
+
+	    // assume only one page, for now...
+	    Lob page = PagePool.oneFullPage(cc.getCanvas(), p0);
+
+	    SizeRequest r = page.getSizeRequest();
+	    float pageW = r.natW, pageH = r.natH;
+
+	    float x0 = RDFUtil.getFloat(graph, n, FF.startX) * pageW;
+	    float y0 = RDFUtil.getFloat(graph, n, FF.startY) * pageH;
+	    float x1 = RDFUtil.getFloat(graph, n, FF.endX) * pageW;
+	    float y1 = RDFUtil.getFloat(graph, n, FF.endY) * pageH;
+
+	    float w = x1-x0, h = y1-y0;
+
+	    float lineWidth = n.equals(focus) ? 3 : 1;
+	    Color color = UniqueColors.getColor(n, .1f, .8f);
+
+	    // just assume first page for now...
+	    Lob rect = Lobs.rect(color, lineWidth);
+
+	    if(cursor != null) {
+		rect = Lobs.clickController(rect, 1, new @realtime-i Action(Cursor cursor, Object n) {
+		    public void run() {
+			cursor.setNode(n);
+		    }
+		});
+	    }
+	    
+	    rect = Lobs.request(rect, w, w, w, h, h, h);
+	    rect = Lobs.translate(rect, x0, y0);
+
+	    tray.add(rect);
 	}
-	
+
+	tray.add(bg);
 	return tray;
     }
     
 
     public Lob getMainviewLob(Cursor cursor) {
-	Object node = cursor.getNode();
 	CanvasCursor cc = getCanvasCursor(cursor);
 
 	Lob l;
-	l = PagePool.fullDocument(node, cc.getPanX());
+	l = PagePool.fullDocument(cc.getCanvas(), cc.getPanX());
 
-	l = Lobs.between(l, getTransclusions(cc), Lobs.nullLob());
+	l = Lobs.clickController(l, 1, new @realtime-i Action(Cursor cursor, CanvasCursor cc) {
+	    public void run() {
+		cursor.setNode(cc.getCanvas());
+	    }
+	});
+
+	l = addTransclusions(l, cursor, cc);
 
 	l = Lobs.translate(l, -cc.getPanX(), -cc.getPanY(), false);
 
@@ -186,7 +233,7 @@ public class DocumentSpatialView implements SpatialView {
 	l = Lobs.request(l, 0, 0, 0, 0, 0, 0);
 	l = Lobs.align(l, .5f, .5f);
 
-	l = SpatialContextLob.newInstance(l, node);
+	l = SpatialContextLob.newInstance(l, cc.getCanvas());
 	l = Lobs.margin(l, 40);
 
 	return l;
@@ -196,11 +243,16 @@ public class DocumentSpatialView implements SpatialView {
 	CanvasCursor cc = makeCanvasCursor(node);
 
 	Lob l;
-	l = PagePool.fullDocument(node, 0);
+	l = PagePool.fullDocument(cc.getCanvas(), 0);
 
 	SizeRequest r = l.getSizeRequest();
 
-	l = Lobs.between(null, l, getTransclusions(cc));
+	l = addTransclusions(l, null, cc);
+	
+	/*
+	if(cc.getCanvas() != cc.get
+	l = Lobs.translate(l, cc.getPanX(), cc.getPanY());
+	*/
 
 	l = Lobs.scale(l, 100 / r.natH);
 
