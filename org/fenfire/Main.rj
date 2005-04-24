@@ -447,13 +447,9 @@ public class Main {
 		}
 	    });
 
-	    Lob mainLob = getMainLob();
-	    mainLob = Lobs.keyController(mainLob, k);
-	    mainLob = UniqueShortcutController.newInstance(mainLob, allProps, graph, cursor, potionsCommand);
-
-	    Lob main = Lobs.tray(false);
-	    main.add(Lobs.align(getDocLob(), 0, 1));
-	    main.add(mainLob);
+	    Lob main = getMainLob();
+	    main = Lobs.keyController(main, k);
+	    main = UniqueShortcutController.newInstance(main, allProps, graph, cursor, potionsCommand);
 
 
 	    List sortedProps = FastList.newInstance(); 
@@ -475,17 +471,12 @@ public class Main {
 
 	    Lob propbox = Views.propbox(graph, reprView, allProps, noShowProps, activeCategories);
 
-	    /*
-	    Model templateNode = Parameter.model(ListModel.PARAM, new ObjectModel(startNode));
-	    Model templateText = new NodeTextModel(graph, templateNode, nmap, textProps, RDFS.label);
-	    Model templateNotChecked = noShowProps.containsModel(templateNode);
-	    Model templateChecked = templateNotChecked.not();
-
-	    propbox.setTemplate(new CheckBox(new Label(templateText), templateChecked));
-	    */
+	    Lob left = Lobs.vbox();
+	    left.add(Lobs.request(Axis.Y, propbox, 0, 0, Lob.INF));
+	    left.add(Lobs.noGrow(Axis.Y, getDocLob()));
 
 	    Lob hbox = Lobs.hbox();
-	    hbox.add(Lobs.request(Axis.X, propbox, 200, 200, 200));
+	    hbox.add(Lobs.request(Axis.X, left, 200, 200, 200));
 	    hbox.add(main);
 	    hbox.add(Lobs.request(Axis.X, viewbox, 200, 200, 200));
 
@@ -831,7 +822,21 @@ public class Main {
     }
 
     private static String[] docStrings = {
-	"Ctrl-G: load data from Gnowsis+Web",
+	"Cursor keys: move",
+	"Ctrl-Left/Right: break connection",
+	null,
+	"Alt-C: connect on [prop] to [node]",
+	"Alt-B: connect backwards on [prop] to [node]",
+	null,
+	"Alt-T: this node",
+	"Alt-N: a new node",
+	"Alt-L: a new literal",
+	null,
+	"Alt-G: go to [node]",
+	"Alt-U: a node given by URI",
+	"Alt-H: the 'home'/'start' node",
+	null,
+	"Ctrl-G: load data about current node from Gnowsis+Web",
 	"Ctrl-O: open item in Gnowsis",
 	"Ctrl-S: save graph",
     };
@@ -849,10 +854,12 @@ public class Main {
 		Lob vbox = Lobs.vbox();
 		
 		for(int i=0; i<docStrings.length; i++) {
-		    if(docStrings[i] != null)
-			vbox.add(Components.label(docStrings[i]));
-		    else
+		    if(docStrings[i] != null) {
+			List lobs = Components.font().textLn(docStrings[i]);
+			vbox.add(Lobs.linebreaker(lobs));
+		    } else {
 			vbox.add(Lobs.glue(Axis.Y, 5, 5, 5));
+		    }
 		}
 
 		box.add(vbox);
