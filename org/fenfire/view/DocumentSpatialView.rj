@@ -196,22 +196,16 @@ public class DocumentSpatialView implements SpatialView {
 	CanvasCursor cc = makeCanvasCursor(node);
 
 	Lob l;
-	l = PagePool.fullDocument(cc.getCanvas(), -cc.getPanX());
-	//l = Lobs.filledRect(java.awt.Color.yellow);
-	l = Lobs.translate(l, -cc.getPanX(), -cc.getPanY());
-	l = Lobs.align(l, .5f, .5f);
-	l = Lobs.request(l, 100, 100, 100, 100, 100, 100);
-	l = addBackground(l, node, false);
+	l = PagePool.fullDocument(node, 0);
+
+	SizeRequest r = l.getSizeRequest();
+
+	l = Lobs.between(null, l, getTransclusions(cc));
+
+	l = Lobs.scale(l, 100 / r.natH);
 
 	l = SpatialContextLob.newInstance(l, node);
 
-	return l;
-    }
-
-    protected Lob addBackground(Lob content, Object canvas, boolean fade) {
-	Color bgcolor = UniqueColors.getColor(canvas, .75f, 1f);
-
-	Lob l = Lobs.frame(content, bgcolor, Color.black, 2, 0, true);
 	return l;
     }
 }
