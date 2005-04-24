@@ -96,10 +96,15 @@ public class DocumentSpatialView implements SpatialView {
 
 	CanvasCursor cc = view.getCanvasCursor(cursor);
 	
-	return new @realtime DragController(@set Lob delegate, @set int button, Cursor cursor, DocumentSpatialView view, CanvasCursor cc) {
+	float _panX = cc.getPanX(), _panY = cc.getPanY();
+	return new @realtime DragController(@set Lob delegate, @set int button, Cursor cursor, DocumentSpatialView view, CanvasCursor cc, float _panX, float _panY) {
 
 	    protected Lob wrap(Lob l) {
 		return view.transDragController(l, button, cursor);
+	    }
+
+	    protected Object getKey() {
+		return "trans-drag-controller-cs";
 	    }
 	    
 	    public void drag(VobScene scene, int cs, float x, float y,
@@ -108,8 +113,8 @@ public class DocumentSpatialView implements SpatialView {
 		p("pan: "+cc.getPanX()+":"+cc.getPanY()+
 		  ", start "+startx+":"+starty+
 		  ", xy: "+x+":"+y);
-		float panX = cc.getPanX()+startx-x, 
-		    panY = cc.getPanY()+starty-y;
+		float panX = _panX+startx-x, //startx-x, 
+		    panY = _panY+starty-y; //starty-y;
 		cursor.setSpatialCursor(new CanvasCursor(cc.getCanvas(), 
 							 panX, panY, 
 							 cc.getZoom()));
@@ -122,30 +127,26 @@ public class DocumentSpatialView implements SpatialView {
 
 	CanvasCursor cc = view.getCanvasCursor(cursor);
 	
-	return new @realtime DragController(@set Lob delegate, @set int button, Cursor cursor, DocumentSpatialView view, CanvasCursor cc) {
+	float _zoom = cc.getZoom();
+	return new @realtime DragController(@set Lob delegate, @set int button, Cursor cursor, DocumentSpatialView view, CanvasCursor cc, float _zoom) {
 
 	    protected Lob wrap(Lob l) {
 		return view.scaleDragController(l, button, cursor);
 	    }
-	    
-	    public void startDrag(VobScene scene, int cs, float x, float y, 
-			     VobMouseEvent e) {
-		//starty = e.getY();
+
+	    protected Object getKey() {
+		return "scale-drag-controller-cs";
 	    }
+	    
 	    public void drag(VobScene scene, int cs, float x, float y, 
 			     VobMouseEvent e) {
 		CanvasCursor cc = view.getCanvasCursor(cursor);
 
-		p("was: "+cc.getZoom());
+		float dy = (y-starty)/250;
+		p("dy = "+dy);
+		//if (dy < -.3f || dy > .3f) dy = 0;
 
-		float dy = (starty-e.getY())/100;
-		if (dy < -.3f || dy > .3f) dy = 0;
-		p(" DY: "+ dy);
-
-		float z = cc.getZoom() * (1 - dy);
-		p("z: "+z);
-		starty = e.getY();
-
+		float z = _zoom + dy;
 		if (z < 0.07) z = 0.07f;
 
 		cursor.setSpatialCursor(new CanvasCursor(cc.getCanvas(), 
@@ -225,10 +226,12 @@ public class DocumentSpatialView implements SpatialView {
 	l = Lobs.translate(l, -cc.getPanX(), -cc.getPanY(), false);
 
 	l = transDragController(l, 1, cursor);
-	l = scaleDragController(l, 3, cursor);
+
 	//l = Lobs.debug(l, "translate");
 
 	l = Lobs.scale(l, cc.getZoom());
+
+	l = scaleDragController(l, 3, cursor);
 
 	l = Lobs.request(l, 0, 0, 0, 0, 0, 0);
 	l = Lobs.align(l, .5f, .5f);
