@@ -146,7 +146,7 @@ public class PageRequests {
 	    return Components.label("Information lost in cyberspace.");
 
 	if (!s.imagesGenerated)
-	    return s.getLob();
+	    return s.getLob(1, 1);
 	
 	
 	int w = s.maxw;
@@ -173,7 +173,7 @@ public class PageRequests {
 	    return Components.label("Information lost in cyberspace.");
 
 	if (!s.imagesGenerated)
-	    return s.getLob();
+	    return s.getLob(x1-x0, y1-y0);
 
 
 	if (start+1 == end) {
@@ -197,7 +197,7 @@ public class PageRequests {
 	    return Components.label("Information lost in cyberspace.");
 
 	if (!s.imagesGenerated)
-	    return s.getLob();
+	    return s.getLob(1, 1);
 
 	// set priority == LOD
 	int n = s.n;
@@ -296,7 +296,7 @@ public class PageRequests {
 		anim.switchVS();
 	}
 
-	public Lob getLob() {
+	public Lob getLob(float wfract, float hfract) {
 	    if (!imagesGenerated) {
 		Lob vbox = Lobs.vbox();
 		List lobs = Lists.list();
@@ -325,14 +325,14 @@ public class PageRequests {
 	        l = vbox;
 		//l = Lobs.scale(l, 2f, 2f);
 		if (maxw > 0 && maxh > 0) {
+		    float lw = maxw*wfract, lh = maxh*hfract;
+
 		    l = Components.frame(l);
 		    l = Lobs.align(l, .5f, .5f);
 		    l = Lobs.between(Lobs.filledRect(Color.white),
 				     l,
 				     Lobs.nullLob());
-		    l = Lobs.request(l, 
-				     maxw, maxw, maxw,
-				     maxh, maxh, maxh);
+		    l = Lobs.request(l, lw, lw, lw, lh, lh, lh);
 		}
 		return Components.frame(l);
 	    }
