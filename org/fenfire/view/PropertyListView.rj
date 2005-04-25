@@ -766,8 +766,10 @@ public class PropertyListView implements SpatialView {
 	vbox.add(Lobs.vbox(lobs));
 	vbox.add(Lobs.vglue());
 
+	ensureRotation(graph, cursor, properties);
+
 	Key key = null;
-	Cursor.Rotation r = cursor.getRotation(node);
+	Cursor.Rotation r = cursor.getRotation();
 	if(r != null) {
 	    key = newKey(r.getRotationProperty(), r.getRotationNode(),
 			 r.getRotationDir());
@@ -852,9 +854,10 @@ public class PropertyListView implements SpatialView {
 	cursor.set(node);
     }
 
-    void scroll(Cursor cursor, int dir) {
+    /** If there is no rotation, try to set one.
+     */
+    static void ensureRotation(Graph graph, Cursor cursor, List properties) {
 	Object node = cursor.getNode();
-
 	Cursor.Rotation r = cursor.getRotation();
 
 	if(r == null) {
@@ -864,22 +867,25 @@ public class PropertyListView implements SpatialView {
 		List conns = getConnectionList(graph, node, prop, 1);
 
 		if(!conns.isEmpty()) {
-		    cursor.setRotation(cursor.getNode(), prop, conns.get(0));
+		    cursor.setRotation(node, prop, conns.get(0));
 		    return;
 		} else {
 		    conns = getConnectionList(graph, node, prop, -1);
 
 		    if(!conns.isEmpty()) {
-			cursor.setRotation(conns.get(0), prop, 
-					   cursor.getNode());
+			cursor.setRotation(conns.get(0), prop, node);
 			return;
 		    }
 		}
 	    }
-
-	    // there are no connections at all
-	    return;
 	}
+    }
+
+    void scroll(Cursor cursor, int dir) {
+	Object node = cursor.getNode();
+
+	ensureRotation(graph, cursor, properties);
+	Cursor.Rotation r = cursor.getRotation();
 
 	Object prop = r.getRotationProperty();
 	Object value = r.getRotationNode();
