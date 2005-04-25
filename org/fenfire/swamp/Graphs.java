@@ -203,29 +203,6 @@ public class Graphs {
 	}
     }
 
-
-    /** Writes a given node in Turtle's resource format.
-     *  @param w    the writer to use
-     *  @param nmap defined namespaces
-     *  @param pre  some text to be written before the node
-     *  @param res  the node to be written
-     *  @param post some text to be written after the node
-     *  @throws IOException if writing fails
-     */
-    protected static void writeNode(Writer w, NamespaceMap nmap, 
-				 String pre, Object res, String post) 
-	throws IOException {
-	w.write(pre);
-	String uri = Nodes.toString(res);
-	String abbrev = nmap.getAbbrevString(uri);
-	if (abbrev == uri) { // if the uri wasn't abbreviated
-	    w.write('<');
-	    w.write(uri);
-	    w.write('>');
-	} else w.write(abbrev);
-	w.write(post);
-    }
-
     public static void writeTurtle(ConstGraph g, Map namespaces,
 				   File f) throws IOException {
 	writeTurtle(g, namespaces,
@@ -240,75 +217,7 @@ public class Graphs {
 	if (namespaces != null)
 	    nmap.putAll(namespaces);
 
-	Iterator n = nmap.uriIterator();
-	while(n.hasNext()) {
-	    String uri = (String) n.next();
-	    w.write("@prefix "+nmap.getAbbrevString(uri)+" <"+uri+">.\n");
-	}
-	w.write("\n");
-
-	for (Iterator i=g.findN_XAA_Iter(); i.hasNext();) {
-	    Object subj = i.next();
-
-	    Iterator j = g.findN_1XA_Iter(subj);
-	    if(!j.hasNext()) throw new Error();
-
-	    writeNode(w, nmap, "", subj, "\n");
-
-	    while(j.hasNext()) {
-		Object pred = j.next();
-
-		Iterator k = g.findN_11X_Iter(subj,pred);
-		if(!k.hasNext()) throw new Error();
-
-		writeNode(w, nmap, "  ", pred, "\n");
-
-		while(k.hasNext()) {
-		    Object obj = k.next();
-
-		    if(obj instanceof Literal) {
-			w.write("    \"");
-			String s = ((Literal)obj).getString();
-			for(int p=0; p<s.length(); p++) {
-			    char c = s.charAt(p);
-			    if(c == '"')
-				w.write("\\\"");
-			    else if(c == '\\')
-				w.write("\\\\");
-			    else if(c == '\n')
-				w.write("\\n");
-			    else
-				w.write(c);
-			}
-			w.write('"');
-			
-			if(obj instanceof PlainLiteral) {
-			    PlainLiteral l = (PlainLiteral)obj;
-			    if(l.getLang() != null) {
-				w.write("@");
-				w.write(l.getLang());
-			    }
-			} else if(obj instanceof TypedLiteral) {
-			    TypedLiteral l = (TypedLiteral)obj;
-			    writeNode(w, nmap, "^^", l.getType(), "");
-			}
-		    } else {
-			writeNode(w, nmap, "    ", obj, "");
-		    }
-			
-		    if(k.hasNext())
-			w.write(",\n");
-		    else if(j.hasNext())
-			w.write(";\n");
-		    else
-			w.write(".\n");
-		}
-	    }
-
-	    w.write("\n");
-	}
-
-	w.close();
+	TurtleWriter.writeTurtle(g, nmap, w);
     }
 
     public static void writeXML(ConstGraph g, File file, NamespaceMap nmap) throws IOException {
