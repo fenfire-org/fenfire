@@ -35,9 +35,17 @@ public final class TurtleWriter {
     private static void p(String s) { System.out.println("TurtleWriter::"+s); }
 
     private static Iterator sort(Iterator i) {
+	return sort(i, COMPARATOR);
+    }
+
+    private static Iterator sort(Iterator i, Comparator c) {
 	List list = new ArrayList();
 	while(i.hasNext()) list.add(i.next());
-	Collections.sort(list, COMPARATOR);
+	if (c==null)
+	    Collections.sort(list);
+	else
+	    Collections.sort(list, c);
+	    
 	return list.iterator();
     }
 
@@ -45,7 +53,7 @@ public final class TurtleWriter {
 				   Writer w, String baseURI) 
 	throws IOException {
 
-	for(Iterator i=sort(nmap.uriIterator()); i.hasNext();) {
+	for(Iterator i=sort(nmap.uriIterator(), null); i.hasNext();) {
 	    String uri = (String)i.next();
 	    w.write("@prefix "+nmap.getAbbrevString(uri)+" <"+uri+">.\n");
 	}
