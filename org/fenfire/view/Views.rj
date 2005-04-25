@@ -43,6 +43,21 @@ public class Views {
 	PROP_CATEGORY = Nodes.get("http://fenfire.org/2005/04/categories#PropertyCategory"),
 	CATEGORY_ITEM = Nodes.get("http://fenfire.org/2005/04/categories#item");
 
+    /** Returns a lob for a throwable. Handles a throwable from a method that 
+     *  should've returned a lob by printing the stacktrace and returning a
+     *  lob that can be used instead and that contains an error message.
+     *  @param t a throwable received from a method
+     *  @return a lob that can be shown instead
+     */
+    public static Lob handleLobThrowable(Throwable t) {
+	t.printStackTrace();
+
+	Lob lob = Components.label("Error: "+t.getMessage());
+	lob = Lobs.between(Lobs.filledRect(java.awt.Color.white), lob, null);
+	lob = Lobs.request(lob, 0, -1, Lob.INF, 0, -1, Lob.INF);
+	return lob;
+    }
+
     /**
      *  @param align If < 0, align top or left; if == 0, align center;
      *               if > 0, align bottom or right.
@@ -75,8 +90,13 @@ public class Views {
 
 	    if(!ok) continue;
 
-	    Lob lob = view.getBuoyLob(cursor.getNode(), true);
-	    lob = Lobs.noGrow(axis, lob);
+	    Lob lob;
+	    try {
+		lob = view.getBuoyLob(cursor.getNode(), true);
+		lob = Lobs.noGrow(axis, lob);
+	    } catch (Throwable t) {
+		lob = handleLobThrowable(t);
+	    }
 		    
 	    lob = Lobs.clickController(lob, 1, new @realtime-i Action(Cursor cursor, SpatialViewSettings svs, SpatialView view) {
 		public void run() {
@@ -88,7 +108,7 @@ public class Views {
 
 	    Text name = Text.valueOf(view.getClass().getName());
 	    name = name.subtext(name.lastIndexOf(".")+1);
-	    viewbox.add(Lobs.hbox(Components.font().text(name)));
+	    viewbox.add(Lobs.hbox(Components.font().textLn(name)));
 	    viewbox.add(Lobs.glue(axis, 10, 10, 10));
 	}
 

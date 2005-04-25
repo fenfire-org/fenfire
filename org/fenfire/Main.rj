@@ -392,10 +392,16 @@ public class Main {
 	    spatialViewSettings = new SpatialViewSettings(spatialViews);
 	}
 
+	/** Returns the major view in the center of the window. Called by
+	 *  createLob, which wraps the result in keyboard controllers.
+	 */
 	protected Lob getMainLob() {
 	    return spatialViewSettings.getMainviewLob(cursor);
 	}
 
+	/** Returns the top-level lob. NewLobMain calls this, lays out
+	 *  the result to fit the window and renders as vobs into a vobscene.
+	 */
 	protected Lob createLob() { 
 	    org.fenfire.spanimages.PagePool.init(graph, 
 						windowAnim);
@@ -514,7 +520,12 @@ public class Main {
 		}
 	    });
 
-	    Lob main = getMainLob();
+	    Lob main;
+	    try {
+		main = getMainLob();
+	    } catch (Throwable t) {
+		main = Views.handleLobThrowable(t);
+	    }
 	    main = Lobs.keyController(main, k);
 	    main = UniqueShortcutController.newInstance(main, allProps, graph, cursor, potionsCommand);
 
@@ -532,11 +543,19 @@ public class Main {
 					   Maps.map("clip", Boolean.FALSE));
 
 		viewbox = RoleContext.lob(viewbox);
+	    } catch (Throwable t) {
+		viewbox = Views.handleLobThrowable(t);
 	    } finally {
 		RoleContext.exit();
 	    }
 
-	    Lob propbox = Views.propbox(graph, reprView, allProps, noShowProps, activeCategories);
+	    Lob propbox;
+	    try {
+		propbox = Views.propbox(graph, reprView, allProps, 
+					noShowProps, activeCategories);
+	    } catch (Throwable t) {
+		propbox = Views.handleLobThrowable(t);
+	    }
 
 	    Lob left = Lobs.vbox();
 	    left.add(Lobs.request(Axis.Y, propbox, -1, -1, Lob.INF));
@@ -557,6 +576,8 @@ public class Main {
 		locationBar = Components.frame(locationBar);
 
 		locationBar = RoleContext.lob(locationBar);
+	    } catch (Throwable t) {
+		locationBar = Views.handleLobThrowable(t);
 	    } finally {
 		RoleContext.exit();
 	    }
@@ -583,6 +604,8 @@ public class Main {
 		}
 
 		potionsBar = RoleContext.lob(potionsBar);
+	    } catch (Throwable t) {
+		potionsBar = Views.handleLobThrowable(t);
 	    } finally {
 		RoleContext.exit();
 	    }
@@ -636,6 +659,11 @@ public class Main {
 		    popup = Lobs.align(popup, .5f, .5f);
 
 		    popup = RoleContext.lob(popup);
+		} catch (Throwable t) {
+		    popup = Views.handleLobThrowable(t);
+		    // XXX hack, as we couldn't exit the popup
+		    popup = lob;
+		    ffmain.uriPopupText = null;
 		} finally {
 		    RoleContext.exit();
 		}
