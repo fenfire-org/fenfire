@@ -404,16 +404,21 @@ public class Main {
 		graphFile.save();
 		System.out.println("Saved.");
 	    }});
-	    k.put("Ctrl-V", new @realtime-i Action(Cursor cursor, SpatialViewSettings spatialViewSettings, WindowAnimation windowAnim) {
+	    k.put("Alt-Z", new @realtime-i Action(Cursor cursor, SpatialViewSettings spatialViewSettings, WindowAnimation windowAnim) {
 		public void run() {
 		    spatialViewSettings.changeView(cursor, 1);
 		    windowAnim.animate();
 		}
 	    });
-	    k.put("Alt-V", new @realtime-i Action(Cursor cursor, ReprViewSettings reprViewSettings, WindowAnimation windowAnim) {
+	    k.put("Alt-X", new @realtime-i Action(Cursor cursor, ReprViewSettings reprViewSettings, WindowAnimation windowAnim) {
 		public void run() {
 		    reprViewSettings.changeView(cursor, 1);
 		    windowAnim.animate();
+		}
+	    });
+	    k.put("Escape", new @realtime-i Action(Cursor cursor, Model potionsCommand) {
+		public void run() {
+		    potionsCommand.set(null);
 		}
 	    });
 
@@ -422,26 +427,22 @@ public class Main {
 
 	    k.put("Alt-N", new PotionAction(null, Potions.newNode, 
 					    graph, cursor, potionsCommand));
-	    k.put("Alt-L", new PotionAction(null, Potions.newLiteral, 
+	    k.put("Alt-M", new PotionAction(null, Potions.newLiteral, 
 					    graph, cursor, potionsCommand));
 	    k.put("Alt-C", new PotionAction(Potions.connect.call(Potions.currentNode, null, null), null,
 					    graph, cursor, potionsCommand));
 	    k.put("Alt-B", new PotionAction(Potions.connectBackwards.call(Potions.currentNode, null, null), null,
 					    graph, cursor, potionsCommand));
-	    k.put("Alt-K", new PotionAction(Potions.connect.call(Potions.currentNode, null, null),
-					    Potions.node(RDFS.label,
-							 "rdfs:label"), 
-					    graph, cursor, potionsCommand));
 	    k.put("Alt-T", new PotionAction(null, Potions.currentNode,
 					    graph, cursor, potionsCommand));
-	    k.put("Alt-G", new PotionAction(Potions.goTo.call(null), null,
+	    k.put("Alt-V", new PotionAction(Potions.goTo.call(null), null,
 					    graph, cursor, potionsCommand));
-	    k.put("Alt-H", new PotionAction(null, Potions.node(startNode, 
+	    k.put("Alt-P", new PotionAction(null, Potions.node(startNode, 
 							       "start node"),
 					    graph, cursor, potionsCommand));
 
 	    FenfireMain ffmain = this;
-	    k.put("Alt-U", new @realtime-i Action(FenfireMain ffmain) {
+	    k.put("Alt-Q", new @realtime-i Action(FenfireMain ffmain) {
 		public void run() {
 		    ffmain.uriPopupText = SimpleModel.newInstance("");
 		}
@@ -830,11 +831,14 @@ public class Main {
 	null,
 	{"Alt-T:", "this node"},
 	{"Alt-N:", "a new node"},
-	{"Alt-L:", "a new literal"},
+	{"Alt-M:", "a new literal"},
 	null,
-	{"Alt-G:", "go to [node]"},
-	{"Alt-U:", "a node given by URI"},
-	{"Alt-H:", "the 'home'/'start' node"},
+	{"Alt-V:", "go to [node]"},
+	{"Alt-Q:", "a node given by URI"},
+	{"Alt-P:", "the 'home'/'start' node"},
+	null,
+	{"Alt-Z:", "change spatial view"},
+	{"Alt-X:", "change node view"},
 	null,
 	{"Ctrl-G:", "load data about current node from Gnowsis+Web"},
 	{"Ctrl-O:", "open item in Gnowsis"},

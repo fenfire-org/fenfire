@@ -44,15 +44,24 @@ public class UniqueShortcutController extends AbstractDelegateLob {
     protected Cursor cursor;
     protected Model potionsCommand;
 
+    public static final String
+	EASY = "ASDFGHJKLWERUIO",
+	HARD = "QTYPZXCVBNM";
+
     public static String getShortcut(Object property) {
+	return getShortcut(property, SHORTCUT_LEN);
+    }
+
+    public static String getShortcut(Object property, int length) {
 
 	java.util.Random r = new Random(property.hashCode());
 	String s = "";
 	
-	for(int i=0; i<SHORTCUT_LEN; i++) {
-	    char c = (char)('A' + r.nextInt(26));
-	    s += c;
+	for(int i=0; i<length-1; i++) {
+	    s += EASY.charAt(r.nextInt(EASY.length()));
 	}
+
+	s += HARD.charAt(r.nextInt(HARD.length()));
 
 	return s;
     }
@@ -77,28 +86,46 @@ public class UniqueShortcutController extends AbstractDelegateLob {
     }
 
     public boolean key(String key) {
-	String PREFIX = "Alt-Shift-";
+	String PREFIX = "Alt-";
+
 	if(key.startsWith(PREFIX) && key.length() == PREFIX.length()+1) {
+
+	    char c = key.charAt(PREFIX.length());
+
 	    String s = (String)
 		Components.getState(Maps.map(), "unique shortcut so far", "");
-	    s += key.charAt(PREFIX.length());
 
-	    if(s.length() < SHORTCUT_LEN) {
-		Components.setState(Maps.map(), "unique shortcut so far", s);
-	    } else {
-		for(Iterator i=properties.iterator(); i.hasNext();) {
-		    Object prop = i.next();
-		    if(getShortcut(prop).equals(s)) {
-			Components.setState(Maps.map(), 
-					    "unique shortcut so far", "");
-
-			Action a = new PotionAction(Potions.connect.call(Potions.currentNode, null, null), Potions.node(prop, prop.toString()), graph, cursor, potionsCommand);
-			a.run();
-		    }
+	    if(EASY.indexOf(c) >= 0) {
+		if(s.length() < SHORTCUT_LEN) {
+		    Components.setState(Maps.map(), "unique shortcut so far", 
+					s+c);
+		    return true;
+		} else {
+		    return super.key(key);
 		}
-	    }
+	    } else if(HARD.indexOf(c) >= 0) {
+		s += c;
+		Components.setState(Maps.map(), "unique shortcut so far", "");
 
-	    return true;
+		if(s.length() == SHORTCUT_LEN) {
+		    for(Iterator i=properties.iterator(); i.hasNext();) {
+			Object prop = i.next();
+			if(getShortcut(prop, SHORTCUT_LEN).equals(s)) {
+			    
+			    Action a = new PotionAction(Potions.connect.call(Potions.currentNode, null, null), Potions.node(prop, prop.toString()), graph, cursor, potionsCommand);
+			    a.run();
+
+			    return true;
+			}
+		    }
+
+		    return false;
+		} else {
+		    return super.key(key);
+		}
+	    } else {
+		return super.key(key);
+	    }
 	} else {
 	    Components.setState(Maps.map(), "unique shortcut so far", "");
 	    return super.key(key);

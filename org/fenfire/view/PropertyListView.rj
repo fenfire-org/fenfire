@@ -784,7 +784,9 @@ public class PropertyListView implements SpatialView {
 	Lob delegate = lob;
 	lob = new @realtime AbstractDelegateLob(@set Lob delegate, Graph graph, Cursor cursor, List viewlets, ReprView reprView) {
 	    public boolean key(String key) {
-		Object prop = cursor.getRotation().getRotationProperty();
+		Cursor.Rotation r = cursor.getRotation();
+		if(r == null) return false;
+		Object prop = r.getRotationProperty();
 		Object node = cursor.getNode();
 
 		for(int i=0; i < viewlets.size(); i++) {
