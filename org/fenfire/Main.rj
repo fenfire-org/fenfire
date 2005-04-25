@@ -87,6 +87,7 @@ public class Main {
 	"rdfs", "http://www.w3.org/2000/01/rdf-schema#",
 	"sl", "http://fenfire.org/rdf-v/2003/05/structlink#",
 	"ffv", "http://purl.oclc.org/NET/fenfire/vocab/",
+	"ff", FF._nsId,
 	"emir", "http:/xmlns.filsa.net/emir/0.2/#",
 	"moz", "http://www.gnowsis.org/ont/mozilla/0.1/",
 	"file", "http://www.gnowsis.org/ont/filesys/0.1#",
