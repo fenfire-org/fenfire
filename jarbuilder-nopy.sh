@@ -59,8 +59,8 @@ cp *README* $jardir
 
 cd $jardir
 
-#echo "remove cryptix sf"
-rm -rf META-INF/CRYP*
+#echo "remove META-INF copied from jar files"
+rm -rf META-INF/
 echo "Creating the jar"
 jar cfm $JARNAME manifest *
 
