@@ -206,18 +206,21 @@ public class Graphs {
     public static void writeTurtle(ConstGraph g, Map namespaces,
 				   File f) throws IOException {
 	writeTurtle(g, namespaces,
-		    new OutputStreamWriter(new FileOutputStream(f), "UTF-8"));
+		    new OutputStreamWriter(new FileOutputStream(f), "UTF-8"),
+		    f.toURI().toString());
     }
 
     public static void writeTurtle(ConstGraph g, Map namespaces,
-				   Writer w) throws IOException {
+				   Writer w, String baseURI) 
+	throws IOException {
+
 	// XXX should get a NamespaceMap instead of a Map
 	// order of namespaces is not the same as originally, but random
 	NamespaceMap nmap = new NamespaceMap();
 	if (namespaces != null)
 	    nmap.putAll(namespaces);
 
-	TurtleWriter.writeTurtle(g, nmap, w);
+	TurtleWriter.writeTurtle(g, nmap, w, baseURI);
     }
 
     public static void writeXML(ConstGraph g, File file, NamespaceMap nmap) throws IOException {

@@ -156,7 +156,7 @@ public class Aggregator implements HTTPUpdater.UpdateListener {
 	if(!start) {
 	    Graph g = new AllQuadsGraph(graph, "foo");
 	    StringWriter w = new StringWriter();
-	    Graphs.writeTurtle(g, agg.namespaces, w);
+	    Graphs.writeTurtle(g, agg.namespaces, w, null);
 	    System.out.println(w.toString());
 	}
     }

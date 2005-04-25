@@ -45,6 +45,7 @@ import org.fenfire.fenfeed.http.*;
 import org.fenfire.potion.*;
 import org.fenfire.view.*;
 import org.fenfire.view.repr.*;
+import org.fenfire.vocab.FF;
 import javolution.realtime.*;
 import javolution.util.*;
 import java.awt.Color;
@@ -157,6 +158,7 @@ public class Main {
 	    }
 	
 	    File file = new File(argv[i]);
+	    String file_uri = file.toURI().toString();
 	    // we try to accept only readable files (or creatable for gf0)
 	    if (!file.canRead() || file.isDirectory()) {
 		if (gf0!=null) {
@@ -179,19 +181,30 @@ public class Main {
 		System.out.println("Can't save changes to "+argv[i]);
 	    }
 
+	    Graph defaultContent = new HashGraph();
+	    defaultContent.add(Nodes.get(file_uri),
+			       FF.startNode,
+			       Nodes.N());
+
 	    if(!xml)
-		gf = new GraphFile.Turtle(file, gf_graph, new HashGraph());
+		gf = new GraphFile.Turtle(file, gf_graph, defaultContent);
 	    else
-		gf = new GraphFile.XML(file, gf_graph, new HashGraph());
+		gf = new GraphFile.XML(file, gf_graph, defaultContent);
 
 	    nmap.putAll(gf.getNamespaces());
 
 	    if(gf0 == null) {
-		Iterator iter = gf_graph.findN_XAA_Iter();
-		if(iter.hasNext())
-		    mainnode = iter.next();
-
 		gf0 = gf;
+
+		Iterator iter = gf_graph.findN_11X_Iter(Nodes.get(file_uri),
+							FF.startNode);
+		if (iter.hasNext())
+		    mainnode = iter.next();
+		else {
+		    iter = gf_graph.findN_XAA_Iter();
+		    if(iter.hasNext())
+			mainnode = iter.next();
+		}
 	    }
 	}
 

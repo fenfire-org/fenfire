@@ -175,7 +175,7 @@ public class FeedReader {
 	read(res, graph, namespaces);
 
 	StringWriter w = new StringWriter();
-	Graphs.writeTurtle(graph, namespaces, w);
+	Graphs.writeTurtle(graph, namespaces, w, null);
 	System.out.println(w.toString());
     }
 }

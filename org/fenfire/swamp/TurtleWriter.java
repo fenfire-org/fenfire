@@ -42,7 +42,8 @@ public final class TurtleWriter {
     }
 
     public static void writeTurtle(ConstGraph g, NamespaceMap nmap,
-				   Writer w) throws IOException {
+				   Writer w, String baseURI) 
+	throws IOException {
 
 	for(Iterator i=sort(nmap.uriIterator()); i.hasNext();) {
 	    String uri = (String)i.next();
@@ -56,7 +57,7 @@ public final class TurtleWriter {
 	    Iterator j = sort(g.findN_1XA_Iter(subj));
 	    if(!j.hasNext()) throw new Error();
 
-	    writeNode(w, nmap, "", subj, "\n");
+	    writeNode(w, baseURI, nmap, "", subj, "\n");
 
 	    while(j.hasNext()) {
 		Object pred = j.next();
@@ -64,7 +65,7 @@ public final class TurtleWriter {
 		Iterator k = sort(g.findN_11X_Iter(subj,pred));
 		if(!k.hasNext()) throw new Error();
 
-		writeNode(w, nmap, "  ", pred, "\n");
+		writeNode(w, baseURI, nmap, "  ", pred, "\n");
 
 		while(k.hasNext()) {
 		    Object obj = k.next();
@@ -93,10 +94,10 @@ public final class TurtleWriter {
 			    }
 			} else if(obj instanceof TypedLiteral) {
 			    TypedLiteral l = (TypedLiteral)obj;
-			    writeNode(w, nmap, "^^", l.getType(), "");
+			    writeNode(w, baseURI, nmap, "^^", l.getType(), "");
 			}
 		    } else {
-			writeNode(w, nmap, "    ", obj, "");
+			writeNode(w, baseURI, nmap, "    ", obj, "");
 		    }
 			
 		    if(k.hasNext())
@@ -116,19 +117,23 @@ public final class TurtleWriter {
 
     /** Writes a given node in Turtle's resource format.
      *  @param w    the writer to use
+     *  @param baseURI the URI that is written out as &lt;&gt;
      *  @param nmap defined namespaces
      *  @param pre  some text to be written before the node
      *  @param res  the node to be written
      *  @param post some text to be written after the node
      *  @throws IOException if writing fails
      */
-    protected static void writeNode(Writer w, NamespaceMap nmap, 
+    protected static void writeNode(Writer w, String baseURI, 
+				    NamespaceMap nmap, 
 				    String pre, Object res, String post) 
 	throws IOException {
 	w.write(pre);
 	String uri = Nodes.toString(res);
 	String abbrev = nmap.getAbbrevString(uri);
-	if (abbrev == uri) { // if the uri wasn't abbreviated
+	if (uri.equals(baseURI))
+	    w.write("<>");
+	else if (abbrev == uri) { // if the uri wasn't abbreviated
 	    w.write('<');
 	    w.write(uri);
 	    w.write('>');

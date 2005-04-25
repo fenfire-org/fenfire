@@ -67,5 +67,7 @@ public class FF {
     static public final Object endX        = Nodes.get(pspdf+"endX");
     static public final Object startY      = Nodes.get(pspdf+"startY");
     static public final Object endY        = Nodes.get(pspdf+"endY");
+
+    static public final Object startNode = Nodes.get(_nsId+"startNode");
 }
 

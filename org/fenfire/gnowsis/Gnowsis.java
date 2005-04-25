@@ -53,7 +53,7 @@ public class Gnowsis {
     public static void main(String[] args) throws Exception {
 	Graph g = getCBD("urn:mozilla:email:msg:mailbox://693890@pop.gmx.de/Inbox#375899911");
 	StringWriter w = new StringWriter();
-	Graphs.writeTurtle(g, new java.util.HashMap(), w);
+	Graphs.writeTurtle(g, new java.util.HashMap(), w, null);
 	System.out.println(w.toString());
     }
 }
