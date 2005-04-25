@@ -31,14 +31,19 @@ import org.fenfire.swamp.smush.SmushListener;
 import javolution.realtime.RealtimeObject;
 import java.util.*;
 
-/** A Fenfire cursor position.
+/** A Fenfire cursor position. This is an important piece in the architecture, 
+ *  keeping the focused node, any spatial state, text cursor position and 
+ *  any selected property and inverse property etc. even when the views change.
+ *
+ *  The cursor is also responsible of keeping itself sane when a node 
+ *  disappears in a smushing.
  */
 public final class Cursor implements SmushListener {
 
-    public Object node;
-    public Object spatialCursor;
+    private Object node;
+    private Object spatialCursor;
     public int textCursor = -1;
-    public Map rotations = new HashMap(); // should perhaps be LRU...
+    private Map rotations = new HashMap(); // should perhaps be LRU...
 
     public final Model textCursorModel = new TextCursorModel();
 
