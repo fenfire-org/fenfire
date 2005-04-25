@@ -154,7 +154,11 @@ public class Main {
 		File file = File.createTempFile("pdfdemo", ".turtle");
 		gf_graph = new OneQuadGraph(quadsGraph, "");
 		mainnode = Nodes.N();
-		gf = new GraphFile.Turtle(file, gf_graph, getPDFDemoGraph(mainnode));
+		// createTempFile really creates the file, so GraphFile.Turtle
+		// doesn't use the given default graph
+		gf0 = new GraphFile.Turtle(file, gf_graph, null);
+		// thus, we addAll ourselves
+		gf_graph.addAll(getPDFDemoGraph(mainnode));
 		continue;
 	    }
 	
