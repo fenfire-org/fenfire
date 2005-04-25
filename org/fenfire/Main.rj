@@ -473,7 +473,7 @@ public class Main {
 	    Lob propbox = Views.propbox(graph, reprView, allProps, noShowProps, activeCategories);
 
 	    Lob left = Lobs.vbox();
-	    left.add(Lobs.request(Axis.Y, propbox, 0, 0, Lob.INF));
+	    left.add(Lobs.request(Axis.Y, propbox, -1, -1, Lob.INF));
 	    left.add(Lobs.noGrow(Axis.Y, getDocLob()));
 
 	    Lob hbox = Lobs.hbox();

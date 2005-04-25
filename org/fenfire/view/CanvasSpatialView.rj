@@ -177,7 +177,7 @@ public class CanvasSpatialView implements SpatialView {
 
 	l = Lobs.scale(l, cc.getZoom());
 
-	l = Lobs.request(l, 0, 0, 0, 0, 0, 0);
+	l = Lobs.request(l, 0, 0, Lob.INF, 0, 0, Lob.INF);
 	l = Lobs.align(l, .5f, .5f);
 
 	/*

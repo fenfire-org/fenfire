@@ -233,7 +233,7 @@ public class DocumentSpatialView implements SpatialView {
 
 	l = scaleDragController(l, 3, cursor);
 
-	l = Lobs.request(l, 0, 0, 0, 0, 0, 0);
+	l = Lobs.request(l, 0, 0, Lob.INF, 0, 0, Lob.INF);
 	l = Lobs.align(l, .5f, .5f);
 
 	l = SpatialContextLob.newInstance(l, cc.getCanvas());
