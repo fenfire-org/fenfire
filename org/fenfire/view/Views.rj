@@ -34,6 +34,7 @@ import org.fenfire.swamp.*;
 import org.fenfire.vocab.*;
 import javolution.realtime.*;
 import javolution.util.*;
+import javolution.lang.Text;
 import java.util.*;
 
 public class Views {
@@ -84,7 +85,10 @@ public class Views {
 	    });
 			
 	    viewbox.add(lob);
-	    viewbox.add(Lobs.hbox(Components.font().text(view.getClass().getName())));
+
+	    Text name = Text.valueOf(view.getClass().getName());
+	    name = name.subtext(name.lastIndexOf(".")+1);
+	    viewbox.add(Lobs.hbox(Components.font().text(name)));
 	    viewbox.add(Lobs.glue(axis, 10, 10, 10));
 	}
 
