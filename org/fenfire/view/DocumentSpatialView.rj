@@ -168,19 +168,24 @@ public class DocumentSpatialView implements SpatialView {
 	     i.hasNext();) {
 	    Object n = i.next();
 	    
-	    int p0 = RDFUtil.getInt(graph, n, FF.startPage) - 1;
-	    int p1 = RDFUtil.getInt(graph, n, FF.endPage);
-
+	    int p0, p1;
+	    try {
+		p0 = RDFUtil.getInt(graph, n, FF.startPage) - 1;
+		p1 = RDFUtil.getInt(graph, n, FF.endPage);
+	    } catch (Exception _) { continue; }
 	    // assume only one page, for now...
 	    Lob page = PagePool.oneFullPage(cc.getCanvas(), p0);
 
 	    SizeRequest r = page.getSizeRequest();
 	    float pageW = r.natW, pageH = r.natH;
 
-	    float x0 = RDFUtil.getFloat(graph, n, FF.startX) * pageW;
-	    float y0 = RDFUtil.getFloat(graph, n, FF.startY) * pageH;
-	    float x1 = RDFUtil.getFloat(graph, n, FF.endX) * pageW;
-	    float y1 = RDFUtil.getFloat(graph, n, FF.endY) * pageH;
+	    float x0, y0, x1, y1;
+	    try {
+		x0 = RDFUtil.getFloat(graph, n, FF.startX) * pageW;
+		y0 = RDFUtil.getFloat(graph, n, FF.startY) * pageH;
+		x1 = RDFUtil.getFloat(graph, n, FF.endX) * pageW;
+		y1 = RDFUtil.getFloat(graph, n, FF.endY) * pageH;
+	    } catch (Exception _) { continue; }
 
 	    float w = x1-x0, h = y1-y0;
 
