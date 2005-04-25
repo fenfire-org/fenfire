@@ -102,7 +102,8 @@ public class Main {
 
 	String filename;
 
-	GraphFile gf0 = null;
+	// the first, primary, editable and to be saved graph
+	GraphFile gf0 = null; 
 	List pipes = new LinkedList();
 
 	Object mainnode = null;
@@ -150,7 +151,7 @@ public class Main {
 	    GraphFile gf;
 
 	    if(argv[i].equals("--pdfdemo")) {
-		File file = new File("/tmp/pdfdemo.turtle");
+		File file = File.createTempFile("pdfdemo", "turtle");
 		gf_graph = new OneQuadGraph(quadsGraph, "");
 		mainnode = Nodes.N();
 		gf = new GraphFile.Turtle(file, gf_graph, getPDFDemoGraph(mainnode));
@@ -182,9 +183,10 @@ public class Main {
 	    }
 
 	    Graph defaultContent = new HashGraph();
-	    defaultContent.add(Nodes.get(file_uri),
-			       FF.startNode,
-			       Nodes.N());
+	    if (gf0==null)
+		defaultContent.add(Nodes.get(file_uri),
+				   FF.startNode,
+				   Nodes.N());
 
 	    if(!xml)
 		gf = new GraphFile.Turtle(file, gf_graph, defaultContent);
@@ -206,12 +208,6 @@ public class Main {
 			mainnode = iter.next();
 		}
 	    }
-	}
-
-	if(argv.length == 0) {
-	    File file = new File("/tmp/ff.turtle");
-	    Graph gf_graph = new OneQuadGraph(quadsGraph, "");
-	    gf0 = new GraphFile.Turtle(file, gf_graph, new HashGraph());
 	}
 
 	final Graph graph = new AllQuadsGraph(quadsGraph, "");
