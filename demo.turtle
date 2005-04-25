@@ -1,7 +1,12 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
 @prefix foaf: <http://xmlns.com/foaf/0.1/>.
 @prefix sl: <http://fenfire.org/rdf-v/2003/05/structlink#>.
+@prefix ff: <http://fenfire.org/rdf-v/2003/05/ff#>.
 
+<> ff:startNode <http://example.org/DEMO>.
+
+<http://example.org/DEMO> rdfs:label "RDF Demonstration".
+<http://example.org/DEMO> rdfs:comment "This is a starting point for a demo of Fenfire.\nYou can follow connections left and right by pressing arrow keys, or by mouse-clicking nodes.".
 
 <http://example.org/DEMO> sl:linkedTo <http://captsolo.net/info/blog_all.php>.
 <http://captsolo.net/info/blog_all.php> rdfs:seeAlso <http://captsolo.net/info/xmlsrv/rdf.php?blog=1>.
