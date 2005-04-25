@@ -857,6 +857,30 @@ public class PropertyListView implements SpatialView {
 
 	Cursor.Rotation r = cursor.getRotation();
 
+	if(r == null) {
+	    for(Iterator i=properties.iterator(); i.hasNext();) {
+		Object prop = i.next();
+		
+		List conns = getConnectionList(graph, node, prop, 1);
+
+		if(!conns.isEmpty()) {
+		    cursor.setRotation(cursor.getNode(), prop, conns.get(0));
+		    return;
+		} else {
+		    conns = getConnectionList(graph, node, prop, -1);
+
+		    if(!conns.isEmpty()) {
+			cursor.setRotation(conns.get(0), prop, 
+					   cursor.getNode());
+			return;
+		    }
+		}
+	    }
+
+	    // there are no connections at all
+	    return;
+	}
+
 	Object prop = r.getRotationProperty();
 	Object value = r.getRotationNode();
 	int rdir = r.getRotationDir();
