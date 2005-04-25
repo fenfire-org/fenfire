@@ -202,11 +202,28 @@ public class Main {
 	    }
 	}
 
+	loadSysGraph(quadsGraph, nmap);
+
 	final Graph graph = new AllQuadsGraph(quadsGraph, "");
 
 	FenfireMain m = new FenfireMain(quadsGraph, graph, gf0, mainnode, nmap,
 					(File[]) pipes.toArray(new File[0]));
 	m.start();
+    }
+
+    private static void loadSysGraph(QuadsGraph quadsGraph, 
+				     NamespaceMap nmap) throws IOException {
+	Graph sys_graph = new OneQuadGraph(quadsGraph, "system:");
+	InputStream in = 
+	    Main.class.getClassLoader().getResourceAsStream("system.turtle");
+	Map map = new TreeMap();
+	
+	if(in == null)
+	    System.out.println("resource not found: system.turtle");
+	else {
+	    Graphs.readTurtle(in, "system:", sys_graph, map);
+	    nmap.putAll(map);
+	}
     }
 
     /** Tries to find a UI start node for a graph.
