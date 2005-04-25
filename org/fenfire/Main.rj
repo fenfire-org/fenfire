@@ -198,15 +198,7 @@ public class Main {
 	    if(gf0 == null) {
 		gf0 = gf;
 
-		Iterator iter = gf_graph.findN_11X_Iter(Nodes.get(file_uri),
-							FF.startNode);
-		if (iter.hasNext())
-		    mainnode = iter.next();
-		else {
-		    iter = gf_graph.findN_XAA_Iter();
-		    if(iter.hasNext())
-			mainnode = iter.next();
-		}
+		mainnode = findStartNode(gf_graph, Nodes.get(file_uri));
 	    }
 	}
 
@@ -215,6 +207,50 @@ public class Main {
 	FenfireMain m = new FenfireMain(quadsGraph, graph, gf0, mainnode, nmap,
 					(File[]) pipes.toArray(new File[0]));
 	m.start();
+    }
+
+    /** Tries to find a UI start node for a graph.
+     *  @param graph the graph the start node should be for
+     *  @param document the node that represents the graph file (%lt;&gt;)
+     *  @return a node that can be used, or
+     *          null, if a good node wasn't found
+     */
+    private static Object findStartNode(Graph graph, Object document) {
+	Iterator iter;
+
+	iter = graph.findN_11X_Iter(document, FF.startNode);
+	if (iter.hasNext())
+	    return iter.next();
+
+	// Also try a property with wider support
+	iter = graph.findN_11X_Iter(document, FOAF.primaryTopic);
+	if (iter.hasNext())
+	    return iter.next();
+
+	// Perhaps document URI has been lost at some point (RIO writer...)
+	iter = graph.findN_A1X_Iter(FF.startNode);
+	if (iter.hasNext())
+	    return iter.next();
+
+	iter = graph.findN_A1X_Iter(FOAF.primaryTopic);
+	if (iter.hasNext())
+	    return iter.next();
+	
+	// Next fallback is the document if there's anything about it
+	iter = graph.findN_1AX_Iter(document);
+	if (iter.hasNext())
+	    return document;
+	iter = graph.findN_XA1_Iter(document);
+	if (iter.hasNext())
+	    return document;
+
+	// Last possibility is any node
+	iter = graph.findN_XAA_Iter();
+	if(iter.hasNext())
+	    return iter.next();
+
+	// No good start node found
+	return null;
     }
 
     public static class FenfireMain extends NewLobMain {

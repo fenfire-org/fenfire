@@ -36,4 +36,5 @@ public class FOAF {
     static public final Object 
 	Image = Nodes.get(base+"Image");
 
+    static public final Object primaryTopic = Nodes.get(base+"primaryTopic");
 }
