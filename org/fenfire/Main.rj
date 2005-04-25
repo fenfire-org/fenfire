@@ -110,7 +110,7 @@ public class Main {
 	NamespaceMap nmap = new NamespaceMap();
 
 	if(argv.length == 0) {
-	    File f = File.createTempFile("fenfire", "turtle");
+	    File f = File.createTempFile("fenfire", ".turtle");
 	    argv = new String[] { f.getPath() };
 
 	    InputStream in = 
@@ -151,7 +151,7 @@ public class Main {
 	    GraphFile gf;
 
 	    if(argv[i].equals("--pdfdemo")) {
-		File file = File.createTempFile("pdfdemo", "turtle");
+		File file = File.createTempFile("pdfdemo", ".turtle");
 		gf_graph = new OneQuadGraph(quadsGraph, "");
 		mainnode = Nodes.N();
 		gf = new GraphFile.Turtle(file, gf_graph, getPDFDemoGraph(mainnode));
