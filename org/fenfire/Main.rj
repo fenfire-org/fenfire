@@ -466,8 +466,8 @@ public class Main {
 	    k.put("Ctrl-O", new @realtime-i Action(Cursor cursor, WindowAnimation windowAnim) { public void run() {
 		Gnowsis.open(cursor.getNode());
 	    }});
-	    k.put("Ctrl-S", new @realtime-i Action(GraphFile graphFile) { public void run() {
-		graphFile.save();
+	    k.put("Ctrl-S", new @realtime-i Action(GraphFile graphFile, NamespaceMap nmap) { public void run() {
+		graphFile.save(nmap);
 		System.out.println("Saved.");
 	    }});
 	    k.put("Alt-Z", new @realtime-i Action(Cursor cursor, SpatialViewSettings spatialViewSettings, WindowAnimation windowAnim) {

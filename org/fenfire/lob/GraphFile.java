@@ -35,7 +35,28 @@ public interface GraphFile {
 
     Graph getGraph();
     Map getNamespaces(); // namespace shortname -> namespace uri
-    void save();
+    void save(NamespaceMap more_names);
+
+    class Helpers {
+	/** Adds new namespaces from another list when they get used. 
+	 *  Initially, a file doesn't have namespaces at all. */
+	private static void addNewNamespaces(Graph graph, Map namespaces,
+					     NamespaceMap more_names) {
+	    NamespaceMap nmap = new NamespaceMap();
+	    nmap.putAll(namespaces);
+	    Iterator preds = graph.findN_AXA_Iter(); // XXX other nodes too?
+	    while (preds.hasNext()) {
+		String pred = preds.next().toString();
+		if (!pred.equals(nmap.getAbbrevString(pred)))
+		    continue; // we already have an abbreviation
+		String abbrev = more_names.getAbbrevString(pred);
+		if (!pred.equals(abbrev)) {
+		    String prefix = abbrev.substring(0, abbrev.indexOf(':'));
+		    namespaces.put(prefix, more_names.getURIForPrefix(prefix));
+		}
+	    }
+	}
+    }
 
     class Turtle implements GraphFile {
 	protected Graph graph;
@@ -72,7 +93,8 @@ public interface GraphFile {
 	    return namespaces;
 	}
 
-	public void save() {
+	public void save(NamespaceMap more_names) {
+	    Helpers.addNewNamespaces(graph, namespaces, more_names);
 	    try {
 		Graphs.writeTurtle(graph, namespaces, file);
 	    } catch(java.io.IOException e) {
@@ -116,7 +138,8 @@ public interface GraphFile {
 	    return namespaces;
 	}
 
-	public void save() {
+	public void save(NamespaceMap more_names) {
+	    Helpers.addNewNamespaces(graph, namespaces, more_names);
 	    try {
 		NamespaceMap nmap = new NamespaceMap();
 		nmap.putAll(namespaces);

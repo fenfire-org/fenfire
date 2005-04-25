@@ -115,6 +115,13 @@ public class NamespaceMap {
 	return getAbbrev(uri).toString();
     }
 
+    public String getURIForPrefix(String prefix) {
+	for (int i=0; i<n; i++)
+	    if (names[i].equals(prefix))
+		return uris[i];
+	throw new NoSuchElementException("NamespaceMap prefix "+prefix);
+    }
+
     private static final Text COLON = Text.valueOf(":").intern();
 
 

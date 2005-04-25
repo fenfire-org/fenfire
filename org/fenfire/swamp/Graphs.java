@@ -224,6 +224,7 @@ public class Graphs {
     }
 
     public static void writeXML(ConstGraph g, File file, NamespaceMap nmap) throws IOException {
+	// XXX the document URI should be abbreviated as <> as in TurtleWriter
 	RdfDocumentWriter writer = new org.openrdf.rio.rdfxml.RdfXmlWriter(new java.io.FileOutputStream(file));
 	writer.startDocument();
 
