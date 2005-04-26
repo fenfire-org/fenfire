@@ -27,18 +27,21 @@ GraphFile.java
  */
 package org.fenfire.lob;
 import org.fenfire.swamp.*;
+import org.fenfire.vocab.RDFS;
 import org.fenfire.util.*;
 import java.io.*;
 import java.util.*;
 
 public interface GraphFile {
-
     Graph getGraph();
     Map getNamespaces(); // namespace shortname -> namespace uri
     File getFile();
     void save(NamespaceMap more_names);
 
     class Helpers {
+	public static boolean dbg = false;
+	private static void p(String s) { System.out.println("GraphFile:: "+s); }
+
 	/** Adds new namespaces from another list when they get used. 
 	 *  Initially, a file doesn't have namespaces at all. */
 	private static void addNewNamespaces(Graph graph, Map namespaces,
@@ -54,6 +57,73 @@ public interface GraphFile {
 		if (!pred.equals(abbrev)) {
 		    String prefix = abbrev.substring(0, abbrev.indexOf(':'));
 		    namespaces.put(prefix, more_names.getURIForPrefix(prefix));
+		}
+	    }
+	}
+
+	private static void addURN5Namespaces(Graph g, Map namespaces) {
+	    for(Iterator i=g.findN_X1A_Iter(RDFS.label); i.hasNext();) {
+		Object o = i.next();
+		String uri = Nodes.toString(o);
+		if(uri.startsWith("urn:urn-5:")) {
+		    String label = null;
+		    for(Iterator j=g.findN_11X_Iter(o, RDFS.label); j.hasNext();) {
+			Object obj = j.next();
+			if(obj instanceof Literal) {
+			    label = ((Literal)obj).getString();
+			    if(label.trim().equals("")) {
+				label = null;
+			    } else {
+				break;
+			    }
+			}
+		    }
+
+		    if(label == null) continue;
+
+		    String prefix = toPrefix(label);
+		    if(namespaces.get(prefix) == null) {
+			namespaces.put(prefix, uri);
+		    }
+		}
+	    }
+	}
+
+	private static String toPrefix(String label) {
+	    StringBuffer prefix = new StringBuffer();
+	    boolean hadDash = false;
+	    for(int i=0; i<label.length(); i++) {
+		char c = label.charAt(i);
+		if(('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') ||
+		   (prefix.length() > 0 && '0' <= c && c <= '9')) {
+		    prefix.append(c);
+		    hadDash = false;
+		} else if(!hadDash) {
+		    if(prefix.length() > 0) // prefixes can't start with -
+			prefix.append('-');
+		    hadDash = true;
+		}
+	    }
+	    return prefix.toString();
+	}
+
+	private static void removeURN5Namespaces(Graph g, Map namespaces) {
+	    for(Iterator i=namespaces.entrySet().iterator(); i.hasNext();) {
+		Map.Entry e = (Map.Entry)i.next();
+		String prefix = (String)e.getKey();
+		String uri = (String)e.getValue();
+
+		if(!uri.startsWith("urn:urn-5:")) continue;
+
+		Object node = Nodes.get(uri);
+		for(Iterator j=g.findN_11X_Iter(node, RDFS.label); j.hasNext();) {
+		    Object object = j.next();
+		    if(!(object instanceof Literal)) continue;
+		    String label = ((Literal)object).getString();
+		    if(prefix.equals(toPrefix(label))) {
+			i.remove();
+			break;
+		    }
 		}
 	    }
 	}
@@ -79,6 +149,7 @@ public interface GraphFile {
 
 	    if(file.exists()) {
 		Graphs.readTurtle(file, graph, namespaces);
+		Helpers.removeURN5Namespaces(graph, namespaces);
 	    } else if(defaultGraph == null) {
 		throw new FileNotFoundException(""+file);
 	    } else {
@@ -100,6 +171,7 @@ public interface GraphFile {
 
 	public void save(NamespaceMap more_names) {
 	    Helpers.addNewNamespaces(graph, namespaces, more_names);
+	    Helpers.addURN5Namespaces(graph, namespaces);
 	    try {
 		Graphs.writeTurtle(graph, namespaces, file);
 	    } catch(java.io.IOException e) {
@@ -128,6 +200,7 @@ public interface GraphFile {
 
 	    if(file.exists()) {
 		Graphs.readXML(file, graph, namespaces);
+		Helpers.removeURN5Namespaces(graph, namespaces);
 	    } else if(defaultGraph == null) {
 		throw new FileNotFoundException(""+file);
 	    } else {
@@ -149,6 +222,7 @@ public interface GraphFile {
 
 	public void save(NamespaceMap more_names) {
 	    Helpers.addNewNamespaces(graph, namespaces, more_names);
+	    Helpers.addURN5Namespaces(graph, namespaces);
 	    try {
 		NamespaceMap nmap = new NamespaceMap();
 		nmap.putAll(namespaces);
