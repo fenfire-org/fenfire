@@ -263,6 +263,9 @@ public class PropertyListView implements SpatialView {
     /** Literal viewlet shows a short, literal-valued property */
     public static class LiteralViewlet implements Viewlet {
 	public boolean canRender(Graph graph, Object prop, Object node) {
+	    Iterator rev = graph.findN_X11_Iter(prop, node);
+	    if (rev.hasNext()) return false; // we can't show reverse props
+
 	    Iterator i = graph.findN_11X_Iter(node, prop);
 	    if(!i.hasNext()) return false;
 
