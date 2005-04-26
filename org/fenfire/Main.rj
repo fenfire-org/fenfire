@@ -853,7 +853,17 @@ public class Main {
 	if(!uri.startsWith("http://")) return;
 
 	try {
-	    if(httpContext == null) httpContext = new HTTPContext();
+	    if(httpContext == null) {
+		httpContext = new HTTPContext();
+		httpContext.setAccept("application/x-turtle, "+
+				      "application/turtle, "+
+				      "application/rdf+xml; q=0.9, "+
+				      "application/rss+xml; q=0.4, "+
+				      "application/xml; q=0.3, "+
+				      "text/xml; q=0.2, "+
+				      "*/*; q=0.1");
+	    }
+
 	    HTTPResource res = new HTTPResource(uri, httpContext);
 	    
 	    System.out.println("Loading data from Web: "+uri+"...");
