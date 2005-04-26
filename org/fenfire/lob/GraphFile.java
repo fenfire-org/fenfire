@@ -35,6 +35,7 @@ public interface GraphFile {
 
     Graph getGraph();
     Map getNamespaces(); // namespace shortname -> namespace uri
+    File getFile();
     void save(NamespaceMap more_names);
 
     class Helpers {
@@ -93,6 +94,10 @@ public interface GraphFile {
 	    return namespaces;
 	}
 
+	public File getFile() {
+	    return file;
+	}
+
 	public void save(NamespaceMap more_names) {
 	    Helpers.addNewNamespaces(graph, namespaces, more_names);
 	    try {
@@ -136,6 +141,10 @@ public interface GraphFile {
 
 	public Map getNamespaces() {
 	    return namespaces;
+	}
+
+	public File getFile() {
+	    return file;
 	}
 
 	public void save(NamespaceMap more_names) {

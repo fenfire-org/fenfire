@@ -161,8 +161,9 @@ public class Main {
 		gf_graph.addAll(getPDFDemoGraph(mainnode));
 		continue;
 	    }
-	
-	    File file = new File(argv[i]);
+
+	    // we should use canonical file as it has same URI as <> in graph
+	    File file = new File(argv[i]).getCanonicalFile();
 	    String file_uri = file.toURI().toString();
 	    // we try to accept only readable files (or creatable for gf0)
 	    if (!file.canRead() || file.isDirectory()) {
@@ -474,7 +475,7 @@ public class Main {
 	    }});
 	    k.put("Ctrl-S", new @realtime-i Action(GraphFile graphFile, NamespaceMap nmap) { public void run() {
 		graphFile.save(nmap);
-		System.out.println("Saved.");
+		System.out.println("Saved <"+graphFile.getFile().toURI()+">.");
 	    }});
 	    k.put("Alt-Z", new @realtime-i Action(Cursor cursor, SpatialViewSettings spatialViewSettings, WindowAnimation windowAnim) {
 		public void run() {
