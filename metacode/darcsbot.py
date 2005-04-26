@@ -27,6 +27,8 @@ from twisted.python.rebuild import rebuild
 import sys
 import time
 import os.path
+import os.stat
+import stat.ST_MTIME
 from traceback import print_exc
 
 
@@ -53,6 +55,7 @@ class Bot(irc.IRCClient):
     """An IRC bot."""
     def __init__(self, nick):
         self.nickname = nick
+        self.inventory_mtimes = {}
         print 'asdf'
 
     def signedOn(self):
@@ -89,7 +92,8 @@ class Bot(irc.IRCClient):
                 self.notice(self.factory.channel, msg)
                 time.sleep(LINE_DELAY)
             for p in projects:
-                project(p, send_commit)
+                self.inventory_mtimes[p] = project(p, send_commit,
+                                               self.inventory_mtimes.get(p, 0))
         except:
             print_exc()
 
@@ -186,10 +190,14 @@ def send(proj, p, send_notice):
 
 
 
-def project(proj, send_notice):
+def project(proj, send_notice, inventory_mtime_old):
     if not os.path.isdir(proj):
         # we don't have that project -- skip
-        return
+        return 0
+
+    inventory_mtime = os.stat('%s/_darcs/inventory' % proj)[stat.ST_MTIME]
+    if (inventory_mtime == inventory_mtime_old):
+        return inventory_mtime # no changes since last check, skip
     
     FILE = SENT_DIR+'/%s-patches-sent' % proj
 
@@ -210,7 +218,7 @@ def project(proj, send_notice):
     f = open(FILE, 'a')
     for p in has_sent: f.write(p+'\n')
 
-
+    return inventory_mtime
 
 
 if __name__ == '__main__':
