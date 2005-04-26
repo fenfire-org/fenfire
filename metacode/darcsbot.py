@@ -44,7 +44,7 @@ NICK = "ffdarcsbot"
 IRC_SERVER = "irc.freenode.net"
 
 # Project options
-projects = [ 'libvob', 'callgl', 'fenfire', 'storm', 'alph', 'depends', 'navidoc', 'project' ]
+projects = [ 'libvob', 'callgl', 'fenfire', 'storm', 'alph', 'depends', 'navidoc', 'project', 'private' ]
 SENT_DIR = 'darcsbot_sent_commits'
 
 if not os.path.exists(SENT_DIR):
