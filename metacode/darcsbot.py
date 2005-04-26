@@ -27,8 +27,8 @@ from twisted.python.rebuild import rebuild
 import sys
 import time
 import os.path
-import os.stat
-import stat.ST_MTIME
+import os
+import stat
 from traceback import print_exc
 
 
