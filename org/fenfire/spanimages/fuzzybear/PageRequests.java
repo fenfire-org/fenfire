@@ -70,7 +70,7 @@ public class PageRequests {
 
     private Graph graph;
     private WindowAnimation anim;
-    private LobbedPagePool pagePool;
+    private LobbedImagePool pagePool;
     private LodElevator lodElevator;
 
     public PageRequests(Graph graph, 
@@ -78,7 +78,7 @@ public class PageRequests {
 	this.graph = graph;
 	this.anim = anim;
 	if (anim == null) throw new IllegalArgumentException();
-	pagePool = LobbedPagePool.getInstance();
+	pagePool = LobbedImagePool.pagePool();
 	lodElevator = new LodElevator(node2state, pagePool, anim);
     }
 
@@ -93,7 +93,7 @@ public class PageRequests {
 	synchronized (node2state) {
 	    State s = (State) node2state.get(node);
 	    if (s == null) {
-		s = new State(node);
+		s = new State(node, anim);
 		node2state.put(node, s);
 	    }
 	}	
@@ -151,7 +151,7 @@ public class PageRequests {
 	
 	int w = s.maxw;
 	int h = s.maxh;
-	Lob l;
+	Lob l = Lobs.nullLob();
 	try {
 	    l = pagePool.getLob(s.poolInds[page-1], 0,0,w,h);
 	} catch (Exception e) {
@@ -179,7 +179,7 @@ public class PageRequests {
 	if (start+1 == end) {
 	    lodElevator.setLOD(s, start, 0);
 
-	    Lob l;
+	    Lob l = Lobs.nullLob();
 	    float w = s.maxw * (x1-x0);
 	    float h = s.maxh * (y1-y0);
 	    //System.out.println("START IS "+start+" POOLIND "+s.poolInds[start]+", FINNISH KEYMAP IS BORING");
@@ -266,109 +266,6 @@ public class PageRequests {
     }
 
     Map node2state = Collections.synchronizedMap(new HashMap());
-    public class State implements ProgressListener {
-	int state = -1;
-	String uri;
-	File file = null;
-	String ct = null;
-	BlockId id = null;
-	PageImageScroll page = null;
-	int maxw = -1, maxh = -1, n = -1;
-	String tmpImgPrefix = null;
-	boolean imagesGenerated = false;
-	int [] poolInds = null;
-	LodElevator.SinglePage[] pages = null;
-
-	public State(String node) { this.uri = node; }
-
-
-	float progress = 0f;
-	String msg = "Uninitialized";
-
-	public void setProgress(float progress) {
-	    this.progress = progress;
-	    if (!anim.hasSceneReplacementPending())
-		anim.switchVS();
-	}
-	public void setMessage(String whatIsGoingOn) {
-	    this.msg = whatIsGoingOn;
-	    if (!anim.hasSceneReplacementPending())
-		anim.switchVS();
-	}
-
-	public Lob getLob(float wfract, float hfract) {
-	    if (!imagesGenerated) {
-		Lob vbox = Lobs.vbox();
-		List lobs = Lists.list();
-		lobs = Lists.concat(lobs, Lists.list(Lobs.hglue()));
-
-		String prog = (progress*100)+"";
-		int comma = (progress*100 < 10? 1: 
-			     (progress*100 < 100? 2: 3));
-		List text = Components.font().text(prog.substring(0,comma)+"% ");
-		lobs = Lists.concat(lobs, text);
-
-		Lob l;
-		l = Lobs.filledRect(Color.cyan);
-		int w = (int) (100*progress);
-		int h = 10;
-		l = Lobs.request(l, w,w,w,h,h,h);
-		lobs = Lists.concat(lobs, Lists.list(l));
-		l = Lobs.filledRect(Color.white);
-		w = 100-w;
-		l = Lobs.request(l, w,w,w,h,h,h);
-		lobs = Lists.concat(lobs, Lists.list(l));
-		lobs = Lists.concat(lobs, Lists.list(Lobs.hglue()));
-		vbox.add(Lobs.hbox(lobs));
-		vbox.add(Lobs.glue(Axis.Y, 10));
-		vbox.add(Components.label(msg));
-	        l = vbox;
-		//l = Lobs.scale(l, 2f, 2f);
-		if (maxw > 0 && maxh > 0) {
-		    float lw = maxw*wfract, lh = maxh*hfract;
-
-		    l = Components.frame(l);
-		    l = Lobs.align(l, .5f, .5f);
-		    l = Lobs.between(Lobs.filledRect(Color.white),
-				     l,
-				     Lobs.nullLob());
-		    l = Lobs.request(l, lw, lw, lw, lh, lh, lh);
-		}
-		return Components.frame(l);
-	    }
-	    return Lobs.nullLob();
-	}
-    }
-
-    /*
-    public Lob getLob(Object node) {
-	return getLob(node, 0);
-    }
-
-    public Lob getLob(Object node, float change) {
-	Lob lob = Lobs.nullLob();
-	State s = (State) node2state.get(node);
-	if (s == null) {
-	    s = new State(node);
-	    node2state.put(node, s);
-	}
-	
-	if (s.file == null)
-	    lob = setFile(s);
-	if (s.ct == null)
-	    lob = setContentType(s);
-	if (s.id == null)
-	    lob = setStormId(s);
-	if (s.page == null)
-	    lob = setPageImageScroll(s);
-	if (s.imagesGenerated == false)
-	    lob = generateImages(s);
-
-	lob = getRealLob(s, change);
-
-	return lob;
-    }
-    */
 
     protected void setFile(State s) {
 	// first get it from network if it's http://something..

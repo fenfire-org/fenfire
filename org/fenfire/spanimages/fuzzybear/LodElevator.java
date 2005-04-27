@@ -48,10 +48,10 @@ public class LodElevator {
     List actives = new ArrayList();
 
     Map node2state;
-    LobbedPagePool pool;
+    LobbedImagePool pool;
     WindowAnimation anim;
     public LodElevator(final Map node2state,
-		       final LobbedPagePool pool,
+		       final LobbedImagePool pool,
 		       final WindowAnimation anim) {
 	this.node2state = node2state;
 	this.pool = pool;
@@ -116,7 +116,7 @@ public class LodElevator {
 
     
     // page is in base 0
-    public void setLOD(PageRequests.State s, int pageB0, int prior) {
+    public void setLOD(State s, int pageB0, int prior) {
 	if (s.pages[pageB0] == null) {
 	    s.pages[pageB0] = new SinglePage(s, prior);
 	    actives.add(s.pages[pageB0]);
@@ -135,10 +135,10 @@ public class LodElevator {
 
     
     static public class SinglePage {
-	PageRequests.State state;
+	State state;
 	int prior;
 	int basePrior = 0;
-	SinglePage(PageRequests.State s, int pr) {
+	SinglePage(State s, int pr) {
 	    state = s; prior = pr;
 	}
 	public int getPage() {

@@ -1,5 +1,5 @@
 /*
-LobbedPagePool.java
+LobbedImagePool.java
  *    
  *    Copyright (c) 2005, Matti J. Katila
  *    This file is part of Fenfire.
@@ -37,18 +37,54 @@ import java.util.*;
 import java.io.*;
 
 
-public class LobbedPagePool extends AWTPagePool {
-    static void p(String s) { System.out.println("LobbedPagePool:: "+s); }
+public class LobbedImagePool extends AWTImagePool {
+    static void p(String s) { System.out.println("LobbedImagePool:: "+s); }
 
-    static public LobbedPagePool getInstance() {
-	if (instance==null)
-	    instance = new LobbedPagePool();
 
-	return (LobbedPagePool) instance;
+    static public LobbedImagePool pagePool() {
+	return new LobbedImagePool(
+	    new int[][]{
+		// how many, width, height
+		{ 1, 2048, 2048 },
+		{ 2, 256, 512 },
+		{ 4, 128, 256 },
+		{ 64, 64, 64 },
+	    },
+	    new DirectColorModel(
+		ColorSpace.getInstance(ColorSpace.CS_sRGB),
+		32, // int
+		0x00ff0000,
+		0x0000ff00,
+		0x000000ff,
+		0, // we don't need alpha
+		true,
+		DataBuffer.TYPE_INT)
+	    );
+    }
+    static public LobbedImagePool imagePool() {
+	return new LobbedImagePool(
+	    new int[][]{
+		// how many, width, height
+		{ 1, 256, 256 },
+		{ 10, 128, 128 },
+		{ 64, 64, 64 },
+	    },
+	    new DirectColorModel(
+		ColorSpace.getInstance(ColorSpace.CS_sRGB),
+		32, // int
+		0x00ff0000,
+		0x0000ff00,
+		0x000000ff,
+		0xff000000, // we need alpha
+		true,
+		DataBuffer.TYPE_INT)
+	    );
     }
 
-    
-    protected LobbedPagePool() {
+    protected ColorModel cm;
+    protected LobbedImagePool(int[][] sizes, ColorModel cm) {
+	super(sizes);
+	this.cm = cm;
     }
 
     static class ImageVob extends AbstractVob {
@@ -57,20 +93,9 @@ public class LobbedPagePool extends AWTPagePool {
 	protected int x0, y0, w0, h0;
 	
 	static Point p = new Point(0,0);
-	static protected ColorModel cm = 
-	new DirectColorModel(
-	    ColorSpace.getInstance(ColorSpace.CS_sRGB),
-	    32, // int
-	    0x00ff0000,
-	    0x0000ff00,
-	    0x000000ff,
-	    0, // we don't need alpha
-	    true,
-	    DataBuffer.TYPE_INT);
-	
 	private ImageVob() {}
 
-	public static ImageVob newInstance(LobbedPagePool pool, 
+	public static ImageVob newInstance(LobbedImagePool pool, 
 					   int ind, int x, 
 					   int y, int w, int h) {
 	    ImageVob m = (ImageVob)FACTORY.object();
@@ -79,7 +104,7 @@ public class LobbedPagePool extends AWTPagePool {
 		    pool.models[ind],
 		    pool.dataBuffs[ind],
 		    p);
-	    m.img = new BufferedImage(cm, raster, false, null);
+	    m.img = new BufferedImage(pool.cm, raster, false, null);
 	    m.x0 = x; 
 	    m.y0 = y;
 	    m.w0 = w; 
@@ -87,11 +112,6 @@ public class LobbedPagePool extends AWTPagePool {
 	    return m;
 	}
 	
-	/*
-	  protected Vob wrap(Image img) {
-	  return newInstance(img, x0, y0, w0, h0);
-	  }
-	*/
 	public void render(Graphics g, boolean fast, 
 			   RenderInfo info1, RenderInfo info2) {
 	    int x = (int)info1.x, 
@@ -122,7 +142,7 @@ public class LobbedPagePool extends AWTPagePool {
 
 
     protected boolean inited = false;
-    protected void init() { //LobbedPagePool() {
+    protected void init() { //LobbedImagePool() {
 	if(inited) return;
 
 	super.init();

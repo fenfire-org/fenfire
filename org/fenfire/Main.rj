@@ -354,7 +354,7 @@ public class Main {
 	    activeCategories = new HashSet();
 
 	    Set reprViews = new HashSet(Arrays.asList(new Object[] {
-		new ImageReprView(graph, IMAGE_TYPES),
+		new ImageRegionReprView(graph),
 		new TextReprView(graph, cursor, nmap, textProps, 
 				 RDFS.label),
 		new CanvasNodeReprView(graph),

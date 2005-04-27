@@ -1,5 +1,5 @@
 /*
-AWTPagePool.java
+AWTImagePool.java
  *    
  *    Copyright (c) 2005, Matti J. Katila
  *    This file is part of Fenfire.
@@ -30,8 +30,8 @@ import java.awt.*;
 import java.io.*;
 import java.util.*;
 
-public class AWTPagePool {
-    static void p(String s) { System.out.println("AWTPagePool:: "+s); }
+public class AWTImagePool {
+    static void p(String s) { System.out.println("AWTImagePool:: "+s); }
 
 
     public int getSizes() { 
@@ -47,13 +47,13 @@ public class AWTPagePool {
 	return sizes[index][2]; 
     }
 
-    protected final int[][] sizes = {
-	// how many, width, height
-	{ 1, 2048, 2048 },
-	{ 2, 256, 512 },
-	{ 4, 128, 256 },
-	{ 64, 64, 64 },
-    };
+    protected final int[][] sizes;
+
+
+    public AWTImagePool(int[][] sizes) {
+	this.sizes = sizes;
+    }
+
 
 
     static int[] mask = new int[]{ 0x00ff0000,
@@ -71,7 +71,7 @@ public class AWTPagePool {
 
     /** Singleton pool for awt
      */
-    protected synchronized void init() { //AWTPagePool() {
+    protected synchronized void init() { 
 
 	//p("inited: "+inited+" "+this);
 	if (inited) return;
