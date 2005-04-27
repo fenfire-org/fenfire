@@ -70,7 +70,7 @@ public class ImageRequests {
 
     private Graph graph;
     private WindowAnimation anim;
-    private LobbedImagePool pagePool;
+    private LobbedImagePool imgPool;
     private LodElevator lodElevator;
 
     public ImageRequests(Graph graph, 
@@ -78,8 +78,8 @@ public class ImageRequests {
 	this.graph = graph;
 	this.anim = anim;
 	if (anim == null) throw new IllegalArgumentException();
-	pagePool = LobbedImagePool.imagePool();
-	lodElevator = new LodElevator(node2state, pagePool, anim);
+	imgPool = LobbedImagePool.imagePool();
+	lodElevator = new LodElevator(node2state, imgPool, anim);
     }
 
     public void flush() { 
@@ -155,7 +155,7 @@ public class ImageRequests {
 	float w = s.maxw * (x1-x0);
 	float h = s.maxh * (y1-y0);
 	//System.out.println("START IS "+start+" POOLIND "+s.poolInds[start]+", FINNISH KEYMAP IS BORING");
-	l = pagePool.getLob(s.poolInds[0], x0,y0,x1-x0,y1-y0);
+	l = imgPool.getLob(s.poolInds[0], x0,y0,x1-x0,y1-y0);
 	l = Lobs.request(l, w,w,w,h,h,h);
 	return l;
     }
@@ -229,8 +229,7 @@ public class ImageRequests {
     protected void setContentType(State s) {
 	s.ct = ImportUtil.getContentType(s.file);
 	boolean ok = false;
-	if (s.ct.equals("application/pdf") ||
-	    s.ct.equals("application/postscript")) { ok = true; }
+	if (s.ct.startsWith("image/")) { ok = true; }
 	if (!ok) {
 	    s.setMessage("ERROR: Wrong content-type: '"+s.ct+"'");
 	    throw new Error("error");
@@ -261,22 +260,15 @@ public class ImageRequests {
 	    s.n = 1;
 	    s.pages = new LodElevator.SinglePage[s.n];
 	    s.poolInds = new int[s.n];
-	    for (int i=0; i<s.n; i++) {
-		s.pages[i] = null; //new LodElevator.SingleImage(s, 10);
-		s.poolInds[i] = -1;
-	    }
+	    s.pages[0] = null; //new LodElevator.SingleImage(s, 10);
+	    s.poolInds[0] = -1;
 
 	    // Find largest dimensions
-	    int maxw = 0, maxh = 0;
-	    for(int p=0; p<s.n; p++) {
-		Dimension d = 
-		    ((ImageSpan) 
-		     ((SimpleImageScroll)s.page).getCurrent()).getSize();
-		if(d.width > maxw) maxw = d.width;
-		if(d.height > maxh) maxh = d.height;
-	    }
-	    s.maxw = maxw;
-	    s.maxh = maxh;
+	    Dimension d = 
+		((ImageSpan) 
+		 ((SimpleImageScroll)s.page).getCurrent()).getSize();
+	    s.maxw = d.width;
+	    s.maxh = d.height;
 	} catch (Exception e) {
 	    e.printStackTrace();
 	    s.setMessage("ERROR: Something wrong while creating page image scroll: '"+e.getMessage()+"'");
@@ -286,43 +278,30 @@ public class ImageRequests {
 
 
     public void generateImages(State s) {
-	int n = s.n;
-	
 	// 72 dpi? http://www.scantips.com/basics1a.html
 	// this is passed to gs
 	float inchWidth = s.maxw / 72.0f;
 	float inchHeight = s.maxh / 72.0f;
 	
 	try {
-	    for (int i=0; i<pagePool.getSizes(); i++) {
-		int w_size = pagePool.getSizeW(i);
-		int h_size = pagePool.getSizeH(i);
-		
-		int xreso = (int)(w_size / inchWidth);
-		int yreso = (int)(h_size / inchHeight);
-		
+	    for (int i=0; i<imgPool.getSizes(); i++) {
+		int w_size = imgPool.getSizeW(i);
+		int h_size = imgPool.getSizeH(i);
+
 		s.tmpImgPrefix = ScrollBlockImager.protectChars(
 		    s.page.getID() + "-");
 		
-		boolean ok = true;
-		for(int p=0; p<n; p++) {
-		    File imgFile = new File(ScrollBlockImager.tmp(),
-					    w_size+"x"+h_size+"_"+
-					    s.tmpImgPrefix+(p+1));
-		    if (!imgFile.exists()) ok = false;
-		}
-		if (!ok) {
-		    // Convert ps/pdf to .png files
+		File imgFile = new File(ScrollBlockImager.tmp(),
+					w_size+"x"+h_size+"_"+
+					s.tmpImgPrefix);
+		if (!imgFile.exists()) {
+		    // Convert image to png file
 
-		    File imgFile = new File(ScrollBlockImager.tmp(),
-					    w_size+"x"+h_size+"_"+
-					    s.tmpImgPrefix);  
-
-		    String resolution = ""+xreso+"x"+yreso;
-		    
 		    BlockFile f = s.page.getBlockFile();
 
-		    String cmdline = "gs -dBATCH -dNOPAUSE -sDEVICE=png256 -r"+resolution+" -sOutputFile="+imgFile.getPath()+"%d "+f.getFilename();
+		    String cmdline = "convert -size "+w_size+"x"+h_size+
+			" " + f.getFilename()+ 
+			" " + imgFile.getPath();
 
 		    Process p = Runtime.getRuntime().exec(cmdline);
 		    int res = p.waitFor();
@@ -342,63 +321,6 @@ public class ImageRequests {
 	    e.printStackTrace();
 	}
     }
-
-    /*
-    protected Lob getRealLob(State s, float dx) {
-	long time = System.currentTimeMillis();
-	long tooMuch = time + 20;
-
-	List list = new ArrayList();
-	int n = s.n;
-	
-	
-	// set priority == LOD
-	float x0 = 0;
-	if (dx < 0) {
-	    for (int i=0; i<n; i++)
-		if (System.currentTimeMillis() < tooMuch)
-		    lods.setLOD(s, i, i);
-	} else if (dx > (n*s.maxw)) {
-	    for (int i=0; i<n; i++)
-		if (System.currentTimeMillis() < tooMuch)
-		    lods.setLOD(s, i, n-i-1);
-	} else {
-	    for (int i=0; i<n; i++) {
-		if (x0 <= dx && dx < (x0+s.maxw)) {
-		    int lod = 0;
-		    for (int j=i; j<n; j++) {
-			if (System.currentTimeMillis() < tooMuch)
-			    lods.setLOD(s, j, lod++);
-		    }
-		    lod = 1;
-		    for (int j=i-1; j>=0; j--) {
-			if (System.currentTimeMillis() < tooMuch)
-			    lods.setLOD(s, j, lod++);
-		    }
-		    break;
-		}
-		x0 += s.maxw;
-	    }
-	}
-
-	Lob l = Lobs.hbox();
-	for (int i=0; i<n; i++) {
-	    int w = s.maxw;
-	    int h = s.maxh;
-	    Lob l2;
-	    try {
-		l2 = pagePool.getLob(lods.getIndex(s, i));
-	    } catch (Exception e) {
-		l2 = Components.label(e.getMessage());
-	    }
-	    l2 = Lobs.request(l2, w,w,w,h,h,h);
-	    l.add(l2);
-	}
-	    
-	return l; 
-    }	
-    */
-
 
 	/*
 	String uri = (String) node;
