@@ -92,7 +92,7 @@ public class PropertyListView implements SpatialView {
 	}
 
 	private Lob valueLob(Cursor cursor, ReprView reprView, Object prop, Object value, int dir) {
-	    Lob l = reprView.getLob(value);
+	    Lob l = Views.getLob(reprView, value);
 	    l = Lobs.clickController(l, 1, new @realtime-i Action(Cursor cursor, Object value) {
 		public void run() {
 		    cursor.set(value);
@@ -119,9 +119,11 @@ public class PropertyListView implements SpatialView {
 		hasRightValues = graph.findN_11X_Iter(node, prop).hasNext();
 
 	    Lob leftLabel = Lobs.hbox(Lists.concat(font.text("Inverse "),
-						   reprView.getLobList(prop),
+						   Views.getLobList(reprView, 
+								    prop),
 						   font.textLn(":")));
-	    Lob rightLabel = Lobs.hbox(Lists.concat(reprView.getLobList(prop),
+	    Lob rightLabel = Lobs.hbox(Lists.concat(Views.getLobList(reprView, 
+								     prop),
 						    font.textLn(":")));
 
 	    Lob vbox = Lobs.vbox();
@@ -291,7 +293,7 @@ public class PropertyListView implements SpatialView {
 	    Lob label;
 
 	    if(isFirst) {
-		List labelLobs = Lists.concat(reprView.getLobList(prop),
+		List labelLobs = Lists.concat(Views.getLobList(reprView, prop),
 					      font.textLn(":"));
 		
 		label = Lobs.vbox();
@@ -444,7 +446,7 @@ public class PropertyListView implements SpatialView {
 
 	    Lob vbox = Lobs.vbox();
 
-	    Lob lob = Lobs.hbox(reprView.getLobList(prop));
+	    Lob lob = Lobs.hbox(Views.getLobList(reprView, prop));
 
 	    Lob hbox = Lobs.hbox();
 	    hbox.add(lob);
@@ -538,15 +540,15 @@ public class PropertyListView implements SpatialView {
 
 	    LobFont font = Components.font();
 
-	    Lob leftLabel = Lobs.hbox(Lists.concat(font.text("One in "),
-						   reprView.getLobList(
-						       reverseProperty),
-						   font.textLn(" of:")));
+	    Lob leftLabel = Lobs.hbox(Lists.concat(
+	        font.text("One in "),
+		Views.getLobList(reprView, reverseProperty),
+		font.textLn(" of:")));
 	    Lob vbox = Lobs.vbox();
 	    vbox.add(leftLabel); vbox.add(Lobs.vglue());
 	    leftLabel = vbox;
 
-	    Lob left = Components.frame(reprView.getLob(source));
+	    Lob left = Components.frame(Views.getLob(reprView, source));
 	    left = Lobs.clickController(left, 1, new @realtime-i Action(Cursor cursor, Object source) {
 		public void run() {
 		    cursor.set(source);
@@ -615,7 +617,8 @@ public class PropertyListView implements SpatialView {
 
 	    LobFont font = Components.font();
 
-	    Lob leftLabel = Lobs.hbox(Lists.concat(reprView.getLobList(prop),
+	    Lob leftLabel = Lobs.hbox(Lists.concat(Views.getLobList(reprView, 
+								    prop),
 						   font.textLn(":")));
 
 	    Lob vbox = Lobs.vbox();
@@ -635,7 +638,7 @@ public class PropertyListView implements SpatialView {
 		    break; // end of continuous part of the list
 		while (j.hasNext()) {
 		    Object item = j.next();
-		    Lob l = reprView.getLob(item);
+		    Lob l = Views.getLob(reprView, item);
 		    l = Lobs.clickController(l, 1, 
 			   new @realtime-i Action(Cursor cursor, Object item) {
 			public void run() {
@@ -757,7 +760,7 @@ public class PropertyListView implements SpatialView {
 	};
 	
 	List titleLobs = Lists.concat(Lists.list(Lobs.hglue()),
-				      reprView.getLobList(node),
+				      Views.getLobList(reprView, node),
 				      Lists.list(Lobs.hglue()));
 
 	Lob title = Lobs.scale(Lobs.linebreaker(titleLobs), 1.5f);
@@ -824,7 +827,7 @@ public class PropertyListView implements SpatialView {
     }
 
     public Lob getBuoyLob(Object node, boolean useFakeFocus) {
-	Lob l = Components.frame(reprView.getLob(node));
+	Lob l = Components.frame(Views.getLob(reprView, node));
 	l = BuoyConnectorLob.newInstance(l, node, !useFakeFocus, useFakeFocus);
 	l = SpatialContextLob.newInstance(l, node);
 	return l;

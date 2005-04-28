@@ -53,9 +53,39 @@ public class Views {
 	t.printStackTrace();
 
 	Lob lob = Components.label("Error: "+t.getMessage());
-	lob = Lobs.between(Lobs.filledRect(java.awt.Color.white), lob, null);
+	lob = Lobs.between(Lobs.filledRect(java.awt.Color.yellow), lob, null);
 	lob = Lobs.request(lob, 0, -1, Lob.INF, 0, -1, Lob.INF);
 	return lob;
+    }
+
+    /** Returns a lob for a given node from the given representation view.
+     *  The call to representation view is wrapped so that any exception
+     *  is also returned as a lob.
+     *  @see ReprView.getLob, handleLobThrowable
+     *  @return reprView.getLob(node), or
+     *          handleLobThrowable(exception) in case of an exception
+     */
+    public static Lob getLob(ReprView reprView, Object node) {
+	try {
+	    return reprView.getLob(node);
+	} catch (Throwable t) {
+	    return handleLobThrowable(t);
+	}
+    }
+
+    /** Returns a list of lobs for a given node from the given representation 
+     *  view. The call to representation view is wrapped so that any exception
+     *  is also returned as a list of lobs.
+     *  @see ReprView.getLobList, handleLobThrowable
+     *  @return reprView.getLobList(node), or
+     *          handleLobThrowable(exception) as a list in case of an exception
+     */
+    public static List getLobList(ReprView reprView, Object node) {
+	try {
+	    return reprView.getLobList(node);
+	} catch (Throwable t) {
+	    return Lists.list(handleLobThrowable(t));
+	}
     }
 
     /**
