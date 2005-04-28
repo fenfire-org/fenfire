@@ -91,7 +91,7 @@ public class PropertyListView implements SpatialView {
 	    return getLob(graph, reprView, cursor, prop, node).key(key);
 	}
 
-	private Lob valueLob(Cursor cursor, ReprView reprView, Object prop, Object value, int dir) {
+	private Lob valueLob(Graph graph, Cursor cursor, ReprView reprView, Object prop, Object value, int dir) {
 	    Lob l = Views.getLob(reprView, value);
 	    l = Lobs.clickController(l, 1, new @realtime-i Action(Cursor cursor, Object value) {
 		public void run() {
@@ -106,6 +106,24 @@ public class PropertyListView implements SpatialView {
 	    });
 	    l = ConnectorLob.newInstance(l, prop, value, dir);
 	    l = Lobs.noGrow(Axis.Y, l);
+	    int connections = 0;
+	    Iterator i;
+	    // XXX don't take noShowProps into account
+	    i = graph.findN_1AX_Iter(value);
+	    while (i.hasNext()) {
+		i.next();
+		connections++;
+	    }
+	    i = graph.findN_XA1_Iter(value);
+	    while (i.hasNext()) {
+		i.next();
+		connections++;
+	    }
+	    int v = Math.min(255, Math.max(0, (connections - 1)*10));
+	    l = Lobs.between(Lobs.filledRect(new java.awt.Color(255, 255-v, 
+								255)), 
+			     l, null);
+
 	    return Components.frame(l, Maps.map("clip", Boolean.FALSE));
 	}
 	
@@ -157,7 +175,7 @@ public class PropertyListView implements SpatialView {
 		if(iter_left.hasNext()) {
 		    lvalue = iter_left.next();
 
-		    left = valueLob(cursor, reprView, prop, lvalue, -1);
+		    left = valueLob(graph, cursor, reprView, prop, lvalue, -1);
 		    llabel = isFirst ? leftLabel : Lobs.nullLob();
 
 		    Lob box = Lobs.vbox();
@@ -172,7 +190,7 @@ public class PropertyListView implements SpatialView {
 		if(iter_right.hasNext()) {
 		    rvalue = iter_right.next();
 
-		    right = valueLob(cursor, reprView, prop, rvalue, 1);
+		    right = valueLob(graph, cursor, reprView, prop, rvalue, 1);
 		    rlabel = isFirst ? rightLabel : Lobs.nullLob();
 
 		    Lob box = Lobs.vbox();
