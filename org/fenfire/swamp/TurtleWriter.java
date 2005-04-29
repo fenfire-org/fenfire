@@ -141,6 +141,8 @@ public final class TurtleWriter {
 	String abbrev = nmap.getAbbrevString(uri);
 	if (uri.equals(baseURI))
 	    w.write("<>");
+	else if (baseURI != null && uri.startsWith(baseURI+"#"))
+	    w.write("<"+uri.substring(baseURI.length())+">");
 	else if (abbrev == uri) { // if the uri wasn't abbreviated
 	    w.write('<');
 	    w.write(uri);
