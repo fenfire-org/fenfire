@@ -299,7 +299,8 @@ public class Main {
 	//List viewlets = new FastList();
 	List listViewProperties = new ArrayList();
 
-	Model uriPopupText;
+	Model popupText;
+	boolean isQNamePopup;
 
 	public FenfireMain(SmushedQuadsGraph quadsGraph, Graph graph,
 			   GraphFile graphFile, Object startNode,
@@ -517,7 +518,14 @@ public class Main {
 	    FenfireMain ffmain = this;
 	    k.put("Alt-Q", new @realtime-i Action(FenfireMain ffmain) {
 		public void run() {
-		    ffmain.uriPopupText = SimpleModel.newInstance("");
+		    ffmain.isQNamePopup = true;
+		    ffmain.popupText = SimpleModel.newInstance("");
+		}
+	    });
+	    k.put("Alt-Y", new @realtime-i Action(FenfireMain ffmain) {
+		public void run() {
+		    ffmain.isQNamePopup = false;
+		    ffmain.popupText = SimpleModel.newInstance("");
 		}
 	    });
 
@@ -619,36 +627,52 @@ public class Main {
 	    Lob lob = ViewThumbnailLinkerLob.newInstance(vbox);
 	    lob = DragManager.newInstance(lob);
 
-	    if(uriPopupText != null) {
+	    if(popupText != null) {
 		Lob popup;
 
 		RoleContext.enter("POPUP");
 		try {
 		    popup = Lobs.vbox();
 
-		    popup.add(Components.label("Enter URI (use Ctrl-V to paste):"));
+		    if(isQNamePopup)
+			popup.add(Components.label("Enter qname (use Ctrl-V to paste):"));
+		    else
+			popup.add(Components.label("Enter URI (use Ctrl-V to paste):"));
+
 		    popup.add(Lobs.glue(Axis.Y, 5, 5, 5));
-		    popup.add(Components.textBox(uriPopupText, Maps.map()));
+		    popup.add(Components.textBox(popupText, Maps.map()));
 		    popup.add(Lobs.glue(Axis.Y, 5, 5, 5));
 
 		    Action ok = new @realtime-i Action(FenfireMain ffmain, 
 			Graph graph, Cursor cursor, Model potionsCommand) {
 			    public void run() {
-				String uri = (String)ffmain.uriPopupText.get();
-				Object node = Nodes.get(uri);
+				String text = (String)ffmain.popupText.get();
+				String uri;
+
+				if(ffmain.isQNamePopup) {
+				    int i = text.indexOf(':');
+				    if(i < 0) return;
+				    String prefix = text.substring(0, i);
+				    uri = ffmain.nmap.getURIForPrefix(prefix)
+					+ text.substring(i+1);
+				} else {
+				    uri = text;
+				}
 				
+				Object node = Nodes.get(uri);
+
 				new PotionAction(Potions.goTo.call(null),
 						 Potions.node(node, uri),
 						 graph, cursor, 
 						 potionsCommand).run();
 				
-				ffmain.uriPopupText = null;
+				ffmain.popupText = null;
 			    }
 			};
 		    Action cancel = 
 			new @realtime-i Action(FenfireMain ffmain) {
 			    public void run() {
-				ffmain.uriPopupText = null;
+				ffmain.popupText = null;
 			    }
 			};
 
@@ -675,7 +699,7 @@ public class Main {
 		    popup = Views.handleLobThrowable(t);
 		    // XXX hack, as we couldn't exit the popup
 		    popup = lob;
-		    ffmain.uriPopupText = null;
+		    ffmain.popupText = null;
 		} finally {
 		    RoleContext.exit();
 		}
@@ -950,7 +974,8 @@ public class Main {
 	{"Alt-M:", "a new literal"},
 	null,
 	{"Alt-V:", "go to [node]"},
-	{"Alt-Q:", "a node given by URI"},
+	{"Alt-Q:", "a node given by qname"},
+	{"Alt-Y:", "a node given by URI"},
 	{"Alt-P:", "the 'home'/'start' node"},
 	null,
 	{"Alt-Z:", "change spatial view"},
