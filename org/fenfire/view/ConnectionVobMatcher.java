@@ -36,7 +36,7 @@ import java.util.*;
 public class ConnectionVobMatcher extends IndexedVobMatcher {
 private static final String rcsid = "$Id: ConnectionVobMatcher.java,v 1.1 2003/04/29 18:07:15 benja Exp $";  
     public static boolean dbg = false;
-    private static void p(String s) { System.out.println(s); }
+    private static void p(String s) { System.out.println("ConnectionVobMatcher:: "+s); }
 
     protected static final Object 
 	LINK_CS_KEY_NEG = new Object(),

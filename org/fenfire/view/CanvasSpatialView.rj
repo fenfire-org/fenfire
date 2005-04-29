@@ -161,6 +161,27 @@ public class CanvasSpatialView implements SpatialView {
 	}; 
     }
 
+    private Lob dragNodes(Lob delegate, int button, int modifiers, 
+			  Cursor cursor, Graph graph) {
+	CanvasSpatialView view = this;
+	
+	return 
+	    new @realtime 
+	    DragController(@set Lob delegate, @set int button, 
+			   @set int modifiers, Cursor cursor, 
+			   CanvasSpatialView view, Graph graph) {
+	    protected Lob wrap(Lob l) {
+		return view.dragNodes(l, button, modifiers, 
+				      cursor,graph );
+	    }
+	    public void drag(VobScene scene, int cs, float x, float y,
+			     VobMouseEvent e) {
+		RDFUtil.setFloat(graph, cursor.getNode(), CANVAS2D.x, x);
+		RDFUtil.setFloat(graph, cursor.getNode(), CANVAS2D.y, y);
+		Lobs.getWindowAnimation().switchVS();
+	    }
+	}; 
+    }
 
     public Lob getMainviewLob(Cursor cursor) {
 	Object node = cursor.getNode();
@@ -249,6 +270,8 @@ public class CanvasSpatialView implements SpatialView {
 	    
 	    Object n = i.next();
 	    Lob label = getContentLob(n);
+	    label = dragNodes(label, 1, VobMouseEvent.CONTROL_MASK, 
+			      cursor, graph);
 
 	    if(label.getLayoutableAxis() == Axis.X) {
 		SizeRequest r = label.getSizeRequest();
