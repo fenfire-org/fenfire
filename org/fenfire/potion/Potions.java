@@ -60,6 +60,18 @@ public class Potions {
 	    }
 	};
 
+    public static Command changeURI = new SimpleCommand(new Object[] {
+	"Change URI of ", node, " to ", node }) {
+
+	    public void execute(Object[] params, Map context) {
+		Graph g = (Graph)context.get("graph");
+		Cursor cursor = (Cursor)context.get("cursor");
+
+		Graphs.changeURI(g, params[0], params[1]);
+		cursor.smushed(params[0], params[1]);
+	    }
+	};
+
     public static Command goTo = new SimpleCommand(new Object[] {
 	"Go to ", node }) {
 

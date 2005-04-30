@@ -47,6 +47,60 @@ public class Graphs {
 
 
 
+    public static void changeURI(Graph g, Object oldNode, Object newNode) {
+	Object o = oldNode, n = newNode;
+
+	if(o == null || n == null) throw new NullPointerException();
+	if(o.equals(n)) return;
+
+	Graph nt = new HashGraph(); // new triples
+
+	for(Iterator i=g.findN_1XA_Iter(o); i.hasNext();) {
+	    Object opred = i.next();
+	    Object npred = (opred == o) ? n : opred;
+
+	    for(Iterator j=g.findN_11X_Iter(o, opred); j.hasNext();) {
+		Object oobj = j.next();
+		Object nobj = (oobj == o) ? n : oobj;
+		
+
+		nt.add(n, npred, nobj);
+	    }
+	}
+
+	for(Iterator i=g.findN_X1A_Iter(o); i.hasNext();) {
+	    Object osubj = i.next();
+	    Object nsubj = (osubj == o) ? n : osubj;
+
+	    for(Iterator j=g.findN_11X_Iter(osubj, o); j.hasNext();) {
+		Object oobj = j.next();
+		Object nobj = (oobj == o) ? n : oobj;
+
+		nt.add(nsubj, n, nobj);
+	    }
+	}
+
+	for(Iterator i=g.findN_XA1_Iter(o); i.hasNext();) {
+	    Object osubj = i.next();
+	    Object nsubj = (osubj == o) ? n : osubj;
+
+	    for(Iterator j=g.findN_1X1_Iter(osubj, o); j.hasNext();) {
+		Object opred = j.next();
+		Object npred = (opred == o) ? n : opred;
+
+		nt.add(nsubj, npred, n);
+	    }
+	}
+
+	g.addAll(nt);
+
+	g.rm_1AA(o);
+	g.rm_A1A(o);
+	g.rm_AA1(o);
+    }
+
+
+
     protected static Object node(String bnodeBase, Value node) { 
 	if(node instanceof URI)
 	    return Nodes.get(((URI)node).getURI());

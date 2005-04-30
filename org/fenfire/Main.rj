@@ -514,6 +514,8 @@ public class Main {
 	    k.put("Alt-P", new PotionAction(null, Potions.node(startNode, 
 							       "start node"),
 					    graph, cursor, potionsCommand));
+	    k.put("Ctrl-R", new PotionAction(Potions.changeURI.call(Potions.currentNode, null), null,
+					     graph, cursor, potionsCommand));
 
 	    FenfireMain ffmain = this;
 	    k.put("Alt-Q", new @realtime-i Action(FenfireMain ffmain) {
@@ -980,6 +982,8 @@ public class Main {
 	null,
 	{"Alt-Z:", "change spatial view"},
 	{"Alt-X:", "change node view"},
+	null,
+	{"Ctrl-R:", "change node URI ('rename')"},
 	null,
 	{"Ctrl-G:", "load data about current node from Gnowsis+Web"},
 	{"Ctrl-O:", "open item in Gnowsis"},
