@@ -42,6 +42,7 @@ public class UniqueShortcutController extends AbstractDelegateLob {
     protected Collection properties;
     protected Graph graph;
     protected Cursor cursor;
+    protected Set bookmarks;
     protected Model potionsCommand;
 
     public static final String
@@ -70,19 +71,21 @@ public class UniqueShortcutController extends AbstractDelegateLob {
 
     public static UniqueShortcutController newInstance(
         Lob content, Collection properties, Graph graph, Cursor cursor, 
-	Model potionsCommand) {
+	Set bookmarks, Model potionsCommand) {
 
 	UniqueShortcutController c = (UniqueShortcutController)FACTORY.object();
 	c.delegate = content;
 	c.properties = properties;
 	c.graph = graph;
 	c.cursor = cursor;
+	c.bookmarks = bookmarks;
 	c.potionsCommand = potionsCommand;
 	return c;
     }
 
     public Lob wrap(Lob l) {
-	return newInstance(l, properties, graph, cursor, potionsCommand);
+	return newInstance(l, properties, graph, cursor, bookmarks,
+			   potionsCommand);
     }
 
     public boolean key(String key) {
@@ -108,11 +111,14 @@ public class UniqueShortcutController extends AbstractDelegateLob {
 		Components.setState(Maps.map(), "unique shortcut so far", "");
 
 		if(s.length() == SHORTCUT_LEN) {
-		    for(Iterator i=properties.iterator(); i.hasNext();) {
+		    List list = new ArrayList(properties);
+		    list.addAll(bookmarks);
+
+		    for(Iterator i=list.iterator(); i.hasNext();) {
 			Object prop = i.next();
 			if(getShortcut(prop, SHORTCUT_LEN).equals(s)) {
 			    
-			    Action a = new PotionAction(Potions.connect.call(Potions.currentNode, null, null), Potions.node(prop, prop.toString()), graph, cursor, potionsCommand);
+			    Action a = new PotionAction(Potions.connect.call(Potions.currentNode, null, null), Potions.node(prop, prop.toString()), graph, cursor, bookmarks, potionsCommand);
 			    a.run();
 
 			    return true;

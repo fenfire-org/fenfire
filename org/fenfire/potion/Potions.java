@@ -72,6 +72,17 @@ public class Potions {
 	    }
 	};
 
+    public static Command bookmark = new SimpleCommand(new Object[] {
+	"Bookmark ", node }) {
+
+	    public void execute(Object[] params, Map context) {
+		Cursor cursor = (Cursor)context.get("cursor");
+		Set bookmarks = (Set)context.get("bookmarks");
+
+		bookmarks.add(params[0]);
+	    }
+	};
+
     public static Command goTo = new SimpleCommand(new Object[] {
 	"Go to ", node }) {
 

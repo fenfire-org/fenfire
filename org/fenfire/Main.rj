@@ -288,6 +288,8 @@ public class Main {
 	Set noShowProps, activeCategories;
 	NamespaceMap nmap;
 
+	Set bookmarks = new HashSet();
+
 	Model potionsCommand = SimpleModel.newInstance();
 
 	SpatialViewSettings spatialViewSettings;
@@ -500,22 +502,24 @@ public class Main {
 	    //Model potionsCommand = StateModel.newInstance("potions command");
 
 	    k.put("Alt-N", new PotionAction(null, Potions.newNode, 
-					    graph, cursor, potionsCommand));
+					    graph, cursor, bookmarks, potionsCommand));
 	    k.put("Alt-M", new PotionAction(null, Potions.newLiteral, 
-					    graph, cursor, potionsCommand));
+					    graph, cursor, bookmarks, potionsCommand));
 	    k.put("Alt-C", new PotionAction(Potions.connect.call(Potions.currentNode, null, null), null,
-					    graph, cursor, potionsCommand));
+					    graph, cursor, bookmarks, potionsCommand));
 	    k.put("Alt-B", new PotionAction(Potions.connectBackwards.call(Potions.currentNode, null, null), null,
-					    graph, cursor, potionsCommand));
+					    graph, cursor, bookmarks, potionsCommand));
 	    k.put("Alt-T", new PotionAction(null, Potions.currentNode,
-					    graph, cursor, potionsCommand));
+					    graph, cursor, bookmarks, potionsCommand));
 	    k.put("Alt-V", new PotionAction(Potions.goTo.call(null), null,
-					    graph, cursor, potionsCommand));
+					    graph, cursor, bookmarks, potionsCommand));
 	    k.put("Alt-P", new PotionAction(null, Potions.node(startNode, 
 							       "start node"),
-					    graph, cursor, potionsCommand));
+					    graph, cursor, bookmarks, potionsCommand));
 	    k.put("Ctrl-R", new PotionAction(Potions.changeURI.call(Potions.currentNode, null), null,
-					     graph, cursor, potionsCommand));
+					     graph, cursor, bookmarks, potionsCommand));
+	    k.put("Alt-Shift-B", new PotionAction(Potions.bookmark.call(null), null,
+					     graph, cursor, bookmarks, potionsCommand));
 
 	    FenfireMain ffmain = this;
 	    k.put("Alt-Q", new @realtime-i Action(FenfireMain ffmain) {
@@ -538,7 +542,7 @@ public class Main {
 		main = Views.handleLobThrowable(t);
 	    }
 	    main = Lobs.keyController(main, k);
-	    main = UniqueShortcutController.newInstance(main, allProps, graph, cursor, potionsCommand);
+	    main = UniqueShortcutController.newInstance(main, allProps, graph, cursor, bookmarks, potionsCommand);
 
 
 	    List sortedProps = FastList.newInstance(); 
@@ -562,8 +566,9 @@ public class Main {
 
 	    Lob propbox;
 	    try {
-		propbox = Views.propbox(graph, reprView, allProps, 
-					noShowProps, activeCategories);
+		propbox = Views.bookmarkBox(graph, reprView, allProps, 
+					    noShowProps, activeCategories,
+					    bookmarks);
 	    } catch (Throwable t) {
 		propbox = Views.handleLobThrowable(t);
 	    }
@@ -646,7 +651,8 @@ public class Main {
 		    popup.add(Lobs.glue(Axis.Y, 5, 5, 5));
 
 		    Action ok = new @realtime-i Action(FenfireMain ffmain, 
-			Graph graph, Cursor cursor, Model potionsCommand) {
+			Graph graph, Cursor cursor, Set bookmarks,
+			Model potionsCommand) {
 			    public void run() {
 				String text = (String)ffmain.popupText.get();
 				String uri;
@@ -665,7 +671,7 @@ public class Main {
 
 				new PotionAction(Potions.goTo.call(null),
 						 Potions.node(node, uri),
-						 graph, cursor, 
+						 graph, cursor, bookmarks,
 						 potionsCommand).run();
 				
 				ffmain.popupText = null;

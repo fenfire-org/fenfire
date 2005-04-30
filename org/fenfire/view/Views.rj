@@ -149,9 +149,9 @@ public class Views {
     }
 
 
-    public static Lob propbox(Graph graph, ReprView reprView, 
-			      List allProps, Set noShowProps,
-			      Set activeCategories) {
+    public static Lob bookmarkBox(Graph graph, ReprView reprView, 
+				  List allProps, Set noShowProps,
+				  Set activeCategories, Set bookmarks) {
 	List categories = Lists.list();
 	Map propsByCategory = FastMap.newInstance();
 	Map categoryByProp = FastMap.newInstance();
@@ -184,10 +184,17 @@ public class Views {
 		    categoryByProp.put(ii.next(), category);
 	    }
 	}
-	
+
+	List bookmarkList = FastList.newInstance();
+
 	List noCategoryProps = FastList.newInstance(); 
 	noCategoryProps.addAll(allProps);
 	noCategoryProps.removeAll(categoryByProp.keySet());
+
+	bookmarkList.addAll(bookmarks);
+	bookmarkList.removeAll(allProps);
+	noCategoryProps.addAll(bookmarkList);
+
 	Collections.sort(noCategoryProps);
 	
 	Collections.sort(categories);
