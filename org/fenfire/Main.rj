@@ -209,9 +209,15 @@ public class Main {
 
 	loadSysGraph(quadsGraph, nmap);
 
+	File prefsFile = new File("fenfire-conf.turtle");
+	Graph prefsGraph = new OneQuadGraph(quadsGraph, "prefs:");
+	GraphFile prefs = new GraphFile.Turtle(prefsFile, prefsGraph, 
+					       new HashGraph());
+
 	final Graph graph = new AllQuadsGraph(quadsGraph, "");
 
-	FenfireMain m = new FenfireMain(quadsGraph, graph, gf0, mainnode, nmap,
+	FenfireMain m = new FenfireMain(quadsGraph, graph, gf0, prefs,
+					mainnode, nmap,
 					(File[]) pipes.toArray(new File[0]));
 	m.start();
     }
@@ -278,8 +284,9 @@ public class Main {
     public static class FenfireMain extends NewLobMain {
 
 	SmushedQuadsGraph quadsGraph;
-	Graph graph;
+	Graph graph, prefsGraph;
 	GraphFile graphFile;
+	GraphFile prefsGraphFile;
 	File[] pipes;
 	Object startNode;
 
@@ -287,8 +294,6 @@ public class Main {
 	Set textProps;
 	Set noShowProps, activeCategories;
 	NamespaceMap nmap;
-
-	Set bookmarks = new HashSet();
 
 	Model potionsCommand = SimpleModel.newInstance();
 
@@ -305,8 +310,8 @@ public class Main {
 	boolean isQNamePopup;
 
 	public FenfireMain(SmushedQuadsGraph quadsGraph, Graph graph,
-			   GraphFile graphFile, Object startNode,
-			   NamespaceMap nmap, File[] pipes) {
+			   GraphFile graphFile, GraphFile prefsGraphFile,
+			   Object startNode, NamespaceMap nmap, File[] pipes) {
 	    super(BG_COLOR);
 
 	    this.nmap = nmap;
@@ -316,7 +321,10 @@ public class Main {
 	    this.quadsGraph = quadsGraph;
 	    this.graph = graph;
 	    this.graphFile = graphFile;
+	    this.prefsGraphFile = prefsGraphFile;
 	    this.pipes = pipes;
+
+	    this.prefsGraph = new OneQuadGraph(quadsGraph, "prefs:");
 	    
 	    cursor = new Cursor();
 	    quadsGraph.addSmushListener(cursor);
@@ -476,8 +484,9 @@ public class Main {
 	    k.put("Ctrl-O", new @realtime-i Action(Cursor cursor, WindowAnimation windowAnim) { public void run() {
 		Gnowsis.open(cursor.getNode());
 	    }});
-	    k.put("Ctrl-S", new @realtime-i Action(GraphFile graphFile, NamespaceMap nmap) { public void run() {
+	    k.put("Ctrl-S", new @realtime-i Action(GraphFile graphFile, GraphFile prefsGraphFile, NamespaceMap nmap) { public void run() {
 		graphFile.save(nmap);
+		prefsGraphFile.save(nmap);
 		System.out.println("Saved <"+graphFile.getFile().toURI()+">.");
 	    }});
 	    k.put("Alt-Z", new @realtime-i Action(Cursor cursor, SpatialViewSettings spatialViewSettings, WindowAnimation windowAnim) {
@@ -502,24 +511,24 @@ public class Main {
 	    //Model potionsCommand = StateModel.newInstance("potions command");
 
 	    k.put("Alt-N", new PotionAction(null, Potions.newNode, 
-					    graph, cursor, bookmarks, potionsCommand));
+					    graph, cursor, prefsGraph, potionsCommand));
 	    k.put("Alt-M", new PotionAction(null, Potions.newLiteral, 
-					    graph, cursor, bookmarks, potionsCommand));
+					    graph, cursor, prefsGraph, potionsCommand));
 	    k.put("Alt-C", new PotionAction(Potions.connect.call(Potions.currentNode, null, null), null,
-					    graph, cursor, bookmarks, potionsCommand));
+					    graph, cursor, prefsGraph, potionsCommand));
 	    k.put("Alt-B", new PotionAction(Potions.connectBackwards.call(Potions.currentNode, null, null), null,
-					    graph, cursor, bookmarks, potionsCommand));
+					    graph, cursor, prefsGraph, potionsCommand));
 	    k.put("Alt-T", new PotionAction(null, Potions.currentNode,
-					    graph, cursor, bookmarks, potionsCommand));
+					    graph, cursor, prefsGraph, potionsCommand));
 	    k.put("Alt-V", new PotionAction(Potions.goTo.call(null), null,
-					    graph, cursor, bookmarks, potionsCommand));
+					    graph, cursor, prefsGraph, potionsCommand));
 	    k.put("Alt-P", new PotionAction(null, Potions.node(startNode, 
 							       "start node"),
-					    graph, cursor, bookmarks, potionsCommand));
+					    graph, cursor, prefsGraph, potionsCommand));
 	    k.put("Ctrl-R", new PotionAction(Potions.changeURI.call(Potions.currentNode, null), null,
-					     graph, cursor, bookmarks, potionsCommand));
+					     graph, cursor, prefsGraph, potionsCommand));
 	    k.put("Alt-Shift-B", new PotionAction(Potions.bookmark.call(null), null,
-					     graph, cursor, bookmarks, potionsCommand));
+					     graph, cursor, prefsGraph, potionsCommand));
 
 	    FenfireMain ffmain = this;
 	    k.put("Alt-Q", new @realtime-i Action(FenfireMain ffmain) {
@@ -542,7 +551,7 @@ public class Main {
 		main = Views.handleLobThrowable(t);
 	    }
 	    main = Lobs.keyController(main, k);
-	    main = UniqueShortcutController.newInstance(main, allProps, graph, cursor, bookmarks, potionsCommand);
+	    main = UniqueShortcutController.newInstance(main, allProps, graph, cursor, prefsGraph, potionsCommand);
 
 
 	    List sortedProps = FastList.newInstance(); 
@@ -567,8 +576,7 @@ public class Main {
 	    Lob propbox;
 	    try {
 		propbox = Views.bookmarkBox(graph, reprView, allProps, 
-					    noShowProps, activeCategories,
-					    bookmarks);
+					    noShowProps, activeCategories);
 	    } catch (Throwable t) {
 		propbox = Views.handleLobThrowable(t);
 	    }
@@ -651,7 +659,7 @@ public class Main {
 		    popup.add(Lobs.glue(Axis.Y, 5, 5, 5));
 
 		    Action ok = new @realtime-i Action(FenfireMain ffmain, 
-			Graph graph, Cursor cursor, Set bookmarks,
+			Graph graph, Cursor cursor, Graph prefsGraph,
 			Model potionsCommand) {
 			    public void run() {
 				String text = (String)ffmain.popupText.get();
@@ -671,7 +679,7 @@ public class Main {
 
 				new PotionAction(Potions.goTo.call(null),
 						 Potions.node(node, uri),
-						 graph, cursor, bookmarks,
+						 graph, cursor, prefsGraph,
 						 potionsCommand).run();
 				
 				ffmain.popupText = null;

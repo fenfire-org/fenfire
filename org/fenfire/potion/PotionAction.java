@@ -37,21 +37,21 @@ public class PotionAction extends RealtimeObject implements Action {
 
     protected Graph graph;
     protected Cursor cursor;
-    protected Set bookmarks;
+    protected Graph prefsGraph;
     protected Model currentCommand;
 
     protected CommandExpression command;
     protected FunctionExpression function;
 
     public PotionAction(CommandExpression command, FunctionExpression function,
-			Graph graph, Cursor cursor, Set bookmarks,
+			Graph graph, Cursor cursor, Graph prefsGraph,
 			Model currentCommand) {
 	this.command = command;
 	this.function = function;
 
 	this.graph = graph;
 	this.cursor = cursor;
-	this.bookmarks = bookmarks;
+	this.prefsGraph = prefsGraph;
 	this.currentCommand = currentCommand;
     } 
 
@@ -61,7 +61,7 @@ public class PotionAction extends RealtimeObject implements Action {
 	Map context = new HashMap();
 	context.put("graph", graph);
 	context.put("cursor", cursor);
-	context.put("bookmarks", bookmarks);
+	context.put("prefsGraph", prefsGraph);
 
 	if(c == null) {
 	    if(command == null) return;

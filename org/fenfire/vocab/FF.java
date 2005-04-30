@@ -42,6 +42,11 @@ public class FF {
     static public final Object content = Nodes.get(_nsId + "content");
 
 
+
+    static public final Object bookmarks = Nodes.get(_nsId + "bookmarks");
+
+
+
     /** Alph vocabulary for images
      */
     static public final Object AlphImg = Nodes.get("http://fenfire.org/rdf-v/2005/03/alph-image");

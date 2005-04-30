@@ -28,6 +28,7 @@ Potions.java
 package org.fenfire.potion;
 import org.fenfire.Cursor;
 import org.fenfire.swamp.*;
+import org.fenfire.vocab.*;
 import org.fenfire.view.ReprView;
 import org.nongnu.libvob.lob.LobFont;
 import java.util.*;
@@ -77,9 +78,9 @@ public class Potions {
 
 	    public void execute(Object[] params, Map context) {
 		Cursor cursor = (Cursor)context.get("cursor");
-		Set bookmarks = (Set)context.get("bookmarks");
+		Graph prefs = (Graph)context.get("prefsGraph");
 
-		bookmarks.add(params[0]);
+		prefs.add(Nodes.get(""), FF.bookmarks, params[0]);
 	    }
 	};
 

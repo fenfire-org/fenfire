@@ -32,6 +32,7 @@ import org.nongnu.libvob.*;
 import org.fenfire.*;
 import org.fenfire.potion.*;
 import org.fenfire.swamp.*;
+import org.fenfire.vocab.*;
 import javolution.realtime.*;
 import java.util.*;
 
@@ -42,7 +43,7 @@ public class UniqueShortcutController extends AbstractDelegateLob {
     protected Collection properties;
     protected Graph graph;
     protected Cursor cursor;
-    protected Set bookmarks;
+    protected Graph prefsGraph;
     protected Model potionsCommand;
 
     public static final String
@@ -71,20 +72,20 @@ public class UniqueShortcutController extends AbstractDelegateLob {
 
     public static UniqueShortcutController newInstance(
         Lob content, Collection properties, Graph graph, Cursor cursor, 
-	Set bookmarks, Model potionsCommand) {
+	Graph prefsGraph, Model potionsCommand) {
 
 	UniqueShortcutController c = (UniqueShortcutController)FACTORY.object();
 	c.delegate = content;
 	c.properties = properties;
 	c.graph = graph;
 	c.cursor = cursor;
-	c.bookmarks = bookmarks;
+	c.prefsGraph = prefsGraph;
 	c.potionsCommand = potionsCommand;
 	return c;
     }
 
     public Lob wrap(Lob l) {
-	return newInstance(l, properties, graph, cursor, bookmarks,
+	return newInstance(l, properties, graph, cursor, prefsGraph,
 			   potionsCommand);
     }
 
@@ -112,13 +113,15 @@ public class UniqueShortcutController extends AbstractDelegateLob {
 
 		if(s.length() == SHORTCUT_LEN) {
 		    List list = new ArrayList(properties);
-		    list.addAll(bookmarks);
+
+		    for(Iterator i=graph.findN_A1X_Iter(FF.bookmarks); i.hasNext();)
+			list.add(i.next());
 
 		    for(Iterator i=list.iterator(); i.hasNext();) {
 			Object prop = i.next();
 			if(getShortcut(prop, SHORTCUT_LEN).equals(s)) {
 			    
-			    Action a = new PotionAction(Potions.connect.call(Potions.currentNode, null, null), Potions.node(prop, prop.toString()), graph, cursor, bookmarks, potionsCommand);
+			    Action a = new PotionAction(Potions.connect.call(Potions.currentNode, null, null), Potions.node(prop, prop.toString()), graph, cursor, prefsGraph, potionsCommand);
 			    a.run();
 
 			    return true;
