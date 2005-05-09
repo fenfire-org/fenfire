@@ -92,7 +92,7 @@ public final class TurtleWriter {
 			    else
 				w.write(c);
 			}
-			w.write('"');
+			w.write("\"");
 			
 			if(obj instanceof PlainLiteral) {
 			    PlainLiteral l = (PlainLiteral)obj;
@@ -144,9 +144,9 @@ public final class TurtleWriter {
 	else if (baseURI != null && uri.startsWith(baseURI+"#"))
 	    w.write("<"+uri.substring(baseURI.length())+">");
 	else if (abbrev == uri) { // if the uri wasn't abbreviated
-	    w.write('<');
+	    w.write("<");
 	    w.write(uri);
-	    w.write('>');
+	    w.write(">");
 	} else w.write(abbrev);
 	w.write(post);
     }
