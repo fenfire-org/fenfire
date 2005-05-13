@@ -216,6 +216,12 @@ public final class HTTPResource {
 	return in("content");
     }
 
+    public File getFile() throws IOException {
+	if(!hasLoaded) reload(false);
+	if(redirect != null) return redirect.getFile();
+	return file("content");
+    }
+
     public String getContentType() throws IOException {
 	if(!hasLoaded) reload(false);
 	if(redirect != null) return redirect.getContentType();
