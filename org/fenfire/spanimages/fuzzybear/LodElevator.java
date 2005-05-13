@@ -41,6 +41,8 @@ import java.util.*;
 import java.io.*;
 
 
+/** A class that has all image (also page) requests and tries to put them in order of level of detail.
+ */
 public class LodElevator {
    private static void p(String s) { System.out.println("LodElevator:: "+s); }
 
@@ -115,7 +117,7 @@ public class LodElevator {
     }
 
     
-    // page is in base 0
+    // page is in 0-based
     public void setLOD(State s, int pageB0, int prior) {
 	if (s.pages[pageB0] == null) {
 	    s.pages[pageB0] = new SinglePage(s, prior);

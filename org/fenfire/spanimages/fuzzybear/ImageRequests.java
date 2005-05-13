@@ -278,8 +278,6 @@ public class ImageRequests {
 
 
     public void generateImages(State s) {
-	// 72 dpi? http://www.scantips.com/basics1a.html
-	// this is passed to gs
 	float inchWidth = s.maxw / 72.0f;
 	float inchHeight = s.maxh / 72.0f;
 	

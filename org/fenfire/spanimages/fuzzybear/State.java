@@ -63,11 +63,19 @@ import java.io.*;
 
 
 
-/** State of progres of generating temporary images for
+/** State of progress of generating temporary images for
  *  ps pdf document or image.
  */
 public class State implements ProgressListener {
-    int state = -1;
+
+    // -checking file 
+    // -sizes and structure...
+    // -convert to png
+    // -load image
+    // -use more progress lobs to create 
+    //  each for different page.
+    
+
     String uri;
     File file = null;
     String ct = null; // content type
@@ -100,7 +108,12 @@ public class State implements ProgressListener {
 	    anim.switchVS();
     }
 
+    /* Generates a progress bar and shows nothing if every 
+     * image has already been generated
+     */
     public Lob getLob(float wfract, float hfract) {
+
+	// Generate status bar
 	if (!imagesGenerated) {
 	    Lob vbox = Lobs.vbox();
 	    List lobs = Lists.list();

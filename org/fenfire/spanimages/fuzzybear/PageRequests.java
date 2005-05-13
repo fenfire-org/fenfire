@@ -30,6 +30,7 @@ PageRequests.java
 package org.fenfire.spanimages.fuzzybear;
 import org.fenfire.vocab.*;
 import org.fenfire.view.*;
+import org.fenfire.fenfeed.http.*;
 import org.fenfire.spanimages.gl.*;
 import org.fenfire.Cursor;
 import org.fenfire.lob.*;
@@ -61,6 +62,10 @@ import java.awt.Dimension;
 import java.util.*;
 import java.io.*;
 
+/** A class that creates lobs that show pages of PS/PDF files,
+ *  if they have been loaded already, or status information if they
+ *  have not been loaded yet.
+ */
 public class PageRequests {
     private static void p(String s) { System.out.println("PageRequests:: "+s); }
 
@@ -270,7 +275,16 @@ public class PageRequests {
     protected void setFile(State s) {
 	// first get it from network if it's http://something..
 	if (s.uri.startsWith(HTTP)) {
-	    throw new Error("Not yet implemented");
+	    try {
+		String uri = s.uri;
+		HTTPContext context = new HTTPContext();
+		HTTPResource res = new HTTPResource(uri, context);
+		s.file = res.getFile();
+		p("file: "+s.file);
+	    } catch (Exception e) {
+		e.printStackTrace();
+		throw new Error(e.getMessage());
+	    }
 	}
 
 	if(s.uri.startsWith(CLASSPATH)) {
