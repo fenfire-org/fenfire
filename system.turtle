@@ -5,6 +5,7 @@
 @prefix dc:   <http://purl.org/dc/elements/1.1/>.
 @prefix dc10: <http://purl.org/dc/elements/1.0/>.
 @prefix sl:   <http://fenfire.org/rdf-v/2003/05/structlink#>.
+@prefix bib:  <http://purl.oclc.org/NET/nknouf/ns/bibtex#>.
 
 @prefix vcard: <http://www.w3.org/2001/vcard-rdf/3.0#>.
 
@@ -31,7 +32,8 @@ pcat:category_weblinkprops
              foaf:workplaceHomepage, foaf:publications,
              foaf:pubkeyAddress, foaf:mbox_sha1sum,
              foaf:wishlist, foaf:workInfoHomepage, rdfs:seeAlso, 
-             <http://xmlns.com/wot/0.1/assurance>.
+             <http://xmlns.com/wot/0.1/assurance>,
+             <http://fenfire.org/rdf-v/2005/05/document#hasInstance>.
 
 pcat:category_relationships
 
@@ -47,6 +49,37 @@ pcat:category_docinfo
 
     cat:item dc:creator, dc:contributor, dc:description, dc:format,
              foaf:maker.
+
+pcat:category_bibtex
+
+    a          cat:PropertyCategory;
+    rdfs:label "Bibtex info";
+
+    cat:item
+             bib:Article, bib:hasAuthor, bib:hasTitle, 
+             bib:hasJournal,bib:hasYear,
+
+             bib:Book, bib:humanCreator, bib:hasPublisher,
+             bib:Booklet, bib:Conference, 
+             bib:Inbook, bib:pageChapterData, 
+             bib:Incollection, bib:Inproceedings, 
+             bib:Manual, bib:Mastersthesis, bib:hasSchool, 
+             bib:Misc, bib:Phdthesis, bib:Proceedings, 
+             bib:Techreport, bib:hasInstitution, 
+             bib:Unpublished, bib:hasNote, 
+
+             bib:hasKey, bib:hasAddress, bib:hasAnnotation, 
+             bib:hasBooktitle, bib:hasChapter, bib:hasCrossref,
+             bib:hasEdition, bib:hasEditor, bib:howPublished, 
+             bib:hasInstitution, bib:hasJournal, bib:hasMonth,
+             bib:hasNote, bib:hasNumber, bib:hasOrganization,
+             bib:hasPages, bib:hasPublisher, bib:hasSeries,
+             bib:hasType, bib:hasVolume, bib:hasAffiliation,
+             bib:hasAbstract, bib:hasContents, bib:hasCopyright,
+             bib:hasISBN, bib:hasISSN, bib:hasKeywords, 
+             bib:hasLanguage, bib:hasLocation, bib:hasLCCN,
+             bib:hasMrnumber, bib:hasPrice, bib:hasSize,
+             bib:hasURL, bib:hasDOI.
 
 pcat:category_contactinfo
 
