@@ -57,15 +57,13 @@ public class PagePool {
     static public Lob region(Object node, int start, int end, 
 			     float x0, float y0, 
 			     float x1, float y1) {
-	PagePool pool = getInstance();
-	pool.request(node);
+	request(node);
 	return requests.getRegion(node, start, end, x0,y0,x1,y1);
     }
 
 
     static public Lob oneFullPage(Object node, int page) {
-	PagePool pool = getInstance();
-	pool.request(node);
+	request(node);
 	return requests.getOnePage(node, page);
     }
 
@@ -73,14 +71,13 @@ public class PagePool {
 	if (node instanceof Literal)
 	    node = ((Literal)node).getString();
 
-	PagePool pool = getInstance();
-	pool.request(node);
+	request(node);
 
 	return requests.getWholeDocument(node, lod);
     }
 
     static public void flush() {
-	getInstance().requests.flush();
+	requests.flush();
     }
 
 }
