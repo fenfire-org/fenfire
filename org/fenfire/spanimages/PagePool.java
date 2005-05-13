@@ -39,42 +39,18 @@ import org.nongnu.libvob.impl.awt.*;
 public class PagePool {
     private static void p(String s) { System.out.println("PagePool:: "+s); }
 
-    protected PageRequests requests = null;
+    protected static PageRequests requests = null;
 
     
-    protected void request(Object node) {
+    protected static void request(Object node) {
 	requests.request((String) node);
     }
 
 
-    protected Lob get(Object node, int start, int end,
-		      float x0, float y0, 
-		      float x1, float y1) {
-	return requests.getRegion(node, start, end, x0,y0,x1,y1);
-    }
-    protected Lob get(Object node, int page) {
-	return requests.getOnePage(node, page);
-    }
-    protected Lob getFull(Object node, float prior) {
-	return requests.getWholeDocument(node, prior);
-    }
-
-
-
-    static protected PagePool instance;
-    static protected PagePool getInstance() {
-	if (instance == null) {
-	    throw new Error("Uninitialized!");
-	}
-	return instance;
-    }
     static public void init(Graph g, WindowAnimation anim) {
-	if (instance == null) {
-	    instance = new PagePool();
-	    if (GraphicsAPI.getInstance() instanceof AWTAPI)
-		instance.requests = new PageRequests(g, anim);
-	    else throw new Error("unreadable error -- see soursce");
-	}
+	if (GraphicsAPI.getInstance() instanceof AWTAPI)
+	    requests = new PageRequests(g, anim);
+	else throw new Error("unreadable error -- see soursce");
     }
 
 
@@ -83,16 +59,14 @@ public class PagePool {
 			     float x1, float y1) {
 	PagePool pool = getInstance();
 	pool.request(node);
-	return pool.get(node, start, end, x0,y0,x1,y1);
+	return requests.getRegion(node, start, end, x0,y0,x1,y1);
     }
 
 
     static public Lob oneFullPage(Object node, int page) {
 	PagePool pool = getInstance();
 	pool.request(node);
-	Lob l;
-	l = pool.get(node, 1);
-	return l;
+	return requests.getOnePage(node, page);
     }
 
     static public Lob fullDocument(Object node, float lod) {
@@ -102,9 +76,7 @@ public class PagePool {
 	PagePool pool = getInstance();
 	pool.request(node);
 
-	Lob l;
-	l = pool.getFull(node, lod);
-	return l;
+	return requests.getWholeDocument(node, lod);
     }
 
     static public void flush() {
