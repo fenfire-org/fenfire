@@ -48,6 +48,7 @@ public class PagePool {
 
 
     static public void init(Graph g, WindowAnimation anim) {
+	if (requests != null) return;
 	if (GraphicsAPI.getInstance() instanceof AWTAPI)
 	    requests = new PageRequests(g, anim);
 	else throw new Error("unreadable error -- see soursce");

@@ -100,7 +100,7 @@ public class PageRequests {
 	    if (s == null) {
 		s = new State(node, anim);
 		node2state.put(node, s);
-	    }
+	    } else throw new Error("There shouln't be another state..");
 	}	
 	Thread t = new Thread() {
 		public void run() {
@@ -267,6 +267,7 @@ public class PageRequests {
     File getCacheFile(String in) {
 	String s = in.replace('/','-');
 	s = s.replace(':','_');
+	s = s.replace('&','+');
 	return new File(getTempDir(), s);
     }
 
@@ -282,8 +283,35 @@ public class PageRequests {
 		s.file = res.getFile();
 		p("file: "+s.file);
 	    } catch (Exception e) {
-		e.printStackTrace();
-		throw new Error(e.getMessage());
+
+		try {
+
+		    if (!getCacheFile(s.uri).exists()) {
+			String exec = 
+			    //"http_proxy=\"http://localhost:8080\" "+
+			    "wget -v --proxy=on "+
+			    s.uri+" -O "+getCacheFile(s.uri).getPath();
+			p(exec);
+			Process p = Runtime.getRuntime().
+			    exec(exec);
+			/*
+			  BufferedReader br = new BufferedReader(
+			  new InputStreamReader(p.getErrorStream()));
+			  String str;
+			  while ((str=br.readLine()) != null) {
+			  p(str);
+			  }
+			*/
+			if (p.waitFor() != 0) throw new Error("bad return ");
+		    }
+		    s.file = getCacheFile(s.uri);
+		} catch (Exception e_) {
+		    e_.printStackTrace();
+		    
+		    e.printStackTrace();
+		    throw new Error(e.getMessage());
+		    
+		}
 	    }
 	}
 
