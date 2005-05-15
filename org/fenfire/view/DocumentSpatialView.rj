@@ -102,11 +102,6 @@ public class DocumentSpatialView implements SpatialView {
 	    protected Lob wrap(Lob l) {
 		return view.transDragController(l, button, cursor);
 	    }
-
-	    protected Object getKey() {
-		return "trans-drag-controller-cs";
-	    }
-	    
 	    public void drag(VobScene scene, int cs, float x, float y,
 			     VobMouseEvent e) {
 		//CanvasCursor cc = view.getCanvasCursor(cursor);
@@ -157,6 +152,109 @@ public class DocumentSpatialView implements SpatialView {
 	    }
 	}; 
     }
+    float selectX=-1, selectY=-1, selectW=-1, selectH=-1;
+    //float selectX=10, selectY=20, selectW=100, selectH=50;
+    private Lob selection(Lob delegate, Cursor cursor) {
+	// put a red rectangle around a selection.
+	if (!(selectX < 0 && selectY < 0 && selectW < 0 && selectH < 0)) {
+	    Tray tray = Tray.newInstance(Lists.list(), false);
+
+	    // the red rectangle
+	    Lob rect = Lobs.rect(java.awt.Color.red, 4);
+	    rect = Lobs.request(rect, selectW, selectW, selectW, 
+				selectH, selectH, selectH);
+	    rect = Lobs.translate(rect, selectX, selectY);
+
+	    if(cursor != null) {
+		DocumentSpatialView v = this;
+		CanvasCursor cc = v.getCanvasCursor(cursor);
+		Graph g = v.graph;
+		rect = Lobs.clickController(
+		    rect, 1, new @realtime-i Action(Graph g,
+						    DocumentSpatialView v,
+						    Cursor cursor) {
+			public void run() {
+			    Object n = Nodes.N();
+			    Lob page = PagePool.oneFullPage(
+				v.getCanvasCursor(cursor).getCanvas(), 0 );
+		
+			    SizeRequest r = page.getSizeRequest();
+			    float pageW = r.natW, pageH = r.natH;
+
+
+			    g.add(n, RDF.type, FF.PsPdfRegion);
+			    g.add(n, FF.startPage, 
+				  new TypedLiteral("1", XSD._int));
+			    g.add(n, FF.endPage, 
+				  new TypedLiteral("1", XSD._int));
+			    g.add(n, FF.startX, 
+				  new TypedLiteral(v.selectX/pageW));
+			    g.add(n, FF.endX, 
+				  new TypedLiteral(
+				      (v.selectX+v.selectW)/pageW));
+			    g.add(n, FF.startY, 
+				  new TypedLiteral(v.selectY/pageH));
+			    g.add(n, FF.endY, 
+				  new TypedLiteral(
+				      (v.selectY+v.selectH)/pageH));
+			    g.add(n, FF.regionOf, v.getCanvasCursor(cursor
+				      ).getCanvas());
+			    v.selectX=v.selectY=v.selectW=v.selectH=-1;
+			    cursor.setNode(n);
+			}
+		    });
+	    }
+
+	    // help text
+	    float fontSize = 18;
+	    LobFont f = FilterLobFont.newInstance(
+		SimpleLobFont.newInstance("serif", 0, fontSize, 
+					  java.awt.Color.red));
+	    Lob helpText = 
+		Lobs.hbox(
+		    f.text("Click into the selection to create a transclusion")
+		    );
+	    helpText = Lobs.translate(helpText, 
+				      selectX, selectY - fontSize);
+	    
+	    tray.add(rect);
+	    tray.add(helpText);
+	    tray.add(delegate);
+	    delegate = tray;
+	}
+	return delegate;
+    }
+    private Lob selectionDrag(Lob delegate, int button, int modifiers, 
+			      Cursor cursor) {
+	DocumentSpatialView view = this;
+	CanvasCursor cc = view.getCanvasCursor(cursor);
+	return new @realtime DragController(@set Lob delegate, 
+					    @set int button, 
+					    @set int modifiers,
+					    Cursor cursor, 
+					    DocumentSpatialView view, 
+					    CanvasCursor cc) {
+
+	    protected Lob wrap(Lob l) {
+		return view.selectionDrag(l, button, modifiers, cursor);
+	    }
+
+	    public void drag(VobScene scene, int cs, float x, float y,
+			     VobMouseEvent e) {
+		if (startx < x) 
+		    view.selectX = startx; 
+		else  view.selectX = x;
+		if (starty < y)
+		    view.selectY = starty; 
+		else view.selectY = y;
+		view.selectW = (float) Math.abs(x-startx); 
+		view.selectH = (float) Math.abs(y-starty);
+		p("start "+startx+":"+starty+
+		  ", xy: "+x+":"+y);
+		Lobs.getWindowAnimation().switchVS();
+	    }
+	};
+    }
 
 
     protected Lob addTransclusions(Lob bg, Cursor cursor, CanvasCursor cc) {
@@ -166,53 +264,61 @@ public class DocumentSpatialView implements SpatialView {
 
 	for (Iterator i=graph.findN_X11_Iter(FF.regionOf, cc.getCanvas());
 	     i.hasNext();) {
-	    Object n = i.next();
-	    
-	    int p0, p1;
 	    try {
+		Object n = i.next();
+		
+		int p0, p1;
 		p0 = RDFUtil.getInt(graph, n, FF.startPage) - 1;
 		p1 = RDFUtil.getInt(graph, n, FF.endPage);
+		// assume only one page, for now...
+		Lob page = PagePool.oneFullPage(cc.getCanvas(), p0);
+		
+		SizeRequest r = page.getSizeRequest();
+		float pageW = r.natW, pageH = r.natH;
+		
+		float x0, y0, x1, y1;
+
+		if (true) {
+		    x0 = RDFUtil.getFloat(graph, n, FF.startX) * pageW;
+		    y0 = RDFUtil.getFloat(graph, n, FF.startY) * pageH;
+		    x1 = RDFUtil.getFloat(graph, n, FF.endX) * pageW;
+		    y1 = RDFUtil.getFloat(graph, n, FF.endY) * pageH;
+		} else {
+		    x0 = RDFUtil.getFloat(graph, n, FF.startX); //* pageW;
+		    y0 = RDFUtil.getFloat(graph, n, FF.startY); //* pageH;
+		    x1 = RDFUtil.getFloat(graph, n, FF.endX); //* pageW;
+		    y1 = RDFUtil.getFloat(graph, n, FF.endY);// * pageH;
+		}
+
+		float w = x1-x0, h = y1-y0;
+		
+		float lineWidth = n.equals(focus) ? 3 : 1;
+		Color color = UniqueColors.getColor(n, .1f, .8f);
+
+		// just assume first page for now...
+		Lob rect = Lobs.rect(color, lineWidth);
+		
+		if(cursor != null) {
+		    rect = Lobs.clickController(rect, 1, new @realtime-i Action(Cursor cursor, Object n) {
+			public void run() {
+			    cursor.setNode(n);
+			}
+		    });
+		}
+		
+		rect = Lobs.request(rect, w, w, w, h, h, h);
+		rect = Lobs.translate(rect, x0, y0);
+		
+		tray.add(rect);
 	    } catch (Exception _) { continue; }
-	    // assume only one page, for now...
-	    Lob page = PagePool.oneFullPage(cc.getCanvas(), p0);
-
-	    SizeRequest r = page.getSizeRequest();
-	    float pageW = r.natW, pageH = r.natH;
-
-	    float x0, y0, x1, y1;
-	    try {
-		x0 = RDFUtil.getFloat(graph, n, FF.startX) * pageW;
-		y0 = RDFUtil.getFloat(graph, n, FF.startY) * pageH;
-		x1 = RDFUtil.getFloat(graph, n, FF.endX) * pageW;
-		y1 = RDFUtil.getFloat(graph, n, FF.endY) * pageH;
-	    } catch (Exception _) { continue; }
-
-	    float w = x1-x0, h = y1-y0;
-
-	    float lineWidth = n.equals(focus) ? 3 : 1;
-	    Color color = UniqueColors.getColor(n, .1f, .8f);
-
-	    // just assume first page for now...
-	    Lob rect = Lobs.rect(color, lineWidth);
-
-	    if(cursor != null) {
-		rect = Lobs.clickController(rect, 1, new @realtime-i Action(Cursor cursor, Object n) {
-		    public void run() {
-			cursor.setNode(n);
-		    }
-		});
-	    }
-	    
-	    rect = Lobs.request(rect, w, w, w, h, h, h);
-	    rect = Lobs.translate(rect, x0, y0);
-
-	    tray.add(rect);
 	}
 
 	tray.add(bg);
 	return tray;
     }
     
+    
+
 
     public Lob getMainviewLob(Cursor cursor) {
 	CanvasCursor cc = getCanvasCursor(cursor);
@@ -225,6 +331,10 @@ public class DocumentSpatialView implements SpatialView {
 		cursor.setNode(cc.getCanvas());
 	    }
 	});
+
+	l = selectionDrag(l, 1, VobMouseEvent.SHIFT_MASK, cursor);
+	l = selection(l, cursor);
+
 
 	l = addTransclusions(l, cursor, cc);
 
