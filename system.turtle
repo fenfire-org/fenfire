@@ -6,6 +6,7 @@
 @prefix dc10: <http://purl.org/dc/elements/1.0/>.
 @prefix sl:   <http://fenfire.org/rdf-v/2003/05/structlink#>.
 @prefix bib:  <http://purl.oclc.org/NET/nknouf/ns/bibtex#>.
+@prefix pspdf: <http://fenfire.org/rdf-v/2005/04/ps-pdf-region#>.
 
 @prefix vcard: <http://www.w3.org/2001/vcard-rdf/3.0#>.
 
@@ -41,6 +42,15 @@ pcat:category_relationships
     rdfs:label "Relationships between people";
 
     cat:item foaf:knows.
+
+pcat:category_pspdf_documents
+    a          cat:PropertyCategory;
+    rdfs:label "Ps/PDF regions";
+    cat:item
+        pspdf:PsPdfRegion,
+        pspdf:regionOf,
+        pspdf:startPage, pspdf:endPage,
+        pspdf:startX, pspdf:startY, pspdf:endX, pspdf:endY.
 
 pcat:category_docinfo
 
