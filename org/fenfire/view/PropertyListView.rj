@@ -321,9 +321,15 @@ public class PropertyListView implements SpatialView {
 		label = Lobs.nullLob();
 	    }
 	    
+	    List text;
 
-	    List literalLobs = Lists.concat(font.text(value.getString()),
-					    Lists.list(Lobs.hglue()));
+	    if(!prop.equals(RSS.encoded)) {
+		text = font.text(value.getString());
+	    } else {
+		text = LobHTML.getLobs(value.getString(), font);
+	    }
+
+	    List literalLobs = Lists.concat(text, Lists.list(Lobs.hglue()));
 
 	    literalLobs = Lobs.keyList(literalLobs, value);
 	    
