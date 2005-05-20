@@ -295,7 +295,7 @@ public class Main {
 	Set noShowProps, activeCategories;
 	NamespaceMap nmap;
 
-	Model potionsCommand = SimpleModel.newInstance();
+	List potionsCommandStack = new ArrayList();
 
 	SpatialViewSettings spatialViewSettings;
 	ReprViewSettings reprViewSettings;
@@ -501,34 +501,35 @@ public class Main {
 		    windowAnim.animate();
 		}
 	    });
-	    k.put("Escape", new @realtime-i Action(Cursor cursor, Model potionsCommand) {
+	    k.put("Escape", new @realtime-i Action(Cursor cursor, List potionsCommandStack) {
 		public void run() {
-		    potionsCommand.set(null);
+		    if(!potionsCommandStack.isEmpty())
+			potionsCommandStack.remove(0);
 		}
 	    });
 
 
-	    //Model potionsCommand = StateModel.newInstance("potions command");
+	    //List potionsCommandStack = StateModel.newInstance("potions command");
 
-	    k.put("Alt-N", new PotionAction(null, Potions.newNode, 
-					    graph, cursor, prefsGraph, potionsCommand));
-	    k.put("Alt-M", new PotionAction(null, Potions.newLiteral, 
-					    graph, cursor, prefsGraph, potionsCommand));
-	    k.put("Alt-C", new PotionAction(Potions.connect.call(Potions.currentNode, null, null), null,
-					    graph, cursor, prefsGraph, potionsCommand));
-	    k.put("Alt-B", new PotionAction(Potions.connectBackwards.call(Potions.currentNode, null, null), null,
-					    graph, cursor, prefsGraph, potionsCommand));
-	    k.put("Alt-T", new PotionAction(null, Potions.currentNode,
-					    graph, cursor, prefsGraph, potionsCommand));
-	    k.put("Alt-V", new PotionAction(Potions.goTo.call(null), null,
-					    graph, cursor, prefsGraph, potionsCommand));
-	    k.put("Alt-P", new PotionAction(null, Potions.node(startNode, 
-							       "start node"),
-					    graph, cursor, prefsGraph, potionsCommand));
-	    k.put("Ctrl-R", new PotionAction(Potions.changeURI.call(Potions.currentNode, null), null,
-					     graph, cursor, prefsGraph, potionsCommand));
-	    k.put("Alt-Shift-B", new PotionAction(Potions.bookmark.call(null), null,
-					     graph, cursor, prefsGraph, potionsCommand));
+	    k.put("Alt-N", new PotionAction(Potions.newNode, 
+					    graph, cursor, prefsGraph, potionsCommandStack));
+	    k.put("Alt-M", new PotionAction(Potions.newLiteral, 
+					    graph, cursor, prefsGraph, potionsCommandStack));
+	    k.put("Alt-C", new PotionAction(Potions.connect.call(Potions.currentNode, null, null),
+					    graph, cursor, prefsGraph, potionsCommandStack));
+	    k.put("Alt-B", new PotionAction(Potions.connectBackwards.call(Potions.currentNode, null, null),
+					    graph, cursor, prefsGraph, potionsCommandStack));
+	    k.put("Alt-T", new PotionAction(Potions.currentNode,
+					    graph, cursor, prefsGraph, potionsCommandStack));
+	    k.put("Alt-V", new PotionAction(Potions.goTo.call(null),
+					    graph, cursor, prefsGraph, potionsCommandStack));
+	    k.put("Alt-P", new PotionAction(Potions.node(startNode, 
+							 "start node"),
+					    graph, cursor, prefsGraph, potionsCommandStack));
+	    k.put("Ctrl-R", new PotionAction(Potions.changeURI.call(Potions.currentNode, null),
+					     graph, cursor, prefsGraph, potionsCommandStack));
+	    k.put("Alt-Shift-B", new PotionAction(Potions.bookmark.call(null),
+					     graph, cursor, prefsGraph, potionsCommandStack));
 
 	    FenfireMain ffmain = this;
 	    k.put("Alt-Q", new @realtime-i Action(FenfireMain ffmain) {
@@ -551,7 +552,7 @@ public class Main {
 		main = Views.handleLobThrowable(t);
 	    }
 	    main = Lobs.keyController(main, k);
-	    main = UniqueShortcutController.newInstance(main, allProps, graph, cursor, prefsGraph, potionsCommand);
+	    main = UniqueShortcutController.newInstance(main, allProps, graph, cursor, prefsGraph, potionsCommandStack);
 
 
 	    List sortedProps = FastList.newInstance(); 
@@ -610,10 +611,9 @@ public class Main {
 
 	    RoleContext.enter("potions bar");
 	    try {
-		org.fenfire.potion.Expression expr =
-		    (org.fenfire.potion.Expression)potionsCommand.get();
-
-		if(expr != null) {
+		if(!potionsCommandStack.isEmpty()) {
+		    org.fenfire.potion.Expression expr =
+			(org.fenfire.potion.Expression)potionsCommandStack.get(0);
 		    Map context = Maps.map("reprView", reprView);
 
 		    LobFont font = Components.font();
@@ -660,7 +660,7 @@ public class Main {
 
 		    Action ok = new @realtime-i Action(FenfireMain ffmain, 
 			Graph graph, Cursor cursor, Graph prefsGraph,
-			Model potionsCommand) {
+			List potionsCommandStack) {
 			    public void run() {
 				String text = (String)ffmain.popupText.get();
 				String uri;
@@ -677,10 +677,9 @@ public class Main {
 				
 				Object node = Nodes.get(uri);
 
-				new PotionAction(Potions.goTo.call(null),
-						 Potions.node(node, uri),
+				new PotionAction(Potions.node(node, uri),
 						 graph, cursor, prefsGraph,
-						 potionsCommand).run();
+						 potionsCommandStack).run();
 				
 				ffmain.popupText = null;
 			    }

@@ -44,7 +44,7 @@ public class UniqueShortcutController extends AbstractDelegateLob {
     protected Graph graph;
     protected Cursor cursor;
     protected Graph prefsGraph;
-    protected Model potionsCommand;
+    protected List potionsCommandStack;
 
     public static final String
 	EASY = "ASDFGHJKLWERUIO",
@@ -72,7 +72,7 @@ public class UniqueShortcutController extends AbstractDelegateLob {
 
     public static UniqueShortcutController newInstance(
         Lob content, Collection properties, Graph graph, Cursor cursor, 
-	Graph prefsGraph, Model potionsCommand) {
+	Graph prefsGraph, List potionsCommandStack) {
 
 	UniqueShortcutController c = (UniqueShortcutController)FACTORY.object();
 	c.delegate = content;
@@ -80,13 +80,13 @@ public class UniqueShortcutController extends AbstractDelegateLob {
 	c.graph = graph;
 	c.cursor = cursor;
 	c.prefsGraph = prefsGraph;
-	c.potionsCommand = potionsCommand;
+	c.potionsCommandStack = potionsCommandStack;
 	return c;
     }
 
     public Lob wrap(Lob l) {
 	return newInstance(l, properties, graph, cursor, prefsGraph,
-			   potionsCommand);
+			   potionsCommandStack);
     }
 
     public boolean key(String key) {
@@ -121,7 +121,7 @@ public class UniqueShortcutController extends AbstractDelegateLob {
 			Object prop = i.next();
 			if(getShortcut(prop, SHORTCUT_LEN).equals(s)) {
 			    
-			    Action a = new PotionAction(Potions.connect.call(Potions.currentNode, null, null), Potions.node(prop, prop.toString()), graph, cursor, prefsGraph, potionsCommand);
+			    Action a = new PotionAction(Potions.node(prop, prop.toString()), graph, cursor, prefsGraph, potionsCommandStack);
 			    a.run();
 
 			    return true;

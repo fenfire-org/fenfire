@@ -38,50 +38,47 @@ public class PotionAction extends RealtimeObject implements Action {
     protected Graph graph;
     protected Cursor cursor;
     protected Graph prefsGraph;
-    protected Model currentCommand;
 
-    protected CommandExpression command;
-    protected FunctionExpression function;
+    protected List commandStack;
 
-    public PotionAction(CommandExpression command, FunctionExpression function,
+    protected Expression expression;
+
+    public PotionAction(Expression expression,
 			Graph graph, Cursor cursor, Graph prefsGraph,
-			Model currentCommand) {
-	this.command = command;
-	this.function = function;
+			List commandStack) {
+	this.expression = expression;
 
 	this.graph = graph;
 	this.cursor = cursor;
 	this.prefsGraph = prefsGraph;
-	this.currentCommand = currentCommand;
+	this.commandStack = commandStack;
     } 
 
     public void run() {
-	CommandExpression c = (CommandExpression)currentCommand.get();
 
 	Map context = new HashMap();
 	context.put("graph", graph);
 	context.put("cursor", cursor);
 	context.put("prefsGraph", prefsGraph);
 
-	if(c == null) {
-	    if(command == null) return;
+	Expression expr = expression.instantiatePattern(context);
 
-	    c = (CommandExpression)command.instantiatePattern(context);
-	}
+	CommandExpression c;
 
-	if(!c.isComplete() && function != null) {
-	    FunctionExpression expr = 
-		(FunctionExpression)function.instantiatePattern(context);
-	    c = (CommandExpression)c.setNextParam(expr);
+	if(expr instanceof CommandExpression) {
+	    c = (CommandExpression)expr;
+	} else {
+	    if(commandStack.isEmpty()) return;
+	    c = (CommandExpression)commandStack.remove(0);
+	    c = (CommandExpression)c.setNextParam((FunctionExpression)expr);
 	}
 
 	if(c.isComplete()) {
 	    c.execute(context);
-	    currentCommand.set(null);
 
 	    System.out.println("performed: "+c);
 	} else {
-	    currentCommand.set(c);
+	    commandStack.add(0, c);
 	    System.out.println("set current command to: "+c);
 	}
 
