@@ -1,0 +1,144 @@
+/* -*-java-*-
+TreeListSpatialView.java
+ *    
+ *    Copyright (c) 2005, Matti Katila
+ *
+ *    This file is part of Fenfire.
+ *    
+ *    Libvob is free software; you can redistribute it and/or modify it under
+ *    the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *    
+ *    Libvob is distributed in the hope that it will be useful, but WITHOUT
+ *    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *    or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+ *    Public License for more details.
+ *    
+ *    You should have received a copy of the GNU General
+ *    Public License along with Libvob; if not, write to the Free
+ *    Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+ *    MA  02111-1307  USA
+ *    
+ *
+ */
+/*
+ * Written by Matti Katila
+ */
+
+package org.fenfire.view;
+import org.fenfire.Cursor;
+import org.fenfire.swamp.*;
+import org.fenfire.vocab.*;
+import org.fenfire.structure.*;
+
+import org.fenfire.lob.*;
+import org.fenfire.util.RDFUtil;
+import org.nongnu.libvob.lob.*;
+import org.nongnu.libvob.lob.lobs.DragController;
+import org.nongnu.libvob.*;
+import org.nongnu.libvob.util.*;
+import org.nongnu.navidoc.util.Obs;
+import javolution.realtime.*;
+import java.awt.Color;
+import java.util.*;
+
+
+/** A spatial view that renders an rdf structure constructed in a form
+ * of a tree with simple tree and rdf list vocabularies. This view is
+ * constructed to help writing structured text. It's supposed to view
+ * the tree as it is on the left side of the view and on the right
+ * side show the text word-wrapped; where focused node in tree
+ * structure view has reddish rectange or other ways to catch the
+ * user's attention.
+ *
+ * <p>
+ *
+ * To use Fenfire framework with this view we do the following
+ * assumption: 
+ *
+ * <ul>
+ *
+ * <li> Textcursor starts from zero and increments by every character
+ * in a literal of rdfs:label and/or by nodes that contains no
+ * characters, e.g., nodes that represent a transclusion.</li>
+ *
+ * <li> Current focused cursor node can be changes by keys left and
+ * right. If the node has text we are going to move text cursor
+ * (hopefully there will be shortcuts to move a word or a sentence)
+ * exept if the textcursor is at the begin or at the end of the text
+ * and next move goes outside of the literal's text content's
+ * size.</li>
+ *
+ * </ul>
+ *
+ * </p>
+ */
+public class TreeListSpatialView implements SpatialView {
+    static private void p(String s) { System.out.println("TreeListSpatialView:: "+s); }
+
+    private Graph graph;
+    private ReprView reprView;
+    private WindowAnimation winAnim;
+
+    public TreeListSpatialView(Graph graph, 
+			       ReprView reprView,
+			       WindowAnimation winAnim) {
+	this.graph = graph;
+	this.reprView = reprView;
+	this.winAnim = winAnim;
+    }
+
+    public final ViewSettings.Type TYPE = 
+	new ViewSettings.AbstractType() {
+	    public boolean containsNode(Object node) {
+		return graph.find1_11X(node, TREE.root) != null;
+	    }
+	};
+    
+    public Set getTypes() {
+	return Collections.singleton(TYPE);
+    }
+
+    protected TreeListCursor getTreeListCursor(Cursor c) {
+	Object pos = c.getSpatialCursor();
+
+	if (pos instanceof TreeListCursor) {
+	    return (TreeListCursor)pos;
+	} else {
+	    Object n = c.getNode();
+	    return makeTreeListCursor(n);
+	}
+    }
+
+    protected TreeListCursor makeTreeListCursor(Object n) {
+	n = TreeList.getRoot(graph, n);
+	return new TreeListCursor(n, 1);
+    }
+
+    public Lob getBuoyLob(Object node, boolean useFakeFocus) {
+	TreeListCursor cc = makeTreeListCursor(node);
+
+	Lob l;
+	l = Components.label("TreeList"+ node);
+	l = SpatialContextLob.newInstance(l, cc.getRoot());
+
+	return l;
+    }
+
+
+    public Lob getMainviewLob(Cursor c) {
+	TreeListCursor cc = getTreeListCursor(c);
+
+	Lob l;
+	l = Components.label("TreeList"+ c.getNode());
+	l = Lobs.request(l, 0, 0, Lob.INF, 0, 0, Lob.INF);
+	l = Lobs.align(l, .5f, .5f);
+	l = SpatialContextLob.newInstance(l, cc.getRoot());
+	l = Components.frame(l);
+	l = Lobs.margin(l, 20);
+
+	return l;
+    }
+
+}

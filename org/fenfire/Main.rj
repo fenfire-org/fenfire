@@ -391,6 +391,7 @@ public class Main {
 	    listViewViewlets.add(new PropertyListView.SimpleViewlet());
 
 	    Set spatialViews = new HashSet(Arrays.asList(new Object[] {
+		new TreeListSpatialView(graph, reprView, windowAnim),
 		new DocumentSpatialView(graph, windowAnim),
 		new PropertyListView(graph, listViewProperties, noShowProps,
 				     listViewViewlets,

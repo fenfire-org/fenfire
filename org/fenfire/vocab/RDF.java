@@ -46,4 +46,9 @@ public class RDF {
     static public Object object = Nodes.get(voc + "object");
 
     static public final Object _1 = Nodes.get(voc + "_1");
+
+    static public Object nil = Nodes.get(voc + "nil");
+    static public Object first = Nodes.get(voc + "first");
+    static public Object rest = Nodes.get(voc + "rest");
+
 }
