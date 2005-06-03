@@ -92,7 +92,8 @@ public class TreeListSpatialView implements SpatialView {
     public final ViewSettings.Type TYPE = 
 	new ViewSettings.AbstractType() {
 	    public boolean containsNode(Object node) {
-		return graph.find1_11X(node, TREE.root) != null;
+		return TreeList.Tree.isRoot(graph, node) ||
+		    TreeList.List.isListItem(graph, node);
 	    }
 	};
     
@@ -102,13 +103,11 @@ public class TreeListSpatialView implements SpatialView {
 
     protected TreeListCursor getTreeListCursor(Cursor c) {
 	Object pos = c.getSpatialCursor();
-
-	if (pos instanceof TreeListCursor) {
-	    return (TreeListCursor)pos;
-	} else {
+	if (!(pos instanceof TreeListCursor)) {
 	    Object n = c.getNode();
-	    return makeTreeListCursor(n);
+	    c.setSpatialCursor(makeTreeListCursor(n));
 	}
+	return (TreeListCursor)c.getSpatialCursor();
     }
 
     protected TreeListCursor makeTreeListCursor(Object n) {
@@ -131,13 +130,200 @@ public class TreeListSpatialView implements SpatialView {
 	TreeListCursor cc = getTreeListCursor(c);
 
 	Lob l;
-	l = Components.label("TreeList"+ c.getNode());
-	l = Lobs.request(l, 0, 0, Lob.INF, 0, 0, Lob.INF);
+	Lob vbox = Lobs.vbox();
+
+	for (Iterator i = TreeList.iterator(graph, cc.getRoot()); 
+	     i.hasNext();) {
+	    Object item = i.next();
+
+	    Literal lit = (Literal) graph.find1_11X(item, RDFS.label);
+	    Lob repr = null;
+	    if (lit != null) {
+		List textList = Components.font().
+		    textLn(lit.getString());
+		textList = Lobs.keyList(textList, item);
+		repr = Lobs.linebreaker(textList);
+
+		if (item == c.getNode()) {
+		    Lob cursor_lob = Lobs.line(
+			java.awt.Color.black, 0, 0, 0, 1);
+		    cursor_lob = Lobs.key(cursor_lob, "textcursor");
+		    repr = Lobs.decorate(repr, cursor_lob, item, 
+					 c.textCursor - 
+					 countTextCursor(cc, graph, item));
+		
+		}
+	    } else 
+		repr = reprView.getLob(item);
+	    repr = Components.frame(repr);
+	    vbox.add(repr);
+	}
+	l = vbox;
+
+	l = Components.frame(l);
+	l = Lobs.request(l, 
+			0, 400, Lob.INF, 
+			0, 400, Lob.INF);
+
+
+	l = keys(l, c);
+	//l = Lobs.request(l, 0, 0, Lob.INF, 0, 0, Lob.INF);
 	l = Lobs.align(l, .5f, .5f);
 	l = SpatialContextLob.newInstance(l, cc.getRoot());
 	l = Components.frame(l);
 	l = Lobs.margin(l, 20);
 
+	return l;
+    }
+
+
+
+    private int countTextCursor(TreeListCursor tc, Graph g, Object n) {
+	int t = 0;
+	for (Iterator i = TreeList.iterator(g, tc.getRoot()); 
+	     i.hasNext();) {
+	    Object item = i.next();
+	    if (item == n) break;
+	    
+	    if (item instanceof Literal) 
+		t += ((Literal)item).getString().length();
+	    else t++; 
+	}
+	return t;
+    }
+    
+    private int validateLiteralCursor(Graph g, Object n, int t) {
+	Literal l = (Literal) g.find1_11X(n,RDFS.label);
+	if (l == null || t < 0) return 0;
+	return (t <= l.getString().length() ? t: l.getString().length());
+    }
+    
+
+
+
+
+
+    /** A key controller implementing simple text editing.
+     */
+    public static class KeysController extends AbstractDelegateLob {
+	
+	private KeysController() {}
+	private TreeListSpatialView tree;
+	private Cursor cursor;
+	public static KeysController newInstance(Lob content, 
+						 TreeListSpatialView tree,
+						 Cursor cur) {
+	    KeysController c = (KeysController)FACTORY.object();
+	    c.delegate = content;
+	    c.tree = tree;
+	    c.cursor = cur;
+	    return c;
+	}
+	
+	public Lob wrap(Lob l) {
+	    return newInstance(l, tree, cursor);
+	}
+	
+	public boolean key(String key) {
+	    WindowAnimation winAnim = Lobs.getWindowAnimation();
+	    
+	    p("KEY: '"+key+"'");
+
+	    TreeListCursor cc = tree.getTreeListCursor(cursor);
+
+	    // INSERTS alpabets or Enter
+	    if (key.length() == 1 || key.equals("Enter")) {
+		p("insert: "+key+", textCursor: "+cursor.textCursor);
+		if (key.equals("Enter")) key = "\n";
+
+		Object current = cursor.getNode();
+		current = TreeList.createNewIfNeeded(tree.graph, 
+						     cc.getRoot(),
+						     current);
+		int tmpTextCursor = cursor.textCursor;
+		if (!TreeList.isTreeLeaf(tree.graph, current))
+		    current = TreeList.addNewItemBefore(tree.graph, current);
+		cursor.setNode(current);
+		cursor.textCursorModel.set(tmpTextCursor);
+		
+		int textCursorMovementsBefore = 
+		    tree.countTextCursor(cc, tree.graph, current);
+		p("textCursorMovementsBefore: "+textCursorMovementsBefore);
+
+		Literal l = (Literal) tree.graph.find1_11X(current, 
+							   RDFS.label);
+		if (l == null) l = new PlainLiteral("");
+		int literalCursor = 0;
+		p(", textCursor: "+cursor.textCursor);
+		if (cursor.textCursor >= 0) {
+		    p("graah..");
+		    literalCursor = cursor.textCursor - 
+			textCursorMovementsBefore;
+		}
+		p("unvalidated: "+literalCursor);
+		literalCursor = tree.validateLiteralCursor(
+		    tree.graph, current, literalCursor);
+		p("validated: "+literalCursor);
+		String str = l.getString();
+		String done = 
+		    str.substring(0, literalCursor) + 
+		    key + 
+		    (str.length() <= literalCursor ? 
+		     "" :  str.substring(literalCursor));
+		tree.graph.set1_11X(current,
+			       RDFS.label, new PlainLiteral(done));
+		cursor.textCursorModel.set(textCursorMovementsBefore+
+					   literalCursor+1);
+		org.nongnu.libvob.lob.Lobs.getWindowAnimation().animate();
+		
+		return true;
+	    } 
+	    // MOVEMENTS 
+	    else if (key.indexOf("Left") >= 0 || key.indexOf("Right") >= 0) {
+		p("Move: "+key);
+		if (key.equals("Left") && cursor.textCursor > 0) {
+		    cursor.textCursorModel.set(cursor.textCursor - 1);
+		} else if (key.equals("Right")) {
+		    cursor.textCursorModel.set(cursor.textCursor + 1);
+		}
+		return true;
+	    }
+	    // DELETE
+	    else if (key.indexOf("Delete") >= 0 || key.indexOf("Backspace") >= 0) {
+		p("Delete: "+key);
+		if (cursor.textCursor <= 0) return false;
+
+		Object current = cursor.getNode();
+		
+
+		return true;
+	    }
+	    // MARK place
+	    else if (key.equals("Ctrl- ")) {
+		p("Mark text cursor");
+		cc.textMark = cursor.textCursor;
+		return true;
+	    }
+	    else {
+		return delegate.key(key);
+	    }
+	}
+
+
+	
+	public List getFocusableLobs() {
+	    return Lists.list(this);
+	}
+	
+	private static final Factory FACTORY = new Factory() {
+		public Object create() {
+		    return new KeysController();
+		}
+	    };
+    }
+
+    private Lob keys(Lob l, Cursor c) {
+	l = KeysController.newInstance(l, this, c);
 	return l;
     }
 

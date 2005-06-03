@@ -33,6 +33,7 @@ public class TreeListCursor {
 
     private final Object rootNode;
     private final float zoom;
+    public int textMark = -1;
 
     public TreeListCursor(Object root, float zoom) { 
 	this.rootNode = root;
