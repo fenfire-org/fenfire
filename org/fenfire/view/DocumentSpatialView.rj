@@ -176,16 +176,19 @@ public class DocumentSpatialView implements SpatialView {
 			    float pageW = r.natW, pageH = r.natH;
 
 
+			    int pageStart = (int)( v.selectX / pageW + 1);
+			    int pageEnd = (int)( (v.selectX+v.selectW)/ pageW + 1);
+
 			    g.add(n, RDF.type, FF.PsPdfRegion);
 			    g.add(n, FF.startPage, 
-				  new TypedLiteral("1", XSD._int));
+				  new TypedLiteral(""+pageStart, XSD._int));
 			    g.add(n, FF.endPage, 
-				  new TypedLiteral("1", XSD._int));
+				  new TypedLiteral(""+pageEnd, XSD._int));
 			    g.add(n, FF.startX, 
-				  new TypedLiteral(v.selectX/pageW));
+				  new TypedLiteral((v.selectX % pageW)/pageW));
 			    g.add(n, FF.endX, 
 				  new TypedLiteral(
-				      (v.selectX+v.selectW)/pageW));
+				      ((v.selectX+v.selectW) % pageW)/pageW));
 			    g.add(n, FF.startY, 
 				  new TypedLiteral(v.selectY/pageH));
 			    g.add(n, FF.endY, 
@@ -269,7 +272,7 @@ public class DocumentSpatialView implements SpatialView {
 		
 		int p0, p1;
 		p0 = RDFUtil.getInt(graph, n, FF.startPage) - 1;
-		p1 = RDFUtil.getInt(graph, n, FF.endPage);
+		p1 = RDFUtil.getInt(graph, n, FF.endPage) - 1;
 		// assume only one page, for now...
 		Lob page = PagePool.oneFullPage(cc.getCanvas(), p0);
 		
@@ -278,17 +281,10 @@ public class DocumentSpatialView implements SpatialView {
 		
 		float x0, y0, x1, y1;
 
-		if (true) {
-		    x0 = RDFUtil.getFloat(graph, n, FF.startX) * pageW;
-		    y0 = RDFUtil.getFloat(graph, n, FF.startY) * pageH;
-		    x1 = RDFUtil.getFloat(graph, n, FF.endX) * pageW;
-		    y1 = RDFUtil.getFloat(graph, n, FF.endY) * pageH;
-		} else {
-		    x0 = RDFUtil.getFloat(graph, n, FF.startX); //* pageW;
-		    y0 = RDFUtil.getFloat(graph, n, FF.startY); //* pageH;
-		    x1 = RDFUtil.getFloat(graph, n, FF.endX); //* pageW;
-		    y1 = RDFUtil.getFloat(graph, n, FF.endY);// * pageH;
-		}
+		x0 = RDFUtil.getFloat(graph, n, FF.startX) * pageW + p0*pageW;
+		y0 = RDFUtil.getFloat(graph, n, FF.startY) * pageH;
+		x1 = RDFUtil.getFloat(graph, n, FF.endX) * pageW + p1*pageW;
+		y1 = RDFUtil.getFloat(graph, n, FF.endY) * pageH;
 
 		float w = x1-x0, h = y1-y0;
 		
