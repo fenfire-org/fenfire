@@ -42,6 +42,7 @@ import java.awt.Color;
 import java.util.*;
 
 public class DocumentSpatialView implements SpatialView {
+    static public boolean dbg = false;
     static private void p(String s) { System.out.println("DocumentSpatialView:: "+s); }
 
     private Graph graph;
@@ -90,7 +91,6 @@ public class DocumentSpatialView implements SpatialView {
 	}
     }
 
-
     private Lob transDragController(Lob delegate, int button, Cursor cursor) {
 	DocumentSpatialView view = this;
 
@@ -105,10 +105,9 @@ public class DocumentSpatialView implements SpatialView {
 	    }
 	    public void drag(VobScene scene, int cs, float x, float y,
 			     VobMouseEvent e) {
-		//CanvasCursor cc = view.getCanvasCursor(cursor);
-		p("pan: "+cc.getPanX()+":"+cc.getPanY()+
-		  ", start "+startx+":"+starty+
-		  ", xy: "+x+":"+y);
+		if (dbg) p("pan: "+cc.getPanX()+":"+cc.getPanY()+
+			   ", start "+startx+":"+starty+
+			   ", xy: "+x+":"+y);
 		float panX = _panX+startx-x, //startx-x, 
 		    panY = _panY+starty-y; //starty-y;
 		cursor.setSpatialCursor(new CanvasCursor(cc.getCanvas(), 
@@ -136,7 +135,7 @@ public class DocumentSpatialView implements SpatialView {
 		CanvasCursor cc = view.getCanvasCursor(cursor);
 
 		float dy = (y-starty)/250;
-		p("dy = "+dy);
+		if (dbg) p("dy = "+dy);
 		//if (dy < -.3f || dy > .3f) dy = 0;
 
 		float z = _zoom + dy;
@@ -151,7 +150,7 @@ public class DocumentSpatialView implements SpatialView {
 	}; 
     }
     float selectX=-1, selectY=-1, selectW=-1, selectH=-1;
-    //float selectX=10, selectY=20, selectW=100, selectH=50;
+
     private Lob selection(Lob delegate, Cursor cursor) {
 	// put a red rectangle around a selection.
 	if (!(selectX < 0 && selectY < 0 && selectW < 0 && selectH < 0)) {
@@ -248,8 +247,10 @@ public class DocumentSpatialView implements SpatialView {
 		else view.selectY = y;
 		view.selectW = (float) Math.abs(x-startx); 
 		view.selectH = (float) Math.abs(y-starty);
-		p("start "+startx+":"+starty+
-		  ", xy: "+x+":"+y);
+		if (dbg) p("scale: "+cc.getZoom()+
+			   ", pan: "+cc.getPanX()+":"+cc.getPanY()+
+			   ", start "+startx+":"+starty+
+			   ", xy: "+x+":"+y);
 		Lobs.getWindowAnimation().switchVS();
 	    }
 	};
@@ -331,14 +332,12 @@ public class DocumentSpatialView implements SpatialView {
 	    }
 	});
 
-	l = selectionDrag(l, 1, VobMouseEvent.SHIFT_MASK, cursor);
 	l = selection(l, cursor);
-
-
 	l = addTransclusions(l, cursor, cc);
 
-	l = Lobs.translate(l, -cc.getPanX(), -cc.getPanY(), false);
+	l = selectionDrag(l, 1, VobMouseEvent.SHIFT_MASK, cursor);
 
+	l = Lobs.translate(l, -cc.getPanX(), -cc.getPanY(), false);
 	l = transDragController(l, 1, cursor);
 
 	//l = Lobs.debug(l, "translate");
