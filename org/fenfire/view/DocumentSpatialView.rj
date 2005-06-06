@@ -159,9 +159,6 @@ public class DocumentSpatialView implements SpatialView {
 
 	    // the red rectangle
 	    Lob rect = Lobs.rect(java.awt.Color.red, 4);
-	    rect = Lobs.request(rect, selectW, selectW, selectW, 
-				selectH, selectH, selectH);
-	    rect = Lobs.translate(rect, selectX, selectY);
 
 	    if(cursor != null) {
 		DocumentSpatialView v = this;
@@ -201,6 +198,9 @@ public class DocumentSpatialView implements SpatialView {
 			    cursor.setNode(n);
 			}
 		    });
+		rect = Lobs.request(rect, selectW, selectW, selectW, 
+				    selectH, selectH, selectH);
+		rect = Lobs.translate(rect, selectX, selectY);
 	    }
 
 	    // help text
