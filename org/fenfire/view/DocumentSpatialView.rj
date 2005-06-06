@@ -99,6 +99,7 @@ public class DocumentSpatialView implements SpatialView {
 	float _panX = cc.getPanX(), _panY = cc.getPanY();
 	return new @realtime DragController(@set Lob delegate, @set int button, Cursor cursor, DocumentSpatialView view, CanvasCursor cc, float _panX, float _panY) {
 
+	    protected Object getKey() { return super.getKey()+"TRANS"; }
 	    protected Lob wrap(Lob l) {
 		return view.transDragController(l, button, cursor);
 	    }
@@ -125,12 +126,9 @@ public class DocumentSpatialView implements SpatialView {
 	float _zoom = cc.getZoom();
 	return new @realtime DragController(@set Lob delegate, @set int button, Cursor cursor, DocumentSpatialView view, CanvasCursor cc, float _zoom) {
 
+	    protected Object getKey() { return super.getKey()+"SCALE"; }
 	    protected Lob wrap(Lob l) {
 		return view.scaleDragController(l, button, cursor);
-	    }
-
-	    protected Object getKey() {
-		return "scale-drag-controller-cs";
 	    }
 	    
 	    public void drag(VobScene scene, int cs, float x, float y, 
@@ -235,6 +233,7 @@ public class DocumentSpatialView implements SpatialView {
 					    DocumentSpatialView view, 
 					    CanvasCursor cc) {
 
+	    protected Object getKey() { return super.getKey()+"SELECT"; }
 	    protected Lob wrap(Lob l) {
 		return view.selectionDrag(l, button, modifiers, cursor);
 	    }
