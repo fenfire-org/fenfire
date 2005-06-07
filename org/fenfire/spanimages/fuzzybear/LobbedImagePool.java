@@ -45,7 +45,7 @@ public class LobbedImagePool extends AWTImagePool {
 	return new LobbedImagePool(
 	    new int[][]{
 		// how many, width, height
-		{ 1, 2048, 2048 },
+		{ 2, 2048, 2048 },
 		{ 2, 256, 512 },
 		{ 4, 128, 256 },
 		{ 64, 64, 64 },
