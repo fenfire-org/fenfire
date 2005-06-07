@@ -217,10 +217,12 @@ public class PageRequests {
 	    for (int i=0; i<n; i++) {
 		if (x0 <= dx && dx < (x0+s.maxw)) {
 		    int lod = 0;
-		    for (int j=i; j<n; j++) {
+		    lodElevator.setLOD(s, i, lod);
+		    lod = ((dx%s.maxw) > (.5f*s.maxw) ? 1: 2);
+		    for (int j=i+1; j<n; j++) {
 			lodElevator.setLOD(s, j, lod++);
 		    }
-		    lod = 1;
+		    lod = ((dx%s.maxw) > (.5f*s.maxw) ? 2:1);
 		    for (int j=i-1; j>=0; j--) {
 			lodElevator.setLOD(s, j, lod++);
 		    }
@@ -238,6 +240,7 @@ public class PageRequests {
 	    Lob l2;
 	    try {
 		l2 = pagePool.getLob(s.poolInds[i]);
+		l2 = Lobs.key(l2, s.id.toString()+i);
 	    } catch (Exception e) {
 		l2 = Components.label(""+e.getMessage());
 	    }
