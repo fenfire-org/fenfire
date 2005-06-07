@@ -38,6 +38,7 @@ import org.nongnu.libvob.*;
 import org.nongnu.libvob.util.*;
 import org.nongnu.navidoc.util.Obs;
 import javolution.realtime.*;
+import javolution.util.*;
 import java.awt.Color;
 import java.util.*;
 
@@ -155,10 +156,10 @@ public class DocumentSpatialView implements SpatialView {
 	// put a red rectangle around a selection.
 	if (!(selectX < 0 && selectY < 0 && selectW < 0 && selectH < 0)) {
 	    Tray tray = Tray.newInstance(Lists.list(), false);
-
+	    
 	    // the red rectangle
 	    Lob rect = Lobs.rect(java.awt.Color.red, 4);
-
+	    
 	    if(cursor != null) {
 		DocumentSpatialView v = this;
 		CanvasCursor cc = v.getCanvasCursor(cursor);
@@ -313,7 +314,79 @@ public class DocumentSpatialView implements SpatialView {
 	return tray;
     }
     
-    
+    private Lob keys(Lob l, Cursor cursor) {
+	CanvasCursor cc = getCanvasCursor(cursor);
+	Lob page = PagePool.oneFullPage(cc.getCanvas(), 0);
+		
+	SizeRequest r = page.getSizeRequest();
+	float pageW = r.natW, pageH = r.natH;
+	Map k = FastMap.newInstance();
+	k.put("a", new @realtime-i Action(
+		  Cursor cursor,CanvasCursor cc){
+	    public void run() {
+		cursor.setSpatialCursor(
+		    new CanvasCursor(cc.getCanvas(), cc.getPanX(),
+				     cc.getPanY(), cc.getZoom()*1.07f));
+	    }
+	    });
+	k.put("z", new @realtime-i Action(
+		  Cursor cursor,CanvasCursor cc){
+	    public void run() {
+		cursor.setSpatialCursor(
+		    new CanvasCursor(cc.getCanvas(), cc.getPanX(),
+				     cc.getPanY(), cc.getZoom()*0.93f));
+	    }
+	    });
+	k.put("Up", new @realtime-i Action(
+		  Cursor cursor,CanvasCursor cc, float pageH){
+	    public void run() {
+		cursor.setSpatialCursor(
+		    new CanvasCursor(cc.getCanvas(), cc.getPanX(),
+				     cc.getPanY()-pageH/6f, cc.getZoom()));
+	    }
+	    });
+	k.put("Down", new @realtime-i Action(
+		  Cursor cursor,CanvasCursor cc, float pageH){
+	    public void run() {
+		cursor.setSpatialCursor(
+		    new CanvasCursor(cc.getCanvas(), cc.getPanX(),
+				     cc.getPanY()+pageH/6f, cc.getZoom()));
+	    }
+	    });
+	k.put("Left", new @realtime-i Action(
+		  Cursor cursor,CanvasCursor cc, float pageW){
+	    public void run() {
+		cursor.setSpatialCursor(
+		    new CanvasCursor(cc.getCanvas(), cc.getPanX()-pageW/5f,
+				     cc.getPanY(), cc.getZoom()));
+	    }
+	    });
+	k.put("Right", new @realtime-i Action(
+		  Cursor cursor,CanvasCursor cc, float pageW){
+	    public void run() {
+		cursor.setSpatialCursor(
+		    new CanvasCursor(cc.getCanvas(), cc.getPanX()+pageW/5f,
+				     cc.getPanY(), cc.getZoom()));
+	    }
+	    });
+	k.put("Alt-Left", new @realtime-i Action(
+		  Cursor cursor,CanvasCursor cc, float pageW){
+	    public void run() {
+		cursor.setSpatialCursor(
+		    new CanvasCursor(cc.getCanvas(), cc.getPanX()-pageW, 
+				     cc.getPanY(), cc.getZoom()));
+	    }
+	    });
+	k.put("Alt-Right", new @realtime-i Action(
+		  Cursor cursor,CanvasCursor cc, float pageW){
+	    public void run() {
+		cursor.setSpatialCursor(
+		    new CanvasCursor(cc.getCanvas(), cc.getPanX()+pageW, 
+				     cc.getPanY(), cc.getZoom()));
+	    }
+	    });
+	return Lobs.keyController(l, k);
+    }
 
 
     public Lob getMainviewLob(Cursor cursor) {
@@ -348,6 +421,8 @@ public class DocumentSpatialView implements SpatialView {
 	l = SpatialContextLob.newInstance(l, cc.getCanvas());
 	l = Lobs.margin(l, 40);
 
+	l = Lobs.ignoreKeyEventsLob(l);
+	l = keys(l, cursor);
 	return l;
     }
 
