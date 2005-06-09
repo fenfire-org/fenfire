@@ -48,17 +48,17 @@ public class AWTImagePool {
     }
 
     protected final int[][] sizes;
+    protected int[] mask;
 
 
-    public AWTImagePool(int[][] sizes) {
+    public AWTImagePool(int[][] sizes, DirectColorModel cm) {
 	this.sizes = sizes;
+	this.mask = new int[]{cm.getRedMask(), cm.getGreenMask(), 
+			      cm.getBlueMask(), cm.getAlphaMask()};
     }
 
 
 
-    static int[] mask = new int[]{ 0x00ff0000,
-				   0x0000ff00,
-				   0x000000ff };
     
     protected int pixs[][];
     protected ColorModel cms[];

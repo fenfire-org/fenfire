@@ -41,11 +41,11 @@ public class LobbedImagePool extends AWTImagePool {
     static void p(String s) { System.out.println("LobbedImagePool:: "+s); }
 
 
-    static public LobbedImagePool pagePool() {
+    static public LobbedImagePool pagePool(int highResPages) {
 	return new LobbedImagePool(
 	    new int[][]{
 		// how many, width, height
-		{ 2, 2048, 2048 },
+		{ highResPages, 2048, 2048 },
 		{ 2, 256, 512 },
 		{ 4, 128, 256 },
 		{ 64, 64, 64 },
@@ -82,8 +82,8 @@ public class LobbedImagePool extends AWTImagePool {
     }
 
     protected ColorModel cm;
-    protected LobbedImagePool(int[][] sizes, ColorModel cm) {
-	super(sizes);
+    protected LobbedImagePool(int[][] sizes, DirectColorModel cm) {
+	super(sizes, cm);
 	this.cm = cm;
     }
 

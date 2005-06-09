@@ -70,7 +70,7 @@ public class ImagePool {
 	    instance = new ImagePool();
 	    if (GraphicsAPI.getInstance() instanceof AWTAPI)
 		instance.requests = new ImageRequests(g, anim);
-	    else throw new Error("unreadable error -- see soursce");
+	    else throw new Error("unreadable error -- see source");
 	}
     }
 

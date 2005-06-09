@@ -154,7 +154,7 @@ public class ImageRequests {
 	Lob l;
 	float w = s.maxw * (x1-x0);
 	float h = s.maxh * (y1-y0);
-	//System.out.println("START IS "+start+" POOLIND "+s.poolInds[start]+", FINNISH KEYMAP IS BORING");
+
 	l = imgPool.getLob(s.poolInds[0], x0,y0,x1-x0,y1-y0);
 	l = Lobs.request(l, w,w,w,h,h,h);
 	return l;
@@ -188,6 +188,7 @@ public class ImageRequests {
 
     File getCacheFile(String in) {
 	String s = in.replace('/','-');
+	s = s.replace('\\','-');
 	s = s.replace(':','_');
 	return new File(getTempDir(), s);
     }
@@ -287,18 +288,19 @@ public class ImageRequests {
 		int h_size = imgPool.getSizeH(i);
 
 		s.tmpImgPrefix = ScrollBlockImager.protectChars(
-		    s.page.getID() + "-");
+		    s.page.getID());
 		
 		File imgFile = new File(ScrollBlockImager.tmp(),
 					w_size+"x"+h_size+"_"+
 					s.tmpImgPrefix);
-		if (!imgFile.exists()) {
+		p("file: "+imgFile);
+		if (true || !imgFile.exists()) {
 		    // Convert image to png file
 
 		    BlockFile f = s.page.getBlockFile();
 
-		    String cmdline = "convert -size "+w_size+"x"+h_size+
-			" " + f.getFilename()+ 
+		    String cmdline = "convert -resize "+w_size+"x"+h_size+
+			"! " + f.getFilename()+ 
 			" " + imgFile.getPath();
 
 		    Process p = Runtime.getRuntime().exec(cmdline);
@@ -319,26 +321,5 @@ public class ImageRequests {
 	    e.printStackTrace();
 	}
     }
-
-	/*
-	String uri = (String) node;
-	ProgressLob l = Progress.pageLob(anim, backgroundProcess);
-	if (uri.startswith("file://")) {
-	    l.initPhases(4);
-	    l.push();
-
-	    // -checking cache and file 
-	    // -sizes and structure...
-	    // -convert to png
-	    // -load image
-	    // -use more progress lobs to create 
-            //  each for different page.
-	    */
-
-
-
-
-
-
 
 }

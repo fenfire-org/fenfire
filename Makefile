@@ -108,6 +108,9 @@ run_java:
 
 run_pdfreader:
 	$(LDLIB) $(JAVACMD) $(DBG) org.fenfire.demo.PDFReader testdata/paper.pdf
+run_logo:
+	$(LDLIB) $(JAVACMD) $(DBG) org.fenfire.demo.Logo ff_logo.png
+
 mudyc:  # Work environment for mudyc ;)
 	http_proxy="http://localhost:8080" $(JAVACMD) $(DBG) org.fenfire.Main ../project/thesis/master/majukati/project.turtle
 

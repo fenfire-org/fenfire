@@ -83,7 +83,10 @@ public class PageRequests {
 	this.graph = graph;
 	this.anim = anim;
 	if (anim == null) throw new IllegalArgumentException();
-	pagePool = LobbedImagePool.pagePool();
+	if (System.getProperty("LOTS_OF_MEMORY") != null)
+	    pagePool = LobbedImagePool.pagePool(2);
+	else
+	    pagePool = LobbedImagePool.pagePool(1);
 	lodElevator = new LodElevator(node2state, pagePool, anim);
     }
 
