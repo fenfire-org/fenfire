@@ -53,8 +53,12 @@ public class AWTImagePool {
 
     public AWTImagePool(int[][] sizes, DirectColorModel cm) {
 	this.sizes = sizes;
-	this.mask = new int[]{cm.getRedMask(), cm.getGreenMask(), 
-			      cm.getBlueMask(), cm.getAlphaMask()};
+	if (cm.getAlphaMask() != 0)
+	    this.mask = new int[]{cm.getRedMask(), cm.getGreenMask(), 
+				  cm.getBlueMask(), cm.getAlphaMask()};
+	else 
+	    this.mask = new int[]{cm.getRedMask(), cm.getGreenMask(), 
+				  cm.getBlueMask()};
     }
 
 

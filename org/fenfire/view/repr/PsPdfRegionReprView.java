@@ -66,7 +66,9 @@ public class PsPdfRegionReprView extends ReprView.AbstractLobView {
 	
 	if (src instanceof Literal)
 	    throw new IllegalArgumentException();
-
-	return PagePool.region(src, p0,p1,x0,y0,x1,y1);
+	
+	Lob l = PagePool.region(src, p0,p1,x0,y0,x1,y1);
+	l = Lobs.scale(l, 1.8f);
+	return l;
     }
 }

@@ -91,8 +91,9 @@ public class LodElevator {
 				File img = new File(ScrollBlockImager.tmp(),
 						    w+"x"+h+"_"+
 						    sp.state.tmpImgPrefix+
-						    (sp.state.ct.startsWith("image/")?
-						     "": (""+sp.getPage()+1)));
+						    (sp.state.ct.startsWith(
+						       "image/")?
+						     "": (""+(sp.getPage()+1))));
 				if (img.exists())
 				    pool.setImage(new FileInputStream(img), i, w,h);
 				else p("no such image! "+img);
